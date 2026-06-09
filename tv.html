@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrowRules TV</title>
+
+<style>
+:root{
+    --bg:#000;
+    --panel:#0f0f0f;
+    --border:#222;
+    --text:#fff;
+    --muted:#999;
+    --accent:#00ffff;
+    --live:#ff2d2d;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    overflow:hidden;
+}
+
+/* TOPBAR */
+.topbar{
+    height:70px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    background:#050505;
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    font-size:1.5rem;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+.logo span{ color:var(--accent); }
+
+.btn{
+    background:var(--accent);
+    color:#000;
+    padding:10px 14px;
+    border-radius:6px;
+    font-weight:bold;
+    border:none;
+    cursor:pointer;
+}
+
+/* LAYOUT */
+.main{
+    display:flex;
+    height:calc(100vh - 70px);
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:280px;
+    background:#080808;
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+}
+
+.search{
+    padding:12px;
+    border-bottom:1px solid var(--border);
+}
+
+.search input{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background:#151515;
+    color:#fff;
+    outline:none;
+}
+
+.channels{
+    overflow-y:auto;
+    flex:1;
+}
+
+.channel{
+    padding:14px;
+    border-bottom:1px solid #141414;
+    cursor:pointer;
+}
+
+.channel:hover{
+    background:#121212;
+}
+
+.channel.active{
+    background:#151515;
+    border-left:4px solid var(--accent);
+}
+
+.channel-title{
+    font-weight:bold;
+}
+
+.channel-desc{
+    font-size:.85rem;
+    color:var(--muted);
+    margin-top:4px;
+}
+
+/* PLAYER */
+.content{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.player{
+    flex:1;
+    position:relative;
+    background:#000;
+}
+
+/* VIDEO */
+.video{
+    position:absolute;
+    inset:0;
+}
+
+.video iframe{
+    width:100%;
+    height:100%;
+    border:0;
+}
+
+/* OVERLAY */
+.overlay{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:30px;
+    background:linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+}
+
+.overlay h1{
+    font-size:1.6rem;
+    margin-bottom:8px;
+}
+
+.overlay p{
+    color:#ddd;
+    max-width:600px;
+    line-height:1.5;
+}
+
+.controls{
+    margin-top:12px;
+    display:flex;
+    gap:10px;
+}
+
+.controls button{
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    background:#222;
+    color:#fff;
+    cursor:pointer;
+}
+
+/* BADGES */
+.live{
+    position:absolute;
+    top:20px;
+    left:20px;
+    background:var(--live);
+    padding:6px 10px;
+    border-radius:6px;
+    font-weight:bold;
+    z-index:5;
+}
+
+.support{
+    position:absolute;
+    top:20px;
+    right:20px;
+    background:var(--accent);
+    color:#000;
+    padding:10px 14px;
+    border-radius:6px;
+    font-weight:bold;
+    text-decoration:none;
+    z-index:5;
+}
+
+/* GUIDE */
+.guide{
+    height:160px;
+    background:#0a0a0a;
+    border-top:1px solid var(--border);
+    overflow-x:auto;
+}
+
+.guide h3{
+    padding:10px 15px;
+}
+
+.guide-row{
+    display:flex;
+    gap:12px;
+    padding:0 15px 15px;
+}
+
+.card{
+    min-width:200px;
+    background:#111;
+    border:1px solid #222;
+    border-radius:8px;
+    padding:10px;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+    body{overflow:auto;}
+    .main{flex-direction:column;}
+    .sidebar{width:100%; height:220px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="logo">CROW<span>RULES</span> TV</div>
+    <a class="btn" href="https://jonathan-riehle-shop.fourthwall.com/" target="_blank">❤️ Support</a>
+</div>
+
+<div class="main">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="search">
+        <input id="search" placeholder="Search channels..." oninput="filterChannels(this.value)">
+    </div>
+    <div id="channelList" class="channels"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+    <div class="player">
+
+        <div class="live">🔴 LIVE</div>
+
+        <a class="support" href="https://jonathan-riehle-shop.fourthwall.com/" target="_blank">Support</a>
+
+        <div class="video" id="video"></div>
+
+        <div class="overlay">
+            <h1 id="title">Loading...</h1>
+            <p id="desc"></p>
+
+            <div class="controls">
+                <button onclick="prev()">⏮ Prev</button>
+                <button onclick="next()">Next ⏭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="guide">
+        <h3>TV Guide</h3>
+        <div class="guide-row">
+            <div class="card"><b>Talk Radio</b><br>Life & family stories</div>
+            <div class="card"><b>D&J Show</b><br>Friends chatting</div>
+            <div class="card"><b>Game Night</b><br>Gaming chaos</div>
+            <div class="card"><b>Spectrum Awards</b><br>Creator showcase</div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+/* =====================
+DATA
+===================== */
+
+const channels = [
+{
+    name:"Talk Radio",
+    desc:"Family, caregiving, autism, real conversations.",
+    seasons:[
+        { name:"Season 1", eps:["JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo"] },
+        { name:"Season 2", eps:["C983cg7hrWo","MMq2MbF9gqM"] }
+    ]
+},
+{
+    name:"D&J Show",
+    desc:"Friends hanging out.",
+    seasons:[
+        { name:"Season 1", eps:["vT-BRFf2Yk0","bo-fv8gLU1U"] }
+    ]
+},
+{
+    name:"Game Night Live",
+    desc:"Gaming chaos.",
+    seasons:[
+        { name:"Season 1", eps:["x2DQKJPi88Q","E0SETa6xQqs"] }
+    ]
+},
+{
+    name:"Spectrum Awards",
+    desc:"Entertainment awards.",
+    seasons:[
+        { name:"Season 1", eps:["jfKfPfyJRdk"] }
+    ]
+},
+{
+    name:"Crow's Nest",
+    desc:"Creator hub.",
+    seasons:[
+        { name:"Season 1", eps:["ysz5S6PUM-U","5qap5aO4i9A"] }
+    ]
+},
+{
+    name:"Bonded in Mystery",
+    desc:"Mysteries & storytelling.",
+    seasons:[
+        { name:"Season 1", eps:["dQw4w9WgXcQ","jfKfPfyJRdk"] }
+    ]
+}
+];
+
+/* =====================
+STATE
+===================== */
+
+let state = {
+    channel:0,
+    season:0,
+    episode:0
+};
+
+/* =====================
+RENDER CHANNELS
+===================== */
+
+function renderChannels(){
+    const list = document.getElementById("channelList");
+    list.innerHTML = "";
+
+    channels.forEach((c,i)=>{
+        const div = document.createElement("div");
+        div.className = "channel" + (i===state.channel ? " active":"");
+
+        div.innerHTML = `
+            <div class="channel-title">${c.name}</div>
+            <div class="channel-desc">${c.desc}</div>
+        `;
+
+        div.onclick = ()=>{
+            state.channel = i;
+            state.season = 0;
+            state.episode = 0;
+            renderChannels();
+            load();
+        };
+
+        list.appendChild(div);
+    });
+}
+
+/* =====================
+SAFE EMBED
+===================== */
+
+function makeEmbed(id){
+    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&controls=1`;
+}
+
+/* =====================
+LOAD PLAYER
+===================== */
+
+function load(){
+    const ch = channels[state.channel];
+    const season = ch.seasons[state.season];
+
+    // bounds safety
+    if(!season || !season.eps.length) return;
+
+    if(state.episode >= season.eps.length){
+        state.episode = 0;
+    }
+
+    const vid = season.eps[state.episode];
+
+    document.getElementById("title").innerText =
+        `${ch.name} — ${season.name}`;
+
+    document.getElementById("desc").innerText = ch.desc;
+
+    const video = document.getElementById("video");
+    video.innerHTML = "";
+
+    const iframe = document.createElement("iframe");
+    iframe.src = makeEmbed(vid);
+    iframe.allow = "autoplay; encrypted-media; fullscreen";
+    iframe.allowFullscreen = true;
+
+    video.appendChild(iframe);
+}
+
+/* =====================
+CONTROLS
+===================== */
+
+function next(){
+    const eps = channels[state.channel].seasons[state.season].eps;
+    state.episode = (state.episode + 1) % eps.length;
+    load();
+}
+
+function prev(){
+    const eps = channels[state.channel].seasons[state.season].eps;
+    state.episode = (state.episode - 1 + eps.length) % eps.length;
+    load();
+}
+
+/* =====================
+SEARCH
+===================== */
+
+function filterChannels(value){
+    value = value.toLowerCase();
+
+    document.querySelectorAll(".channel").forEach(el=>{
+        el.style.display =
+            el.innerText.toLowerCase().includes(value)
+            ? "block" : "none";
+    });
+}
+
+/* =====================
+INIT
+===================== */
+
+renderChannels();
+load();
+
+</script>
+
+</body>
+</html>
