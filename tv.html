@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Control Room Dashboard</title>
+<title>CrowRules TV - Network Automation System</title>
 
 <style>
 :root{
     --bg:#000;
-    --panel:#0b0b0b;
     --accent:#00ffff;
-    --danger:#ff2d2d;
+    --live:#ff2d2d;
     --text:#fff;
     --muted:#aaa;
+    --panel:#0b0b0b;
     --border:#1f1f1f;
 }
 
@@ -26,7 +26,6 @@
 body{
     background:var(--bg);
     color:var(--text);
-    overflow:hidden;
 }
 
 /* LAYOUT */
@@ -36,51 +35,44 @@ body{
 }
 
 /* CONTROL ROOM */
-.dashboard{
+.control{
     width:360px;
     background:#070707;
     border-right:1px solid var(--border);
-    padding:15px;
+    padding:12px;
     overflow-y:auto;
 }
 
 .section{
-    margin-bottom:20px;
-    padding:10px;
     background:#0c0c0c;
     border:1px solid #1a1a1a;
+    padding:10px;
+    margin-bottom:12px;
     border-radius:8px;
 }
 
-h2{
-    font-size:14px;
+h3{
     color:var(--accent);
+    font-size:13px;
     margin-bottom:10px;
 }
 
 /* BUTTONS */
 .btn{
-    display:block;
     width:100%;
-    margin:5px 0;
     padding:10px;
+    margin:4px 0;
     background:#1a1a1a;
     border:none;
     color:#fff;
-    cursor:pointer;
     border-radius:6px;
+    cursor:pointer;
     text-align:left;
 }
 
-.btn:hover{
-    background:#222;
-}
+.btn:hover{ background:#222; }
 
-.btn.active{
-    border-left:4px solid var(--accent);
-}
-
-/* PLAYER SIDE */
+/* VIEWER */
 .viewer{
     flex:1;
     position:relative;
@@ -111,39 +103,30 @@ iframe{
 
 .title{
     font-size:22px;
-    margin-bottom:5px;
 }
 
 .desc{
+    font-size:13px;
     color:var(--muted);
-    font-size:14px;
 }
 
-/* STATUS BAR */
+/* STATUS */
 .status{
     position:absolute;
     top:10px;
     left:10px;
     display:flex;
-    gap:10px;
+    gap:8px;
 }
 
 .badge{
     padding:6px 10px;
+    font-size:12px;
     border-radius:6px;
-    font-size:12px;
-    font-weight:bold;
 }
 
-.live{ background:var(--danger); }
+.live{ background:var(--live); }
 .accent{ background:var(--accent); color:#000; }
-
-/* NOW NEXT */
-.info{
-    margin-top:10px;
-    font-size:12px;
-    color:#ccc;
-}
 
 /* CLOCK */
 .clock{
@@ -161,55 +144,49 @@ iframe{
 <div class="container">
 
 <!-- CONTROL ROOM -->
-<div class="dashboard">
+<div class="control">
 
-    <div class="section">
-        <h2>📺 LIVE CHANNELS</h2>
-        <button class="btn" onclick="setChannel('talk')">🎙 Talk Radio</button>
-        <button class="btn" onclick="setChannel('gaming')">🎮 Game Night</button>
-        <button class="btn" onclick="setChannel('dj')">🎧 DJ Block</button>
-        <button class="btn" onclick="setChannel('mystery')">🕵 Mystery</button>
-        <button class="btn" onclick="setChannel('tacoma')">🌃 Tacoma Nights</button>
-    </div>
+<div class="section">
+<h3>📡 NETWORK STATUS</h3>
+<button class="btn" onclick="setMode('auto')">🤖 AUTO NETWORK</button>
+<button class="btn" onclick="setMode('manual')">🎛 DIRECTOR OVERRIDE</button>
+</div>
 
-    <div class="section">
-        <h2>🎙 TALK RADIO CONTROL</h2>
-        <button class="btn" onclick="playlistPrev()">⏮ Previous Segment</button>
-        <button class="btn" onclick="playlistNext()">⏭ Next Segment</button>
-    </div>
+<div class="section">
+<h3>📺 CHANNEL FORCE</h3>
+<button class="btn" onclick="force('talk')">🎙 Talk Radio</button>
+<button class="btn" onclick="force('gaming')">🎮 Game Night</button>
+<button class="btn" onclick="force('dj')">🎧 DJ Block</button>
+<button class="btn" onclick="force('mystery')">🕵 Mystery</button>
+<button class="btn" onclick="force('tacoma')">🌃 Tacoma</button>
+</div>
 
-    <div class="section">
-        <h2>⚡ BROADCAST MODE</h2>
-        <button class="btn" onclick="setMode('auto')">🤖 AUTO SCHEDULE</button>
-        <button class="btn" onclick="setMode('manual')">🎛 MANUAL OVERRIDE</button>
-    </div>
+<div class="section">
+<h3>🎬 EMERGENCY</h3>
+<button class="btn" onclick="skipEpisode()">⏭ Skip Episode</button>
+<button class="btn" onclick="restartEpisode()">🔁 Restart Episode</button>
+</div>
 
 </div>
 
 <!-- VIEWER -->
 <div class="viewer">
 
-    <div class="status">
-        <div class="badge live">🔴 LIVE</div>
-        <div class="badge accent" id="modeBadge">AUTO</div>
-    </div>
+<div class="status">
+<div class="badge live">🔴 LIVE</div>
+<div class="badge accent" id="mode">AUTO</div>
+</div>
 
-    <div class="clock" id="clock"></div>
+<div class="clock" id="clock"></div>
 
-    <div class="video">
-        <iframe id="player"></iframe>
-    </div>
+<div class="video">
+<iframe id="player" allowfullscreen></iframe>
+</div>
 
-    <div class="overlay">
-        <div class="title" id="title">Initializing...</div>
-        <div class="desc" id="desc">CrowRules Broadcast System loading</div>
-
-        <div class="info">
-            NOW: <span id="now"></span><br>
-            NEXT: <span id="next"></span><br>
-            BLOCK: <span id="block"></span>
-        </div>
-    </div>
+<div class="overlay">
+<div class="title" id="title">Booting Network...</div>
+<div class="desc" id="desc">Initializing broadcast engine</div>
+</div>
 
 </div>
 
@@ -219,141 +196,149 @@ iframe{
 
 /* CLOCK */
 setInterval(()=>{
-    document.getElementById("clock").innerText =
-    new Date().toLocaleTimeString("en-US",{timeZone:"America/Los_Angeles"});
+document.getElementById("clock").innerText =
+new Date().toLocaleTimeString("en-US",{timeZone:"America/Los_Angeles"});
 },1000);
 
 /* STATE */
 let mode = "auto";
-let currentChannel = "talk";
+let overrideChannel = null;
 
-/* TALK PLAYLIST ENGINE */
-const talk = {
-    index:0,
-    list:[
-        {
-            name:"Main Talk Feed",
-            desc:"Core conversations",
-            url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCu_lTbNegjLUDVSY4TUTB9e&autoplay=1&mute=1"
-        },
-        {
-            name:"Caregiver Stories",
-            desc:"Family life stories",
-            url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCvlG38PUlghfql_IHqE5L6P&autoplay=1&mute=1"
-        },
-        {
-            name:"Late Night Talk",
-            desc:"Night reflection",
-            url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCtqf79j-tkFM_lysVX_9knZ&autoplay=1&mute=1"
-        }
-    ]
-};
+/* VIDEO BUILDER */
+function vid(id){
+return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0`;
+}
 
-/* CHANNELS */
-const channels = {
-talk, gaming:{
-    name:"Game Night",
-    url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCvy10wkPZPZySX0w4ryHMun&autoplay=1&mute=1",
-    desc:"Gaming chaos"
+/* CHANNEL DATABASE */
+const network = {
+
+talk:{
+index:0,
+episodes:[
+{t:"Morning Talk",d:"Daily conversations",id:"dQw4w9WgXcQ",len:180},
+{t:"Care Stories",d:"Life experiences",id:"kxopViU98Xo",len:200},
+{t:"Night Talk",d:"Late reflections",id:"3JZ_D3ELwOQ",len:240}
+]
 },
+
+gaming:{
+index:0,
+episodes:[
+{t:"Game Start",d:"Opening chaos",id:"9bZkp7q19f0",len:300},
+{t:"Mid Match",d:"Competitive play",id:"hTWKbfoikeg",len:300},
+{t:"Final Round",d:"Endgame",id:"fJ9rUzIMcZQ",len:300}
+]
+},
+
 dj:{
-    name:"DJ Block",
-    url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCtHV3QupW55wBi2-lO323fE&autoplay=1&mute=1",
-    desc:"Music vibes"
+index:0,
+episodes:[
+{t:"D&J Show #1",d:"First Episode",id:"vT-BRFf2Yk0",len:240},
+{t:"D&J Show #2",d:"Second Episode",id:"bo-fv8gLU1U",len:300}
+]
 },
+
 mystery:{
-    name:"Mystery Hour",
-    url:"https://www.youtube.com/embed/videoseries?list=PLXXXXXXXX3&autoplay=1&mute=1",
-    desc:"Investigations"
+index:0,
+episodes:[
+{t:"Case 1",d:"Investigation begins",id:"hTWKbfoikeg",len:300},
+{t:"Case 2",d:"Evidence review",id:"3fumBcKC6RE",len:300}
+]
 },
+
 tacoma:{
-    name:"Tacoma Nights",
-    url:"https://www.youtube.com/embed/videoseries?list=PLXXXXXXXX4&autoplay=1&mute=1",
-    desc:"Cinematic talk"
+index:0,
+episodes:[
+{t:"Rain City",d:"Atmosphere",id:"YQHsXMglC9A",len:300},
+{t:"Night Drive",d:"Cinematic travel",id:"kXYiU_JCYtU",len:300}
+]
 }
+
 };
 
-/* CONTROL */
-function setChannel(ch){
-    currentChannel = ch;
-    mode = "manual";
-    updateUI();
+/* SCHEDULE ENGINE */
+function getChannel(){
+
+const h = new Date().getHours();
+
+if(overrideChannel) return overrideChannel;
+
+if(h < 6) return "talk";
+if(h < 12) return "talk";
+if(h < 16) return "gaming";
+if(h < 18) return "dj";
+if(h < 22) return "mystery";
+return "talk";
+
 }
 
-function setMode(m){
-    mode = m;
-    document.getElementById("modeBadge").innerText = m.toUpperCase();
-    updateUI();
+/* AUTO ADVANCE ENGINE */
+let lastSwitch = Date.now();
+
+function advanceIfNeeded(ch){
+
+const c = network[ch];
+const ep = c.episodes[c.index];
+
+const now = Date.now();
+
+/* simulate episode completion */
+if(now - lastSwitch > ep.len * 1000){
+
+c.index = (c.index + 1) % c.episodes.length;
+lastSwitch = now;
+
 }
 
-/* PLAYLIST CONTROL */
-function playlistNext(){
-    talk.index = (talk.index+1) % talk.list.length;
-    updateUI();
 }
 
-function playlistPrev(){
-    talk.index = (talk.index-1+talk.list.length) % talk.list.length;
-    updateUI();
-}
+/* MAIN ENGINE */
+function update(){
 
-/* AUTO SCHEDULE */
-function getScheduleChannel(){
-    const h = new Date().getHours();
+const ch = getChannel();
+const c = network[ch];
 
-    if(h < 6) return "talk";
-    if(h < 12) return "talk";
-    if(h < 16) return "gaming";
-    if(h < 18) return "dj";
-    if(h < 22) return "mystery";
-    return "talk";
-}
+advanceIfNeeded(ch);
 
-/* MASTER ENGINE */
-function updateUI(){
+const ep = c.episodes[c.index];
+const next = c.episodes[(c.index+1)%c.episodes.length];
 
-let ch = currentChannel;
-
-if(mode === "auto"){
-    ch = getScheduleChannel();
-}
-
-const c = channels[ch];
-
-if(ch === "talk"){
-
-const item = talk.list[talk.index];
-const next = talk.list[(talk.index+1)%talk.list.length];
-
-document.getElementById("player").src = item.url;
+document.getElementById("player").src = vid(ep.id);
 
 document.getElementById("title").innerText =
-"Talk Radio — " + item.name;
+ch.toUpperCase() + " — " + ep.t;
 
-document.getElementById("desc").innerText = item.desc;
+document.getElementById("desc").innerText = ep.d;
 
-document.getElementById("now").innerText = item.name;
-document.getElementById("next").innerText = next.name;
-document.getElementById("block").innerText = mode.toUpperCase();
-
-} else {
-
-document.getElementById("player").src = c.url;
-
-document.getElementById("title").innerText = c.name;
-document.getElementById("desc").innerText = c.desc;
-
-document.getElementById("now").innerText = c.name;
-document.getElementById("next").innerText = "Scheduled Block";
-document.getElementById("block").innerText = mode.toUpperCase();
+document.getElementById("mode").innerText = mode.toUpperCase();
 
 }
 
+/* CONTROL */
+function setMode(m){
+mode = m;
+overrideChannel = null;
+document.getElementById("mode").innerText = m.toUpperCase();
 }
 
-/* AUTO REFRESH */
-setInterval(updateUI, 8000);
-updateUI();
+function force(ch){
+overrideChannel = ch;
+mode = "manual";
+}
+
+function skipEpisode(){
+const ch = getChannel();
+network[ch].index++;
+update();
+}
+
+function restartEpisode(){
+update();
+}
+
+/* START LOOP */
+update();
+setInterval(update, 5000);
 
 </script>
 
