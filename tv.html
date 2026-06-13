@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Broadcast OS</title>
+<title>CrowRules TV - Stable Broadcast OS</title>
 
 <style>
 body{
@@ -19,35 +19,34 @@ body{
     height:100vh;
 }
 
-/* CONTROL ROOM */
+/* CONTROL */
 .control{
     width:340px;
     background:#0a0a0a;
     border-right:1px solid #222;
     padding:10px;
-    overflow:auto;
 }
 
 .btn{
     width:100%;
-    margin:4px 0;
     padding:10px;
+    margin:4px 0;
     background:#1a1a1a;
     border:0;
     color:#fff;
     cursor:pointer;
 }
 
-/* VIEWER */
+/* VIEW */
 .viewer{
     flex:1;
     position:relative;
 }
 
-iframe{
+/* PLAYER */
+#player{
     width:100%;
     height:100%;
-    border:0;
 }
 
 /* OVERLAY */
@@ -79,15 +78,19 @@ iframe{
 <!-- CONTROL -->
 <div class="control">
 
-<h3>📡 Broadcast Control</h3>
+<h3>📡 MODE</h3>
 <button class="btn" onclick="setMode('auto')">AUTO NETWORK</button>
-<button class="btn" onclick="setMode('manual')">MANUAL OVERRIDE</button>
+<button class="btn" onclick="setMode('manual')">DIRECTOR MODE</button>
 
-<h3>📺 Channels</h3>
+<h3>📺 CHANNELS</h3>
 <button class="btn" onclick="force('talk')">Talk Radio</button>
 <button class="btn" onclick="force('gaming')">Game Night</button>
 <button class="btn" onclick="force('dj')">DJ Block</button>
 <button class="btn" onclick="force('mystery')">Mystery Hour</button>
+
+<h3>🎬 CONTROL</h3>
+<button class="btn" onclick="nextEpisode()">Next Episode</button>
+<button class="btn" onclick="restartEpisode()">Restart</button>
 
 </div>
 
@@ -98,19 +101,30 @@ iframe{
 
 <div class="overlay">
 <div class="title" id="title">Booting Broadcast OS...</div>
-<div class="sub" id="sub">Initializing scheduler...</div>
+<div class="sub" id="sub">Initializing system...</div>
 </div>
 
-<iframe id="player"></iframe>
+<div id="player"></div>
 
 </div>
 
 </div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
 /* =========================
-   1. BROADCAST LIBRARY
+   STATE
+========================= */
+
+let player;
+let mode = "auto";
+let override = null;
+let currentId = null;
+
+/* =========================
+   CHANNELS
 ========================= */
 
 const channels = {
@@ -118,100 +132,128 @@ const channels = {
 talk:{
 index:0,
 episodes:[
-{id:"dQw4w9WgXcQ",t:"Talk 1",d:"Morning talk block",len:180},
-{id:"kxopViU98Xo",t:"Talk 2",d:"Care stories",len:200},
-{id:"3JZ_D3ELwOQ",t:"Talk 3",d:"Night reflection",len:240}
+{id:"dQw4w9WgXcQ",t:"Morning Talk",d:"Daily conversations"},
+{id:"kxopViU98Xo",t:"Care Stories",d:"Life reflections"},
+{id:"3JZ_D3ELwOQ",t:"Night Talk",d:"Late discussion"}
 ]
 },
 
 gaming:{
 index:0,
 episodes:[
-{id:"9bZkp7q19f0",t:"Game 1",d:"Match start",len:300},
-{id:"hTWKbfoikeg",t:"Game 2",d:"Mid match",len:300}
+{id:"9bZkp7q19f0",t:"Game Start",d:"Opening match"},
+{id:"hTWKbfoikeg",t:"Mid Match",d:"Competitive play"}
 ]
 },
 
 dj:{
 index:0,
 episodes:[
-{id:"vT-BRFf2Yk0",t:"DJ 1",d:"Warmup",len:240},
-{id:"bo-fv8gLU1U",t:"DJ 2",d:"Main set",len:300}
+{id:"vT-BRFf2Yk0",t:"Episode 1",d:"Debut"},
+{id:"bo-fv8gLU1U",t:"Episode 2",d:"Episode 2"}
 ]
 },
 
 mystery:{
 index:0,
 episodes:[
-{id:"hTWKbfoikeg",t:"Case 1",d:"Investigation",len:300},
-{id:"3fumBcKC6RE",t:"Case 2",d:"Evidence",len:300}
+{id:"hTWKbfoikeg",t:"Case 1",d:"Investigation"},
+{id:"3fumBcKC6RE",t:"Case 2",d:"Evidence review"}
 ]
 }
 
 };
 
 /* =========================
-   2. STATE ENGINE
+   SCHEDULER
 ========================= */
 
-let mode = "auto";
-let override = null;
-let lastTick = Date.now();
-
-/* =========================
-   3. SCHEDULER (PLUTO STYLE)
-========================= */
-
-function schedule(){
+function getChannel(){
+if(override) return override;
 
 const h = new Date().getHours();
-
-if(override) return override;
 
 if(h < 6) return "talk";
 if(h < 12) return "talk";
 if(h < 16) return "gaming";
 if(h < 18) return "dj";
 return "mystery";
+}
+
+/* =========================
+   YOUTUBE API READY
+========================= */
+
+function onYouTubeIframeAPIReady(){
+
+player = new YT.Player("player",{
+height:"100%",
+width:"100%",
+videoId:"",
+events:{
+"onStateChange":onState
+}
+});
+
+update();
 
 }
 
 /* =========================
-   4. PLAYOUT ENGINE
+   REAL END DETECTION
 ========================= */
 
-function advanceIfNeeded(ch){
-
-const c = channels[ch];
-const ep = c.episodes[c.index];
-
-const now = Date.now();
-
-if(now - lastTick > ep.len * 1000){
-    c.index = (c.index + 1) % c.episodes.length;
-    lastTick = now;
+function onState(e){
+if(e.data === 0){
+nextEpisode();
 }
+}
+
+/* =========================
+   PLAY ENGINE (NO RESTART BUG)
+========================= */
+
+function play(id){
+
+if(currentId === id) return; // 🔥 CRITICAL FIX
+
+currentId = id;
+player.loadVideoById(id);
 
 }
 
 /* =========================
-   5. RENDER ENGINE
+   NEXT EPISODE
 ========================= */
 
-function render(){
+function nextEpisode(){
 
-const ch = schedule();
+const ch = getChannel();
 const c = channels[ch];
 
-advanceIfNeeded(ch);
+c.index = (c.index + 1) % c.episodes.length;
+
+update();
+
+}
+
+/* =========================
+   UPDATE ENGINE
+========================= */
+
+function update(){
+
+const ch = getChannel();
+const c = channels[ch];
 
 const ep = c.episodes[c.index];
+const next = c.episodes[(c.index+1)%c.episodes.length];
 
-document.getElementById("player").src =
-`https://www.youtube.com/embed/${ep.id}?autoplay=1&mute=1`;
+play(ep.id);
 
+/* UI */
 document.getElementById("title").innerText =
-`${ch.toUpperCase()} — ${ep.t}`;
+ch.toUpperCase() + " — " + ep.t;
 
 document.getElementById("sub").innerText =
 ep.d;
@@ -219,7 +261,7 @@ ep.d;
 }
 
 /* =========================
-   6. CONTROL ROOM
+   CONTROLS
 ========================= */
 
 function setMode(m){
@@ -230,10 +272,18 @@ override = null;
 function force(ch){
 override = ch;
 mode = "manual";
+update();
 }
 
-setInterval(render, 4000);
-render();
+function restartEpisode(){
+update();
+}
+
+/* =========================
+   LOOP (SAFE UI ONLY)
+========================= */
+
+setInterval(update, 5000);
 
 </script>
 
