@@ -1,464 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CrowRules TV Network System</title>
 
 <style>
-:root{
-    --bg:#000;
-    --panel:#0f0f0f;
-    --border:#222;
-    --text:#fff;
-    --muted:#999;
-    --accent:#00ffff;
-    --live:#ff2d2d;
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@300;500&display=swap');
+
+body {
+    margin: 0;
+    background: #05070a;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden;
+    display: flex;
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
+/* =========================
+   LEFT: NETWORK GRID
+========================= */
+.network {
+    width: 320px;
+    background: #0b0f14;
+    border-right: 1px solid #1f2a36;
+    padding: 15px;
+    overflow-y: auto;
 }
 
-body{
-    background:var(--bg);
-    color:var(--text);
-    overflow:hidden;
+.logo {
+    font-family: 'Orbitron', sans-serif;
+    color: #00f7ff;
+    font-size: 20px;
+    margin-bottom: 15px;
 }
 
-/* TOPBAR */
-.topbar{
-    height:70px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 20px;
-    background:#050505;
-    border-bottom:1px solid var(--border);
+.channel {
+    background: #111822;
+    border: 1px solid #1f2a36;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.logo{
-    font-size:1.5rem;
-    font-weight:bold;
-    letter-spacing:2px;
+.channel:hover {
+    border-color: #00f7ff;
+    transform: scale(1.02);
 }
 
-.logo span{ color:var(--accent); }
-
-.btn{
-    background:var(--accent);
-    color:#000;
-    padding:10px 14px;
-    border-radius:6px;
-    font-weight:bold;
-    border:none;
-    cursor:pointer;
+.channel.active {
+    border-color: #00f7ff;
+    box-shadow: 0 0 10px rgba(0,247,255,0.3);
 }
 
-/* LAYOUT */
-.main{
-    display:flex;
-    height:calc(100vh - 70px);
+.channel-name {
+    font-weight: bold;
 }
 
-/* SIDEBAR */
-.sidebar{
-    width:280px;
-    background:#080808;
-    border-right:1px solid var(--border);
-    display:flex;
-    flex-direction:column;
+.channel-meta {
+    font-size: 12px;
+    color: #888;
 }
 
-.search{
-    padding:12px;
-    border-bottom:1px solid var(--border);
+/* =========================
+   CENTER: PLAYER
+========================= */
+.player {
+    flex: 1;
+    background: black;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.search input{
-    width:100%;
-    padding:10px;
-    border:none;
-    border-radius:6px;
-    background:#151515;
-    color:#fff;
-    outline:none;
+/* VIDEO FEED SIMULATION */
+.feed {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #0a0f14 0%, #000 70%);
 }
 
-.channels{
-    overflow-y:auto;
-    flex:1;
+/* LIVE OVERLAY */
+.overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 12px;
+    border: 1px solid #ff003c;
+    font-size: 12px;
+    color: #ff003c;
 }
 
-.channel{
-    padding:14px;
-    border-bottom:1px solid #141414;
-    cursor:pointer;
+.dot {
+    width: 8px;
+    height: 8px;
+    background: red;
+    border-radius: 50%;
+    animation: blink 1s infinite;
 }
 
-.channel:hover{
-    background:#121212;
+@keyframes blink {
+    50% { opacity: 0.2; }
 }
 
-.channel.active{
-    background:#151515;
-    border-left:4px solid var(--accent);
+/* NOW PLAYING */
+.nowPlaying {
+    position: absolute;
+    bottom: 40px;
+    left: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
+    color: #00f7ff;
+    text-shadow: 0 0 10px #00f7ff;
 }
 
-.channel-title{
-    font-weight:bold;
+/* STATUS */
+.statusBar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 12px;
+    color: #aaa;
 }
 
-.channel-desc{
-    font-size:.85rem;
-    color:var(--muted);
-    margin-top:4px;
+/* =========================
+   RIGHT: CONTROL PANEL
+========================= */
+.controls {
+    width: 320px;
+    background: #0b0f14;
+    border-left: 1px solid #1f2a36;
+    padding: 15px;
 }
 
-/* PLAYER */
-.content{
-    flex:1;
-    display:flex;
-    flex-direction:column;
+button {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #111822;
+    border: 1px solid #1f2a36;
+    color: white;
+    cursor: pointer;
 }
 
-.player{
-    flex:1;
-    position:relative;
-    background:#000;
+button:hover {
+    border-color: #00f7ff;
+    color: #00f7ff;
 }
 
-/* VIDEO */
-.video{
-    position:absolute;
-    inset:0;
+/* PROGRAM GRID */
+.schedule {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #aaa;
 }
 
-.video iframe{
-    width:100%;
-    height:100%;
-    border:0;
-}
-
-/* OVERLAY */
-.overlay{
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    padding:30px;
-    background:linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-}
-
-.overlay h1{
-    font-size:1.6rem;
-    margin-bottom:8px;
-}
-
-.overlay p{
-    color:#ddd;
-    max-width:600px;
-    line-height:1.5;
-}
-
-.controls{
-    margin-top:12px;
-    display:flex;
-    gap:10px;
-}
-
-.controls button{
-    padding:8px 12px;
-    border:none;
-    border-radius:6px;
-    background:#222;
-    color:#fff;
-    cursor:pointer;
-}
-
-/* BADGES */
-.live{
-    position:absolute;
-    top:20px;
-    left:20px;
-    background:var(--live);
-    padding:6px 10px;
-    border-radius:6px;
-    font-weight:bold;
-    z-index:5;
-}
-
-.support{
-    position:absolute;
-    top:20px;
-    right:20px;
-    background:var(--accent);
-    color:#000;
-    padding:10px 14px;
-    border-radius:6px;
-    font-weight:bold;
-    text-decoration:none;
-    z-index:5;
-}
-
-/* GUIDE */
-.guide{
-    height:160px;
-    background:#0a0a0a;
-    border-top:1px solid var(--border);
-    overflow-x:auto;
-}
-
-.guide h3{
-    padding:10px 15px;
-}
-
-.guide-row{
-    display:flex;
-    gap:12px;
-    padding:0 15px 15px;
-}
-
-.card{
-    min-width:200px;
-    background:#111;
-    border:1px solid #222;
-    border-radius:8px;
-    padding:10px;
-}
-
-/* MOBILE */
-@media(max-width:900px){
-    body{overflow:auto;}
-    .main{flex-direction:column;}
-    .sidebar{width:100%; height:220px;}
+.block {
+    background: #111822;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-left: 3px solid #00f7ff;
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-    <div class="logo">CROW<span>RULES</span> TV</div>
-    <a class="btn" href="https://jonathan-riehle-shop.fourthwall.com/" target="_blank">❤️ Support</a>
-</div>
+<!-- ================= NETWORK ================= -->
+<div class="network">
+    <div class="logo">CROWRULES TV</div>
 
-<div class="main">
-
-<!-- SIDEBAR -->
-<div class="sidebar">
-    <div class="search">
-        <input id="search" placeholder="Search channels..." oninput="filterChannels(this.value)">
-    </div>
-    <div id="channelList" class="channels"></div>
-</div>
-
-<!-- CONTENT -->
-<div class="content">
-    <div class="player">
-
-        <div class="live">🔴 LIVE</div>
-
-        <a class="support" href="https://jonathan-riehle-shop.fourthwall.com/" target="_blank">Support</a>
-
-        <div class="video" id="video"></div>
-
-        <div class="overlay">
-            <h1 id="title">Loading...</h1>
-            <p id="desc"></p>
-
-            <div class="controls">
-                <button onclick="prev()">⏮ Prev</button>
-                <button onclick="next()">Next ⏭</button>
-            </div>
-        </div>
+    <div class="channel active" onclick="switchChannel(0)">
+        <div class="channel-name">🌃 Tacoma Nights</div>
+        <div class="channel-meta">Cinematic Talk • LIVE</div>
     </div>
 
-    <div class="guide">
-        <h3>TV Guide</h3>
-        <div class="guide-row">
-            <div class="card"><b>Talk Radio</b><br>Life & family stories</div>
-            <div class="card"><b>D&J Show</b><br>Friends chatting</div>
-            <div class="card"><b>Game Night</b><br>Gaming chaos</div>
-            <div class="card"><b>Spectrum Awards</b><br>Creator showcase</div>
-        </div>
+    <div class="channel" onclick="switchChannel(1)">
+        <div class="channel-name">🎮 Game Night Live</div>
+        <div class="channel-meta">Gaming • 24/7 Loop</div>
+    </div>
+
+    <div class="channel" onclick="switchChannel(2)">
+        <div class="channel-name">🎙 Talk Radio</div>
+        <div class="channel-meta">Voices & Stories</div>
+    </div>
+
+    <div class="channel" onclick="switchChannel(3)">
+        <div class="channel-name">🧠 Bonded in Mystery</div>
+        <div class="channel-meta">Podcast Network</div>
+    </div>
+
+    <div class="schedule">
+        <h4>📅 TODAY’S PROGRAM</h4>
+        <div class="block">6:00 PM — Tacoma Nights Intro</div>
+        <div class="block">6:10 PM — Live Segment</div>
+        <div class="block">7:00 PM — Game Night Switch</div>
+        <div class="block">9:00 PM — Talk Radio Block</div>
+        <div class="block">11:00 PM — Chill Loop</div>
     </div>
 </div>
+
+<!-- ================= PLAYER ================= -->
+<div class="player">
+
+    <div class="feed" id="feed"></div>
+
+    <div class="overlay">
+        <div class="dot"></div>
+        LIVE • CROWRULES TV NETWORK
+    </div>
+
+    <div class="statusBar" id="status">
+        CHANNEL: TACOMA NIGHTS
+    </div>
+
+    <div class="nowPlaying" id="nowPlaying">
+        NOW PLAYING: Tacoma Nights
+    </div>
+
+</div>
+
+<!-- ================= CONTROLS ================= -->
+<div class="controls">
+
+    <button onclick="goLive()">🔴 GO LIVE</button>
+    <button onclick="playIntro()">▶ PLAY INTRO</button>
+    <button onclick="nextBlock()">⏭ NEXT BLOCK</button>
+    <button onclick="toggleNetwork()">📡 NETWORK MODE</button>
 
 </div>
 
 <script>
 
-/* =====================
-DATA
-===================== */
-
+/* =========================
+   CHANNEL SYSTEM
+========================= */
 const channels = [
-{
-    name:"Talk Radio",
-    desc:"Family, caregiving, autism, real conversations.",
-    seasons:[
-        { name:"Season 1", eps:["JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo"] },
-        { name:"Season 2", eps:["C983cg7hrWo","MMq2MbF9gqM"] }
-    ]
-},
-{
-    name:"D&J Show",
-    desc:"Friends hanging out.",
-    seasons:[
-        { name:"Season 1", eps:["vT-BRFf2Yk0","bo-fv8gLU1U"] }
-    ]
-},
-{
-    name:"Game Night Live",
-    desc:"Gaming chaos.",
-    seasons:[
-        { name:"Past Lives", eps:["x2DQKJPi88Q","E0SETa6xQqs"] }
-    ]
-},
-{
-    name:"Spectrum Awards",
-    desc:"Entertainment awards.",
-    seasons:[
-        { name:"Season 1", eps:["jfKfPfyJRdk"] }
-    ]
-},
-{
-    name:"Crow's Nest",
-    desc:"Creator hub.",
-    seasons:[
-        { name:"FreyaPlaysRBLX", eps:["qgqofBgbvfY","NDNOZPKm0mk"] },
-        { name:"SmileyTaco", eps:["klhkc5vVi6k","wjsqp3d42KY"] }
-    ]
-},
-{
-    name:"Bonded in Mystery",
-    desc:"Mysteries & storytelling.",
-    seasons:[
-        { name:"Season 1", eps:["dQw4w9WgXcQ","jfKfPfyJRdk"] }
-    ]
-}
+    "Tacoma Nights",
+    "Game Night Live",
+    "Talk Radio",
+    "Bonded in Mystery"
 ];
 
-/* =====================
-STATE
-===================== */
+let currentChannel = 0;
 
-let state = {
-    channel:0,
-    season:0,
-    episode:0
-};
+/* SWITCH CHANNEL */
+function switchChannel(i) {
+    currentChannel = i;
 
-/* =====================
-RENDER CHANNELS
-===================== */
-
-function renderChannels(){
-    const list = document.getElementById("channelList");
-    list.innerHTML = "";
-
-    channels.forEach((c,i)=>{
-        const div = document.createElement("div");
-        div.className = "channel" + (i===state.channel ? " active":"");
-
-        div.innerHTML = `
-            <div class="channel-title">${c.name}</div>
-            <div class="channel-desc">${c.desc}</div>
-        `;
-
-        div.onclick = ()=>{
-            state.channel = i;
-            state.season = 0;
-            state.episode = 0;
-            renderChannels();
-            load();
-        };
-
-        list.appendChild(div);
+    document.querySelectorAll(".channel").forEach((c, idx) => {
+        c.classList.toggle("active", idx === i);
     });
+
+    document.getElementById("nowPlaying").innerText =
+        "NOW PLAYING: " + channels[i];
+
+    document.getElementById("status").innerText =
+        "CHANNEL: " + channels[i].toUpperCase();
 }
 
-/* =====================
-SAFE EMBED
-===================== */
-
-function makeEmbed(id){
-    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&controls=1`;
+/* =========================
+   BROADCAST CONTROLS
+========================= */
+function goLive() {
+    document.getElementById("feed").style.filter = "brightness(1.2)";
+    document.getElementById("status").innerText += " • LIVE";
 }
 
-/* =====================
-LOAD PLAYER
-===================== */
+function playIntro() {
+    document.getElementById("nowPlaying").innerText =
+        "PLAYING INTRO SEQUENCE...";
+}
 
-function load(){
-    const ch = channels[state.channel];
-    const season = ch.seasons[state.season];
+function nextBlock() {
+    const blocks = [
+        "Switching Scene...",
+        "Cutting to Segment...",
+        "Loading Next Show Block...",
+        "Transitioning Network Feed..."
+    ];
 
-    // bounds safety
-    if(!season || !season.eps.length) return;
+    document.getElementById("nowPlaying").innerText =
+        blocks[Math.floor(Math.random() * blocks.length)];
+}
 
-    if(state.episode >= season.eps.length){
-        state.episode = 0;
+/* =========================
+   NETWORK MODE (AUTO CYCLE SIM)
+========================= */
+let networkMode = false;
+let interval;
+
+function toggleNetwork() {
+    networkMode = !networkMode;
+
+    if (networkMode) {
+        interval = setInterval(() => {
+            currentChannel = (currentChannel + 1) % channels.length;
+            switchChannel(currentChannel);
+        }, 5000);
+    } else {
+        clearInterval(interval);
     }
-
-    const vid = season.eps[state.episode];
-
-    document.getElementById("title").innerText =
-        `${ch.name} — ${season.name}`;
-
-    document.getElementById("desc").innerText = ch.desc;
-
-    const video = document.getElementById("video");
-    video.innerHTML = "";
-
-    const iframe = document.createElement("iframe");
-    iframe.src = makeEmbed(vid);
-    iframe.allow = "autoplay; encrypted-media; fullscreen";
-    iframe.allowFullscreen = true;
-
-    video.appendChild(iframe);
 }
-
-/* =====================
-CONTROLS
-===================== */
-
-function next(){
-    const eps = channels[state.channel].seasons[state.season].eps;
-    state.episode = (state.episode + 1) % eps.length;
-    load();
-}
-
-function prev(){
-    const eps = channels[state.channel].seasons[state.season].eps;
-    state.episode = (state.episode - 1 + eps.length) % eps.length;
-    load();
-}
-
-/* =====================
-SEARCH
-===================== */
-
-function filterChannels(value){
-    value = value.toLowerCase();
-
-    document.querySelectorAll(".channel").forEach(el=>{
-        el.style.display =
-            el.innerText.toLowerCase().includes(value)
-            ? "block" : "none";
-    });
-}
-
-/* =====================
-INIT
-===================== */
-
-renderChannels();
-load();
 
 </script>
 
