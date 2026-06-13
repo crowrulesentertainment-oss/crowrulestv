@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Network Automation System</title>
+<title>CrowRules TV - Stable Broadcast Engine</title>
 
 <style>
 :root{
@@ -12,7 +12,6 @@
     --live:#ff2d2d;
     --text:#fff;
     --muted:#aaa;
-    --panel:#0b0b0b;
     --border:#1f1f1f;
 }
 
@@ -26,38 +25,36 @@
 body{
     background:var(--bg);
     color:var(--text);
+    overflow:hidden;
 }
 
-/* LAYOUT */
 .container{
     display:flex;
     height:100vh;
 }
 
-/* CONTROL ROOM */
+/* CONTROL */
 .control{
-    width:360px;
+    width:340px;
     background:#070707;
     border-right:1px solid var(--border);
     padding:12px;
-    overflow-y:auto;
 }
 
 .section{
     background:#0c0c0c;
     border:1px solid #1a1a1a;
     padding:10px;
-    margin-bottom:12px;
+    margin-bottom:10px;
     border-radius:8px;
 }
 
 h3{
     color:var(--accent);
     font-size:13px;
-    margin-bottom:10px;
+    margin-bottom:8px;
 }
 
-/* BUTTONS */
 .btn{
     width:100%;
     padding:10px;
@@ -72,7 +69,7 @@ h3{
 
 .btn:hover{ background:#222; }
 
-/* VIEWER */
+/* VIEW */
 .viewer{
     flex:1;
     position:relative;
@@ -80,34 +77,8 @@ h3{
     flex-direction:column;
 }
 
-/* VIDEO */
 .video{
     flex:1;
-    position:relative;
-}
-
-iframe{
-    width:100%;
-    height:100%;
-    border:0;
-}
-
-/* OVERLAY */
-.overlay{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    background:linear-gradient(to top, rgba(0,0,0,.95), transparent);
-    padding:20px;
-}
-
-.title{
-    font-size:22px;
-}
-
-.desc{
-    font-size:13px;
-    color:var(--muted);
 }
 
 /* STATUS */
@@ -117,6 +88,7 @@ iframe{
     left:10px;
     display:flex;
     gap:8px;
+    z-index:10;
 }
 
 .badge{
@@ -128,13 +100,22 @@ iframe{
 .live{ background:var(--live); }
 .accent{ background:var(--accent); color:#000; }
 
-/* CLOCK */
-.clock{
+/* INFO */
+.overlay{
     position:absolute;
-    top:10px;
-    right:10px;
-    color:#aaa;
-    font-size:12px;
+    bottom:0;
+    width:100%;
+    padding:20px;
+    background:linear-gradient(to top, rgba(0,0,0,.95), transparent);
+}
+
+.title{ font-size:20px; }
+.desc{ font-size:13px; color:var(--muted); }
+
+iframe{
+    width:100%;
+    height:100%;
+    border:0;
 }
 </style>
 </head>
@@ -143,17 +124,17 @@ iframe{
 
 <div class="container">
 
-<!-- CONTROL ROOM -->
+<!-- CONTROL -->
 <div class="control">
 
 <div class="section">
-<h3>📡 NETWORK STATUS</h3>
-<button class="btn" onclick="setMode('auto')">🤖 AUTO NETWORK</button>
-<button class="btn" onclick="setMode('manual')">🎛 DIRECTOR OVERRIDE</button>
+<h3>📡 MODE</h3>
+<button class="btn" onclick="setMode('auto')">🤖 AUTO</button>
+<button class="btn" onclick="setMode('manual')">🎛 MANUAL</button>
 </div>
 
 <div class="section">
-<h3>📺 CHANNEL FORCE</h3>
+<h3>📺 CHANNELS</h3>
 <button class="btn" onclick="force('talk')">🎙 Talk Radio</button>
 <button class="btn" onclick="force('gaming')">🎮 Game Night</button>
 <button class="btn" onclick="force('dj')">🎧 DJ Block</button>
@@ -162,9 +143,9 @@ iframe{
 </div>
 
 <div class="section">
-<h3>🎬 EMERGENCY</h3>
-<button class="btn" onclick="skipEpisode()">⏭ Skip Episode</button>
-<button class="btn" onclick="restartEpisode()">🔁 Restart Episode</button>
+<h3>🎬 CONTROL</h3>
+<button class="btn" onclick="nextEpisode()">⏭ Next</button>
+<button class="btn" onclick="restartEpisode()">🔁 Restart</button>
 </div>
 
 </div>
@@ -177,91 +158,78 @@ iframe{
 <div class="badge accent" id="mode">AUTO</div>
 </div>
 
-<div class="clock" id="clock"></div>
-
 <div class="video">
-<iframe id="player" allowfullscreen></iframe>
+<div id="player"></div>
 </div>
 
 <div class="overlay">
-<div class="title" id="title">Booting Network...</div>
-<div class="desc" id="desc">Initializing broadcast engine</div>
+<div class="title" id="title">Booting Broadcast...</div>
+<div class="desc" id="desc">Loading system</div>
 </div>
 
 </div>
 
 </div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
-/* CLOCK */
-setInterval(()=>{
-document.getElementById("clock").innerText =
-new Date().toLocaleTimeString("en-US",{timeZone:"America/Los_Angeles"});
-},1000);
-
 /* STATE */
 let mode = "auto";
-let overrideChannel = null;
+let override = null;
+let player;
 
 /* VIDEO BUILDER */
 function vid(id){
-return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0`;
+    return id;
 }
 
-/* CHANNEL DATABASE */
+/* NETWORK */
 const network = {
-
 talk:{
 index:0,
 episodes:[
-{t:"Morning Talk",d:"Daily conversations",id:"dQw4w9WgXcQ",len:180},
-{t:"Care Stories",d:"Life experiences",id:"kxopViU98Xo",len:200},
-{t:"Night Talk",d:"Late reflections",id:"3JZ_D3ELwOQ",len:240}
+{t:"Morning Talk",d:"Daily conversations",id:"dQw4w9WgXcQ"},
+{t:"Care Stories",d:"Life experiences",id:"kxopViU98Xo"},
+{t:"Night Talk",d:"Late reflections",id:"3JZ_D3ELwOQ"}
 ]
 },
-
 gaming:{
 index:0,
 episodes:[
-{t:"Game Start",d:"Opening chaos",id:"9bZkp7q19f0",len:300},
-{t:"Mid Match",d:"Competitive play",id:"hTWKbfoikeg",len:300},
-{t:"Final Round",d:"Endgame",id:"fJ9rUzIMcZQ",len:300}
+{t:"Game Start",d:"Opening chaos",id:"9bZkp7q19f0"},
+{t:"Mid Match",d:"Competitive play",id:"hTWKbfoikeg"}
 ]
 },
-
 dj:{
 index:0,
 episodes:[
-{t:"D&J Show #1",d:"First Episode",id:"vT-BRFf2Yk0",len:654},
-{t:"D&J Show #2",d:"Second Episode",id:"bo-fv8gLU1U",len:1129}
+{t:"DJ Session",d:"Music block",id:"vT-BRFf2Yk0"},
+{t:"DJ Night",d:"Late mix",id:"bo-fv8gLU1U"}
 ]
 },
-
 mystery:{
 index:0,
 episodes:[
-{t:"Case 1",d:"Investigation begins",id:"hTWKbfoikeg",len:300},
-{t:"Case 2",d:"Evidence review",id:"3fumBcKC6RE",len:300}
+{t:"Case 1",d:"Investigation begins",id:"hTWKbfoikeg"},
+{t:"Case 2",d:"Evidence review",id:"3fumBcKC6RE"}
 ]
 },
-
 tacoma:{
 index:0,
 episodes:[
-{t:"Rain City",d:"Atmosphere",id:"YQHsXMglC9A",len:300},
-{t:"Night Drive",d:"Cinematic travel",id:"kXYiU_JCYtU",len:300}
+{t:"Rain City",d:"Atmosphere",id:"YQHsXMglC9A"},
+{t:"Night Drive",d:"Cinematic travel",id:"kXYiU_JCYtU"}
 ]
 }
-
 };
 
-/* SCHEDULE ENGINE */
+/* CHANNEL PICK */
 function getChannel(){
+if(override) return override;
 
 const h = new Date().getHours();
-
-if(overrideChannel) return overrideChannel;
 
 if(h < 6) return "talk";
 if(h < 12) return "talk";
@@ -269,42 +237,74 @@ if(h < 16) return "gaming";
 if(h < 18) return "dj";
 if(h < 22) return "mystery";
 return "talk";
-
 }
 
-/* AUTO ADVANCE ENGINE */
-let lastSwitch = Date.now();
+/* YOUTUBE READY */
+function onYouTubeIframeAPIReady(){
+player = new YT.Player("player", {
+height:"100%",
+width:"100%",
+videoId:"",
+events:{
+"onStateChange":onState
+}
+});
 
-function advanceIfNeeded(ch){
+update();
+}
 
+/* AUTO ADVANCE (REAL END DETECTION) */
+function onState(e){
+if(e.data === 0){
+nextEpisode();
+}
+}
+
+/* PLAY */
+function play(id){
+if(!player) return;
+player.loadVideoById(id);
+}
+
+/* NEXT */
+function nextEpisode(){
+const ch = getChannel();
 const c = network[ch];
-const ep = c.episodes[c.index];
-
-const now = Date.now();
-
-/* simulate episode completion */
-if(now - lastSwitch > ep.len * 1000){
 
 c.index = (c.index + 1) % c.episodes.length;
-lastSwitch = now;
-
+update();
 }
 
+/* RESTART */
+function restartEpisode(){
+update();
 }
 
-/* MAIN ENGINE */
+/* CONTROL */
+function setMode(m){
+mode = m;
+override = null;
+document.getElementById("mode").innerText = m.toUpperCase();
+}
+
+function force(ch){
+override = ch;
+mode = "manual";
+update();
+}
+
+/* ENGINE (NO LOOP, NO REFRESH BUG) */
 function update(){
 
 const ch = getChannel();
 const c = network[ch];
 
-advanceIfNeeded(ch);
-
 const ep = c.episodes[c.index];
 const next = c.episodes[(c.index+1)%c.episodes.length];
 
-document.getElementById("player").src = vid(ep.id);
+play(ep.id);
 
+/* UI */
 document.getElementById("title").innerText =
 ch.toUpperCase() + " — " + ep.t;
 
@@ -313,32 +313,6 @@ document.getElementById("desc").innerText = ep.d;
 document.getElementById("mode").innerText = mode.toUpperCase();
 
 }
-
-/* CONTROL */
-function setMode(m){
-mode = m;
-overrideChannel = null;
-document.getElementById("mode").innerText = m.toUpperCase();
-}
-
-function force(ch){
-overrideChannel = ch;
-mode = "manual";
-}
-
-function skipEpisode(){
-const ch = getChannel();
-network[ch].index++;
-update();
-}
-
-function restartEpisode(){
-update();
-}
-
-/* START LOOP */
-update();
-setInterval(update, 5000);
 
 </script>
 
