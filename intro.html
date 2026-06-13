@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tacoma Nights - OBS Intro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+background:black;
+font-family:Orbitron, sans-serif;
+}
+
+/* SKY */
+.sky{
+position:absolute;
+width:100%;
+height:100%;
+background: radial-gradient(circle at top, #081420, #000);
+}
+
+/* SKYLINE */
+.city{
+position:absolute;
+bottom:0;
+width:100%;
+height:45%;
+background:url('tacoma-skyline.png') bottom center/cover no-repeat;
+opacity:0.75;
+filter:brightness(0.6) contrast(1.1);
+}
+
+/* FOG */
+.fog{
+position:absolute;
+width:200%;
+height:100%;
+background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 70%);
+animation: fogMove 25s linear infinite;
+}
+
+@keyframes fogMove{
+0%{transform:translateX(0);}
+100%{transform:translateX(-15%);}
+}
+
+/* SIGNAL GLOW */
+.signal{
+position:absolute;
+width:100%;
+height:100%;
+background: radial-gradient(circle, rgba(0,255,255,0.05), transparent 60%);
+animation:pulse 6s infinite;
+mix-blend-mode:screen;
+}
+
+@keyframes pulse{
+0%,100%{opacity:0.2;}
+50%{opacity:0.7;}
+}
+
+/* CENTER TEXT */
+.center{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+text-align:center;
+color:white;
+width:100%;
+}
+
+/* PRESENTS */
+#presents{
+opacity:0;
+letter-spacing:5px;
+font-size:14px;
+transition:2s;
+}
+
+/* TITLE */
+#title{
+opacity:0;
+font-size:7vw;
+color:#00ffff;
+text-shadow:
+0 0 10px #00ffff,
+0 0 25px #00ffff,
+0 0 50px #00ffff;
+}
+
+/* TAGLINE */
+#tagline{
+opacity:0;
+font-size:16px;
+letter-spacing:3px;
+margin-top:10px;
+}
+
+/* LIGHTNING FLASH */
+.flash{
+position:absolute;
+width:100%;
+height:100%;
+background:white;
+opacity:0;
+pointer-events:none;
+}
+
+/* CANVAS */
+canvas{
+position:absolute;
+top:0;
+left:0;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sky"></div>
+<div class="signal"></div>
+<div class="fog"></div>
+<div class="city"></div>
+
+<div class="flash" id="flash"></div>
+
+<canvas id="rain"></canvas>
+
+<div class="center">
+
+<div id="presents">CROWRULES ENTERTAINMENT PRESENTS</div>
+
+<div id="title">TACOMA NIGHTS</div>
+
+<div id="tagline">REAL LIFE • REAL STORIES • REAL TACOMA</div>
+
+</div>
+
+<audio id="rainAudio" src="rain.mp3" loop></audio>
+<audio id="thunderAudio" src="thunder.mp3"></audio>
+<audio id="hitAudio" src="hit.mp3"></audio>
+
+<script>
+
+/* -------------------- RAIN -------------------- */
+
+const canvas = document.getElementById("rain");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+let drops = [];
+
+for(let i=0;i<350;i++){
+drops.push({
+x: Math.random()*canvas.width,
+y: Math.random()*canvas.height,
+l: 10 + Math.random()*10,
+s: 4 + Math.random()*4
+});
+}
+
+function rain(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.strokeStyle="rgba(255,255,255,0.25)";
+ctx.lineWidth=1;
+
+for(let d of drops){
+ctx.beginPath();
+ctx.moveTo(d.x,d.y);
+ctx.lineTo(d.x,d.y+d.l);
+ctx.stroke();
+
+d.y += d.s;
+
+if(d.y > canvas.height){
+d.y = -20;
+d.x = Math.random()*canvas.width;
+}
+}
+
+requestAnimationFrame(rain);
+}
+rain();
+
+/* -------------------- LIGHTNING -------------------- */
+
+const flash = document.getElementById("flash");
+
+function lightning(){
+flash.style.opacity = 0.85;
+
+document.getElementById("thunderAudio").play().catch(()=>{});
+
+setTimeout(()=> flash.style.opacity = 0, 120);
+}
+
+setInterval(()=>{
+if(Math.random() > 0.75){
+lightning();
+}
+}, 3500);
+
+/* -------------------- AUDIO SAFE PLAY -------------------- */
+
+window.addEventListener("click", ()=>{
+document.getElementById("rainAudio").play().catch(()=>{});
+});
+
+/* -------------------- TIMELINE -------------------- */
+
+const presents = document.getElementById("presents");
+const title = document.getElementById("title");
+const tagline = document.getElementById("tagline");
+
+setTimeout(()=>{
+presents.style.opacity = 1;
+}, 1200);
+
+setTimeout(()=>{
+presents.style.opacity = 0;
+}, 4200);
+
+setTimeout(()=>{
+title.style.opacity = 1;
+document.getElementById("hitAudio").play().catch(()=>{});
+}, 6500);
+
+setTimeout(()=>{
+tagline.style.opacity = 1;
+}, 9000);
+
+setTimeout(()=>{
+title.style.textShadow = "0 0 5px #00ffff, 0 0 10px #00ffff";
+}, 12000);
+
+</script>
+
+</body>
+</html>
