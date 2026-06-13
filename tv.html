@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Broadcast OS</title>
+<title>CrowRules TV - Auto Broadcast Station</title>
 
 <style>
 :root{
@@ -57,9 +57,11 @@ body{
 
 .logo span{ color:var(--accent); }
 
-.clock{ color:var(--muted); }
+.clock{
+    color:var(--muted);
+}
 
-/* MAIN LAYOUT */
+/* LAYOUT */
 .main{
     display:flex;
     height:calc(100vh - 70px);
@@ -108,7 +110,7 @@ body{
     background:#000;
 }
 
-/* 16:9 PLAYER */
+/* 16:9 VIDEO */
 .video-wrapper{
     position:relative;
     width:100%;
@@ -164,18 +166,31 @@ body{
     left:0;
     right:0;
     padding:25px;
-    background:linear-gradient(to top, rgba(0,0,0,.92), transparent);
+    background:linear-gradient(to top, rgba(0,0,0,.93), transparent);
 }
 
 .overlay h1{
     font-size:2rem;
-    margin-bottom:8px;
+    margin-bottom:6px;
 }
 
 .overlay p{
-    max-width:650px;
+    max-width:700px;
     color:#ddd;
     line-height:1.5;
+}
+
+.now-next{
+    margin-top:10px;
+    padding:10px;
+    border-left:3px solid var(--accent);
+    background:rgba(0,0,0,.4);
+    font-size:.85rem;
+    color:#ccc;
+}
+
+.now-next span{
+    color:var(--accent);
 }
 
 /* GUIDE */
@@ -236,7 +251,7 @@ body{
 
     <div class="channel" onclick="switchChannel(this,'mystery')">
         <h3>🕵 Bonded in Mystery</h3>
-        <p>Investigations & stories</p>
+        <p>Investigations & storytelling</p>
     </div>
 
     <div class="channel" onclick="switchChannel(this,'tacoma')">
@@ -262,14 +277,20 @@ body{
 
     <!-- OVERLAY -->
     <div class="overlay">
-        <h1 id="title">Loading...</h1>
-        <p id="desc">Initializing CrowRules Broadcast System...</p>
+        <h1 id="title">Initializing Broadcast...</h1>
+        <p id="desc">Loading CrowRules TV system...</p>
+
+        <div class="now-next">
+            NOW: <span id="now"></span><br>
+            NEXT: <span id="next"></span><br>
+            BLOCK: <span id="block"></span>
+        </div>
     </div>
 
     <!-- GUIDE -->
     <div class="guide">
         <div class="guide-track" id="guide">
-            CrowRules TV • 24/7 Network • Loading schedule •
+            CrowRules TV • Initializing schedule engine •
         </div>
     </div>
 
@@ -293,28 +314,28 @@ function updateClock(){
 setInterval(updateClock,1000);
 updateClock();
 
-/* CHANNEL SYSTEM */
+/* CHANNELS */
 const channels = {
 
-talk: {
+talk:{
     type:"multi",
     title:"Talk Radio 24/7",
-    desc:"Life stories, caregiving, and real conversations across CrowRules TV.",
+    desc:"Life stories and real conversations across CrowRules TV.",
 
     playlists:[
         {
             name:"Season 1",
-            desc:"Core daily talk programming.",
+            desc:"Core talk programming.",
             url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCu_lTbNegjLUDVSY4TUTB9e&autoplay=1&mute=1"
         },
         {
             name:"Season 2",
-            desc:"Family life and personal stories.",
+            desc:"Family and caregiving stories.",
             url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCvlG38PUlghfql_IHqE5L6P&autoplay=1&mute=1"
         },
         {
             name:"Season 3",
-            desc:"Reflective night conversations.",
+            desc:"Reflective night discussions.",
             url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCtqf79j-tkFM_lysVX_9knZ&autoplay=1&mute=1"
         }
     ],
@@ -323,7 +344,7 @@ talk: {
 
 gaming:{
     title:"Game Night Live",
-    desc:"Community gaming chaos and events.",
+    desc:"Community gaming chaos.",
     url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCvy10wkPZPZySX0w4ryHMun&autoplay=1&mute=1"
 },
 
@@ -335,57 +356,87 @@ mystery:{
 
 tacoma:{
     title:"Tacoma Nights",
-    desc:"Cinematic Tacoma reflections.",
+    desc:"Cinematic reflections.",
     url:"https://www.youtube.com/embed/videoseries?list=PLXXXXXXXX4&autoplay=1&mute=1"
 }
 
 };
 
-/* SWITCH CHANNEL */
-function switchChannel(el,key){
+/* SCHEDULE ENGINE */
+const schedule = [
+    {start:0,end:6,channel:"talk",block:"Late Night Talk Radio"},
+    {start:6,end:12,channel:"talk",block:"Morning Talk Radio"},
+    {start:12,end:18,channel:"gaming",block:"Afternoon Gaming Block"},
+    {start:18,end:22,channel:"mystery",block:"Prime Time Mystery"},
+    {start:22,end:24,channel:"talk",block:"Night Reflection Radio"}
+];
 
-const c = channels[key];
-if(!c) return;
+function getBlock(){
+    const h = new Date().getHours();
+    return schedule.find(s => h >= s.start && h < s.end);
+}
 
-/* MULTI PLAYLIST (Talk Radio) */
-if(c.type==="multi"){
+/* MAIN ENGINE */
+function runBroadcast(){
+
+const b = getBlock();
+const c = channels[b.channel];
+
+if(c.type === "multi"){
 
 const p = c.playlists[c.index];
+const next = c.playlists[(c.index+1)%c.playlists.length];
 
 document.getElementById("playerFrame").src = p.url;
+
 document.getElementById("title").innerText =
 c.title + " — " + p.name;
 
 document.getElementById("desc").innerText = p.desc;
 
-document.getElementById("guide").innerText =
-"NOW: " + p.name +
-" • NEXT: " + c.playlists[(c.index+1)%c.playlists.length].name +
-" • CrowRules TV Network •";
+document.getElementById("now").innerText = p.name;
+document.getElementById("next").innerText = next.name;
+document.getElementById("block").innerText = b.block;
 
 c.index = (c.index + 1) % c.playlists.length;
-}
 
-/* SINGLE CHANNELS */
-else{
+}else{
+
 document.getElementById("playerFrame").src = c.url;
-document.getElementById("title").innerText = c.title;
+
+document.getElementById("title").innerText =
+b.block + " — " + c.title;
+
 document.getElementById("desc").innerText = c.desc;
 
-document.getElementById("guide").innerText =
-"NOW: " + c.title + " • CrowRules TV Network •";
+document.getElementById("now").innerText = c.title;
+document.getElementById("next").innerText = "Scheduled Block Change";
+document.getElementById("block").innerText = b.block;
+
 }
 
-/* UI ACTIVE */
+}
+
+/* MANUAL OVERRIDE */
+function switchChannel(el,key){
+
+const c = channels[key];
+
 document.querySelectorAll(".channel")
 .forEach(x=>x.classList.remove("active"));
-
 el.classList.add("active");
+
+/* reset index on manual switch */
+if(c.type==="multi") c.index = 0;
+
+/* force run */
+runBroadcast();
 
 }
 
-/* AUTO START */
-switchChannel(document.querySelector(".channel.active"), "talk");
+/* AUTO SYSTEM */
+runBroadcast();
+setInterval(runBroadcast, 5 * 60 * 1000);
 
 </script>
 
