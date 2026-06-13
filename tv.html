@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Auto Broadcast Station</title>
+<title>CrowRules TV - Broadcast OS</title>
 
 <style>
 :root{
     --bg:#000;
-    --panel:#0b0b0b;
     --accent:#00ffff;
     --live:#ff2d2d;
     --text:#ffffff;
@@ -57,9 +56,7 @@ body{
 
 .logo span{ color:var(--accent); }
 
-.clock{
-    color:var(--muted);
-}
+.clock{ color:var(--muted); }
 
 /* LAYOUT */
 .main{
@@ -110,7 +107,7 @@ body{
     background:#000;
 }
 
-/* 16:9 VIDEO */
+/* VIDEO */
 .video-wrapper{
     position:relative;
     width:100%;
@@ -135,8 +132,8 @@ body{
     padding:8px 14px;
     border-radius:8px;
     font-weight:bold;
-    animation:pulse 1.5s infinite;
     z-index:10;
+    animation:pulse 1.5s infinite;
 }
 
 @keyframes pulse{
@@ -155,8 +152,8 @@ body{
     padding:10px 14px;
     border-radius:8px;
     font-weight:bold;
-    text-decoration:none;
     z-index:10;
+    text-decoration:none;
 }
 
 /* OVERLAY */
@@ -166,7 +163,7 @@ body{
     left:0;
     right:0;
     padding:25px;
-    background:linear-gradient(to top, rgba(0,0,0,.93), transparent);
+    background:linear-gradient(to top, rgba(0,0,0,.95), transparent);
 }
 
 .overlay h1{
@@ -180,9 +177,10 @@ body{
     line-height:1.5;
 }
 
+/* NOW NEXT BOX */
 .now-next{
     margin-top:10px;
-    padding:10px;
+    padding:12px;
     border-left:3px solid var(--accent);
     background:rgba(0,0,0,.4);
     font-size:.85rem;
@@ -228,7 +226,6 @@ body{
 
 <div class="bg-glow"></div>
 
-<!-- TOP -->
 <div class="topbar">
     <div class="logo">CROW<span>RULES</span> TV</div>
     <div class="clock" id="clock"></div>
@@ -241,7 +238,7 @@ body{
 
     <div class="channel active" onclick="switchChannel(this,'talk')">
         <h3>🎙 Talk Radio</h3>
-        <p>Rotating life conversations</p>
+        <p>Rotating conversations</p>
     </div>
 
     <div class="channel" onclick="switchChannel(this,'gaming')">
@@ -249,8 +246,13 @@ body{
         <p>Community gaming chaos</p>
     </div>
 
+    <div class="channel" onclick="switchChannel(this,'dj')">
+        <h3>🎧 DJ Block</h3>
+        <p>Music + community vibes</p>
+    </div>
+
     <div class="channel" onclick="switchChannel(this,'mystery')">
-        <h3>🕵 Bonded in Mystery</h3>
+        <h3>🕵 Mystery Hour</h3>
         <p>Investigations & storytelling</p>
     </div>
 
@@ -270,12 +272,10 @@ body{
         ❤️ Support
     </a>
 
-    <!-- VIDEO -->
     <div class="video-wrapper">
         <iframe id="playerFrame" allowfullscreen></iframe>
     </div>
 
-    <!-- OVERLAY -->
     <div class="overlay">
         <h1 id="title">Initializing Broadcast...</h1>
         <p id="desc">Loading CrowRules TV system...</p>
@@ -287,10 +287,9 @@ body{
         </div>
     </div>
 
-    <!-- GUIDE -->
     <div class="guide">
         <div class="guide-track" id="guide">
-            CrowRules TV • Initializing schedule engine •
+            CrowRules TV • Initializing broadcast engine •
         </div>
     </div>
 
@@ -314,28 +313,42 @@ function updateClock(){
 setInterval(updateClock,1000);
 updateClock();
 
+/* STATE */
+let manualOverride = null;
+let lastRotation = 0;
+
+/* SAFE ROTATION */
+function shouldRotate(){
+    const now = Date.now();
+    if(now - lastRotation > 10 * 60 * 1000){
+        lastRotation = now;
+        return true;
+    }
+    return false;
+}
+
 /* CHANNELS */
 const channels = {
 
 talk:{
     type:"multi",
     title:"Talk Radio 24/7",
-    desc:"Life stories and real conversations across CrowRules TV.",
+    desc:"Rotating conversations",
 
     playlists:[
         {
-            name:"Season 1",
-            desc:"Core talk programming.",
+            name:"Main Feed",
+            desc:"Core talk programming",
             url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCu_lTbNegjLUDVSY4TUTB9e&autoplay=1&mute=1"
         },
         {
-            name:"Season 2",
-            desc:"Family and caregiving stories.",
+            name:"Caregiver Stories",
+            desc:"Family + real life",
             url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCvlG38PUlghfql_IHqE5L6P&autoplay=1&mute=1"
         },
         {
-            name:"Season 3",
-            desc:"Reflective night discussions.",
+            name:"Late Night Talk",
+            desc:"Reflective conversations",
             url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCtqf79j-tkFM_lysVX_9knZ&autoplay=1&mute=1"
         }
     ],
@@ -344,45 +357,52 @@ talk:{
 
 gaming:{
     title:"Game Night Live",
-    desc:"Community gaming chaos.",
+    desc:"Community gaming chaos",
     url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCvy10wkPZPZySX0w4ryHMun&autoplay=1&mute=1"
 },
 
 dj:{
-    title:"D&J Show",
-    desc:"Community gaming chaos.",
+    title:"DJ Block",
+    desc:"Music + community energy",
     url:"https://www.youtube.com/embed/videoseries?list=PLXptfWTKLcCtHV3QupW55wBi2-lO323fE&autoplay=1&mute=1"
-},    
+},
 
 mystery:{
-    title:"Bonded in Mystery",
-    desc:"Investigations and storytelling.",
+    title:"Mystery Hour",
+    desc:"Investigations",
     url:"https://www.youtube.com/embed/videoseries?list=PLXXXXXXXX3&autoplay=1&mute=1"
 },
 
 tacoma:{
     title:"Tacoma Nights",
-    desc:"Cinematic reflections.",
+    desc:"Cinematic reflections",
     url:"https://www.youtube.com/embed/videoseries?list=PLXXXXXXXX4&autoplay=1&mute=1"
 }
 
 };
 
-/* SCHEDULE ENGINE */
+/* SCHEDULE */
 const schedule = [
-    {start:0,end:6,channel:"talk",block:"Late Night Talk Radio"},
-    {start:6,end:12,channel:"talk",block:"Morning Talk Radio"},
-    {start:12,end:18,channel:"gaming",block:"Afternoon Gaming Block"},
-    {start:18,end:22,channel:"mystery",block:"Prime Time Mystery"},
-    {start:22,end:24,channel:"talk",block:"Night Reflection Radio"}
+    {start:0,end:6,channel:"talk",block:"Late Night Talk"},
+    {start:6,end:12,channel:"talk",block:"Morning Talk"},
+    {start:12,end:16,channel:"gaming",block:"Afternoon Gaming"},
+    {start:16,end:18,channel:"dj",block:"DJ Block"},
+    {start:18,end:22,channel:"mystery",block:"Prime Mystery"},
+    {start:22,end:24,channel:"talk",block:"Night Talk"}
 ];
 
 function getBlock(){
+
     const h = new Date().getHours();
-    return schedule.find(s => h >= s.start && h < s.end);
+
+    if(manualOverride){
+        return schedule.find(s => s.channel === manualOverride) || schedule[0];
+    }
+
+    return schedule.find(s => h >= s.start && h < s.end) || schedule[0];
 }
 
-/* MAIN ENGINE */
+/* ENGINE */
 function runBroadcast(){
 
 const b = getBlock();
@@ -404,7 +424,9 @@ document.getElementById("now").innerText = p.name;
 document.getElementById("next").innerText = next.name;
 document.getElementById("block").innerText = b.block;
 
-c.index = (c.index + 1) % c.playlists.length;
+if(shouldRotate()){
+    c.index = (c.index + 1) % c.playlists.length;
+}
 
 }else{
 
@@ -426,21 +448,24 @@ document.getElementById("block").innerText = b.block;
 /* MANUAL OVERRIDE */
 function switchChannel(el,key){
 
-const c = channels[key];
+manualOverride = key;
 
 document.querySelectorAll(".channel")
 .forEach(x=>x.classList.remove("active"));
 el.classList.add("active");
 
-/* reset index on manual switch */
-if(c.type==="multi") c.index = 0;
+const c = channels[key];
+if(c.type === "multi") c.index = 0;
 
-/* force run */
 runBroadcast();
-
 }
 
-/* AUTO SYSTEM */
+/* AUTO RESET */
+setInterval(() => {
+    manualOverride = null;
+}, 30 * 60 * 1000);
+
+/* START */
 runBroadcast();
 setInterval(runBroadcast, 5 * 60 * 1000);
 
