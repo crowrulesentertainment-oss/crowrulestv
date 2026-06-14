@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Broadcast OS v5</title>
+<title>CrowRules TV - Broadcast OS v6</title>
 
 <style>
 body{
@@ -37,7 +37,7 @@ body{
     cursor:pointer;
 }
 
-/* VIEW */
+/* VIEWER */
 .viewer{
     flex:1;
     position:relative;
@@ -87,10 +87,10 @@ body{
 <button class="btn" onclick="setMode('manual')">DIRECTOR MODE</button>
 
 <h3>🎮 CHANNELS</h3>
-<button class="btn" onclick="force('talk')">Talk Radio</button>
 <button class="btn" onclick="force('gaming')">Gaming Night</button>
+<button class="btn" onclick="force('talk')">Talk Radio</button>
 <button class="btn" onclick="force('dj')">DJ Block</button>
-<button class="btn" onclick="force('mystery')">Mystery Hour</button>
+<button class="btn" onclick="force('mystery')">Bonded in Mystery</button>
 
 <h3>🔴 LIVE TEST</h3>
 <button class="btn" onclick="simulateLive('kick')">Kick Live</button>
@@ -120,19 +120,17 @@ body{
 <script>
 
 /* =========================
-   STATE ENGINE
+   STATE
 ========================= */
 
 let player;
 let mode = "auto";
 let override = null;
 let currentId = null;
-
-/* LIVE STATE */
 let liveFeed = null;
 
 /* =========================
-   FULL CHANNEL SYSTEM (UNCHANGED CORE)
+   CHANNEL SYSTEM (UNCHANGED CONTENT)
 ========================= */
 
 const channels = {
@@ -181,12 +179,15 @@ async function checkKickLive(channel){
 
 try{
 
-const res = await fetch(`https://kick.com/api/v2/channels/${channel}`);
+const res = await fetch(`https://kick.com/api/v2/channels/${channel}`,{
+cache:"no-store"
+});
+
 if(!res.ok) return null;
 
 const data = await res.json();
 
-if(data && data.livestream){
+if(data?.livestream){
 
 return {
 platform:"kick",
@@ -211,25 +212,20 @@ return null;
 
 async function checkLiveFeeds(){
 
-// 🔴 Kick (active)
 const kick = await checkKickLive("CrowRules_TV");
 if(kick) return kick;
-
-// 🟣 placeholders for future:
- // Twitch API
- // YouTube API
 
 return null;
 }
 
 /* =========================
-   BROADCAST SELECTOR (PRIORITY SYSTEM)
+   PRIORITY ENGINE
 ========================= */
 
 function getState(){
 
-// 1. LIVE ALWAYS WINS
-if(liveFeed){
+// 🔴 LIVE ALWAYS WINS
+if(liveFeed && liveFeed.videoId){
 return {
 type:"live",
 platform: liveFeed.platform,
@@ -237,7 +233,7 @@ videoId: liveFeed.videoId
 };
 }
 
-// 2. DIRECTOR OVERRIDE
+// 🎛 OVERRIDE
 if(override){
 return {
 type:"replay",
@@ -245,10 +241,9 @@ ch: override
 };
 }
 
-// 3. SCHEDULE ENGINE
+// 🕒 SCHEDULE
 const h = new Date().getHours();
 
-if(h < 6) return {type:"replay", ch:"talk"};
 if(h < 12) return {type:"replay", ch:"talk"};
 if(h < 16) return {type:"replay", ch:"gaming"};
 if(h < 18) return {type:"replay", ch:"dj"};
@@ -266,18 +261,20 @@ player = new YT.Player("player",{
 height:"100%",
 width:"100%",
 videoId:"",
-events:{
-onStateChange:onState
-}
+events:{ onStateChange:onState }
 });
 
-/* LIVE POLLING LOOP */
+/* LIVE POLLING (SAFE + STABLE) */
 setInterval(async () => {
 
-liveFeed = await checkLiveFeeds();
-update();
+const result = await checkLiveFeeds();
 
-}, 8000);
+if(JSON.stringify(result) !== JSON.stringify(liveFeed)){
+liveFeed = result;
+update();
+}
+
+}, 9000);
 
 update();
 
@@ -313,7 +310,6 @@ player.loadVideoById(id);
 function next(){
 
 const state = getState();
-
 if(state.type === "live") return;
 
 const c = channels[state.ch];
@@ -324,7 +320,7 @@ update();
 }
 
 /* =========================
-   MAIN UPDATE ENGINE
+   UPDATE ENGINE
 ========================= */
 
 function update(){
@@ -345,7 +341,9 @@ document.getElementById("title").innerText =
 document.getElementById("sub").innerText =
 "Now streaming live feed";
 
+if(currentId !== state.videoId){
 play(state.videoId);
+}
 
 return;
 }
@@ -386,7 +384,7 @@ update();
 }
 
 /* =========================
-   LIVE SIMULATION
+   LIVE TEST
 ========================= */
 
 function simulateLive(platform){
