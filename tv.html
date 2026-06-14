@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Stable Broadcast OS</title>
+<title>CrowRules TV - Broadcast OS v5</title>
 
 <style>
 body{
@@ -19,7 +19,7 @@ body{
     height:100vh;
 }
 
-/* CONTROL */
+/* CONTROL PANEL */
 .control{
     width:340px;
     background:#0a0a0a;
@@ -43,7 +43,6 @@ body{
     position:relative;
 }
 
-/* PLAYER */
 #player{
     width:100%;
     height:100%;
@@ -61,12 +60,17 @@ body{
 .title{ font-size:20px; }
 .sub{ font-size:13px; color:#aaa; }
 
+/* LIVE BADGE */
 .badge{
     position:absolute;
     top:10px;
     left:10px;
-    background:#ff2d2d;
+    background:#444;
     padding:6px 10px;
+}
+
+.badge.live{
+    background:#ff2d2d;
 }
 </style>
 </head>
@@ -82,26 +86,27 @@ body{
 <button class="btn" onclick="setMode('auto')">AUTO NETWORK</button>
 <button class="btn" onclick="setMode('manual')">DIRECTOR MODE</button>
 
-<h3>📺 CHANNELS</h3>
+<h3>🎮 CHANNELS</h3>
 <button class="btn" onclick="force('talk')">Talk Radio</button>
-<button class="btn" onclick="force('gaming')">Game Night</button>
+<button class="btn" onclick="force('gaming')">Gaming Night</button>
 <button class="btn" onclick="force('dj')">DJ Block</button>
 <button class="btn" onclick="force('mystery')">Mystery Hour</button>
 
-<h3>🎬 CONTROL</h3>
-<button class="btn" onclick="nextEpisode()">Next Episode</button>
-<button class="btn" onclick="restartEpisode()">Restart</button>
+<h3>🔴 LIVE TEST</h3>
+<button class="btn" onclick="simulateLive('kick')">Kick Live</button>
+<button class="btn" onclick="simulateLive('youtube')">YouTube Live</button>
+<button class="btn" onclick="clearLive()">Clear Live</button>
 
 </div>
 
 <!-- VIEW -->
 <div class="viewer">
 
-<div class="badge">🔴 LIVE</div>
+<div class="badge" id="badge">📺 REPLAY</div>
 
 <div class="overlay">
-<div class="title" id="title">Booting Broadcast OS...</div>
-<div class="sub" id="sub">Initializing system...</div>
+<div class="title" id="title">Booting CrowRules TV...</div>
+<div class="sub" id="sub">Initializing broadcast engine...</div>
 </div>
 
 <div id="player"></div>
@@ -115,7 +120,7 @@ body{
 <script>
 
 /* =========================
-   STATE
+   STATE ENGINE
 ========================= */
 
 let player;
@@ -123,8 +128,11 @@ let mode = "auto";
 let override = null;
 let currentId = null;
 
+/* LIVE STATE */
+let liveFeed = null;
+
 /* =========================
-   CHANNELS
+   FULL CHANNEL SYSTEM (UNCHANGED CORE)
 ========================= */
 
 const channels = {
@@ -132,56 +140,124 @@ const channels = {
 talk:{
 index:0,
 episodes:[
-{id:"JkoTW5nNXLg",t:"Talk Radio #1",d:"Debut"},
-{id:"sgmxBU9y6A4",t:"Talk Radio #2",d:"Episode 2"},
-{id:"J3SkM_WAdLo",t:"Talk Radio #3",d:"Episode 3"}
+{id:"JkoTW5nNXLg",t:"Talk Radio #1",d:"Debut Broadcast"},
+{id:"sgmxBU9y6A4",t:"Talk Radio #2",d:"Community Session"},
+{id:"J3SkM_WAdLo",t:"Talk Radio #3",d:"Archive"}
 ]
 },
 
 gaming:{
 index:0,
 episodes:[
-{id:"deU1Cyb8M7I",t:"Dandy World",d:"First Game Night"},
-{id:"co9BYq82aNk",t:"Dandy's World #2",d:"Second Game Night"}
+{id:"deU1Cyb8M7I",t:"Gaming Night #1",d:"Roblox Session"},
+{id:"co9BYq82aNk",t:"Gaming Night #2",d:"Continuation"},
+{id:"J3SkM_WAdLo",t:"Gaming Night Archive",d:"Replay Block"}
 ]
 },
 
 dj:{
 index:0,
 episodes:[
-{id:"vT-BRFf2Yk0",t:"Episode #1",d:"Debut"},
-{id:"bo-fv8gLU1U",t:"Episode #2",d:"Episode 2"}
+{id:"vT-BRFf2Yk0",t:"DJ Block #1",d:"Live Mix Replay"},
+{id:"bo-fv8gLU1U",t:"DJ Block #2",d:"Extended Set"}
 ]
 },
 
 mystery:{
 index:0,
 episodes:[
-{id:"hTWKbfoikeg",t:"Case 1",d:"Investigation"},
-{id:"3fumBcKC6RE",t:"Case 2",d:"Evidence review"}
+{id:"hTWKbfoikeg",t:"Mystery Case #1",d:"Investigation"},
+{id:"3fumBcKC6RE",t:"Mystery Case #2",d:"Evidence Review"}
 ]
 }
 
 };
 
 /* =========================
-   SCHEDULER
+   KICK LIVE BRIDGE
 ========================= */
 
-function getChannel(){
-if(override) return override;
+async function checkKickLive(channel){
 
-const h = new Date().getHours();
+try{
 
-if(h < 6) return "talk";
-if(h < 12) return "talk";
-if(h < 16) return "gaming";
-if(h < 18) return "dj";
-return "mystery";
+const res = await fetch(`https://kick.com/api/v2/channels/${channel}`);
+if(!res.ok) return null;
+
+const data = await res.json();
+
+if(data && data.livestream){
+
+return {
+platform:"kick",
+videoId:"kick-live",
+channel
+};
+
+}
+
+return null;
+
+}catch(e){
+console.log("Kick error:", e);
+return null;
+}
+
 }
 
 /* =========================
-   YOUTUBE API READY
+   LIVE AGGREGATOR
+========================= */
+
+async function checkLiveFeeds(){
+
+// 🔴 Kick (active)
+const kick = await checkKickLive("CrowRules_TV");
+if(kick) return kick;
+
+// 🟣 placeholders for future:
+ // Twitch API
+ // YouTube API
+
+return null;
+}
+
+/* =========================
+   BROADCAST SELECTOR (PRIORITY SYSTEM)
+========================= */
+
+function getState(){
+
+// 1. LIVE ALWAYS WINS
+if(liveFeed){
+return {
+type:"live",
+platform: liveFeed.platform,
+videoId: liveFeed.videoId
+};
+}
+
+// 2. DIRECTOR OVERRIDE
+if(override){
+return {
+type:"replay",
+ch: override
+};
+}
+
+// 3. SCHEDULE ENGINE
+const h = new Date().getHours();
+
+if(h < 6) return {type:"replay", ch:"talk"};
+if(h < 12) return {type:"replay", ch:"talk"};
+if(h < 16) return {type:"replay", ch:"gaming"};
+if(h < 18) return {type:"replay", ch:"dj"};
+return {type:"replay", ch:"mystery"};
+
+}
+
+/* =========================
+   YOUTUBE ENGINE
 ========================= */
 
 function onYouTubeIframeAPIReady(){
@@ -191,33 +267,41 @@ height:"100%",
 width:"100%",
 videoId:"",
 events:{
-"onStateChange":onState
+onStateChange:onState
 }
 });
+
+/* LIVE POLLING LOOP */
+setInterval(async () => {
+
+liveFeed = await checkLiveFeeds();
+update();
+
+}, 8000);
 
 update();
 
 }
 
 /* =========================
-   REAL END DETECTION
+   AUTO NEXT
 ========================= */
 
 function onState(e){
 if(e.data === 0){
-nextEpisode();
+next();
 }
 }
 
 /* =========================
-   PLAY ENGINE (NO RESTART BUG)
+   SAFE PLAY (NO RESTART BUG)
 ========================= */
 
 function play(id){
 
-if(currentId === id) return; // 🔥 CRITICAL FIX
-
+if(currentId === id) return;
 currentId = id;
+
 player.loadVideoById(id);
 
 }
@@ -226,11 +310,13 @@ player.loadVideoById(id);
    NEXT EPISODE
 ========================= */
 
-function nextEpisode(){
+function next(){
 
-const ch = getChannel();
-const c = channels[ch];
+const state = getState();
 
+if(state.type === "live") return;
+
+const c = channels[state.ch];
 c.index = (c.index + 1) % c.episodes.length;
 
 update();
@@ -238,25 +324,49 @@ update();
 }
 
 /* =========================
-   UPDATE ENGINE
+   MAIN UPDATE ENGINE
 ========================= */
 
 function update(){
 
-const ch = getChannel();
-const c = channels[ch];
+const state = getState();
 
-const ep = c.episodes[c.index];
-const next = c.episodes[(c.index+1)%c.episodes.length];
+/* ================= LIVE ================= */
+if(state.type === "live"){
 
-play(ep.id);
+document.getElementById("badge").innerText =
+"🔴 LIVE " + state.platform.toUpperCase();
 
-/* UI */
+document.getElementById("badge").classList.add("live");
+
 document.getElementById("title").innerText =
-ch.toUpperCase() + " — " + ep.t;
+"LIVE BROADCAST — " + state.platform;
+
+document.getElementById("sub").innerText =
+"Now streaming live feed";
+
+play(state.videoId);
+
+return;
+}
+
+/* ================= REPLAY ================= */
+
+document.getElementById("badge").innerText =
+"📺 REPLAY";
+
+document.getElementById("badge").classList.remove("live");
+
+const c = channels[state.ch];
+const ep = c.episodes[c.index];
+
+document.getElementById("title").innerText =
+state.ch.toUpperCase() + " — " + ep.t;
 
 document.getElementById("sub").innerText =
 ep.d;
+
+play(ep.id);
 
 }
 
@@ -267,23 +377,33 @@ ep.d;
 function setMode(m){
 mode = m;
 override = null;
+update();
 }
 
 function force(ch){
 override = ch;
-mode = "manual";
-update();
-}
-
-function restartEpisode(){
 update();
 }
 
 /* =========================
-   LOOP (SAFE UI ONLY)
+   LIVE SIMULATION
 ========================= */
 
-setInterval(update, 5000);
+function simulateLive(platform){
+
+liveFeed = {
+platform,
+videoId:"dQw4w9WgXcQ"
+};
+
+update();
+
+}
+
+function clearLive(){
+liveFeed = null;
+update();
+}
 
 </script>
 
