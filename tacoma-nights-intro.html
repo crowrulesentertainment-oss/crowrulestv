@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tacoma Nights Intro</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  overflow: hidden;
+}
+
+/* =========================
+   FIXED 1920x1080 STAGE
+========================= */
+
+#stage {
+  position: absolute;
+  width: 1920px;
+  height: 1080px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* =========================
+   RAIN LAYER
+========================= */
+
+#rain {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.drop {
+  position: absolute;
+  width: 1px;
+  height: 140px;
+  background: linear-gradient(to bottom, transparent, rgba(0,229,255,0.65));
+  animation: fall linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes fall {
+  0% { transform: translateY(-120vh); }
+  100% { transform: translateY(120vh); }
+}
+
+/* =========================
+   FOG LAYER
+========================= */
+
+.fog {
+  position: absolute;
+  width: 220%;
+  height: 220%;
+  background: radial-gradient(circle at center,
+    rgba(0,229,255,0.05),
+    transparent 60%);
+  animation: drift 45s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+@keyframes drift {
+  0% { transform: translate(-5%, -5%); }
+  50% { transform: translate(-12%, 10%); }
+  100% { transform: translate(-5%, -5%); }
+}
+
+/* =========================
+   VHS SCANLINES
+========================= */
+
+#scanlines {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03),
+    transparent 3px
+  );
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+}
+
+/* =========================
+   NOISE
+========================= */
+
+#noise {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+/* =========================
+   CENTER STAGE CONTENT
+========================= */
+
+.center {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  z-index: 5;
+}
+
+/* =========================
+   TITLE
+========================= */
+
+.title {
+  font-size: 86px;
+  letter-spacing: 20px;
+  color: #00e5ff;
+  opacity: 0;
+  text-shadow: 0 0 40px rgba(0,229,255,0.45);
+}
+
+.subtitle {
+  margin-top: 18px;
+  font-size: 14px;
+  letter-spacing: 8px;
+  color: rgba(255,255,255,0.6);
+  opacity: 0;
+}
+
+/* =========================
+   TOPIC (CENTERED INTERTITLES)
+========================= */
+
+.topic {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 34px;
+  letter-spacing: 10px;
+  color: rgba(0,229,255,0.9);
+  opacity: 0;
+  text-align: center;
+  text-shadow: 0 0 30px rgba(0,229,255,0.25);
+}
+
+/* =========================
+   FADE SYSTEM
+========================= */
+
+.fade-in {
+  animation: fadeIn 3s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(1.04); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="stage">
+
+  <!-- AUDIO -->
+  <audio id="rainAudio" loop autoplay>
+    <source src="https://github.com/crowrulesentertainment-oss/crowrulestv/blob/main/liecio-light-rain-109591.mp3?raw=true" type="audio/mpeg">
+  </audio>
+
+  <!-- ATMOSPHERE -->
+  <div id="rain"></div>
+  <div class="fog"></div>
+  <div id="scanlines"></div>
+  <div id="noise"></div>
+
+  <!-- VISUAL CENTER -->
+  <div class="center">
+    <div class="title" id="title">TACOMA NIGHTS</div>
+    <div class="subtitle" id="subtitle">CROWRULES ENTERTAINMENT</div>
+  </div>
+
+  <div class="topic" id="topic"></div>
+
+</div>
+
+<script>
+
+/* =========================
+   RAIN SYSTEM
+========================= */
+
+const rain = document.getElementById("rain");
+
+function dropRain() {
+  const d = document.createElement("div");
+  d.className = "drop";
+
+  d.style.left = Math.random() * 1920 + "px";
+  d.style.animationDuration = (0.7 + Math.random() * 1.5) + "s";
+  d.style.opacity = 0.2 + Math.random() * 0.5;
+
+  rain.appendChild(d);
+
+  setTimeout(() => d.remove(), 5000);
+}
+
+setInterval(dropRain, 18);
+
+/* =========================
+   AUDIO CONTROL
+========================= */
+
+const rainAudio = document.getElementById("rainAudio");
+
+window.addEventListener("load", () => {
+  rainAudio.volume = 0.35;
+
+  rainAudio.play().catch(() => {
+    document.body.addEventListener("click", () => {
+      rainAudio.play();
+    }, { once: true });
+  });
+});
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const title = document.getElementById("title");
+const subtitle = document.getElementById("subtitle");
+const topic = document.getElementById("topic");
+
+/* =========================
+   TOPICS
+========================= */
+
+const topics = [
+  "FINDING YOUR VOICE",
+  "THE CITY AFTER MIDNIGHT",
+  "MEMORY & STATIC",
+  "LOST CONNECTIONS",
+  "BUILDING CROWRULES ENTERTAINMENT",
+  "TACOMA — AFTER DARK"
+];
+
+function playTopic(text, delay) {
+  setTimeout(() => {
+    topic.textContent = text;
+    topic.classList.remove("fade-out");
+    topic.classList.add("fade-in");
+
+    setTimeout(() => {
+      topic.classList.remove("fade-in");
+      topic.classList.add("fade-out");
+    }, 4500);
+
+  }, delay);
+}
+
+/* =========================
+   TIMELINE
+========================= */
+
+setTimeout(() => title.classList.add("fade-in"), 1600);
+
+setTimeout(() => subtitle.classList.add("fade-in"), 4200);
+
+setTimeout(() => {
+  title.classList.add("fade-out");
+  subtitle.classList.add("fade-out");
+}, 9200);
+
+/* =========================
+   TOPIC FLOW
+========================= */
+
+playTopic(topics[0], 11000);
+playTopic(topics[1], 17500);
+playTopic(topics[2], 24000);
+playTopic(topics[3], 30500);
+playTopic(topics[4], 37000);
+playTopic(topics[5], 43500);
+
+</script>
+
+</body>
+</html>
