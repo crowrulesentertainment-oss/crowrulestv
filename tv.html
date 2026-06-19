@@ -3,405 +3,251 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV - Broadcast OS v6</title>
+
+<title>CrowRules TV | Live Network</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
 body{
-    margin:0;
-    background:#000;
+    background:#0a0a0a;
     color:#fff;
-    font-family:Arial;
+    font-family:'Montserrat',sans-serif;
     overflow:hidden;
 }
 
-.layout{
+.app{display:flex;height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+    width:80px;
+    background:#050505;
+    border-right:1px solid rgba(0,255,255,0.2);
     display:flex;
-    height:100vh;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 0;
+    gap:25px;
 }
 
-/* CONTROL PANEL */
-.control{
-    width:340px;
-    background:#0a0a0a;
-    border-right:1px solid #222;
-    padding:10px;
+.logo{
+    font-family:'Orbitron';
+    font-size:12px;
+    color:#00ffff;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    letter-spacing:2px;
 }
 
-.btn{
-    width:100%;
-    padding:10px;
-    margin:4px 0;
-    background:#1a1a1a;
-    border:0;
-    color:#fff;
-    cursor:pointer;
+.nav-dot{
+    width:10px;height:10px;border-radius:50%;
+    background:#00ffff;opacity:0.5;
 }
 
-/* VIEWER */
-.viewer{
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;}
+
+.topbar{
+    height:60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    background:#050505;
+    border-bottom:1px solid rgba(0,255,255,0.2);
+}
+
+.live{color:#ff3b3b;font-weight:bold;}
+.clock{color:#00ff66;}
+
+.content{display:flex;flex:1;}
+
+/* PLAYER */
+.player{
+    flex:2;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.screen{
+    width:95%;
+    height:88%;
+    border-radius:20px;
+    border:2px solid rgba(0,255,255,0.2);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+}
+
+/* VIDEO */
+.video{
     flex:1;
-    position:relative;
+    background:#000;
 }
 
-#player{
+iframe{
     width:100%;
     height:100%;
+    border:none;
 }
 
-/* OVERLAY */
-.overlay{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    padding:20px;
-    background:linear-gradient(to top, rgba(0,0,0,.95), transparent);
+/* INFO BAR */
+.info{
+    padding:15px;
+    background:rgba(10,10,10,0.95);
+    border-top:1px solid rgba(0,255,255,0.2);
 }
 
-.title{ font-size:20px; }
-.sub{ font-size:13px; color:#aaa; }
+.info h2{color:#00ffff;font-size:18px;}
+.info p{opacity:0.8;font-size:13px;margin-top:5px;}
 
-/* LIVE BADGE */
-.badge{
-    position:absolute;
-    top:10px;
-    left:10px;
-    background:#444;
-    padding:6px 10px;
+/* CHANNELS */
+.channels{
+    flex:1;
+    background:#070707;
+    border-left:1px solid rgba(0,255,255,0.2);
+    overflow-y:auto;
+    padding:10px;
 }
 
-.badge.live{
-    background:#ff2d2d;
+.channel{
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(0,255,255,0.15);
+    cursor:pointer;
+    transition:0.2s;
 }
+
+.channel:hover{background:rgba(0,255,255,0.08);}
+.channel.active{border-color:#00ffff;}
+
+.channel h4{color:#00ffff;}
+.channel p{font-size:12px;opacity:0.7;margin-top:5px;}
+
 </style>
 </head>
 
 <body>
 
-<div class="layout">
+<div class="app">
 
-<!-- CONTROL -->
-<div class="control">
+<!-- SIDEBAR -->
+<div class="sidebar">
+<div class="logo">CROWRULES TV</div>
+<div class="nav-dot"></div>
+<div class="nav-dot"></div>
+<div class="nav-dot"></div>
+<div class="nav-dot"></div>
+</div>
 
-<h3>📡 MODE</h3>
-<button class="btn" onclick="setMode('auto')">AUTO NETWORK</button>
-<button class="btn" onclick="setMode('manual')">DIRECTOR MODE</button>
+<!-- MAIN -->
+<div class="main">
 
-<h3>🎮 CHANNELS</h3>
-<button class="btn" onclick="force('gaming')">Gaming Night</button>
-<button class="btn" onclick="force('talk')">Talk Radio</button>
-<button class="btn" onclick="force('dj')">DJ Block</button>
-<button class="btn" onclick="force('mystery')">Bonded in Mystery</button>
+<div class="topbar">
+<div class="live">● LIVE</div>
+<div class="clock" id="clock"></div>
+</div>
 
-<h3>🔴 LIVE TEST</h3>
-<button class="btn" onclick="simulateLive('kick')">Kick Live</button>
-<button class="btn" onclick="simulateLive('youtube')">YouTube Live</button>
-<button class="btn" onclick="clearLive()">Clear Live</button>
+<div class="content">
+
+<!-- PLAYER -->
+<div class="player">
+
+<div class="screen">
+
+<div class="video">
+<iframe id="video"
+src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+allow="autoplay; encrypted-media"
+allowfullscreen></iframe>
+</div>
+
+<div class="info">
+<h2 id="title">Tacoma Nights</h2>
+<p id="desc">Flagship talk show from Tacoma, WA</p>
+</div>
 
 </div>
 
-<!-- VIEW -->
-<div class="viewer">
-
-<div class="badge" id="badge">📺 REPLAY</div>
-
-<div class="overlay">
-<div class="title" id="title">Booting CrowRules TV...</div>
-<div class="sub" id="sub">Initializing broadcast engine...</div>
 </div>
 
-<div id="player"></div>
+<!-- CHANNELS -->
+<div class="channels">
+
+<div class="channel active" onclick="switchChannel('Tacoma Nights','Flagship talk show from Tacoma, WA','dQw4w9WgXcQ')">
+<h4>Tacoma Nights</h4>
+<p>Talk Show</p>
+</div>
+
+<div class="channel" onclick="switchChannel('Talk Radio','Live discussion & call-in style talk show','T3lctohkk14')">
+<h4>Talk Radio</h4>
+<p>Live Radio Show</p>
+</div>
+
+<div class="channel" onclick="switchChannel('D&J Show','Comedy / discussion / variety show','AZN8JGVb0-s')">
+<h4>D&J Show</h4>
+<p>Variety</p>
+</div>
+
+<div class="channel" onclick="switchChannel('Game Night Live','Gaming & live streams','Dp351ijRrM8')">
+<h4>Game Night Live</h4>
+<p>Gaming</p>
+</div>
+
+<div class="channel" onclick="switchChannel('Bonded in Mystery','True crime investigations','eVTXPUF4Oz4')">
+<h4>Bonded in Mystery</h4>
+<p>Podcast</p>
+</div>
+
+<div class="channel" onclick="switchChannel('Voices From The Void','Horror storytelling','kJQP7kiw5Fk')">
+<h4>Voices From The Void</h4>
+<p>Horror Audio</p>
+</div>
+
+</div>
 
 </div>
 
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
+</div>
 
 <script>
 
-/* =========================
-   STATE
-========================= */
+/* CLOCK */
+function updateClock(){
+const now=new Date();
+document.getElementById("clock").innerText=
+now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+setInterval(updateClock,1000);
+updateClock();
 
-let player;
-let mode = "auto";
-let override = null;
-let currentId = null;
-let liveFeed = null;
+/* CHANNEL SWITCH */
+function switchChannel(title,desc,videoId){
 
-/* =========================
-   CHANNEL SYSTEM (UNCHANGED CONTENT)
-========================= */
+document.getElementById("title").innerText=title;
+document.getElementById("desc").innerText=desc;
 
-const channels = {
+document.getElementById("video").src=
+`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
 
-talk:{
-index:0,
-episodes:[
-{id:"JkoTW5nNXLg",t:"Talk Radio #1",d:"Debut Broadcast"},
-{id:"sgmxBU9y6A4",t:"Talk Radio #2",d:"Community Session"},
-{id:"J3SkM_WAdLo",t:"Talk Radio #3",d:"Archive"}
-]
-},
-
-gaming:{
-index:0,
-episodes:[
-{id:"deU1Cyb8M7I",t:"Gaming Night #1",d:"Roblox Session"},
-{id:"co9BYq82aNk",t:"Gaming Night #2",d:"Continuation"},
-{id:"J3SkM_WAdLo",t:"Gaming Night Archive",d:"Replay Block"}
-]
-},
-
-dj:{
-index:0,
-episodes:[
-{id:"vT-BRFf2Yk0",t:"DJ Block #1",d:"Live Mix Replay"},
-{id:"bo-fv8gLU1U",t:"DJ Block #2",d:"Extended Set"}
-]
-},
-
-mystery:{
-index:0,
-episodes:[
-{id:"hTWKbfoikeg",t:"Mystery Case #1",d:"Investigation"},
-{id:"3fumBcKC6RE",t:"Mystery Case #2",d:"Evidence Review"}
-]
 }
 
-};
-
-/* =========================
-   KICK LIVE BRIDGE
-========================= */
-
-async function checkKickLive(channel){
-
-try{
-
-const res = await fetch(`https://kick.com/api/v2/channels/${channel}`,{
-cache:"no-store"
+/* ACTIVE STATE */
+document.querySelectorAll(".channel").forEach(el=>{
+el.addEventListener("click",()=>{
+document.querySelectorAll(".channel").forEach(c=>c.classList.remove("active"));
+el.classList.add("active");
 });
-
-if(!res.ok) return null;
-
-const data = await res.json();
-
-if(data?.livestream){
-
-return {
-platform:"kick",
-videoId:"kick-live",
-channel
-};
-
-}
-
-return null;
-
-}catch(e){
-console.log("Kick error:", e);
-return null;
-}
-
-}
-
-/* =========================
-   LIVE AGGREGATOR
-========================= */
-
-async function checkLiveFeeds(){
-
-const kick = await checkKickLive("CrowRules_TV");
-if(kick) return kick;
-
-return null;
-}
-
-/* =========================
-   PRIORITY ENGINE
-========================= */
-
-function getState(){
-
-// 🔴 LIVE ALWAYS WINS
-if(liveFeed && liveFeed.videoId){
-return {
-type:"live",
-platform: liveFeed.platform,
-videoId: liveFeed.videoId
-};
-}
-
-// 🎛 OVERRIDE
-if(override){
-return {
-type:"replay",
-ch: override
-};
-}
-
-// 🕒 SCHEDULE
-const h = new Date().getHours();
-
-if(h < 12) return {type:"replay", ch:"talk"};
-if(h < 16) return {type:"replay", ch:"gaming"};
-if(h < 18) return {type:"replay", ch:"dj"};
-return {type:"replay", ch:"mystery"};
-
-}
-
-/* =========================
-   YOUTUBE ENGINE
-========================= */
-
-function onYouTubeIframeAPIReady(){
-
-player = new YT.Player("player",{
-height:"100%",
-width:"100%",
-videoId:"",
-events:{ onStateChange:onState }
 });
-
-/* LIVE POLLING (SAFE + STABLE) */
-setInterval(async () => {
-
-const result = await checkLiveFeeds();
-
-if(JSON.stringify(result) !== JSON.stringify(liveFeed)){
-liveFeed = result;
-update();
-}
-
-}, 9000);
-
-update();
-
-}
-
-/* =========================
-   AUTO NEXT
-========================= */
-
-function onState(e){
-if(e.data === 0){
-next();
-}
-}
-
-/* =========================
-   SAFE PLAY (NO RESTART BUG)
-========================= */
-
-function play(id){
-
-if(currentId === id) return;
-currentId = id;
-
-player.loadVideoById(id);
-
-}
-
-/* =========================
-   NEXT EPISODE
-========================= */
-
-function next(){
-
-const state = getState();
-if(state.type === "live") return;
-
-const c = channels[state.ch];
-c.index = (c.index + 1) % c.episodes.length;
-
-update();
-
-}
-
-/* =========================
-   UPDATE ENGINE
-========================= */
-
-function update(){
-
-const state = getState();
-
-/* ================= LIVE ================= */
-if(state.type === "live"){
-
-document.getElementById("badge").innerText =
-"🔴 LIVE " + state.platform.toUpperCase();
-
-document.getElementById("badge").classList.add("live");
-
-document.getElementById("title").innerText =
-"LIVE BROADCAST — " + state.platform;
-
-document.getElementById("sub").innerText =
-"Now streaming live feed";
-
-if(currentId !== state.videoId){
-play(state.videoId);
-}
-
-return;
-}
-
-/* ================= REPLAY ================= */
-
-document.getElementById("badge").innerText =
-"📺 REPLAY";
-
-document.getElementById("badge").classList.remove("live");
-
-const c = channels[state.ch];
-const ep = c.episodes[c.index];
-
-document.getElementById("title").innerText =
-state.ch.toUpperCase() + " — " + ep.t;
-
-document.getElementById("sub").innerText =
-ep.d;
-
-play(ep.id);
-
-}
-
-/* =========================
-   CONTROLS
-========================= */
-
-function setMode(m){
-mode = m;
-override = null;
-update();
-}
-
-function force(ch){
-override = ch;
-update();
-}
-
-/* =========================
-   LIVE TEST
-========================= */
-
-function simulateLive(platform){
-
-liveFeed = {
-platform,
-videoId:"dQw4w9WgXcQ"
-};
-
-update();
-
-}
-
-function clearLive(){
-liveFeed = null;
-update();
-}
 
 </script>
 
