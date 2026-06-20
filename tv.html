@@ -98,13 +98,33 @@ iframe{
 
 /* INFO BAR */
 .info{
-    padding:15px;
+    padding:12px;
     background:rgba(10,10,10,0.95);
     border-top:1px solid rgba(0,255,255,0.2);
 }
 
 .info h2{color:#00ffff;font-size:18px;}
 .info p{opacity:0.8;font-size:13px;margin-top:5px;}
+
+/* CONTROLS */
+.controls{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+}
+
+button{
+    background:rgba(0,255,255,0.1);
+    border:1px solid rgba(0,255,255,0.3);
+    color:#00ffff;
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:rgba(0,255,255,0.2);
+}
 
 /* CHANNELS */
 .channels{
@@ -131,6 +151,12 @@ iframe{
 .channel h4{color:#00ffff;}
 .channel p{font-size:12px;opacity:0.7;margin-top:5px;}
 
+.video-list{
+    margin-top:8px;
+    font-size:11px;
+    opacity:0.6;
+}
+
 </style>
 </head>
 
@@ -138,7 +164,6 @@ iframe{
 
 <div class="app">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 <div class="logo">CROWRULES TV</div>
 <div class="nav-dot"></div>
@@ -147,7 +172,6 @@ iframe{
 <div class="nav-dot"></div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="topbar">
@@ -164,7 +188,7 @@ iframe{
 
 <div class="video">
 <iframe id="video"
-src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1"
 allow="autoplay; encrypted-media"
 allowfullscreen></iframe>
 </div>
@@ -172,6 +196,12 @@ allowfullscreen></iframe>
 <div class="info">
 <h2 id="title">Tacoma Nights</h2>
 <p id="desc">Flagship talk show from Tacoma, WA</p>
+
+<div class="controls">
+<button onclick="prevVideo()">⟵ Prev</button>
+<button onclick="nextVideo()">Next ⟶</button>
+</div>
+
 </div>
 
 </div>
@@ -179,39 +209,7 @@ allowfullscreen></iframe>
 </div>
 
 <!-- CHANNELS -->
-<div class="channels">
-
-<div class="channel active" onclick="switchChannel('Tacoma Nights','Flagship talk show from Tacoma, WA','dQw4w9WgXcQ')">
-<h4>Tacoma Nights</h4>
-<p>Talk Show</p>
-</div>
-
-<div class="channel" onclick="switchChannel('Talk Radio','Live discussion & call-in style talk show','T3lctohkk14')">
-<h4>Talk Radio</h4>
-<p>Live Radio Show</p>
-</div>
-
-<div class="channel" onclick="switchChannel('D&J Show','Comedy / discussion / variety show','AZN8JGVb0-s')">
-<h4>D&J Show</h4>
-<p>Variety</p>
-</div>
-
-<div class="channel" onclick="switchChannel('Game Night Live','Gaming & live streams','Dp351ijRrM8')">
-<h4>Game Night Live</h4>
-<p>Gaming</p>
-</div>
-
-<div class="channel" onclick="switchChannel('Bonded in Mystery','True crime investigations','eVTXPUF4Oz4')">
-<h4>Bonded in Mystery</h4>
-<p>Podcast</p>
-</div>
-
-<div class="channel" onclick="switchChannel('Voices From The Void','Horror storytelling','kJQP7kiw5Fk')">
-<h4>Voices From The Void</h4>
-<p>Horror Audio</p>
-</div>
-
-</div>
+<div class="channels" id="channelList"></div>
 
 </div>
 
@@ -230,24 +228,100 @@ now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 setInterval(updateClock,1000);
 updateClock();
 
-/* CHANNEL SWITCH */
-function switchChannel(title,desc,videoId){
+/* CHANNEL DATA (MULTI-VIDEO SUPPORT) */
+const channels = {
+"Tacoma Nights": {
+desc:"Flagship talk show from Tacoma, WA",
+videos:["dQw4w9WgXcQ","kJQP7kiw5Fk","3JZ_D3ELwOQ"],
+index:0
+},
+"Talk Radio": {
+desc:"Live discussion & call-in style talk show",
+videos:["JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo"],
+index:0
+},
+"D&J Show": {
+desc:"Comedy / discussion / variety show",
+videos:["vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM"],
+index:0
+},
+"Game Night Live": {
+desc:"Gaming & live streams",
+videos:["R_es3EtUbOY","Dp351ijRrM8","sbQc9zTn9oc"],
+index:0
+},
+"Bonded in Mystery": {
+desc:"True crime investigations",
+videos:["eVTXPUF4Oz4","ktvTqknDobU","hTWKbfoikeg"],
+index:0
+},
+"Voices From The Void": {
+desc:"Horror storytelling",
+videos:["kJQP7kiw5Fk","eY52Zsg-KVI","CevxZvSJLk8"],
+index:0
+}
+};
 
-document.getElementById("title").innerText=title;
-document.getElementById("desc").innerText=desc;
+let currentChannel = "Tacoma Nights";
 
-document.getElementById("video").src=
-`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+/* RENDER CHANNEL LIST */
+function renderChannels(){
+const container = document.getElementById("channelList");
+container.innerHTML = "";
 
+Object.keys(channels).forEach(name=>{
+const ch = channels[name];
+
+const div = document.createElement("div");
+div.className="channel" + (name===currentChannel?" active":"");
+
+div.innerHTML = `
+<h4>${name}</h4>
+<p>${ch.desc}</p>
+<div class="video-list">Videos: ${ch.videos.length}</div>
+`;
+
+div.onclick=()=>switchChannel(name);
+
+container.appendChild(div);
+});
+}
+renderChannels();
+
+/* SWITCH CHANNEL */
+function switchChannel(name){
+currentChannel = name;
+channels[name].index = 0;
+
+document.getElementById("title").innerText = name;
+document.getElementById("desc").innerText = channels[name].desc;
+
+loadVideo();
+
+renderChannels();
 }
 
-/* ACTIVE STATE */
-document.querySelectorAll(".channel").forEach(el=>{
-el.addEventListener("click",()=>{
-document.querySelectorAll(".channel").forEach(c=>c.classList.remove("active"));
-el.classList.add("active");
-});
-});
+/* LOAD VIDEO */
+function loadVideo(){
+const ch = channels[currentChannel];
+const vid = ch.videos[ch.index];
+
+document.getElementById("video").src =
+`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1`;
+}
+
+/* NEXT / PREV */
+function nextVideo(){
+const ch = channels[currentChannel];
+ch.index = (ch.index + 1) % ch.videos.length;
+loadVideo();
+}
+
+function prevVideo(){
+const ch = channels[currentChannel];
+ch.index = (ch.index - 1 + ch.videos.length) % ch.videos.length;
+loadVideo();
+}
 
 </script>
 
