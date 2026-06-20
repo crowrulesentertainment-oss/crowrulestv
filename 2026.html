@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrowRules Live Admin Overlay System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    margin:0;
+    background:transparent;
+    font-family:Montserrat,sans-serif;
+    color:white;
+    overflow:hidden;
+}
+
+/* LIVE TAG */
+.live{
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    background:red;
+    padding:8px 16px;
+    border-radius:20px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+/* ADMIN PANEL */
+.admin{
+    position:absolute;
+    right:20px;
+    top:10px;
+    width:300px;
+    background:rgba(0,0,0,.85);
+    border:1px solid #00ffff;
+    border-radius:12px;
+    padding:12px;
+}
+
+.admin h3{
+    font-family:Orbitron;
+    color:#00ffff;
+    margin:0 0 10px 0;
+    text-align:center;
+}
+
+input,select{
+    width:100%;
+    margin:5px 0;
+    padding:8px;
+    border-radius:6px;
+    border:none;
+    outline:none;
+}
+
+button{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.add{background:#00ff88;}
+.remove{background:#ff3333;color:white;}
+
+/* PANELS */
+.panel{
+    position:absolute;
+    left:20px;
+    top:60px;
+    width:420px;
+    background:rgba(10,10,10,.9);
+    border:1px solid #00ffff;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.header{
+    text-align:center;
+    padding:10px;
+    font-family:Orbitron;
+    color:#00ffff;
+    background:#111;
+}
+
+/* TABS */
+.tabs{
+    display:flex;
+}
+
+.tab{
+    flex:1;
+    padding:8px;
+    cursor:pointer;
+    background:#111;
+    border:none;
+    color:white;
+}
+
+.tab.active{
+    background:#00ffff;
+    color:black;
+}
+
+/* LIST */
+.list{
+    height:620px;
+    overflow-y:auto;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 10px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    font-size:12px;
+}
+
+.rank{width:30px;color:gold;font-weight:bold;}
+.name{flex:1;}
+.points{width:80px;text-align:right;color:#00ffff;}
+
+/* HIDE */
+.hidden{display:none;}
+
+</style>
+</head>
+
+<body>
+
+<div class="live">🔴 LIVE CROWRULES CONTROL SYSTEM</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin">
+<h3>ADMIN CONTROL</h3>
+
+<select id="game">
+<option value="dandy">Dandy's World</option>
+<option value="toons">Toons Universe</option>
+<option value="twilight">Twilight's Zone</option>
+<option value="outlaster">Outlaster</option>
+</select>
+
+<input id="player" placeholder="Player Name">
+<input id="points" placeholder="Points">
+
+<button class="add" onclick="addPoints()">+ ADD POINTS</button>
+<button class="remove" onclick="removePoints()">- REMOVE POINTS</button>
+
+</div>
+
+<!-- LEADERBOARD PANEL -->
+<div class="panel">
+
+<div class="header">LIVE LEADERBOARDS (AUTO SORT)</div>
+
+<div class="tabs">
+<button class="tab active" onclick="show('dandy')">Dandy</button>
+<button class="tab" onclick="show('toons')">Toons</button>
+<button class="tab" onclick="show('twilight')">Twilight</button>
+<button class="tab" onclick="show('outlaster')">Outlaster</button>
+</div>
+
+<!-- DANDY -->
+<div id="dandy" class="list"></div>
+
+<!-- TOONS -->
+<div id="toons" class="list hidden"></div>
+
+<!-- TWILIGHT -->
+<div id="twilight" class="list hidden"></div>
+
+<!-- OUTLASTER -->
+<div id="outlaster" class="list hidden"></div>
+
+</div>
+
+<script>
+
+/* -------------------------
+   INITIAL DATA (FULL SET)
+--------------------------*/
+
+let data = {
+dandy:[
+["FreyaPlaysRBLX",7970],
+["Joncool123",5690],
+["Dinosaursarekool",4625],
+["Nika",3495],
+["DucksAreKool",2355],
+["amberrrr12w",2030],
+["ilikestuff",1980],
+["RainbowDragonett",1715],
+["bark",1540],
+["Fallen Jester",1495],
+["OceanTheSillyGooberArtist",1365],
+["Charlotte",1250],
+["Zethsun4",1205],
+["UnicornFarts",995],
+["KingCrow",690],
+["Jordan",625],
+["ilikeoranges",570],
+["ToofBeTold",550],
+["solar",525],
+["Billy_hargrov3",445],
+["ILikeDandysWorld",435],
+["Lordrick",420],
+["Sprout",390],
+["bobbete428",375],
+["Gourdy",290],
+["kingYT",280],
+["N3PTUNE_wcueYT",270],
+["IWILLNOTCHAT",250],
+["Pebble",225],
+["Cheesecakesz",205],
+["kapilan23495",195],
+["Yaniwarouw439",195],
+["Noelle",180],
+["MyChatGotSuspended",180],
+["gojo8",170],
+["NeneMTAandBambi",165],
+["Kira_XD",160],
+["Lolbithefoxy",155],
+["xM1NTYxSC4RZx",155],
+["Antonio",150],
+["custard",135],
+["Shelly",135],
+["michael123boy87",120],
+["SmileyTaco",120],
+["jackmandude3",120],
+["MR_GUY",120],
+["makoto_naegi",110],
+["Auri",75],
+["doverben",45],
+["Wafflez",45],
+["idk",45],
+["Thanos",45],
+["YoulocalfanAmy",45],
+["Teito",45],
+["valentino",15],
+["Hectorlogan2015",15]
+],
+
+toons:[
+["FreyaPlaysRBLX",4570],
+["Nika",3120],
+["RainbowDragonett",1350],
+["Zethsun4",930],
+["ilikestuff",540],
+["Hectorlogan2015",405],
+["Joncool",345],
+["makoto_naegi",330],
+["Lordrick",255],
+["SmileyTaco",240],
+["amberrrr12w",240],
+["Fallen Jester",225],
+["Colten",225],
+["OceanTheSillyGoober",165],
+["Orbit",75],
+["bobbete",45],
+["Dinosaursarekool",15],
+["Sprout",15]
+],
+
+twilight:[
+["FreyaPlaysRBLX",1290],
+["Fallen Jester",790],
+["RainbowDragonett",705],
+["Nika",610],
+["Zethsun4",580],
+["jackmandude3",340],
+["Joncool123",300],
+["Lordrick",195],
+["Hectorlogan2015",165],
+["Colten",150],
+["SmileyTaco",120],
+["amberrrr12w",105],
+["ilikestuff",60]
+],
+
+outlaster:[
+["FreyaPlaysRBLX",1130],
+["CrowRulesTV",360],
+["RainbowDragonett",200],
+["Dinosaursarekool",180],
+["Nika",180],
+["UnicornFarts",130],
+["ilikefriedchicken",100],
+["DucksAreKool",60],
+["Fallen Jester",60],
+["Hectorlogan2015",60],
+["xM1NTYxSC4RZx",40],
+["Faith",40],
+["SmileyTaco",40],
+["KingCrow",40]
+]
+};
+
+/* -------------------------
+   RENDER FUNCTION (AUTO SORT)
+--------------------------*/
+
+function render(game){
+let container = document.getElementById(game);
+container.innerHTML = "";
+
+/* SORT DESCENDING */
+data[game]
+.sort((a,b)=>b[1]-a[1])
+.forEach((p,i)=>{
+let row = document.createElement("div");
+row.className="row";
+
+row.innerHTML = `
+<div class="rank">${i+1}</div>
+<div class="name">${p[0]}</div>
+<div class="points">${p[1]}</div>
+`;
+
+container.appendChild(row);
+});
+}
+
+/* RENDER ALL */
+function renderAll(){
+render("dandy");
+render("toons");
+render("twilight");
+render("outlaster");
+}
+
+/* -------------------------
+   ADMIN FUNCTIONS
+--------------------------*/
+
+function addPoints(){
+let g = document.getElementById("game").value;
+let name = document.getElementById("player").value;
+let pts = parseInt(document.getElementById("points").value);
+
+let found = data[g].find(p=>p[0]===name);
+
+if(found){
+found[1]+=pts;
+}else{
+data[g].push([name,pts]);
+}
+
+save();
+renderAll();
+}
+
+function removePoints(){
+let g = document.getElementById("game").value;
+let name = document.getElementById("player").value;
+let pts = parseInt(document.getElementById("points").value);
+
+let found = data[g].find(p=>p[0]===name);
+
+if(found){
+found[1]-=pts;
+if(found[1]<0) found[1]=0;
+}
+
+save();
+renderAll();
+}
+
+/* -------------------------
+   TAB SYSTEM
+--------------------------*/
+
+function show(id){
+document.querySelectorAll('.list').forEach(l=>l.classList.add('hidden'));
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+
+document.getElementById(id).classList.remove('hidden');
+event.target.classList.add('active');
+}
+
+/* -------------------------
+   SAVE (LOCAL STORAGE)
+--------------------------*/
+
+function save(){
+localStorage.setItem("crowrules_leaderboards",JSON.stringify(data));
+}
+
+function load(){
+let saved = localStorage.getItem("crowrules_leaderboards");
+if(saved){
+data = JSON.parse(saved);
+}
+}
+
+/* INIT */
+load();
+renderAll();
+
+</script>
+
+</body>
+</html>
