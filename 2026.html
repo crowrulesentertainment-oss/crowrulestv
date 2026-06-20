@@ -3,329 +3,251 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules Live Control Overlay System</title>
+<title>CrowRules Live Esports Overlay</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-body{
+:root{
+    --bg:#000;
+    --panel:#0f0f0f;
+    --cyan:#00ffff;
+    --green:#00ff88;
+    --gold:#ffd700;
+    --red:#ff3333;
+    --text:#fff;
+}
+
+*{
     margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
     background:transparent;
     font-family:Montserrat,sans-serif;
-    color:white;
+    color:var(--text);
     overflow:hidden;
 }
 
-/* LIVE */
+/* LIVE BADGE */
 .live{
     position:absolute;
     top:10px;
     left:50%;
     transform:translateX(-50%);
-    background:red;
-    padding:8px 16px;
-    border-radius:20px;
+    background:var(--red);
+    padding:8px 18px;
+    border-radius:30px;
     font-weight:bold;
     letter-spacing:2px;
+    font-size:14px;
 }
 
-/* ADMIN */
-.admin{
-    position:absolute;
-    right:20px;
-    top:10px;
-    width:300px;
-    background:rgba(0,0,0,.85);
-    border:1px solid #00ffff;
-    border-radius:12px;
-    padding:12px;
-}
-
-.admin h3{
-    font-family:Orbitron;
-    color:#00ffff;
-    margin:0 0 10px 0;
-    text-align:center;
-}
-
-input,select{
-    width:100%;
-    margin:5px 0;
-    padding:8px;
-    border-radius:6px;
-    border:none;
-    outline:none;
-    box-sizing:border-box;
-}
-
-button{
-    width:100%;
-    padding:10px;
-    margin-top:5px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-.add{background:#00ff88;}
-.remove{background:#ff3333;color:white;}
-
-/* LEADERBOARD PANEL */
+/* MAIN PANEL */
 .panel{
     position:absolute;
-    left:20px;
     top:60px;
-    width:420px;
-    background:rgba(10,10,10,.92);
-    border:1px solid #00ffff;
-    border-radius:12px;
+    left:20px;
+    width:520px;
+    background:rgba(10,10,10,0.92);
+    border:1px solid var(--cyan);
+    border-radius:14px;
     overflow:hidden;
+    backdrop-filter: blur(8px);
 }
 
+/* HEADER */
 .header{
     text-align:center;
-    padding:10px;
+    padding:12px;
     font-family:Orbitron;
-    color:#00ffff;
+    color:var(--cyan);
     background:#111;
+    font-size:16px;
 }
 
 /* TABS */
 .tabs{
     display:flex;
+    border-bottom:1px solid #222;
 }
 
 .tab{
     flex:1;
-    padding:8px;
-    cursor:pointer;
+    padding:10px;
     background:#111;
     border:none;
-    color:white;
+    color:#fff;
+    cursor:pointer;
     font-weight:bold;
+    font-size:12px;
+    transition:0.2s;
+}
+
+.tab:hover{
+    background:var(--cyan);
+    color:#000;
 }
 
 .tab.active{
-    background:#00ffff;
-    color:black;
+    background:var(--cyan);
+    color:#000;
 }
 
-/* LIST (FIXED SCROLL) */
+/* LIST */
 .list{
-    height:620px;
+    height:600px;
     overflow-y:auto;
-    overflow-x:hidden;
 }
 
-/* ROW */
-.row{
-    display:flex;
-    justify-content:space-between;
-    padding:6px 10px;
-    border-bottom:1px solid rgba(255,255,255,.08);
-    font-size:12px;
-}
-
-.rank{width:40px;color:gold;font-weight:bold;}
-.name{flex:1;}
-.points{width:80px;text-align:right;color:#00ffff;}
-
-/* SCROLLBAR (OBS FRIENDLY) */
 .list::-webkit-scrollbar{
     width:6px;
 }
+
 .list::-webkit-scrollbar-thumb{
-    background:#00ffff;
+    background:var(--cyan);
     border-radius:10px;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 10px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    font-size:13px;
+}
+
+.rank{
+    width:35px;
+    color:var(--gold);
+    font-weight:bold;
+}
+
+.name{
+    flex:1;
+}
+
+.points{
+    width:80px;
+    text-align:right;
+    color:var(--cyan);
+    font-weight:bold;
+}
+
+/* TOP COLORS */
+.list .row:nth-child(1){color:gold;font-weight:bold;}
+.list .row:nth-child(2){color:silver;}
+.list .row:nth-child(3){color:#cd7f32;}
+
+.hidden{display:none;}
+
+footer{
+    position:absolute;
+    bottom:10px;
+    right:20px;
+    font-size:11px;
+    color:#555;
 }
 </style>
 </head>
 
 <body>
 
-<div class="live">🔴 LIVE CROWRULES CONTROL SYSTEM</div>
+<div class="live">🔴 CROWRULES LIVE LEADERBOARDS</div>
 
-<!-- ADMIN -->
-<div class="admin">
-<h3>ADMIN CONTROL</h3>
-
-<select id="game">
-<option value="dandy">Dandy's World</option>
-<option value="toons">Toons Universe</option>
-<option value="twilight">Twilight's Zone</option>
-<option value="outlaster">Outlaster</option>
-</select>
-
-<input id="player" placeholder="Player Name">
-<input id="points" type="number" placeholder="Points">
-
-<button class="add" onclick="addPoints()">+ ADD POINTS</button>
-<button class="remove" onclick="removePoints()">- REMOVE POINTS</button>
-</div>
-
-<!-- PANEL -->
 <div class="panel">
-<div class="header">LIVE LEADERBOARDS (AUTO SORT)</div>
+
+<div class="header">ESPORTS SEASON CONTROL HUB</div>
 
 <div class="tabs">
-<button class="tab active" data-tab="dandy">Dandy</button>
-<button class="tab" data-tab="toons">Toons</button>
-<button class="tab" data-tab="twilight">Twilight</button>
-<button class="tab" data-tab="outlaster">Outlaster</button>
+<button class="tab active" onclick="show('dandy', event)">Dandy's World</button>
+<button class="tab" onclick="show('toons', event)">Toons Universe</button>
+<button class="tab" onclick="show('twilight', event)">Twilight's Zone</button>
+<button class="tab" onclick="show('outlaster', event)">Outlaster</button>
 </div>
 
+<!-- LEADERBOARDS -->
 <div id="dandy" class="list"></div>
-<div id="toons" class="list" style="display:none;"></div>
-<div id="twilight" class="list" style="display:none;"></div>
-<div id="outlaster" class="list" style="display:none;"></div>
+<div id="toons" class="list hidden"></div>
+<div id="twilight" class="list hidden"></div>
+<div id="outlaster" class="list hidden"></div>
+
 </div>
+
+<footer>Auto-updating JSON Leaderboard System</footer>
 
 <script>
 
-/* =========================
-   FULL DATA
-========================= */
-let data = {
-dandy:[
-["FreyaPlaysRBLX",7970],["Joncool123",5690],["Dinosaursarekool",4625],
-["Nika",3495],["DucksAreKool",2355],["amberrrr12w",2030],
-["ilikestuff",1980],["RainbowDragonett",1715],["bark",1540],
-["Fallen Jester",1495],["OceanTheSillyGooberArtist",1365],
-["Charlotte",1250],["Zethsun4",1205],["UnicornFarts",995],
-["KingCrow",690],["Jordan",625],["ilikeoranges",570],
-["ToofBeTold",550],["solar",525],["Billy_hargrov3",445],
-["ILikeDandysWorld",435],["Lordrick",420],["Sprout",390],
-["bobbete428",375],["Gourdy",290],["kingYT",280],
-["N3PTUNE_wcueYT",270],["IWILLNOTCHAT",250],["Pebble",225],
-["Cheesecakesz",205],["kapilan23495",195],["Yaniwarouw439",195],
-["Noelle",180],["MyChatGotSuspended",180],["gojo8",170],
-["NeneMTAandBambi",165],["Kira_XD",160],["Lolbithefoxy",155],
-["xM1NTYxSC4RZx",155],["Antonio",150],["custard",135],
-["Shelly",135],["michael123boy87",120],["SmileyTaco",120],
-["jackmandude3",120],["MR_GUY",120],["makoto_naegi",110],
-["Auri",75],["doverben",45],["Wafflez",45],["idk",45],
-["Thanos",45],["YoulocalfanAmy",45],["Teito",45],
-["valentino",15],["Hectorlogan2015",15]
-],
+/* -------------------------
+   DATA FROM JSON
+--------------------------*/
+let data = {};
 
-toons:[
-["FreyaPlaysRBLX",4570],["Nika",3120],["RainbowDragonett",1350],
-["Zethsun4",930],["ilikestuff",540],["Hectorlogan2015",405],
-["Joncool",345],["makoto_naegi",330],["Lordrick",255],
-["SmileyTaco",240],["amberrrr12w",240],["Fallen Jester",225],
-["Colten",225],["OceanTheSillyGoober",165],["Orbit",75],
-["bobbete",45],["Dinosaursarekool",15],["Sprout",15]
-],
+/* -------------------------
+   FETCH JSON LIVE
+--------------------------*/
+async function fetchData(){
+    try{
+        const res = await fetch("leaderboard.json?cache=" + Date.now());
+        data = await res.json();
+        renderAll();
+    }catch(err){
+        console.log("JSON load failed", err);
+    }
+}
 
-twilight:[
-["FreyaPlaysRBLX",1290],["Fallen Jester",790],
-["RainbowDragonett",705],["Nika",610],["Zethsun4",580],
-["jackmandude3",340],["Joncool123",300],["Lordrick",195],
-["Hectorlogan2015",165],["Colten",150],["SmileyTaco",120],
-["amberrrr12w",105],["ilikestuff",60]
-],
-
-outlaster:[
-["FreyaPlaysRBLX",1130],["CrowRulesTV",360],
-["RainbowDragonett",200],["Dinosaursarekool",180],
-["Nika",180],["UnicornFarts",130],["ilikefriedchicken",100],
-["DucksAreKool",60],["Fallen Jester",60],["Hectorlogan2015",60],
-["xM1NTYxSC4RZx",40],["Faith",40],["SmileyTaco",40],
-["KingCrow",40]
-]
-};
-
-/* =========================
-   RENDER
-========================= */
+/* -------------------------
+   RENDER GAME
+--------------------------*/
 function render(game){
-const container = document.getElementById(game);
-container.innerHTML = "";
+    const container = document.getElementById(game);
+    container.innerHTML = "";
 
-data[game]
-.sort((a,b)=>b[1]-a[1])
-.forEach((p,i)=>{
-const row = document.createElement("div");
-row.className = "row";
+    let list = (data[game] || [])
+        .sort((a,b)=>b.points - a.points);
 
-row.innerHTML = `
-<div class="rank">${i+1}</div>
-<div class="name">${p[0]}</div>
-<div class="points">${p[1]}</div>
-`;
+    list.forEach((p,i)=>{
+        const row = document.createElement("div");
+        row.className = "row";
 
-container.appendChild(row);
-});
+        row.innerHTML = `
+            <div class="rank">${i+1}</div>
+            <div class="name">${p.name}</div>
+            <div class="points">${p.points}</div>
+        `;
+
+        container.appendChild(row);
+    });
 }
 
+/* -------------------------
+   RENDER ALL
+--------------------------*/
 function renderAll(){
-render("dandy");
-render("toons");
-render("twilight");
-render("outlaster");
+    render("dandy");
+    render("toons");
+    render("twilight");
+    render("outlaster");
 }
 
-/* =========================
-   ADMIN FIXED
-========================= */
-function addPoints(){
-updatePoints(1);
+/* -------------------------
+   TAB SWITCHING
+--------------------------*/
+function show(id, event){
+    document.querySelectorAll(".list").forEach(l=>l.classList.add("hidden"));
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+
+    document.getElementById(id).classList.remove("hidden");
+    event.target.classList.add("active");
 }
 
-function removePoints(){
-updatePoints(-1);
-}
-
-function updatePoints(mult){
-const g = document.getElementById("game").value;
-const name = document.getElementById("player").value.trim();
-const pts = parseInt(document.getElementById("points").value);
-
-if(!name || isNaN(pts)) return;
-
-let found = data[g].find(p => p[0] === name);
-
-if(found){
-found[1] += pts * mult;
-if(found[1] < 0) found[1] = 0;
-} else if(mult > 0){
-data[g].push([name, pts]);
-}
-
-save();
-renderAll();
-}
-
-/* =========================
-   TAB FIX (NO event bug)
-========================= */
-document.querySelectorAll(".tab").forEach(btn=>{
-btn.addEventListener("click", ()=>{
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-btn.classList.add("active");
-
-document.querySelectorAll(".list").forEach(l=>l.style.display="none");
-document.getElementById(btn.dataset.tab).style.display="block";
-});
-});
-
-/* =========================
-   SAVE / LOAD
-========================= */
-function save(){
-localStorage.setItem("crowrules_leaderboards", JSON.stringify(data));
-}
-
-function load(){
-const saved = localStorage.getItem("crowrules_leaderboards");
-if(saved) data = JSON.parse(saved);
-}
-
-/* INIT */
-load();
-renderAll();
-document.getElementById("dandy").style.display = "block";
+/* -------------------------
+   AUTO REFRESH LOOP
+--------------------------*/
+fetchData();
+setInterval(fetchData, 3000);
 
 </script>
 
