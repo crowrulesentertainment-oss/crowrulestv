@@ -193,9 +193,9 @@ const rawData = {
   }
 };
 
-// clean numbers (fix commas + decimals like "8.985")
-function clean(value) {
-  return parseInt(String(value).replace(/[.,]/g, ""), 10);
+// FIX: convert ALL formats safely
+function parsePoints(val) {
+  return parseInt(String(val).replace(/[^\d]/g, ""), 10) || 0;
 }
 
 // combine totals
@@ -203,22 +203,22 @@ const totals = {};
 
 for (const game in rawData) {
   for (const player in rawData[game]) {
-    const pts = clean(rawData[game][player]);
+    const pts = parsePoints(rawData[game][player]);
     totals[player] = (totals[player] || 0) + pts;
   }
 }
 
-// sort
+// sort descending
 const sorted = Object.entries(totals)
   .sort((a, b) => b[1] - a[1]);
 
-// render MVP board
+// render
 const board = document.getElementById("mvpBoard");
 
 let html = "<pre>";
 
 sorted.slice(0, 10).forEach((p, i) => {
-  html += `#${i + 1} ${p[0]} - ${p[1]} pts\n`;
+  html += `#${i + 1} ${p[0]} - ${p[1].toLocaleString()} pts\n`;
 });
 
 html += "</pre>";
@@ -226,13 +226,13 @@ html += "</pre>";
 html += `
 <p style="opacity:0.8;margin-top:10px;">
 👥 Total Players: ${sorted.length}<br>
-🏆 Current MVP: ${sorted[0][0]} (${sorted[0][1]} pts)
+🏆 Current MVP: ${sorted[0][0]} (${sorted[0][1].toLocaleString()} pts)
 </p>
 `;
 
 board.innerHTML = html;
 </script>
-
+  
 <div class="section grid">
 
   <div class="panel">
