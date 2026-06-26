@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV | Broadcast Engine v4.0</title>
+<title>CrowRules TV | Broadcast Engine v6.0</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -61,10 +61,8 @@ body{
 .live{color:#ff3b3b;font-weight:bold;}
 .clock{color:#00ff66;font-weight:600}
 
-/* CONTENT */
 .content{display:flex;flex:1;}
 
-/* PLAYER */
 .player{
     flex:2;
     display:flex;
@@ -83,33 +81,17 @@ body{
     flex-direction:column;
 }
 
-.video{
-    flex:1;
-}
+.video{flex:1;}
+#player{width:100%;height:100%;}
 
-/* PLAYER CONTAINER */
-#player{
-    width:100%;
-    height:100%;
-}
-
-/* INFO */
 .info{
     padding:12px;
     background:rgba(10,10,10,0.95);
     border-top:1px solid rgba(0,255,255,0.15);
 }
 
-.info h2{
-    color:#00ffff;
-    font-size:16px;
-}
-
-.info p{
-    opacity:0.75;
-    font-size:13px;
-    margin-top:4px;
-}
+.info h2{color:#00ffff;font-size:16px;}
+.info p{opacity:0.75;font-size:13px;margin-top:4px;}
 
 .status{
     margin-top:6px;
@@ -119,9 +101,9 @@ body{
 
 .controls{
     display:flex;
-    flex-wrap:wrap;
     gap:8px;
     margin-top:10px;
+    flex-wrap:wrap;
 }
 
 button{
@@ -134,7 +116,6 @@ button{
     font-size:12px;
 }
 
-/* CHANNELS */
 .channels{
     flex:1;
     background:#070707;
@@ -152,10 +133,7 @@ button{
     cursor:pointer;
 }
 
-.channel.active{
-    border-color:#00ffff;
-}
-
+.channel.active{border-color:#00ffff;}
 .small{font-size:12px;opacity:0.7}
 </style>
 </head>
@@ -164,7 +142,6 @@ button{
 
 <div class="app">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 <div class="logo">CROWRULES TV</div>
 <div class="nav-dot"></div>
@@ -173,7 +150,6 @@ button{
 <div class="nav-dot"></div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="topbar">
@@ -183,7 +159,6 @@ button{
 
 <div class="content">
 
-<!-- PLAYER -->
 <div class="player">
 <div class="screen">
 <div class="video">
@@ -206,7 +181,6 @@ button{
 </div>
 </div>
 
-<!-- CHANNEL LIST -->
 <div class="channels" id="channels"></div>
 
 </div>
@@ -216,20 +190,20 @@ button{
 
 <script>
 
-/* ================= CLOCK ================= */
+/* CLOCK */
 setInterval(()=>{
 document.getElementById("clock").innerText =
 new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* ================= BUMPERS (UNCHANGED) ================= */
+/* BUMPERS */
 const bumpers = [
 "7wtfhZwyrcc",
 "Zi_XLOBDo_Y",
 "fJ9rUzIMcZQ"
 ];
 
-/* ================= CHANNELS (ALL VIDEOS PRESERVED) ================= */
+/* CHANNELS (UNCHANGED VIDEOS) */
 const channels = {
 "Tacoma Nights":{
 desc:"Flagship talk show",
@@ -239,46 +213,34 @@ index:0
 "Talk Radio":{
 desc:"Live discussion show",
 videos:[
-"JkoTW5nNXLg",
-"sgmxBU9y6A4",
-"J3SkM_WAdLo",
-"uzb9N9exc7k",
-"wVIMzr02YQg",
-"lbuX1NST_WI",
-"gX-4M0M8ax8",
-"rzBtb7U-jtg",
-"OeybM6vTSRo",
-"ZJ4EH6ZLEwU",
+"JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo","uzb9N9exc7k","wVIMzr02YQg",
+"lbuX1NST_WI","gX-4M0M8ax8","rzBtb7U-jtg","OeybM6vTSRo","ZJ4EH6ZLEwU"
 ],
 index:0
 },
 "D&J Show":{
 desc:"Comedy variety",
 videos:[
-"vT-BRFf2Yk0",
-"bo-fv8gLU1U",
-"x4W80w1wCZM",
-"Skdnn5cERuo",
-"6wsqHTc6Rl0"
+"vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM","Skdnn5cERuo","6wsqHTc6Rl0"
 ],
 index:0
 }
 };
 
-/* ================= STATE ================= */
 const state = {
 channel:"Tacoma Nights",
 shuffle:false,
 auto:true,
-player:null
+player:null,
+lastState:null
 };
 
-/* ================= INIT PLAYER ================= */
+/* INIT */
 function onYouTubeIframeAPIReady(){
 
 state.player = new YT.Player("player",{
 
-videoId: getVideo(),
+videoId:getVideo(),
 
 playerVars:{
 autoplay:1,
@@ -288,8 +250,8 @@ rel:0
 },
 
 events:{
-"onReady": onReady,
-"onStateChange": onStateChange
+onReady:onReady,
+onStateChange:onStateChange
 }
 
 });
@@ -298,26 +260,28 @@ render();
 updateUI();
 }
 
-/* ================= READY ================= */
+/* READY */
 function onReady(){
 state.player.playVideo();
 }
 
-/* ================= GET CURRENT VIDEO ================= */
+/* GET VIDEO */
 function getVideo(){
-const ch = channels[state.channel];
-return ch.videos[ch.index];
+return channels[state.channel].videos[channels[state.channel].index];
 }
 
-/* ================= LOAD VIDEO ================= */
+/* LOAD */
 function load(){
-const id = getVideo();
-state.player.loadVideoById(id);
+state.player.loadVideoById(getVideo());
 updateUI();
 }
 
-/* ================= AUTO NEXT ON END ================= */
+/* AUTO NEXT */
 function onStateChange(e){
+
+state.lastState = e.data;
+
+/* END OF VIDEO */
 if(e.data === YT.PlayerState.ENDED){
 
 if(state.shuffle && Math.random() < 0.15){
@@ -327,23 +291,31 @@ return;
 
 next();
 }
+
+/* FIX: AUTO RESUME IF PAUSED IN BACKGROUND */
+if(state.auto && e.data === YT.PlayerState.PAUSED){
+setTimeout(()=>{
+state.player.playVideo();
+},1000);
 }
 
-/* ================= NEXT ================= */
+}
+
+/* NEXT */
 function next(){
 const ch = channels[state.channel];
 ch.index = (ch.index + 1) % ch.videos.length;
 load();
 }
 
-/* ================= PREV ================= */
+/* PREV */
 function prev(){
 const ch = channels[state.channel];
 ch.index = (ch.index - 1 + ch.videos.length) % ch.videos.length;
 load();
 }
 
-/* ================= SWITCH CHANNEL ================= */
+/* CHANNEL SWITCH */
 function setChannel(name){
 state.channel = name;
 channels[name].index = 0;
@@ -351,7 +323,7 @@ load();
 render();
 }
 
-/* ================= BUMPER ================= */
+/* BUMPER */
 function playBumper(){
 const id = bumpers[Math.floor(Math.random()*bumpers.length)];
 
@@ -362,14 +334,14 @@ next();
 },5000);
 }
 
-/* ================= UI ================= */
+/* RENDER */
 function render(){
 const box = document.getElementById("channels");
 box.innerHTML="";
 
 Object.keys(channels).forEach(name=>{
 const el = document.createElement("div");
-el.className = "channel" + (name===state.channel ? " active":"");
+el.className = "channel" + (name===state.channel?" active":"");
 
 el.innerHTML = `
 <b>${name}</b>
@@ -381,15 +353,18 @@ box.appendChild(el);
 });
 }
 
+/* UI */
 function updateUI(){
 document.getElementById("title").innerText = state.channel;
 document.getElementById("desc").innerText = channels[state.channel].desc;
 
 document.getElementById("status").innerText =
-state.auto ? "AUTO MODE: ON (ENDLESS CHANNEL PLAYBACK)" : "MANUAL MODE";
+state.auto
+? "AUTO MODE: ON (ANTI-PAUSE ACTIVE)"
+: "MANUAL MODE";
 }
 
-/* ================= CONTROLS ================= */
+/* CONTROLS */
 function toggleShuffle(){
 state.shuffle = !state.shuffle;
 }
@@ -399,7 +374,7 @@ state.auto = !state.auto;
 updateUI();
 }
 
-/* expose buttons */
+/* EXPOSE */
 window.next = next;
 window.prev = prev;
 window.toggleShuffle = toggleShuffle;
