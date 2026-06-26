@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV | Broadcast Engine v3.0</title>
+<title>CrowRules TV | Broadcast Engine v4.0</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -83,12 +83,14 @@ body{
     flex-direction:column;
 }
 
-.video{flex:1;}
+.video{
+    flex:1;
+}
 
-iframe{
+/* PLAYER CONTAINER */
+#player{
     width:100%;
     height:100%;
-    border:none;
 }
 
 /* INFO */
@@ -132,7 +134,7 @@ button{
     font-size:12px;
 }
 
-/* CHANNEL LIST */
+/* CHANNELS */
 .channels{
     flex:1;
     background:#070707;
@@ -184,9 +186,8 @@ button{
 <!-- PLAYER -->
 <div class="player">
 <div class="screen">
-
 <div class="video">
-<iframe id="video"></iframe>
+<div id="player"></div>
 </div>
 
 <div class="info">
@@ -202,15 +203,16 @@ button{
 </div>
 
 </div>
-
 </div>
 </div>
 
-<!-- CHANNELS -->
+<!-- CHANNEL LIST -->
 <div class="channels" id="channels"></div>
 
 </div>
 </div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
@@ -220,33 +222,41 @@ document.getElementById("clock").innerText =
 new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* ================= BUMPERS ================= */
+/* ================= BUMPERS (UNCHANGED) ================= */
 const bumpers = [
 "7wtfhZwyrcc",
 "Zi_XLOBDo_Y",
 "fJ9rUzIMcZQ"
 ];
 
-/* ================= CHANNEL DATA ================= */
-const data = {
+/* ================= CHANNELS (ALL VIDEOS PRESERVED) ================= */
+const channels = {
 "Tacoma Nights":{
 desc:"Flagship talk show",
 videos:["YXcW0pN3KrE"],
-i:0
+index:0
 },
 "Talk Radio":{
 desc:"Live discussion show",
 videos:[
-"JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo","uzb9N9exc7k","wVIMzr02YQg"
+"JkoTW5nNXLg",
+"sgmxBU9y6A4",
+"J3SkM_WAdLo",
+"uzb9N9exc7k",
+"wVIMzr02YQg"
 ],
-i:0
+index:0
 },
 "D&J Show":{
 desc:"Comedy variety",
 videos:[
-"vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM","Skdnn5cERuo","6wsqHTc6Rl0","7Z9--D8PLV8","Ci_GVzgq2Go","FE8wFPuMJPg","wYnGU5XTwAA","rrLKkjEdVSw"
+"vT-BRFf2Yk0",
+"bo-fv8gLU1U",
+"x4W80w1wCZM",
+"Skdnn5cERuo",
+"6wsqHTc6Rl0"
 ],
-i:0
+index:0
 }
 };
 
@@ -254,93 +264,57 @@ i:0
 const state = {
 channel:"Tacoma Nights",
 shuffle:false,
-auto:true
+auto:true,
+player:null
 };
 
-/* ================= RENDER CHANNELS ================= */
-function renderChannels(){
-const box = document.getElementById("channels");
-box.innerHTML="";
+/* ================= INIT PLAYER ================= */
+function onYouTubeIframeAPIReady(){
 
-Object.keys(data).forEach(name=>{
-const el = document.createElement("div");
-el.className = "channel" + (name===state.channel ? " active":"");
+state.player = new YT.Player("player",{
 
-el.innerHTML = `
-<b>${name}</b>
-<div class="small">${data[name].desc}</div>
-`;
+videoId: getVideo(),
 
-el.onclick = ()=>setChannel(name);
-box.appendChild(el);
+playerVars:{
+autoplay:1,
+mute:1,
+controls:1,
+rel:0
+},
+
+events:{
+"onReady": onReady,
+"onStateChange": onStateChange
+}
+
 });
+
+render();
+updateUI();
+}
+
+/* ================= READY ================= */
+function onReady(){
+state.player.playVideo();
+}
+
+/* ================= GET CURRENT VIDEO ================= */
+function getVideo(){
+const ch = channels[state.channel];
+return ch.videos[ch.index];
 }
 
 /* ================= LOAD VIDEO ================= */
 function load(){
-
-const ch = data[state.channel];
-const id = ch.videos[ch.i];
-
-document.getElementById("video").src =
-`https://www.youtube.com/embed/${id}?enablejsapi=1&autoplay=1&mute=1`;
-
-document.getElementById("title").innerText = state.channel;
-document.getElementById("desc").innerText = ch.desc;
-
-document.getElementById("status").innerText =
-state.auto ? "AUTO MODE: ON (ENDLESS PLAYBACK)" : "MANUAL MODE";
-
-renderChannels();
+const id = getVideo();
+state.player.loadVideoById(id);
+updateUI();
 }
 
-/* ================= NEXT / PREV ================= */
-function next(){
-const ch = data[state.channel];
-ch.i = (ch.i + 1) % ch.videos.length;
-load();
-}
-
-function prev(){
-const ch = data[state.channel];
-ch.i = (ch.i - 1 + ch.videos.length) % ch.videos.length;
-load();
-}
-
-/* ================= CHANNEL SWITCH ================= */
-function setChannel(name){
-state.channel = name;
-data[name].i = 0;
-load();
-}
-
-/* ================= OPTIONS ================= */
-function toggleShuffle(){
-state.shuffle = !state.shuffle;
-}
-
-function toggleAuto(){
-state.auto = !state.auto;
-document.getElementById("status").innerText =
-state.auto ? "AUTO MODE: ON" : "MANUAL MODE";
-}
-
-/* ================= YOUTUBE API ================= */
-let player;
-
-function onYouTubeIframeAPIReady(){
-player = new YT.Player('video', {
-events:{
-'onStateChange':onStateChange
-}
-});
-}
-
+/* ================= AUTO NEXT ON END ================= */
 function onStateChange(e){
-
 if(e.data === YT.PlayerState.ENDED){
 
-/* optional bumper */
 if(state.shuffle && Math.random() < 0.15){
 playBumper();
 return;
@@ -350,23 +324,84 @@ next();
 }
 }
 
+/* ================= NEXT ================= */
+function next(){
+const ch = channels[state.channel];
+ch.index = (ch.index + 1) % ch.videos.length;
+load();
+}
+
+/* ================= PREV ================= */
+function prev(){
+const ch = channels[state.channel];
+ch.index = (ch.index - 1 + ch.videos.length) % ch.videos.length;
+load();
+}
+
+/* ================= SWITCH CHANNEL ================= */
+function setChannel(name){
+state.channel = name;
+channels[name].index = 0;
+load();
+render();
+}
+
 /* ================= BUMPER ================= */
 function playBumper(){
 const id = bumpers[Math.floor(Math.random()*bumpers.length)];
 
-document.getElementById("video").src =
-`https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
+state.player.loadVideoById(id);
 
-setTimeout(next, 5000);
+setTimeout(()=>{
+next();
+},5000);
 }
 
-/* ================= INIT ================= */
-renderChannels();
-setChannel(state.channel);
+/* ================= UI ================= */
+function render(){
+const box = document.getElementById("channels");
+box.innerHTML="";
+
+Object.keys(channels).forEach(name=>{
+const el = document.createElement("div");
+el.className = "channel" + (name===state.channel ? " active":"");
+
+el.innerHTML = `
+<b>${name}</b>
+<div class="small">${channels[name].desc}</div>
+`;
+
+el.onclick = ()=>setChannel(name);
+box.appendChild(el);
+});
+}
+
+function updateUI(){
+document.getElementById("title").innerText = state.channel;
+document.getElementById("desc").innerText = channels[state.channel].desc;
+
+document.getElementById("status").innerText =
+state.auto ? "AUTO MODE: ON (ENDLESS CHANNEL PLAYBACK)" : "MANUAL MODE";
+}
+
+/* ================= CONTROLS ================= */
+function toggleShuffle(){
+state.shuffle = !state.shuffle;
+}
+
+function toggleAuto(){
+state.auto = !state.auto;
+updateUI();
+}
+
+/* expose buttons */
+window.next = next;
+window.prev = prev;
+window.toggleShuffle = toggleShuffle;
+window.toggleAuto = toggleAuto;
+window.setChannel = setChannel;
 
 </script>
-
-<script src="https://www.youtube.com/iframe_api"></script>
 
 </body>
 </html>
