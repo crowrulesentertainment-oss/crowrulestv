@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV | Broadcast Engine v6.0</title>
+<title>CrowRules TV | Broadcast Engine v6.0 FIXED</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -19,7 +19,6 @@ body{
 
 .app{display:flex;height:100vh;}
 
-/* SIDEBAR */
 .sidebar{
     width:90px;
     background:#050505;
@@ -37,15 +36,10 @@ body{
     color:#00ffff;
     writing-mode:vertical-rl;
     transform:rotate(180deg);
-    letter-spacing:2px;
 }
 
-.nav-dot{
-    width:10px;height:10px;border-radius:50%;
-    background:#00ffff33;
-}
+.nav-dot{width:10px;height:10px;border-radius:50%;background:#00ffff33;}
 
-/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;}
 
 .topbar{
@@ -93,28 +87,7 @@ body{
 .info h2{color:#00ffff;font-size:16px;}
 .info p{opacity:0.75;font-size:13px;margin-top:4px;}
 
-.status{
-    margin-top:6px;
-    font-size:11px;
-    color:#888;
-}
-
-.controls{
-    display:flex;
-    gap:8px;
-    margin-top:10px;
-    flex-wrap:wrap;
-}
-
-button{
-    background:rgba(0,255,255,0.08);
-    border:1px solid rgba(0,255,255,0.25);
-    color:#00ffff;
-    padding:6px 10px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:12px;
-}
+.status{margin-top:6px;font-size:11px;color:#888;}
 
 .channels{
     flex:1;
@@ -144,10 +117,8 @@ button{
 
 <div class="sidebar">
 <div class="logo">CROWRULES TV</div>
-<div class="nav-dot"></div>
-<div class="nav-dot"></div>
-<div class="nav-dot"></div>
-<div class="nav-dot"></div>
+<div class="nav-dot"></div><div class="nav-dot"></div>
+<div class="nav-dot"></div><div class="nav-dot"></div>
 </div>
 
 <div class="main">
@@ -169,15 +140,8 @@ button{
 <h2 id="title">Loading...</h2>
 <p id="desc"></p>
 <div class="status" id="status"></div>
-
-<div class="controls">
-<button onclick="prev()">⟵ Prev</button>
-<button onclick="next()">Next ⟶</button>
-<button onclick="toggleShuffle()">🎲 Shuffle</button>
-<button onclick="toggleAuto()">🔁 Auto</button>
 </div>
 
-</div>
 </div>
 </div>
 
@@ -197,13 +161,9 @@ new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
 /* BUMPERS */
-const bumpers = [
-"7wtfhZwyrcc",
-"Zi_XLOBDo_Y",
-"fJ9rUzIMcZQ"
-];
+const bumpers = ["7wtfhZwyrcc","Zi_XLOBDo_Y","fJ9rUzIMcZQ"];
 
-/* CHANNELS (UNCHANGED VIDEOS) */
+/* CHANNELS (UNCHANGED) */
 const channels = {
 "Tacoma Nights":{
 desc:"Flagship talk show",
@@ -231,38 +191,32 @@ const state = {
 channel:"Tacoma Nights",
 shuffle:false,
 auto:true,
-player:null,
-lastState:null
+player:null
 };
 
-/* INIT */
-function onYouTubeIframeAPIReady(){
-
-state.player = new YT.Player("player",{
-
-videoId:getVideo(),
-
-playerVars:{
-autoplay:1,
-mute:1,
-controls:1,
-rel:0
-},
-
-events:{
-onReady:onReady,
-onStateChange:onStateChange
+/* ================= SAFE INIT ================= */
+function init(){
+if(typeof YT === "undefined" || !YT.Player){
+setTimeout(init,300);
+return;
 }
 
+state.player = new YT.Player("player",{
+videoId:getVideo(),
+playerVars:{autoplay:1,mute:1,controls:1,rel:0},
+events:{
+onReady:()=>state.player.playVideo(),
+onStateChange:onStateChange
+}
 });
 
 render();
 updateUI();
 }
 
-/* READY */
-function onReady(){
-state.player.playVideo();
+/* REQUIRED GLOBAL CALLBACK */
+function onYouTubeIframeAPIReady(){
+init();
 }
 
 /* GET VIDEO */
@@ -272,33 +226,21 @@ return channels[state.channel].videos[channels[state.channel].index];
 
 /* LOAD */
 function load(){
+if(!state.player) return;
 state.player.loadVideoById(getVideo());
 updateUI();
 }
 
 /* AUTO NEXT */
 function onStateChange(e){
-
-state.lastState = e.data;
-
-/* END OF VIDEO */
 if(e.data === YT.PlayerState.ENDED){
-
-if(state.shuffle && Math.random() < 0.15){
-playBumper();
-return;
-}
-
 next();
 }
 
-/* FIX: AUTO RESUME IF PAUSED IN BACKGROUND */
+/* ANTI-PAUSE FIX (BEST EFFORT) */
 if(state.auto && e.data === YT.PlayerState.PAUSED){
-setTimeout(()=>{
-state.player.playVideo();
-},1000);
+setTimeout(()=>state.player.playVideo(),1000);
 }
-
 }
 
 /* NEXT */
@@ -323,17 +265,6 @@ load();
 render();
 }
 
-/* BUMPER */
-function playBumper(){
-const id = bumpers[Math.floor(Math.random()*bumpers.length)];
-
-state.player.loadVideoById(id);
-
-setTimeout(()=>{
-next();
-},5000);
-}
-
 /* RENDER */
 function render(){
 const box = document.getElementById("channels");
@@ -343,12 +274,9 @@ Object.keys(channels).forEach(name=>{
 const el = document.createElement("div");
 el.className = "channel" + (name===state.channel?" active":"");
 
-el.innerHTML = `
-<b>${name}</b>
-<div class="small">${channels[name].desc}</div>
-`;
-
+el.innerHTML = `<b>${name}</b><div class="small">${channels[name].desc}</div>`;
 el.onclick = ()=>setChannel(name);
+
 box.appendChild(el);
 });
 }
@@ -357,29 +285,9 @@ box.appendChild(el);
 function updateUI(){
 document.getElementById("title").innerText = state.channel;
 document.getElementById("desc").innerText = channels[state.channel].desc;
-
 document.getElementById("status").innerText =
-state.auto
-? "AUTO MODE: ON (ANTI-PAUSE ACTIVE)"
-: "MANUAL MODE";
+state.auto ? "AUTO MODE: ON" : "MANUAL";
 }
-
-/* CONTROLS */
-function toggleShuffle(){
-state.shuffle = !state.shuffle;
-}
-
-function toggleAuto(){
-state.auto = !state.auto;
-updateUI();
-}
-
-/* EXPOSE */
-window.next = next;
-window.prev = prev;
-window.toggleShuffle = toggleShuffle;
-window.toggleAuto = toggleAuto;
-window.setChannel = setChannel;
 
 </script>
 
