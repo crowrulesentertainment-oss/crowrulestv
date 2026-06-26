@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>CrowRules TV | Broadcast Engine v2.1</title>
+<title>CrowRules TV | Broadcast Engine v3.0</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -85,13 +84,14 @@ body{
 }
 
 .video{flex:1;}
+
 iframe{
     width:100%;
     height:100%;
     border:none;
-    transition:opacity 0.4s ease;
 }
 
+/* INFO */
 .info{
     padding:12px;
     background:rgba(10,10,10,0.95);
@@ -132,7 +132,7 @@ button{
     font-size:12px;
 }
 
-/* CHANNELS */
+/* CHANNEL LIST */
 .channels{
     flex:1;
     background:#070707;
@@ -153,6 +153,7 @@ button{
 .channel.active{
     border-color:#00ffff;
 }
+
 .small{font-size:12px;opacity:0.7}
 </style>
 </head>
@@ -161,6 +162,7 @@ button{
 
 <div class="app">
 
+<!-- SIDEBAR -->
 <div class="sidebar">
 <div class="logo">CROWRULES TV</div>
 <div class="nav-dot"></div>
@@ -169,6 +171,7 @@ button{
 <div class="nav-dot"></div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
 <div class="topbar">
@@ -178,11 +181,12 @@ button{
 
 <div class="content">
 
+<!-- PLAYER -->
 <div class="player">
 <div class="screen">
 
 <div class="video">
-<iframe id="video" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe id="video"></iframe>
 </div>
 
 <div class="info">
@@ -191,10 +195,10 @@ button{
 <div class="status" id="status"></div>
 
 <div class="controls">
-<button onclick="prevVideo()">⟵ Prev</button>
-<button onclick="nextVideo()">Next ⟶</button>
+<button onclick="prev()">⟵ Prev</button>
+<button onclick="next()">Next ⟶</button>
 <button onclick="toggleShuffle()">🎲 Shuffle</button>
-<button onclick="toggleAuto()">🔁 24/7 Mode</button>
+<button onclick="toggleAuto()">🔁 Auto</button>
 </div>
 
 </div>
@@ -202,185 +206,167 @@ button{
 </div>
 </div>
 
-<div class="channels" id="channelList"></div>
+<!-- CHANNELS -->
+<div class="channels" id="channels"></div>
 
 </div>
 </div>
 
 <script>
 
-/* CLOCK */
+/* ================= CLOCK ================= */
 setInterval(()=>{
 document.getElementById("clock").innerText =
 new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* BUMPERS (UNCHANGED) */
+/* ================= BUMPERS ================= */
 const bumpers = [
 "7wtfhZwyrcc",
 "Zi_XLOBDo_Y",
 "fJ9rUzIMcZQ"
 ];
 
-/* =========================
-   CHANNEL DATA (UNCHANGED VIDEOS)
-========================= */
-
-const channels = {
+/* ================= CHANNEL DATA ================= */
+const data = {
 "Tacoma Nights":{
 desc:"Flagship talk show",
 videos:["YXcW0pN3KrE"],
-index:0
+i:0
 },
-
 "Talk Radio":{
 desc:"Live discussion show",
 videos:[
-"JkoTW5nNXLg",
-"sgmxBU9y6A4",
-"J3SkM_WAdLo",
-"uzb9N9exc7k",
-"wVIMzr02YQg"
+"JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo","uzb9N9exc7k","wVIMzr02YQg"
 ],
-index:0
+i:0
 },
-
 "D&J Show":{
 desc:"Comedy variety",
 videos:[
-"vT-BRFf2Yk0",
-"bo-fv8gLU1U",
-"x4W80w1wCZM",
-"Skdnn5cERuo",
-"6wsqHTc6Rl0"
+"vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM","Skdnn5cERuo","6wsqHTc6Rl0"
 ],
-index:0
+i:0
 }
 };
 
-/* STATE */
+/* ================= STATE ================= */
 const state = {
-currentChannel:"Tacoma Nights",
-auto:false,
+channel:"Tacoma Nights",
 shuffle:false,
-timer:null,
-plays:0
+auto:true
 };
 
-/* RENDER CHANNEL LIST */
-function render(){
-const list=document.getElementById("channelList");
-list.innerHTML="";
+/* ================= RENDER CHANNELS ================= */
+function renderChannels(){
+const box = document.getElementById("channels");
+box.innerHTML="";
 
-Object.keys(channels).forEach(name=>{
-const div=document.createElement("div");
-div.className="channel"+(name===state.currentChannel?" active":"");
+Object.keys(data).forEach(name=>{
+const el = document.createElement("div");
+el.className = "channel" + (name===state.channel ? " active":"");
 
-div.innerHTML=`
+el.innerHTML = `
 <b>${name}</b>
-<div class="small">${channels[name].desc}</div>
+<div class="small">${data[name].desc}</div>
 `;
 
-div.onclick=()=>switchChannel(name);
-list.appendChild(div);
+el.onclick = ()=>setChannel(name);
+box.appendChild(el);
 });
 }
 
-/* LOAD VIDEO */
+/* ================= LOAD VIDEO ================= */
 function load(){
 
-state.plays++;
+const ch = data[state.channel];
+const id = ch.videos[ch.i];
 
-const ch=channels[state.currentChannel];
+document.getElementById("video").src =
+`https://www.youtube.com/embed/${id}?enablejsapi=1&autoplay=1&mute=1`;
 
-/* bumper every 5 plays */
-if(state.plays % 5 === 0){
+document.getElementById("title").innerText = state.channel;
+document.getElementById("desc").innerText = ch.desc;
+
+document.getElementById("status").innerText =
+state.auto ? "AUTO MODE: ON (ENDLESS PLAYBACK)" : "MANUAL MODE";
+
+renderChannels();
+}
+
+/* ================= NEXT / PREV ================= */
+function next(){
+const ch = data[state.channel];
+ch.i = (ch.i + 1) % ch.videos.length;
+load();
+}
+
+function prev(){
+const ch = data[state.channel];
+ch.i = (ch.i - 1 + ch.videos.length) % ch.videos.length;
+load();
+}
+
+/* ================= CHANNEL SWITCH ================= */
+function setChannel(name){
+state.channel = name;
+data[name].i = 0;
+load();
+}
+
+/* ================= OPTIONS ================= */
+function toggleShuffle(){
+state.shuffle = !state.shuffle;
+}
+
+function toggleAuto(){
+state.auto = !state.auto;
+document.getElementById("status").innerText =
+state.auto ? "AUTO MODE: ON" : "MANUAL MODE";
+}
+
+/* ================= YOUTUBE API ================= */
+let player;
+
+function onYouTubeIframeAPIReady(){
+player = new YT.Player('video', {
+events:{
+'onStateChange':onStateChange
+}
+});
+}
+
+function onStateChange(e){
+
+if(e.data === YT.PlayerState.ENDED){
+
+/* optional bumper */
+if(state.shuffle && Math.random() < 0.15){
 playBumper();
 return;
 }
 
-/* shuffle channel */
-if(state.shuffle){
-const keys=Object.keys(channels);
-state.currentChannel=keys[Math.floor(Math.random()*keys.length)];
+next();
+}
 }
 
-/* video */
-const vid=ch.videos[ch.index];
-
-const iframe=document.getElementById("video");
-iframe.style.opacity=0;
-
-setTimeout(()=>{
-iframe.src=`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1`;
-iframe.style.opacity=1;
-},250);
-
-/* UI */
-document.getElementById("title").innerText=state.currentChannel;
-document.getElementById("desc").innerText=ch.desc;
-document.getElementById("status").innerText=
-state.auto ? "AUTO MODE ACTIVE (24/7)" : "MANUAL MODE";
-}
-
-/* BUMPER */
+/* ================= BUMPER ================= */
 function playBumper(){
-const ad=bumpers[Math.floor(Math.random()*bumpers.length)];
-document.getElementById("video").src=
-`https://www.youtube.com/embed/${ad}?autoplay=1&mute=1`;
+const id = bumpers[Math.floor(Math.random()*bumpers.length)];
 
-setTimeout(nextVideo,6000);
+document.getElementById("video").src =
+`https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
+
+setTimeout(next, 5000);
 }
 
-/* CHANNEL SWITCH */
-function switchChannel(name){
-state.currentChannel=name;
-channels[name].index=0;
-render();
-load();
-}
-
-/* NEXT / PREV */
-function nextVideo(){
-const ch=channels[state.currentChannel];
-ch.index=(ch.index+1)%ch.videos.length;
-load();
-}
-
-function prevVideo(){
-const ch=channels[state.currentChannel];
-ch.index=(ch.index-1+ch.videos.length)%ch.videos.length;
-load();
-}
-
-/* AUTO MODE (FIXED CLEAN) */
-function toggleAuto(){
-
-state.auto=!state.auto;
-
-if(state.timer){
-clearInterval(state.timer);
-state.timer=null;
-}
-
-if(state.auto){
-state.timer=setInterval(nextVideo,12000);
-}
-
-load();
-}
-
-/* SHUFFLE */
-function toggleShuffle(){
-state.shuffle=!state.shuffle;
-load();
-}
-
-/* INIT */
-render();
-switchChannel(state.currentChannel);
+/* ================= INIT ================= */
+renderChannels();
+setChannel(state.channel);
 
 </script>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 
 </body>
 </html>
