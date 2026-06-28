@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV | Broadcast Network v8.1 Stable</title>
+<title>CrowRules TV | Broadcast Network v8.3 Stable</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -78,10 +78,7 @@ body{
 
 .video{flex:1;position:relative;}
 
-#player{
-    width:100%;
-    height:100%;
-}
+#player{width:100%;height:100%;}
 
 .loading{
     position:absolute;
@@ -164,7 +161,7 @@ body{
 
 <div class="video">
 <div id="player"></div>
-<div class="loading" id="loading">INITIALIZING BROADCAST...</div>
+<div class="loading" id="loading">INITIALIZING BROADCAST SYSTEM...</div>
 
 <div class="overlay">
 NOW: <span id="now"></span><br>
@@ -197,26 +194,46 @@ document.getElementById("clock").innerText =
 new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* ================= CHANNEL DATA (UNCHANGED VIDEOS) ================= */
+/* ================= CHANNEL DATA (VIDEOS INTACT + TITLES) ================= */
 const channels = {
 "Tacoma Nights":{
 desc:"Flagship talk show",
-videos:["YXcW0pN3KrE"],
-index:0
-},
-"Talk Radio":{
-desc:"Live discussion show",
 videos:[
-"JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo","uzb9N9exc7k","wVIMzr02YQg",
-"lbuX1NST_WI","gX-4M0M8ax8","rzBtb7U-jtg","OeybM6vTSRo","ZJ4EH6ZLEwU"
+{id:"YXcW0pN3KrE", title:"Tacoma Nights — Pilot Broadcast"}
 ],
 index:0
 },
+
+"Talk Radio":{
+desc:"Live discussion show",
+videos:[
+{id:"JkoTW5nNXLg", title:"Talk Radio — Episode #1"},
+{id:"sgmxBU9y6A4", title:"Talk Radio — Episode #2"},
+{id:"J3SkM_WAdLo", title:"Talk Radio — Episode #3"},
+{id:"uzb9N9exc7k", title:"Talk Radio — Episode #4"},
+{id:"wVIMzr02YQg", title:"Talk Radio — Episode #5"},
+{id:"lbuX1NST_WI", title:"Talk Radio — Episode #6"},
+{id:"gX-4M0M8ax8", title:"Talk Radio — Episode #7"},
+{id:"rzBtb7U-jtg", title:"Talk Radio — Episode #8"},
+{id:"OeybM6vTSRo", title:"Talk Radio — Episode #9"},
+{id:"ZJ4EH6ZLEwU", title:"Talk Radio — Episode #10"}
+],
+index:0
+},
+
 "D&J Show":{
 desc:"Comedy variety",
 videos:[
-"vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM","Skdnn5cERuo","6wsqHTc6Rl0",
-"7Z9--D8PLV8","Ci_GVzgq2Go","FE8wFPuMJPg","wYnGU5XTwAA","rrLKkjEdVSw"
+{id:"vT-BRFf2Yk0", title:"D&J Show — Episode #1"},
+{id:"bo-fv8gLU1U", title:"D&J Show — Episode #2"},
+{id:"x4W80w1wCZM", title:"D&J Show — Episode #3"},
+{id:"Skdnn5cERuo", title:"D&J Show — Episode #4"},
+{id:"6wsqHTc6Rl0", title:"D&J Show — Episode #5"},
+{id:"7Z9--D8PLV8", title:"D&J Show — Episode #6"},
+{id:"Ci_GVzgq2Go", title:"D&J Show — Episode #7"},
+{id:"FE8wFPuMJPg", title:"D&J Show — Episode #8"},
+{id:"wYnGU5XTwAA", title:"D&J Show — Episode #9"},
+{id:"rrLKkjEdVSw", title:"D&J Show — Episode #10"}
 ],
 index:0
 }
@@ -227,40 +244,43 @@ const state = {
 channel:"Tacoma Nights",
 player:null,
 ready:false,
-ytReady:false,
-loading:true
+ytReady:false
 };
+
+/* ================= HELPERS ================= */
+function current(){
+return channels[state.channel].videos[channels[state.channel].index];
+}
+function id(){ return current().id; }
+function title(){ return current().title; }
 
 /* ================= LOADING ================= */
 function setLoading(v){
 document.getElementById("loading").style.display = v ? "flex" : "none";
 }
 
-/* ================= SAFE YOUTUBE BOOT ================= */
+/* ================= YT BOOT ================= */
 function onYouTubeIframeAPIReady(){
 state.ytReady = true;
 boot();
 }
 
 function boot(){
-if(!state.ytReady) return;
-
-const wait = setInterval(()=>{
-const el = document.getElementById("player");
-if(!el) return;
-
-clearInterval(wait);
+const check = setInterval(()=>{
+if(document.getElementById("player")){
+clearInterval(check);
 initPlayer();
-
+}
 },150);
 }
 
 /* ================= INIT PLAYER ================= */
 function initPlayer(){
+
 if(state.player) return;
 
 state.player = new YT.Player("player",{
-videoId:getVideo(),
+videoId:id(),
 playerVars:{
 autoplay:1,
 mute:1,
@@ -288,18 +308,13 @@ updateUI();
 updateOverlay();
 }
 
-/* ================= GET VIDEO ================= */
-function getVideo(){
-return channels[state.channel].videos[channels[state.channel].index];
-}
-
-/* ================= SAFE LOAD ================= */
+/* ================= LOAD ================= */
 function load(){
 if(!state.ready || !state.player) return;
 
 setLoading(true);
 
-state.player.loadVideoById(getVideo());
+state.player.loadVideoById(id());
 
 setTimeout(()=>setLoading(false),500);
 
@@ -307,7 +322,7 @@ updateUI();
 updateOverlay();
 }
 
-/* ================= PLAYER EVENTS ================= */
+/* ================= EVENTS ================= */
 function onState(e){
 if(e.data === YT.PlayerState.ENDED){
 next();
@@ -339,11 +354,10 @@ render();
 function updateOverlay(){
 const ch = channels[state.channel];
 
-document.getElementById("now").innerText =
-ch.videos[ch.index];
+document.getElementById("now").innerText = title();
 
 document.getElementById("next").innerText =
-ch.videos[(ch.index+1)%ch.videos.length];
+ch.videos[(ch.index+1)%ch.videos.length].title;
 }
 
 /* ================= RENDER ================= */
@@ -364,10 +378,10 @@ box.appendChild(el);
 
 /* ================= UI ================= */
 function updateUI(){
-document.getElementById("title").innerText = state.channel;
+document.getElementById("title").innerText = title();
 document.getElementById("desc").innerText = channels[state.channel].desc;
 document.getElementById("status").innerText =
-"NETWORK ONLINE • BROADCAST SYNC ACTIVE";
+"NETWORK ONLINE • BROADCAST ENGINE ACTIVE";
 }
 
 </script>
