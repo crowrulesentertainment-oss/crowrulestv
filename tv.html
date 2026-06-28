@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV | Broadcast Engine v6.0 FIXED</title>
+<title>CrowRules TV | Broadcast Engine v7.0</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -75,8 +75,24 @@ body{
     flex-direction:column;
 }
 
-.video{flex:1;}
-#player{width:100%;height:100%;}
+.video{flex:1;position:relative;}
+
+#player{
+    width:100%;
+    height:100%;
+}
+
+.loading{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#000;
+    color:#00ffff;
+    font-size:12px;
+    letter-spacing:2px;
+}
 
 .info{
     padding:12px;
@@ -104,9 +120,12 @@ body{
     background:rgba(255,255,255,0.03);
     border:1px solid rgba(0,255,255,0.1);
     cursor:pointer;
+    transition:0.2s;
 }
 
+.channel:hover{border-color:#00ffff55;}
 .channel.active{border-color:#00ffff;}
+
 .small{font-size:12px;opacity:0.7}
 </style>
 </head>
@@ -132,8 +151,10 @@ body{
 
 <div class="player">
 <div class="screen">
+
 <div class="video">
 <div id="player"></div>
+<div class="loading" id="loading">LOADING STREAM...</div>
 </div>
 
 <div class="info">
@@ -160,10 +181,7 @@ document.getElementById("clock").innerText =
 new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* BUMPERS */
-const bumpers = ["7wtfhZwyrcc","Zi_XLOBDo_Y","fJ9rUzIMcZQ"];
-
-/* CHANNELS (UNCHANGED) */
+/* KEEP VIDEOS INTACT */
 const channels = {
 "Tacoma Nights":{
 desc:"Flagship talk show",
@@ -182,7 +200,7 @@ index:0
 desc:"Comedy variety",
 videos:[
 "vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM","Skdnn5cERuo","6wsqHTc6Rl0",
-"7Z9--D8PLV8", "Ci_GVzgq2Go", "FE8wFPuMJPg", "wYnGU5XTwAA", "rrLKkjEdVSw"
+"7Z9--D8PLV8","Ci_GVzgq2Go","FE8wFPuMJPg","wYnGU5XTwAA","rrLKkjEdVSw"
 ],
 index:0
 }
@@ -190,68 +208,90 @@ index:0
 
 const state = {
 channel:"Tacoma Nights",
-shuffle:false,
-auto:true,
-player:null
+player:null,
+ready:false,
+auto:true
 };
 
-/* ================= SAFE INIT ================= */
-function init(){
-if(typeof YT === "undefined" || !YT.Player){
-setTimeout(init,300);
-return;
+/* CLOCK INIT FIX */
+function setLoading(v){
+document.getElementById("loading").style.display = v ? "flex" : "none";
 }
+
+/* YT READY */
+function onYouTubeIframeAPIReady(){
+initPlayer();
+}
+
+/* SAFE INIT */
+function initPlayer(){
+if(state.player) return;
 
 state.player = new YT.Player("player",{
 videoId:getVideo(),
-playerVars:{autoplay:1,mute:1,controls:1,rel:0},
+playerVars:{
+autoplay:1,
+mute:1,
+controls:1,
+rel:0
+},
 events:{
-onReady:()=>state.player.playVideo(),
-onStateChange:onStateChange
+onReady:()=>{
+state.ready = true;
+setLoading(false);
+state.player.playVideo();
+updateUI();
+render();
+},
+onStateChange:onState
 }
 });
 
-render();
-updateUI();
+setLoading(true);
 }
 
-/* REQUIRED GLOBAL CALLBACK */
-function onYouTubeIframeAPIReady(){
-init();
-}
-
-/* GET VIDEO */
+/* VIDEO GET */
 function getVideo(){
 return channels[state.channel].videos[channels[state.channel].index];
 }
 
-/* LOAD */
+/* LOAD VIDEO */
 function load(){
-if(!state.player) return;
+if(!state.ready) return;
+
+setLoading(true);
+
 state.player.loadVideoById(getVideo());
+
+setTimeout(()=>setLoading(false),800);
+
 updateUI();
 }
 
-/* AUTO NEXT */
-function onStateChange(e){
+/* STATE HANDLER (FIXED LOOP BUG) */
+function onState(e){
+
+// ended
 if(e.data === YT.PlayerState.ENDED){
 next();
+return;
 }
 
-/* ANTI-PAUSE FIX (BEST EFFORT) */
-if(state.auto && e.data === YT.PlayerState.PAUSED){
-setTimeout(()=>state.player.playVideo(),1000);
+// only auto-resume if truly intentional pause
+if(state.auto &&
+e.data === YT.PlayerState.PAUSED &&
+state.userPaused !== true){
+setTimeout(()=>state.player.playVideo(),800);
 }
 }
 
-/* NEXT */
+/* NEXT/PREV */
 function next(){
 const ch = channels[state.channel];
 ch.index = (ch.index + 1) % ch.videos.length;
 load();
 }
 
-/* PREV */
 function prev(){
 const ch = channels[state.channel];
 ch.index = (ch.index - 1 + ch.videos.length) % ch.videos.length;
@@ -266,7 +306,7 @@ load();
 render();
 }
 
-/* RENDER */
+/* RENDER UI */
 function render(){
 const box = document.getElementById("channels");
 box.innerHTML="";
@@ -282,13 +322,31 @@ box.appendChild(el);
 });
 }
 
-/* UI */
+/* UI TEXT */
 function updateUI(){
 document.getElementById("title").innerText = state.channel;
 document.getElementById("desc").innerText = channels[state.channel].desc;
 document.getElementById("status").innerText =
 state.auto ? "AUTO MODE: ON" : "MANUAL";
 }
+
+/* KEYBOARD CONTROLS */
+document.addEventListener("keydown",(e)=>{
+if(!state.ready) return;
+
+switch(e.key){
+case "ArrowRight": next(); break;
+case "ArrowLeft": prev(); break;
+case "ArrowUp":
+setChannel(Object.keys(channels)[
+(Math.max(0,Object.keys(channels).indexOf(state.channel)-1))
+]); break;
+case "ArrowDown":
+setChannel(Object.keys(channels)[
+(Math.min(Object.keys(channels).length-1,Object.keys(channels).indexOf(state.channel)+1))
+]); break;
+}
+});
 
 </script>
 
