@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV | Broadcast Engine v7.0</title>
+<title>CrowRules TV | Broadcast Engine v7.1 Stable</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -154,7 +154,7 @@ body{
 
 <div class="video">
 <div id="player"></div>
-<div class="loading" id="loading">LOADING STREAM...</div>
+<div class="loading" id="loading">LOADING BROADCAST...</div>
 </div>
 
 <div class="info">
@@ -175,13 +175,13 @@ body{
 
 <script>
 
-/* CLOCK */
+/* ================= CLOCK ================= */
 setInterval(()=>{
 document.getElementById("clock").innerText =
 new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* KEEP VIDEOS INTACT */
+/* ================= CHANNELS (UNCHANGED VIDEOS) ================= */
 const channels = {
 "Tacoma Nights":{
 desc:"Flagship talk show",
@@ -206,26 +206,29 @@ index:0
 }
 };
 
+/* ================= STATE ================= */
 const state = {
 channel:"Tacoma Nights",
 player:null,
 ready:false,
-auto:true
+ytReady:false
 };
 
-/* CLOCK INIT FIX */
+/* ================= LOADING UI ================= */
 function setLoading(v){
 document.getElementById("loading").style.display = v ? "flex" : "none";
 }
 
-/* YT READY */
+/* ================= YOUTUBE READY ================= */
 function onYouTubeIframeAPIReady(){
+state.ytReady = true;
 initPlayer();
 }
 
-/* SAFE INIT */
+/* ================= SAFE INIT ================= */
 function initPlayer(){
-if(state.player) return;
+
+if(!state.ytReady || state.player) return;
 
 state.player = new YT.Player("player",{
 videoId:getVideo(),
@@ -240,52 +243,45 @@ onReady:()=>{
 state.ready = true;
 setLoading(false);
 state.player.playVideo();
-updateUI();
 render();
+updateUI();
 },
-onStateChange:onState
+onStateChange:onStateChange
 }
 });
 
 setLoading(true);
 }
 
-/* VIDEO GET */
+/* ================= GET CURRENT VIDEO ================= */
 function getVideo(){
 return channels[state.channel].videos[channels[state.channel].index];
 }
 
-/* LOAD VIDEO */
+/* ================= LOAD VIDEO SAFELY ================= */
 function load(){
-if(!state.ready) return;
+if(!state.player || !state.ready) return;
 
 setLoading(true);
-
 state.player.loadVideoById(getVideo());
 
-setTimeout(()=>setLoading(false),800);
+setTimeout(()=>setLoading(false),600);
 
 updateUI();
 }
 
-/* STATE HANDLER (FIXED LOOP BUG) */
-function onState(e){
+/* ================= STATE HANDLER (FIXED) ================= */
+function onStateChange(e){
 
-// ended
 if(e.data === YT.PlayerState.ENDED){
 next();
 return;
 }
 
-// only auto-resume if truly intentional pause
-if(state.auto &&
-e.data === YT.PlayerState.PAUSED &&
-state.userPaused !== true){
-setTimeout(()=>state.player.playVideo(),800);
-}
+// IMPORTANT: no forced PAUSED recovery (this was the bug)
 }
 
-/* NEXT/PREV */
+/* ================= NEXT / PREV ================= */
 function next(){
 const ch = channels[state.channel];
 ch.index = (ch.index + 1) % ch.videos.length;
@@ -298,7 +294,7 @@ ch.index = (ch.index - 1 + ch.videos.length) % ch.videos.length;
 load();
 }
 
-/* CHANNEL SWITCH */
+/* ================= CHANNEL SWITCH ================= */
 function setChannel(name){
 state.channel = name;
 channels[name].index = 0;
@@ -306,7 +302,7 @@ load();
 render();
 }
 
-/* RENDER UI */
+/* ================= RENDER CHANNEL LIST ================= */
 function render(){
 const box = document.getElementById("channels");
 box.innerHTML="";
@@ -322,31 +318,13 @@ box.appendChild(el);
 });
 }
 
-/* UI TEXT */
+/* ================= UI ================= */
 function updateUI(){
 document.getElementById("title").innerText = state.channel;
 document.getElementById("desc").innerText = channels[state.channel].desc;
 document.getElementById("status").innerText =
-state.auto ? "AUTO MODE: ON" : "MANUAL";
+"STREAM ONLINE • AUTO MODE ACTIVE";
 }
-
-/* KEYBOARD CONTROLS */
-document.addEventListener("keydown",(e)=>{
-if(!state.ready) return;
-
-switch(e.key){
-case "ArrowRight": next(); break;
-case "ArrowLeft": prev(); break;
-case "ArrowUp":
-setChannel(Object.keys(channels)[
-(Math.max(0,Object.keys(channels).indexOf(state.channel)-1))
-]); break;
-case "ArrowDown":
-setChannel(Object.keys(channels)[
-(Math.min(Object.keys(channels).length-1,Object.keys(channels).indexOf(state.channel)+1))
-]); break;
-}
-});
 
 </script>
 
