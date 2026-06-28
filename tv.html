@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrowRules TV | Broadcast Engine v7.1 Stable FIX</title>
+<title>CrowRules TV | Broadcast Network v8.0</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -17,9 +17,9 @@ body{
     overflow:hidden;
 }
 
+/* ===== LAYOUT ===== */
 .app{display:flex;height:100vh;}
 
-/* SIDEBAR */
 .sidebar{
     width:90px;
     background:#050505;
@@ -39,12 +39,8 @@ body{
     transform:rotate(180deg);
 }
 
-.nav-dot{
-    width:10px;height:10px;border-radius:50%;
-    background:#00ffff33;
-}
+.nav-dot{width:10px;height:10px;border-radius:50%;background:#00ffff33;}
 
-/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;}
 
 .topbar{
@@ -60,10 +56,9 @@ body{
 .live{color:#ff3b3b;font-weight:bold;}
 .clock{color:#00ff66;font-weight:600}
 
-/* CONTENT */
 .content{display:flex;flex:1;}
 
-/* PLAYER */
+/* ===== PLAYER ===== */
 .player{
     flex:2;
     display:flex;
@@ -80,17 +75,12 @@ body{
     overflow:hidden;
     display:flex;
     flex-direction:column;
-}
-
-.video{
-    flex:1;
     position:relative;
 }
 
-#player{
-    width:100%;
-    height:100%;
-}
+.video{flex:1;position:relative;}
+
+#player{width:100%;height:100%;}
 
 .loading{
     position:absolute;
@@ -104,7 +94,20 @@ body{
     letter-spacing:2px;
 }
 
-/* INFO */
+/* ===== NOW / NEXT OVERLAY ===== */
+.overlay{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:rgba(0,0,0,0.6);
+    border:1px solid rgba(0,255,255,0.2);
+    padding:8px 10px;
+    font-size:11px;
+    color:#00ffff;
+    border-radius:8px;
+}
+
+/* ===== INFO ===== */
 .info{
     padding:12px;
     background:rgba(10,10,10,0.95);
@@ -114,13 +117,9 @@ body{
 .info h2{color:#00ffff;font-size:16px;}
 .info p{opacity:0.75;font-size:13px;margin-top:4px;}
 
-.status{
-    margin-top:6px;
-    font-size:11px;
-    color:#888;
-}
+.status{margin-top:6px;font-size:11px;color:#888;}
 
-/* CHANNEL LIST */
+/* ===== CHANNELS ===== */
 .channels{
     flex:1;
     background:#070707;
@@ -150,41 +149,43 @@ body{
 
 <div class="app">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-    <div class="logo">CROWRULES TV</div>
-    <div class="nav-dot"></div>
-    <div class="nav-dot"></div>
-    <div class="nav-dot"></div>
-    <div class="nav-dot"></div>
+<div class="logo">CROWRULES TV</div>
+<div class="nav-dot"></div><div class="nav-dot"></div>
+<div class="nav-dot"></div><div class="nav-dot"></div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="topbar">
-    <div class="live">● LIVE BROADCAST</div>
-    <div class="clock" id="clock"></div>
+<div class="live">● BROADCAST NETWORK</div>
+<div class="clock" id="clock"></div>
 </div>
 
 <div class="content">
 
 <!-- PLAYER -->
 <div class="player">
-    <div class="screen">
+<div class="screen">
 
-        <div class="video">
-            <div id="player"></div>
-            <div class="loading" id="loading">LOADING BROADCAST...</div>
-        </div>
+<div class="video">
+<div id="player"></div>
+<div class="loading" id="loading">SYNCING NETWORK...</div>
 
-        <div class="info">
-            <h2 id="title">Loading...</h2>
-            <p id="desc"></p>
-            <div class="status" id="status"></div>
-        </div>
+<div class="overlay" id="overlay">
+NOW: <span id="now"></span><br>
+NEXT: <span id="next"></span>
+</div>
 
-    </div>
+</div>
+
+<div class="info">
+<h2 id="title">Loading...</h2>
+<p id="desc"></p>
+<div class="status" id="status"></div>
+</div>
+
+</div>
 </div>
 
 <!-- CHANNELS -->
@@ -199,145 +200,137 @@ body{
 
 /* ================= CLOCK ================= */
 setInterval(()=>{
-    document.getElementById("clock").innerText =
-    new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+document.getElementById("clock").innerText =
+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* ================= CHANNEL DATA (UNCHANGED) ================= */
+/* ================= CHANNEL ENGINE (UNCHANGED VIDEOS) ================= */
 const channels = {
 "Tacoma Nights":{
-    desc:"Flagship talk show",
-    videos:["YXcW0pN3KrE"],
-    index:0
+desc:"Flagship talk show",
+videos:["YXcW0pN3KrE"],
+index:0
 },
 "Talk Radio":{
-    desc:"Live discussion show",
-    videos:[
-        "JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo","uzb9N9exc7k","wVIMzr02YQg",
-        "lbuX1NST_WI","gX-4M0M8ax8","rzBtb7U-jtg","OeybM6vTSRo","ZJ4EH6ZLEwU"
-    ],
-    index:0
+desc:"Live discussion show",
+videos:[
+"JkoTW5nNXLg","sgmxBU9y6A4","J3SkM_WAdLo","uzb9N9exc7k","wVIMzr02YQg",
+"lbuX1NST_WI","gX-4M0M8ax8","rzBtb7U-jtg","OeybM6vTSRo","ZJ4EH6ZLEwU"
+],
+index:0
 },
 "D&J Show":{
-    desc:"Comedy variety",
-    videos:[
-        "vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM","Skdnn5cERuo","6wsqHTc6Rl0",
-        "7Z9--D8PLV8","Ci_GVzgq2Go","FE8wFPuMJPg","wYnGU5XTwAA","rrLKkjEdVSw"
-    ],
-    index:0
+desc:"Comedy variety",
+videos:[
+"vT-BRFf2Yk0","bo-fv8gLU1U","x4W80w1wCZM","Skdnn5cERuo","6wsqHTc6Rl0",
+"7Z9--D8PLV8","Ci_GVzgq2Go","FE8wFPuMJPg","wYnGU5XTwAA","rrLKkjEdVSw"
+],
+index:0
 }
 };
 
-/* ================= STATE ================= */
+/* ================= BROADCAST STATE ================= */
 const state = {
 channel:"Tacoma Nights",
 player:null,
 ready:false,
 ytReady:false,
-switching:false
+mode:"broadcast" // NEW: broadcast engine mode
 };
 
-/* ================= UI HELPERS ================= */
+/* ================= LOADING ================= */
 function setLoading(v){
-    document.getElementById("loading").style.display = v ? "flex" : "none";
+document.getElementById("loading").style.display = v ? "flex" : "none";
 }
 
-/* ================= YOUTUBE READY (FIXED) ================= */
-window.onYouTubeIframeAPIReady = function () {
-    state.ytReady = true;
-    bootPlayer();
-};
-
-/* ================= SAFE BOOT ================= */
-function bootPlayer(){
-    const wait = () => {
-        const el = document.getElementById("player");
-        if(!el){
-            requestAnimationFrame(wait);
-            return;
-        }
-        initPlayer();
-    };
-    wait();
+/* ================= YT READY ================= */
+function onYouTubeIframeAPIReady(){
+state.ytReady = true;
+init();
 }
 
-/* ================= PLAYER INIT ================= */
-function initPlayer(){
-
-if(!state.ytReady) return;
-
-if(state.player){
-    try{ state.player.destroy(); }catch(e){}
-    state.player = null;
-}
-
-setLoading(true);
+/* ================= INIT ================= */
+function init(){
+if(!state.ytReady || state.player) return;
 
 state.player = new YT.Player("player",{
-    videoId:getVideo(),
-    playerVars:{
-        autoplay:1,
-        mute:1,
-        controls:1,
-        rel:0
-    },
-    events:{
-        onReady:(e)=>{
-            state.ready = true;
-            setLoading(false);
-
-            setTimeout(()=>{
-                state.player.playVideo();
-            },300);
-
-            render();
-            updateUI();
-        },
-        onStateChange:onStateChange,
-        onError:(e)=>{
-            console.log("YT ERROR:", e.data);
-            next(); // auto-skip broken videos
-        }
-    }
+videoId:getVideo(),
+playerVars:{
+autoplay:1,
+mute:1,
+controls:1,
+rel:0
+},
+events:{
+onReady:()=>{
+state.ready = true;
+setLoading(false);
+state.player.playVideo();
+render();
+updateUI();
+syncBroadcast();
+},
+onStateChange:onState
+}
 });
 
+setLoading(true);
 }
 
-/* ================= CURRENT VIDEO ================= */
+/* ================= GET VIDEO ================= */
 function getVideo(){
-    return channels[state.channel].videos[channels[state.channel].index];
+return channels[state.channel].videos[channels[state.channel].index];
 }
 
-/* ================= LOAD VIDEO (FIXED) ================= */
+/* ================= BROADCAST ENGINE CORE ================= */
+function syncBroadcast(){
+updateOverlay();
+
+setInterval(()=>{
+updateOverlay();
+},5000);
+}
+
+function updateOverlay(){
+const ch = channels[state.channel];
+const now = ch.videos[ch.index];
+const next = ch.videos[(ch.index+1)%ch.videos.length];
+
+document.getElementById("now").innerText = now;
+document.getElementById("next").innerText = next;
+}
+
+/* ================= LOAD VIDEO ================= */
 function load(){
-
 if(!state.player || !state.ready) return;
-if(state.switching) return;
 
-state.switching = true;
 setLoading(true);
 
 state.player.loadVideoById(getVideo());
 
-setTimeout(()=>{
-    state.switching = false;
-    setLoading(false);
-},700);
+setTimeout(()=>setLoading(false),600);
 
 updateUI();
+updateOverlay();
 }
 
-/* ================= STATE HANDLER ================= */
-function onStateChange(e){
+/* ================= PLAYER EVENTS ================= */
+function onState(e){
 if(e.data === YT.PlayerState.ENDED){
-    next();
+next();
 }
 }
 
-/* ================= NEXT / PREV ================= */
+/* ================= NAV ================= */
 function next(){
 const ch = channels[state.channel];
 ch.index = (ch.index + 1) % ch.videos.length;
+load();
+}
+
+function prev(){
+const ch = channels[state.channel];
+ch.index = (ch.index - 1 + ch.videos.length) % ch.videos.length;
 load();
 }
 
@@ -349,29 +342,28 @@ load();
 render();
 }
 
-/* ================= RENDER CHANNEL LIST ================= */
+/* ================= RENDER ================= */
 function render(){
-
 const box = document.getElementById("channels");
 box.innerHTML="";
 
 Object.keys(channels).forEach(name=>{
-    const el = document.createElement("div");
-    el.className = "channel" + (name===state.channel?" active":"");
+const el = document.createElement("div");
+el.className = "channel" + (name===state.channel?" active":"");
 
-    el.innerHTML = `<b>${name}</b><div class="small">${channels[name].desc}</div>`;
-    el.onclick = ()=>setChannel(name);
+el.innerHTML = `<b>${name}</b><div class="small">${channels[name].desc}</div>`;
+el.onclick = ()=>setChannel(name);
 
-    box.appendChild(el);
+box.appendChild(el);
 });
-
 }
 
 /* ================= UI ================= */
 function updateUI(){
 document.getElementById("title").innerText = state.channel;
 document.getElementById("desc").innerText = channels[state.channel].desc;
-document.getElementById("status").innerText = "STREAM ONLINE • AUTO MODE ACTIVE";
+document.getElementById("status").innerText =
+"BROADCAST SYNC ACTIVE • NETWORK ONLINE";
 }
 
 </script>
