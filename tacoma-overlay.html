@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tacoma Nights Live Overlay</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* MAIN HUD */
+.hud {
+    position: absolute;
+    bottom: 60px;
+    left: 60px;
+    color: rgba(255,255,255,0.85);
+}
+
+/* LOCATION */
+.location {
+    font-size: 14px;
+    opacity: 0.75;
+}
+
+/* TIME */
+.time {
+    font-family: 'Orbitron';
+    font-size: 26px;
+    color: #7fe7ff;
+    margin-top: 5px;
+    text-shadow: 0 0 10px rgba(127,231,255,0.25);
+}
+
+/* WEATHER */
+.weather {
+    margin-top: 6px;
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+/* RAIN LAYERS */
+.rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    display: none;
+}
+
+/* RAINDROPS */
+.drop {
+    position: absolute;
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(transparent, rgba(127,231,255,0.6));
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-120px); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(110vh); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="hud">
+    <div class="location">Tacoma, Washington</div>
+    <div class="time" id="time">--:--:--</div>
+    <div class="weather" id="weather">Loading weather...</div>
+</div>
+
+<div class="rain" id="rain"></div>
+
+<script>
+// =====================
+// CLOCK
+// =====================
+function updateTime() {
+    const now = new Date();
+    document.getElementById("time").innerText =
+        now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+
+// =====================
+// WEATHER API (OPENWEATHER)
+// =====================
+
+// 🔑 PUT YOUR API KEY HERE
+const API_KEY = "d90d53ec2ff7c86d0f9a4b537e7f9dc7";
+const CITY = "Tacoma";
+
+async function getWeather() {
+    try {
+        const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=imperial&appid=${API_KEY}`
+        );
+        const data = await res.json();
+
+        const temp = Math.round(data.main.temp);
+        const condition = data.weather[0].main.toLowerCase();
+
+        document.getElementById("weather").innerText =
+            `${data.weather[0].description} • ${temp}°F`;
+
+        // RAIN DETECTION
+        if (condition.includes("rain") || condition.includes("drizzle")) {
+            startRain();
+        } else {
+            stopRain();
+        }
+
+    } catch (err) {
+        document.getElementById("weather").innerText = "Weather unavailable";
+    }
+}
+
+getWeather();
+setInterval(getWeather, 600000); // update every 10 min
+
+
+// =====================
+// RAIN SYSTEM
+// =====================
+const rainContainer = document.getElementById("rain");
+
+function startRain() {
+    rainContainer.style.display = "block";
+
+    // prevent duplicates
+    if (rainContainer.children.length > 0) return;
+
+    for (let i = 0; i < 120; i++) {
+        const drop = document.createElement("div");
+        drop.classList.add("drop");
+
+        drop.style.left = Math.random() * 100 + "vw";
+        drop.style.animationDuration = (0.5 + Math.random() * 1.2) + "s";
+        drop.style.opacity = Math.random();
+
+        rainContainer.appendChild(drop);
+    }
+}
+
+function stopRain() {
+    rainContainer.style.display = "none";
+    rainContainer.innerHTML = "";
+}
+</script>
+
+</body>
+</html>
