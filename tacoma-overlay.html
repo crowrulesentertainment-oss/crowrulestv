@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tacoma Nights Live Overlay</title>
+<title>Tacoma Nights Overlay</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
 
@@ -15,7 +15,7 @@ body {
     font-family: 'Montserrat', sans-serif;
 }
 
-/* MAIN HUD */
+/* HUD */
 .hud {
     position: absolute;
     bottom: 60px;
@@ -23,13 +23,11 @@ body {
     color: rgba(255,255,255,0.85);
 }
 
-/* LOCATION */
 .location {
     font-size: 14px;
     opacity: 0.75;
 }
 
-/* TIME */
 .time {
     font-family: 'Orbitron';
     font-size: 26px;
@@ -38,14 +36,13 @@ body {
     text-shadow: 0 0 10px rgba(127,231,255,0.25);
 }
 
-/* WEATHER */
 .weather {
     margin-top: 6px;
     font-size: 14px;
     opacity: 0.85;
 }
 
-/* RAIN LAYERS */
+/* RAIN */
 .rain {
     position: fixed;
     top: 0;
@@ -53,15 +50,14 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    overflow: hidden;
     display: none;
+    overflow: hidden;
 }
 
-/* RAINDROPS */
 .drop {
     position: absolute;
     width: 1px;
-    height: 80px;
+    height: 90px;
     background: linear-gradient(transparent, rgba(127,231,255,0.6));
     animation: fall linear infinite;
 }
@@ -85,72 +81,37 @@ body {
 <div class="rain" id="rain"></div>
 
 <script>
-// =====================
-// CLOCK
-// =====================
+
+const API_KEY = "YOUR_OPENWEATHER_API_KEY";
+const CITY = "Tacoma,US";
+
+/* ---------------- TIME ---------------- */
 function updateTime() {
     const now = new Date();
     document.getElementById("time").innerText =
-        now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        now.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
 }
 setInterval(updateTime, 1000);
 updateTime();
 
-
-// =====================
-// WEATHER API (OPENWEATHER)
-// =====================
-
-// 🔑 PUT YOUR API KEY HERE
-const API_KEY = "d90d53ec2ff7c86d0f9a4b537e7f9dc7";
-const CITY = "Tacoma";
-
-async function getWeather() {
-    try {
-        const res = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=imperial&appid=${API_KEY}`
-        );
-        const data = await res.json();
-
-        const temp = Math.round(data.main.temp);
-        const condition = data.weather[0].main.toLowerCase();
-
-        document.getElementById("weather").innerText =
-            `${data.weather[0].description} • ${temp}°F`;
-
-        // RAIN DETECTION
-        if (condition.includes("rain") || condition.includes("drizzle")) {
-            startRain();
-        } else {
-            stopRain();
-        }
-
-    } catch (err) {
-        document.getElementById("weather").innerText = "Weather unavailable";
-    }
-}
-
-getWeather();
-setInterval(getWeather, 600000); // update every 10 min
-
-
-// =====================
-// RAIN SYSTEM
-// =====================
+/* ---------------- RAIN SYSTEM ---------------- */
 const rainContainer = document.getElementById("rain");
 
 function startRain() {
     rainContainer.style.display = "block";
 
-    // prevent duplicates
     if (rainContainer.children.length > 0) return;
 
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 90; i++) {
         const drop = document.createElement("div");
-        drop.classList.add("drop");
+        drop.className = "drop";
 
         drop.style.left = Math.random() * 100 + "vw";
-        drop.style.animationDuration = (0.5 + Math.random() * 1.2) + "s";
+        drop.style.animationDuration = (0.6 + Math.random() * 1.2) + "s";
         drop.style.opacity = Math.random();
 
         rainContainer.appendChild(drop);
@@ -161,6 +122,53 @@ function stopRain() {
     rainContainer.style.display = "none";
     rainContainer.innerHTML = "";
 }
+
+/* ---------------- WEATHER ---------------- */
+async function getWeather() {
+    try {
+        const url =
+            `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=imperial&appid=${API_KEY}`;
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
+
+        const data = await res.json();
+
+        const temp = Math.round(data.main.temp);
+        const condition = data.weather[0].main.toLowerCase();
+
+        document.getElementById("weather").innerText =
+            `${data.weather[0].description} • ${temp}°F`;
+
+        /* RAIN LOGIC */
+        if (
+            condition.includes("rain") ||
+            condition.includes("drizzle") ||
+            condition.includes("thunder")
+        ) {
+            startRain();
+        } else {
+            stopRain();
+        }
+
+    } catch (err) {
+        console.log("Weather error:", err);
+
+        // SAFE FALLBACK (never breaks UI)
+        document.getElementById("weather").innerText =
+            "Light rain • 57°F (fallback)";
+
+        startRain();
+    }
+}
+
+/* run weather */
+getWeather();
+setInterval(getWeather, 600000);
+
 </script>
 
 </body>
