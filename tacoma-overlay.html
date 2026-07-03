@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tacoma Nights Overlay</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
 
 <style>
 body {
@@ -15,7 +15,6 @@ body {
     font-family: 'Montserrat', sans-serif;
 }
 
-/* HUD */
 .hud {
     position: absolute;
     bottom: 60px;
@@ -25,7 +24,7 @@ body {
 
 .location {
     font-size: 14px;
-    opacity: 0.75;
+    opacity: 0.7;
 }
 
 .time {
@@ -33,7 +32,6 @@ body {
     font-size: 26px;
     color: #7fe7ff;
     margin-top: 5px;
-    text-shadow: 0 0 10px rgba(127,231,255,0.25);
 }
 
 .weather {
@@ -45,13 +43,9 @@ body {
 /* RAIN */
 .rain {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     pointer-events: none;
     display: none;
-    overflow: hidden;
 }
 
 .drop {
@@ -66,6 +60,11 @@ body {
     0% { transform: translateY(-120px); opacity: 0; }
     10% { opacity: 1; }
     100% { transform: translateY(110vh); opacity: 0; }
+}
+
+/* ERROR STATE (IMPORTANT) */
+.error {
+    color: #ff6b6b;
 }
 </style>
 </head>
@@ -82,8 +81,12 @@ body {
 
 <script>
 
-const API_KEY = "d90d53ec2ff7c86d0f9a4b537e7f9dc7";
+const API_KEY = "6ad74cde0b4da591ba9a056c9f05839a";
 const CITY = "Tacoma";
+const UNITS = "imperial";
+
+const weatherEl = document.getElementById("weather");
+const rainEl = document.getElementById("rain");
 
 /* ---------------- TIME ---------------- */
 function updateTime() {
@@ -98,56 +101,61 @@ function updateTime() {
 setInterval(updateTime, 1000);
 updateTime();
 
-/* ---------------- RAIN SYSTEM ---------------- */
-const rainContainer = document.getElementById("rain");
-
+/* ---------------- RAIN ---------------- */
 function startRain() {
-    rainContainer.style.display = "block";
+    rainEl.style.display = "block";
 
-    if (rainContainer.children.length > 0) return;
+    if (rainEl.children.length > 0) return;
 
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 100; i++) {
         const drop = document.createElement("div");
         drop.className = "drop";
 
         drop.style.left = Math.random() * 100 + "vw";
-        drop.style.animationDuration = (0.6 + Math.random() * 1.2) + "s";
+        drop.style.animationDuration = (0.5 + Math.random() * 1.2) + "s";
         drop.style.opacity = Math.random();
 
-        rainContainer.appendChild(drop);
+        rainEl.appendChild(drop);
     }
 }
 
 function stopRain() {
-    rainContainer.style.display = "none";
-    rainContainer.innerHTML = "";
+    rainEl.style.display = "none";
+    rainEl.innerHTML = "";
 }
 
-/* ---------------- WEATHER ---------------- */
+/* ---------------- WEATHER (REAL + NO FAKE FALLBACK) ---------------- */
 async function getWeather() {
     try {
         const url =
-            `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=imperial&appid=${API_KEY}`;
+            `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=${UNITS}&appid=${API_KEY}`;
 
         const res = await fetch(url);
 
+        // HARD FAILURE HANDLING
         if (!res.ok) {
-            throw new Error("HTTP " + res.status);
+            const text = await res.text();
+            throw new Error(`HTTP ${res.status}: ${text}`);
         }
 
         const data = await res.json();
 
+        if (!data.weather || !data.main) {
+            throw new Error("Invalid API response structure");
+        }
+
         const temp = Math.round(data.main.temp);
         const condition = data.weather[0].main.toLowerCase();
+        const description = data.weather[0].description;
 
-        document.getElementById("weather").innerText =
-            `${data.weather[0].description} • ${temp}°F`;
+        weatherEl.classList.remove("error");
+        weatherEl.innerText = `${description} • ${temp}°F`;
 
-        /* RAIN LOGIC */
+        // Rain logic (ONLY REAL DATA)
         if (
             condition.includes("rain") ||
             condition.includes("drizzle") ||
-            condition.includes("thunder")
+            condition.includes("thunderstorm")
         ) {
             startRain();
         } else {
@@ -155,17 +163,16 @@ async function getWeather() {
         }
 
     } catch (err) {
-        console.log("Weather error:", err);
+        console.error("WEATHER ERROR:", err);
 
-        // SAFE FALLBACK (never breaks UI)
-        document.getElementById("weather").innerText =
-            "Light rain • 57°F (fallback)";
+        // REAL ERROR DISPLAY (NOT FAKE WEATHER)
+        weatherEl.classList.add("error");
+        weatherEl.innerText = "Weather unavailable (check API / connection)";
 
-        startRain();
+        stopRain();
     }
 }
 
-/* run weather */
 getWeather();
 setInterval(getWeather, 600000);
 
