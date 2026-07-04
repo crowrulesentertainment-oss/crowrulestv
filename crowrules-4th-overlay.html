@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tacoma Fireworks Overlay</title>
+
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+        font-family: Arial, sans-serif;
+        color: white;
+    }
+
+    /* ===== TOP BAR ===== */
+    #topbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        box-sizing: border-box;
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid rgba(0,255,255,0.25);
+    }
+
+    .title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #00ffff;
+        letter-spacing: 1px;
+    }
+
+    .status {
+        font-size: 14px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: rgba(0,0,0,0.6);
+        border: 1px solid #00ffff;
+    }
+
+    .live {
+        color: #ff3b3b;
+        border-color: #ff3b3b;
+    }
+
+    /* ===== INFO PANEL ===== */
+    #infoPanel {
+        position: absolute;
+        top: 90px;
+        left: 20px;
+        width: 300px;
+        padding: 15px;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0,255,255,0.2);
+    }
+
+    .label {
+        font-size: 12px;
+        opacity: 0.7;
+        margin-bottom: 4px;
+    }
+
+    .value {
+        font-size: 22px;
+        margin-bottom: 12px;
+    }
+
+    .countdown {
+        font-size: 20px;
+        color: #00ffff;
+    }
+
+    /* ===== CHAT BOX ===== */
+    #chatBox {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+        width: 320px;
+        height: 500px;
+        background: rgba(0,0,0,0.35);
+        border-radius: 12px;
+        border: 1px solid rgba(0,255,255,0.25);
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+    }
+
+    #chatHeader {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        font-size: 14px;
+        color: #00ffff;
+        background: rgba(0,0,0,0.6);
+        border-bottom: 1px solid rgba(0,255,255,0.2);
+    }
+
+    #chatContent {
+        width: 100%;
+        height: calc(100% - 40px);
+    }
+
+    .glow {
+        text-shadow: 0 0 10px rgba(0,255,255,0.8);
+    }
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+    <div class="title glow">
+        🔥 Tacoma Hilltop Fireworks Live
+    </div>
+    <div id="status" class="status">
+        PRE-SHOW
+    </div>
+</div>
+
+<!-- INFO PANEL -->
+<div id="infoPanel">
+    <div class="label">LIVE CLOCK (Tacoma)</div>
+    <div id="clock" class="value">--:--:--</div>
+
+    <div class="label">COUNTDOWN TO 10:00 PM</div>
+    <div id="countdown" class="countdown">--:--:--</div>
+</div>
+
+<!-- CHAT -->
+<div id="chatBox">
+    <div id="chatHeader">LIVE CHAT</div>
+    <div id="chatContent">
+        <iframe
+            src="https://streamlabs.com/widgets/chat-box/v1/00D0143615339AE31FBD3EF5890BECF8A225B8B29E8169F3BDDA168D943FB38D026B8642A339736FE6F90FA70EBCA8CE1538ACA4C0B7FD914E5542D5823693E029512B54D4755C338FE515B0EEA6AD844136070CD51CD88BF889799427F8C10279AAC2A499C4D1BB45E8031CF691CD5E38C6996FF4F93E4FF0235FFB2C"
+            width="100%"
+            height="100%"
+            style="border:none;">
+        </iframe>
+    </div>
+</div>
+
+<script>
+/* ===== CLOCK ===== */
+function updateClock() {
+    const now = new Date();
+    document.getElementById("clock").innerText =
+        now.toLocaleTimeString("en-US", { hour12: true });
+}
+
+/* ===== COUNTDOWN TO 10PM ===== */
+function updateCountdown() {
+    const now = new Date();
+
+    // 🎆 FIREWORKS PEAK: 10:00 PM LOCAL
+    let target = new Date();
+    target.setHours(22, 0, 0, 0);
+
+    let diff = target - now;
+    let status = document.getElementById("status");
+
+    // 🔴 LIVE WINDOW: 10PM → 12AM
+    if (diff <= 0 && diff > -2 * 60 * 60 * 1000) {
+        status.innerText = "LIVE - FIREWORKS PEAK";
+        status.classList.add("live");
+        document.getElementById("countdown").innerText = "SKY IS LIVE 🎆";
+        return;
+    }
+
+    // 🌙 POST SHOW
+    if (diff <= -2 * 60 * 60 * 1000) {
+        status.innerText = "POST SHOW";
+        status.classList.remove("live");
+        document.getElementById("countdown").innerText = "THANK YOU FOR WATCHING";
+        return;
+    }
+
+    // ⏳ PRE-SHOW COUNTDOWN
+    let hours = Math.floor(diff / (1000 * 60 * 60));
+    let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    document.getElementById("countdown").innerText =
+        `${hours}h ${minutes}m ${seconds}s`;
+
+    status.innerText = "PRE-FIREWORKS BUILDUP";
+    status.classList.remove("live");
+}
+
+/* LOOP */
+setInterval(updateClock, 1000);
+setInterval(updateCountdown, 1000);
+
+updateClock();
+updateCountdown();
+</script>
+
+</body>
+</html>
