@@ -1,3271 +1,3545 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>
-CrowRules TV | Broadcast Network v11 Ultimate
-</title>
+<title>CrowRules TV | Broadcast Network</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 
-:root{
+:root {
+    --bg: #030303;
+    --panel: #090909;
+    --panel2: #101010;
+    --panel3: #151515;
 
---bg:#050505;
---panel:#0b0b0b;
---panel-light:#111;
+    --cyan: #00ffff;
+    --green: #00ff66;
+    --red: #ff3030;
+    --yellow: #ffe600;
+    --purple: #9d4edd;
 
---cyan:#00ffff;
---green:#00ff66;
---red:#ff3030;
---yellow:#ffe600;
+    --text: #ffffff;
+    --muted: #858585;
 
---line:
-rgba(0,255,255,.18);
+    --line: rgba(0,255,255,.16);
+    --glass: rgba(255,255,255,.045);
 
---glass:
-rgba(255,255,255,.05);
+    --sidebar: 220px;
+    --radius: 16px;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background:
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(0,255,255,.08),
+            transparent 40%
+        ),
+        #000;
+
+    color: var(--text);
+
+    font-family: Montserrat, sans-serif;
+
+    overflow: hidden;
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+#app {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+    width: var(--sidebar);
+
+    flex-shrink: 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            #050505,
+            #0b0b0b
+        );
+
+    border-right: 1px solid var(--line);
+
+    padding: 22px 15px;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 20;
+}
+
+.logo {
+    font-family: Orbitron, sans-serif;
+
+    font-weight: 900;
+
+    font-size: 25px;
+
+    line-height: .9;
+
+    letter-spacing: 3px;
+
+    color: var(--cyan);
+
+    text-shadow:
+        0 0 10px var(--cyan),
+        0 0 25px rgba(0,255,255,.5);
+
+    padding: 5px 10px 25px;
+}
+
+.logo span {
+    color: white;
+}
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.nav button {
+    width: 100%;
+
+    background: transparent;
+
+    border: 1px solid transparent;
+
+    color: #aaa;
+
+    padding: 13px 14px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    font-family: Montserrat;
+
+    font-size: 14px;
+
+    transition: .2s;
+}
+
+.nav button:hover,
+.nav button.active {
+    color: white;
+
+    background:
+        rgba(0,255,255,.08);
+
+    border-color:
+        rgba(0,255,255,.18);
+
+    box-shadow:
+        inset 3px 0 0 var(--cyan);
+}
+
+.nav button.live-nav:hover {
+    border-color: rgba(255,48,48,.3);
+    box-shadow:
+        inset 3px 0 0 var(--red);
+}
+
+/* =========================================================
+   SIDEBAR FOOTER
+========================================================= */
+
+.sidebar-footer {
+    margin-top: auto;
+
+    padding: 15px 10px;
+
+    border-top: 1px solid var(--line);
+
+    font-size: 10px;
+
+    color: #555;
+
+    line-height: 1.7;
+}
+
+.sidebar-footer strong {
+    color: var(--cyan);
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.topbar {
+    height: 60px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 0 24px;
+
+    background:
+        rgba(0,0,0,.88);
+
+    border-bottom:
+        1px solid var(--line);
+
+    backdrop-filter: blur(12px);
+
+    z-index: 10;
+}
+
+.network-status {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    font-family: Orbitron;
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--green);
+
+    box-shadow:
+        0 0 12px var(--green);
+
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: .35;
+    }
+}
+
+.clock {
+    font-family: Orbitron;
+
+    color: var(--green);
+
+    font-size: 13px;
+
+    letter-spacing: 1px;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.content {
+    flex: 1;
+
+    display: flex;
+
+    min-height: 0;
+
+    overflow: hidden;
+}
+
+.dashboard {
+    flex: 1;
+
+    min-width: 0;
+
+    overflow-y: auto;
+
+    padding: 25px;
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.page {
+    display: none;
+
+    animation: pageIn .25s ease;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   HOME HERO
+========================================================= */
+
+.home-hero {
+    position: relative;
+
+    min-height: 300px;
+
+    border-radius: 22px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--line);
+
+    background:
+        radial-gradient(
+            circle at 80% 30%,
+            rgba(0,255,255,.15),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            #101010,
+            #030303
+        );
+
+    display: flex;
+
+    align-items: flex-end;
+
+    padding: 35px;
+}
+
+.home-hero::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            transparent 0px,
+            transparent 3px,
+            rgba(255,255,255,.015) 4px
+        );
+
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+
+    max-width: 650px;
+}
+
+.hero-kicker {
+    font-family: Orbitron;
+
+    color: var(--red);
+
+    font-size: 11px;
+
+    letter-spacing: 3px;
+
+    margin-bottom: 10px;
+}
+
+.home-hero h1 {
+    font-family: Orbitron;
+
+    font-size: clamp(35px, 5vw, 62px);
+
+    line-height: 1;
+
+    color: white;
+
+    text-shadow:
+        0 0 25px rgba(0,255,255,.3);
+}
+
+.home-hero h1 span {
+    color: var(--cyan);
+}
+
+.home-hero p {
+    margin-top: 18px;
+
+    color: #aaa;
+
+    line-height: 1.7;
+
+    max-width: 600px;
+}
+
+.hero-buttons {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 22px;
+
+    flex-wrap: wrap;
+}
+
+.primary-btn,
+.secondary-btn {
+    border-radius: 9px;
+
+    padding: 11px 17px;
+
+    cursor: pointer;
+
+    font-family: Montserrat;
+
+    font-weight: 600;
+}
+
+.primary-btn {
+    background: var(--cyan);
+
+    border: 1px solid var(--cyan);
+
+    color: #000;
+}
+
+.secondary-btn {
+    background: rgba(255,255,255,.06);
+
+    border: 1px solid var(--line);
+
+    color: white;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.section-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin: 28px 0 14px;
+}
+
+.section-header h2 {
+    font-family: Orbitron;
+
+    font-size: 17px;
+
+    letter-spacing: 1px;
+}
+
+.section-header span {
+    font-size: 10px;
+
+    color: var(--cyan);
+
+    font-family: Orbitron;
+}
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+.player-wrapper {
+    margin-top: 25px;
+}
+
+.player-box {
+    position: relative;
+
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    min-height: 300px;
+
+    background: #000;
+
+    border-radius: var(--radius);
+
+    overflow: hidden;
+
+    border: 1px solid var(--line);
+
+    box-shadow:
+        0 15px 50px rgba(0,0,0,.5);
+}
+
+#player,
+#livePlayer {
+    width: 100%;
+    height: 100%;
+}
+
+.loading,
+.live-loading {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 5;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 30px;
+
+    background:
+        rgba(0,0,0,.96);
+
+    color: var(--cyan);
+
+    font-family: Orbitron;
+
+    letter-spacing: 2px;
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   PLAYER CONTROLS
+========================================================= */
+
+.player-controls {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 0;
+}
+
+.player-controls button {
+    width: 42px;
+    height: 38px;
+
+    border-radius: 8px;
+
+    background: var(--glass);
+
+    border: 1px solid var(--line);
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 15px;
+}
+
+.player-controls button:hover {
+    border-color: var(--cyan);
+
+    color: var(--cyan);
+}
+
+.loop-status {
+    margin-left: auto;
+
+    font-family: Orbitron;
+
+    font-size: 9px;
+
+    color: var(--green);
+
+    letter-spacing: 1px;
+}
+
+/* =========================================================
+   NOW PLAYING
+========================================================= */
+
+.now-playing {
+    margin-top: 10px;
+
+    padding: 18px;
+
+    border-radius: var(--radius);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0,255,255,.06),
+            rgba(255,255,255,.02)
+        );
+
+    border: 1px solid var(--line);
+}
+
+.now-label {
+    color: var(--cyan);
+
+    font-family: Orbitron;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 7px;
+}
+
+#currentTitle {
+    font-family: Orbitron;
+
+    font-size: 20px;
+}
+
+#currentDescription {
+    color: var(--muted);
+
+    font-size: 13px;
+
+    margin-top: 7px;
+}
+
+#broadcastStatus {
+    margin-top: 10px;
+
+    color: var(--green);
+
+    font-size: 11px;
+}
+
+/* =========================================================
+   PLAYLIST
+========================================================= */
+
+.playlist {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(230px, 1fr)
+        );
+
+    gap: 12px;
+}
+
+.episode-card {
+    position: relative;
+
+    background: var(--glass);
+
+    border: 1px solid var(--line);
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.episode-card:hover {
+    border-color: var(--cyan);
+
+    transform: translateY(-2px);
+}
+
+.episode-card.active {
+    border-color: var(--cyan);
+
+    background:
+        rgba(0,255,255,.08);
+
+    box-shadow:
+        0 0 18px rgba(0,255,255,.08);
+}
+
+.episode-number {
+    color: var(--cyan);
+
+    font-family: Orbitron;
+
+    font-size: 9px;
+
+    margin-bottom: 8px;
+}
+
+.episode-title {
+    font-weight: 600;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+}
+
+.episode-status {
+    margin-top: 10px;
+
+    font-size: 9px;
+
+    color: var(--muted);
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(220px, 1fr)
+        );
+
+    gap: 14px;
+}
+
+.card {
+    background: var(--glass);
+
+    border: 1px solid var(--line);
+
+    border-radius: 13px;
+
+    padding: 18px;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.card:hover {
+    border-color: var(--cyan);
+
+    transform: translateY(-2px);
+}
+
+.card h2,
+.card h3 {
+    font-family: Orbitron;
+}
+
+.card p {
+    margin-top: 9px;
+
+    color: #999;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+.card small {
+    display: block;
+
+    margin-top: 12px;
+
+    color: #666;
+}
+
+/* =========================================================
+   LIVE PAGE
+========================================================= */
+
+.live-page-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.live-page-header h1 {
+    font-family: Orbitron;
+
+    color: var(--red);
+}
+
+.live-indicator {
+    font-family: Orbitron;
+
+    color: var(--yellow);
+
+    font-size: 11px;
+}
+
+.live-player-box {
+    position: relative;
+
+    margin-top: 22px;
+
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    background: #000;
+
+    border-radius: var(--radius);
+
+    overflow: hidden;
+
+    border: 1px solid rgba(255,48,48,.45);
+
+    box-shadow:
+        0 0 35px rgba(255,48,48,.08);
+}
+
+.live-badge {
+    position: absolute;
+
+    top: 14px;
+    left: 14px;
+
+    z-index: 10;
+
+    background: var(--red);
+
+    color: white;
+
+    padding: 7px 11px;
+
+    border-radius: 6px;
+
+    font-family: Orbitron;
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+.live-status {
+    margin-top: 15px;
+
+    padding: 17px;
+
+    background:
+        rgba(255,48,48,.05);
+
+    border:
+        1px solid rgba(255,48,48,.2);
+
+    border-radius: var(--radius);
+}
+
+.live-status h2 {
+    font-family: Orbitron;
+
+    color: var(--red);
+
+    font-size: 17px;
+}
+
+.live-status p {
+    margin-top: 8px;
+
+    color: #999;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+#liveBroadcastStatus {
+    margin-top: 12px;
+
+    color: var(--green);
+
+    font-size: 11px;
+}
+
+.live-channel-link {
+    display: inline-block;
+
+    margin-top: 14px;
+
+    padding: 10px 14px;
+
+    border: 1px solid var(--red);
+
+    border-radius: 8px;
+
+    color: white;
+
+    text-decoration: none;
+
+    font-size: 12px;
+}
+
+.live-channel-link:hover {
+    background: rgba(255,48,48,.1);
+}
+
+.live-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(220px, 1fr)
+        );
+
+    gap: 12px;
+}
+
+/* =========================================================
+   RIGHT PANEL
+========================================================= */
+
+.channel-panel {
+    width: 300px;
+
+    flex-shrink: 0;
+
+    background:
+        rgba(5,5,5,.92);
+
+    border-left: 1px solid var(--line);
+
+    padding: 20px;
+
+    overflow-y: auto;
+}
+
+.panel-title {
+    font-family: Orbitron;
+
+    color: var(--cyan);
+
+    font-size: 13px;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 13px;
+}
+
+.channel-item {
+    padding: 13px;
+
+    border: 1px solid var(--line);
+
+    background: var(--glass);
+
+    border-radius: 10px;
+
+    margin-bottom: 8px;
+
+    cursor: pointer;
+}
+
+.channel-item:hover {
+    border-color: var(--cyan);
+}
+
+.channel-item.active {
+    background: rgba(0,255,255,.07);
+
+    border-color: var(--cyan);
+}
+
+.channel-name {
+    font-family: Orbitron;
+
+    font-size: 11px;
+}
+
+.channel-description {
+    color: #777;
+
+    font-size: 10px;
+
+    margin-top: 6px;
+
+    line-height: 1.5;
+}
+
+.up-next {
+    padding: 15px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,.03);
+
+    border: 1px solid var(--line);
+}
+
+.up-next-label {
+    font-family: Orbitron;
+
+    color: var(--yellow);
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 8px;
+}
+
+#upNext {
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+/* =========================================================
+   LIVE SIDE STATUS
+========================================================= */
+
+.side-live {
+    margin-top: 20px;
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    border: 1px solid rgba(255,48,48,.3);
+
+    background:
+        rgba(255,48,48,.04);
+
+    font-size: 11px;
+
+    line-height: 1.6;
+}
+
+/* =========================================================
+   GUIDE
+========================================================= */
+
+.guide-card {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.guide-time {
+    font-family: Orbitron;
+
+    color: var(--cyan);
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+.settings-box {
+    max-width: 700px;
+
+    background: var(--glass);
+
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius);
+
+    padding: 22px;
+}
+
+.settings-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,.05);
+
+    font-size: 13px;
+}
+
+.settings-row:last-child {
+    border-bottom: 0;
+}
+
+.settings-value {
+    color: var(--green);
+
+    font-family: Orbitron;
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.mobile-nav {
+    display: none;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width: 1100px) {
+
+    .channel-panel {
+        display: none;
+    }
 
 }
 
+@media(max-width: 750px) {
 
+    body {
+        overflow: auto;
+    }
 
-*{
+    #app {
+        height: auto;
+        min-height: 100vh;
+        padding-bottom: 65px;
+    }
 
-margin:0;
-padding:0;
-box-sizing:border-box;
+    .sidebar {
+        display: none;
+    }
 
-}
+    .topbar {
+        height: 52px;
 
+        padding: 0 15px;
+    }
 
+    .network-status {
+        font-size: 9px;
+    }
 
-body{
+    .dashboard {
+        padding: 15px;
+    }
 
-background:
-radial-gradient(
-circle at top,
-#151515,
-#000
-);
+    .home-hero {
+        min-height: 270px;
 
-color:white;
+        padding: 25px;
+    }
 
-font-family:
-Montserrat,
-sans-serif;
+    .home-hero h1 {
+        font-size: 35px;
+    }
 
-height:100vh;
+    .player-box,
+    .live-player-box {
+        min-height: 220px;
+    }
 
-overflow:hidden;
+    .mobile-nav {
+        display: flex;
 
-}
+        position: fixed;
 
+        bottom: 0;
+        left: 0;
+        right: 0;
 
+        height: 64px;
 
-/* =========================
-APP
-========================= */
+        background:
+            rgba(5,5,5,.97);
 
+        border-top:
+            1px solid var(--line);
 
-#app{
+        z-index: 100;
 
-display:flex;
+        justify-content: space-around;
 
-height:100vh;
+        align-items: center;
+    }
 
-}
+    .mobile-nav button {
+        background: none;
 
+        border: none;
 
+        color: #777;
 
-/* =========================
-SIDEBAR
-========================= */
+        font-size: 10px;
 
+        display: flex;
 
-.sidebar{
+        flex-direction: column;
 
-width:240px;
+        gap: 4px;
 
-background:
-linear-gradient(
-180deg,
-#050505,
-#101010
-);
+        align-items: center;
+    }
 
-border-right:
-1px solid var(--line);
+    .mobile-nav button:hover {
+        color: var(--cyan);
+    }
 
-padding:20px;
-
-}
-
-
-
-.logo{
-
-font-family:
-Orbitron;
-
-font-size:24px;
-
-font-weight:900;
-
-letter-spacing:3px;
-
-color:var(--cyan);
-
-text-shadow:
-0 0 20px var(--cyan);
-
-margin-bottom:35px;
-
-}
-
-
-
-.nav{
-
-display:flex;
-
-flex-direction:column;
-
-gap:12px;
-
-}
-
-
-
-.nav button{
-
-background:
-var(--glass);
-
-border:
-1px solid var(--line);
-
-color:white;
-
-padding:14px;
-
-border-radius:12px;
-
-cursor:pointer;
-
-text-align:left;
-
-transition:.3s;
-
-}
-
-
-
-.nav button:hover{
-
-background:
-rgba(0,255,255,.15);
-
-transform:
-translateX(5px);
-
-}
-
-
-
-/* =========================
-MAIN
-========================= */
-
-
-.main{
-
-flex:1;
-
-display:flex;
-
-flex-direction:column;
-
-}
-
-
-
-.topbar{
-
-height:65px;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-padding:0 25px;
-
-background:
-rgba(0,0,0,.75);
-
-border-bottom:
-1px solid var(--line);
-
-}
-
-
-
-.broadcast{
-
-color:
-var(--red);
-
-font-weight:bold;
-
-}
-
-
-
-.clock{
-
-font-family:
-Orbitron;
-
-color:
-var(--green);
-
-}
-
-
-
-/* =========================
-CONTENT
-========================= */
-
-
-.content{
-
-display:flex;
-
-flex:1;
-
-overflow:hidden;
-
-}
-
-
-
-.dashboard{
-
-flex:1;
-
-padding:25px;
-
-overflow-y:auto;
-
-}
-
-
-
-/* =========================
-HERO
-========================= */
-
-
-.hero{
-
-height:250px;
-
-border-radius:20px;
-
-padding:35px;
-
-border:
-1px solid var(--line);
-
-background:
-
-linear-gradient(
-135deg,
-rgba(0,255,255,.25),
-rgba(0,0,0,.9)
-);
-
-}
-
-
-
-.hero h1{
-
-font-family:
-Orbitron;
-
-font-size:42px;
-
-color:
-var(--cyan);
-
-text-shadow:
-0 0 20px var(--cyan);
-
-}
-
-
-
-.hero p{
-
-margin-top:15px;
-
-opacity:.8;
-
-}
-
-
-
-/* =========================
-PLAYER
-========================= */
-
-
-.player-box{
-
-height:480px;
-
-margin-top:25px;
-
-background:black;
-
-border-radius:18px;
-
-border:
-2px solid var(--line);
-
-overflow:hidden;
-
-position:relative;
-
-}
-
-
-
-#player{
-
-width:100%;
-
-height:100%;
-
-}
-
-
-
-.loading{
-
-position:absolute;
-
-inset:0;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-background:black;
-
-color:
-var(--cyan);
-
-font-family:
-Orbitron;
-
-letter-spacing:3px;
-
-z-index:5;
-
-text-align:center;
-
-}
-
-
-
-/* =========================
-LIVE TV
-========================= */
-
-
-.live-page-header{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-gap:20px;
-
-flex-wrap:wrap;
-
-}
-
-
-
-.live-page-header h1{
-
-font-family:
-Orbitron;
-
-color:
-var(--red);
-
-}
-
-
-
-.live-indicator{
-
-font-family:
-Orbitron;
-
-font-weight:bold;
-
-color:
-var(--yellow);
-
-}
-
-
-
-.live-player-box{
-
-height:520px;
-
-margin-top:25px;
-
-background:black;
-
-border-radius:18px;
-
-border:
-2px solid var(--red);
-
-overflow:hidden;
-
-position:relative;
-
-box-shadow:
-0 0 25px rgba(255,48,48,.15);
-
-}
-
-
-
-#livePlayer{
-
-width:100%;
-
-height:100%;
-
-}
-
-
-
-.live-loading{
-
-position:absolute;
-
-inset:0;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-background:
-rgba(0,0,0,.96);
-
-color:
-var(--red);
-
-font-family:
-Orbitron;
-
-letter-spacing:2px;
-
-z-index:5;
-
-text-align:center;
-
-padding:30px;
-
-}
-
-
-
-.live-badge{
-
-position:absolute;
-
-top:15px;
-
-left:15px;
-
-z-index:10;
-
-background:
-var(--red);
-
-color:white;
-
-padding:8px 14px;
-
-border-radius:8px;
-
-font-family:
-Orbitron;
-
-font-size:13px;
-
-font-weight:bold;
-
-box-shadow:
-0 0 15px rgba(255,48,48,.6);
-
-}
-
-
-
-.live-status{
-
-margin-top:15px;
-
-padding:15px;
-
-background:
-rgba(255,48,48,.08);
-
-border:
-1px solid rgba(255,48,48,.3);
-
-border-radius:12px;
-
-}
-
-
-
-.live-status h2{
-
-font-family:
-Orbitron;
-
-color:
-var(--red);
-
-}
-
-
-
-#liveBroadcastStatus{
-
-margin-top:10px;
-
-color:
-var(--green);
-
-}
-
-
-
-.live-controls{
-
-display:flex;
-
-gap:10px;
-
-margin-top:15px;
-
-flex-wrap:wrap;
-
-}
-
-
-
-.live-controls button{
-
-background:
-var(--glass);
-
-border:
-1px solid var(--line);
-
-color:white;
-
-padding:10px 15px;
-
-border-radius:8px;
-
-cursor:pointer;
-
-font-family:Montserrat;
-
-}
-
-
-
-.live-controls button:hover{
-
-background:
-rgba(0,255,255,.15);
-
-}
-
-
-
-.live-channel-link{
-
-display:inline-block;
-
-margin-top:12px;
-
-padding:10px 15px;
-
-border:
-1px solid var(--red);
-
-border-radius:8px;
-
-color:white;
-
-text-decoration:none;
-
-}
-
-
-
-.live-channel-link:hover{
-
-background:
-rgba(255,48,48,.15);
-
-}
-
-
-
-/* =========================
-INFO
-========================= */
-
-
-.now-playing{
-
-margin-top:15px;
-
-padding:15px;
-
-background:
-var(--glass);
-
-border:
-1px solid var(--line);
-
-border-radius:12px;
-
-}
-
-
-
-.now-playing h2{
-
-color:
-var(--cyan);
-
-font-family:
-Orbitron;
-
-}
-
-
-
-#broadcastStatus{
-
-margin-top:10px;
-
-color:
-var(--green);
-
-}
-
-
-
-/* =========================
-RIGHT PANEL
-========================= */
-
-
-.channel-panel{
-
-width:330px;
-
-background:
-var(--panel);
-
-border-left:
-1px solid var(--line);
-
-padding:20px;
-
-overflow-y:auto;
-
-}
-
-
-
-.section-title{
-
-font-family:
-Orbitron;
-
-color:
-var(--cyan);
-
-margin-bottom:15px;
-
-}
-
-
-
-.card{
-
-background:
-var(--glass);
-
-border:
-1px solid var(--line);
-
-padding:15px;
-
-border-radius:12px;
-
-margin-bottom:12px;
-
-cursor:pointer;
-
-}
-
-
-
-.card:hover{
-
-border-color:
-var(--cyan);
-
-}
-
-
-
-.live-card{
-
-border-color:
-rgba(255,48,48,.4);
-
-}
-
-
-
-.live-card:hover{
-
-border-color:
-var(--red);
-
-}
-
-
-
-/* =========================
-PAGE CONTAINERS
-========================= */
-
-
-.page{
-
-display:none;
-
-}
-
-
-
-.page.active{
-
-display:block;
-
-}
-
-
-
-.grid{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fill,minmax(220px,1fr));
-
-gap:15px;
-
-}
-
-
-
-.live-grid{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fill,minmax(220px,1fr));
-
-gap:15px;
-
-margin-top:20px;
-
-}
-
-
-
-/* =========================
-MOBILE
-========================= */
-
-
-@media(max-width:900px){
-
-.sidebar{
-
-display:none;
-
-}
-
-
-.channel-panel{
-
-display:none;
-
-}
-
-
-.hero h1{
-
-font-size:28px;
-
-}
-
-
-.live-player-box{
-
-height:300px;
-
-}
+    .loop-status {
+        display: none;
+    }
 
 }
 
 </style>
-
 </head>
-
 
 <body>
 
 <div id="app">
 
-
-<!-- =========================
-SIDEBAR
-========================= -->
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
 
 <aside class="sidebar">
 
-<div class="logo">
-CROW<br>
-RULES<br>
-TV
-</div>
+    <div class="logo">
+        CROW<br>
+        <span>RULES</span><br>
+        TV
+    </div>
 
+    <nav class="nav">
 
-<div class="nav">
+        <button onclick="openPage('home')" class="active">
+            🏠 Home
+        </button>
 
-<button onclick="openPage('home')">
-🏠 Home
-</button>
+        <button
+            onclick="openPage('live')"
+            class="live-nav">
+            🔴 Live TV
+        </button>
 
-<button onclick="openPage('live')">
-🔴 Live TV
-</button>
+        <button onclick="openPage('library')">
+            🎬 On Demand
+        </button>
 
-<button onclick="openPage('library')">
-🎬 On Demand
-</button>
+        <button onclick="openPage('originals')">
+            🎙 Originals
+        </button>
 
-<button onclick="openPage('originals')">
-🎙 Originals
-</button>
+        <button onclick="openPage('guide')">
+            📅 TV Guide
+        </button>
 
-<button onclick="openPage('guide')">
-📅 TV Guide
-</button>
+        <button onclick="openPage('settings')">
+            ⚙ Settings
+        </button>
 
-<button onclick="openPage('settings')">
-⚙ Settings
-</button>
+    </nav>
 
-</div>
+    <div class="sidebar-footer">
+        CROWRULES TV<br>
+        <strong>PROJECT RAVEN</strong><br>
+        BROADCAST NETWORK<br>
+        v11 ULTIMATE
+    </div>
 
 </aside>
 
 
-
-<!-- =========================
-MAIN
-========================= -->
+<!-- =====================================================
+     MAIN
+===================================================== -->
 
 <main class="main">
 
+    <header class="topbar">
 
-<header class="topbar">
+        <div class="network-status">
 
-<div class="broadcast">
-● CROWRULES TV NETWORK
-</div>
+            <span class="status-dot"></span>
 
+            CROWRULES TV NETWORK
 
-<div class="clock" id="clock">
-00:00
-</div>
+        </div>
 
-</header>
+        <div
+            class="clock"
+            id="clock">
+            00:00
+        </div>
 
+    </header>
 
 
-<section class="content">
+    <section class="content">
 
+        <div class="dashboard">
 
-<div class="dashboard">
 
-
-<!-- =========================
-HOME
-========================= -->
-
-<div id="home" class="page active">
-
-
-<div class="hero">
-
-<h1>
-CROWRULES TV
-</h1>
-
-
-<p>
-Independent Streaming Network
-<br>
-Original Shows • Gaming • Stories • Community
-</p>
-
-</div>
-
-
-
-<div class="now-playing">
-
-<h2 id="currentTitle">
-Loading Broadcast...
-</h2>
-
-
-<p id="currentDescription">
-Connecting...
-</p>
-
-
-<div id="broadcastStatus">
-NETWORK STARTING...
-</div>
-
-</div>
-
-
-
-<div class="player-box">
-
-<div id="player"></div>
-
-
-<div class="loading" id="loading">
-INITIALIZING NETWORK...
-</div>
-
-</div>
-
-
-</div>
-
-
-
-<!-- =========================
-LIVE TV
-========================= -->
-
-<div id="live" class="page">
-
-
-<div class="live-page-header">
-
-<h1>
-🔴 LIVE TV
-</h1>
-
-
-<div class="live-indicator"
-id="liveIndicator">
-
-● STANDBY
-
-</div>
-
-</div>
-
-
-<p style="margin-top:10px;opacity:.75;">
-
-CrowRules TV Live — YouTube Live Network
-
-</p>
-
-
-
-<div class="live-player-box">
-
-
-<div class="live-badge">
-● LIVE
-</div>
-
-
-<div id="livePlayer"></div>
-
-
-<div class="live-loading"
-id="liveLoading">
-
-CONNECTING TO
-CROWRULES TV LIVE...
-
-</div>
-
-
-</div>
-
-
-
-<div class="live-status">
-
-
-<h2 id="liveTitle">
-
-CrowRules TV Live
-
-</h2>
-
-
-<p id="liveDescription">
-
-Waiting for the current YouTube livestream.
-
-</p>
-
-
-<div id="liveBroadcastStatus">
-
-● CONNECTING
-
-</div>
-
-
-<a
-id="youtubeLiveLink"
-class="live-channel-link"
-href="#"
-target="_blank"
-rel="noopener noreferrer">
-
-OPEN CROWRULES TV ON YOUTUBE
-
-</a>
-
-
-</div>
-
-
-
-<div class="live-controls">
-
-<button onclick="refreshLiveBroadcast()">
-🔄 Refresh Live
-</button>
-
-
-<button onclick="loadConfiguredLive()">
-▶ Load Live Stream
-</button>
-
-
-<button onclick="openYouTubeLive()">
-📺 Open YouTube Live
-</button>
-
-</div>
-
-
-
-<h2
-class="section-title"
-style="margin-top:30px;">
-
-LIVE NETWORK
-
-</h2>
-
+<!-- =====================================================
+     HOME
+===================================================== -->
 
 <div
-id="liveChannelGrid"
-class="live-grid">
+    id="home"
+    class="page active">
+
+    <section class="home-hero">
+
+        <div class="hero-content">
+
+            <div class="hero-kicker">
+                INDEPENDENT STREAMING NETWORK
+            </div>
+
+            <h1>
+                CROW<span>RULES</span> TV
+            </h1>
+
+            <p>
+                Original shows, gaming, stories,
+                live broadcasts and community —
+                all inside one growing independent
+                television network.
+            </p>
+
+            <div class="hero-buttons">
+
+                <button
+                    class="primary-btn"
+                    onclick="playCurrent()">
+                    ▶ WATCH NOW
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    onclick="openPage('live')">
+                    🔴 LIVE TV
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PLAYER -->
+
+    <div class="player-wrapper">
+
+        <div class="section-header">
+
+            <h2>
+                NOW PLAYING
+            </h2>
+
+            <span>
+                CROW RULES NETWORK
+            </span>
+
+        </div>
+
+
+        <div class="player-box">
+
+            <div id="player"></div>
+
+            <div
+                class="loading"
+                id="loading">
+
+                INITIALIZING
+                BROADCAST SYSTEM...
+
+            </div>
+
+        </div>
+
+
+        <div class="player-controls">
+
+            <button
+                onclick="previousEpisode()"
+                title="Previous">
+                ⏮
+            </button>
+
+            <button
+                onclick="togglePlay()"
+                title="Play/Pause"
+                id="playButton">
+                ▶
+            </button>
+
+            <button
+                onclick="nextEpisode()"
+                title="Next">
+                ⏭
+            </button>
+
+            <button
+                onclick="toggleMute()"
+                title="Mute">
+                🔇
+            </button>
+
+            <button
+                onclick="fullscreenPlayer()"
+                title="Fullscreen">
+                ⛶
+            </button>
+
+            <div class="loop-status">
+                🔁 PLAYLIST LOOP ENABLED
+            </div>
+
+        </div>
+
+
+        <div class="now-playing">
+
+            <div class="now-label">
+                NOW PLAYING
+            </div>
+
+            <h2 id="currentTitle">
+                Loading Broadcast...
+            </h2>
+
+            <p id="currentDescription">
+                Connecting to CrowRules TV...
+            </p>
+
+            <div id="broadcastStatus">
+                ● NETWORK STARTING
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PLAYLIST -->
+
+    <div class="section-header">
+
+        <h2>
+            CURRENT CHANNEL PLAYLIST
+        </h2>
+
+        <span id="playlistLoopLabel">
+            LOOPING
+        </span>
+
+    </div>
+
+    <div
+        class="playlist"
+        id="playlist">
+
+    </div>
 
 </div>
 
 
-</div>
-
-
-
-<!-- =========================
-LIBRARY
-========================= -->
-
-<div id="library" class="page">
-
-<h1>
-On Demand
-</h1>
-
+<!-- =====================================================
+     LIVE TV
+===================================================== -->
 
 <div
-class="grid"
-id="libraryGrid">
+    id="live"
+    class="page">
+
+    <div class="live-page-header">
+
+        <h1>
+            🔴 LIVE TV
+        </h1>
+
+        <div
+            class="live-indicator"
+            id="liveIndicator">
+
+            ● STANDBY
+
+        </div>
+
+    </div>
+
+    <p
+        style="
+        margin-top:8px;
+        color:#777;
+        font-size:13px;
+        ">
+
+        CrowRules TV Live — YouTube Live Network
+
+    </p>
+
+
+    <div class="live-player-box">
+
+        <div class="live-badge">
+            ● LIVE
+        </div>
+
+        <div id="livePlayer"></div>
+
+        <div
+            class="live-loading"
+            id="liveLoading">
+
+            CONNECTING TO<br>
+            CROWRULES TV LIVE...
+
+        </div>
+
+    </div>
+
+
+    <div class="live-status">
+
+        <h2 id="liveTitle">
+            CrowRules TV Live
+        </h2>
+
+        <p id="liveDescription">
+            Waiting for the current YouTube livestream.
+        </p>
+
+        <div id="liveBroadcastStatus">
+            ● CONNECTING
+        </div>
+
+        <a
+            id="youtubeLiveLink"
+            class="live-channel-link"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer">
+
+            OPEN CROWRULES TV ON YOUTUBE
+
+        </a>
+
+    </div>
+
+
+    <div class="hero-buttons">
+
+        <button
+            class="secondary-btn"
+            onclick="refreshLiveBroadcast()">
+            🔄 Refresh Live
+        </button>
+
+        <button
+            class="secondary-btn"
+            onclick="loadConfiguredLive()">
+            ▶ Load Live Stream
+        </button>
+
+        <button
+            class="secondary-btn"
+            onclick="openYouTubeLive()">
+            📺 Open YouTube Live
+        </button>
+
+    </div>
+
+
+    <div class="section-header">
+
+        <h2>
+            LIVE NETWORK
+        </h2>
+
+    </div>
+
+    <div
+        id="liveChannelGrid"
+        class="live-grid">
+    </div>
 
 </div>
 
-</div>
 
-
-
-<!-- =========================
-ORIGINALS
-========================= -->
-
-<div id="originals" class="page">
-
-<h1>
-CrowRules Originals
-</h1>
-
+<!-- =====================================================
+     LIBRARY
+===================================================== -->
 
 <div
-class="grid"
-id="originalGrid">
+    id="library"
+    class="page">
+
+    <div class="section-header">
+
+        <h2>
+            ON DEMAND
+        </h2>
+
+        <span>
+            AVAILABLE NOW
+        </span>
+
+    </div>
+
+    <div
+        class="grid"
+        id="libraryGrid">
+    </div>
 
 </div>
 
-</div>
 
-
-
-<!-- =========================
-GUIDE
-========================= -->
-
-<div id="guide" class="page">
-
-<h1>
-TV Guide
-</h1>
-
+<!-- =====================================================
+     ORIGINALS
+===================================================== -->
 
 <div
-class="grid"
-id="guideGrid">
+    id="originals"
+    class="page">
 
-</div>
+    <div class="section-header">
 
-</div>
+        <h2>
+            CROWRULES ORIGINALS
+        </h2>
 
+    </div>
 
-
-<!-- =========================
-SETTINGS
-========================= -->
-
-<div id="settings" class="page">
-
-<h1>
-Network Settings
-</h1>
-
-
-<div class="card">
-
-<b>
-CrowRules TV v11 Ultimate
-</b>
-
-<br><br>
-
-Broadcast Engine:
-ACTIVE
-
-<br><br>
-
-Live TV Engine:
-NO API KEY
-
-<br><br>
-
-YouTube Live:
-CHANNEL / FALLBACK MODE
-
-</div>
+    <div
+        class="grid"
+        id="originalGrid">
+    </div>
 
 </div>
 
 
+<!-- =====================================================
+     GUIDE
+===================================================== -->
+
+<div
+    id="guide"
+    class="page">
+
+    <div class="section-header">
+
+        <h2>
+            TV GUIDE
+        </h2>
+
+        <span>
+            NETWORK SCHEDULE
+        </span>
+
+    </div>
+
+    <div
+        class="grid"
+        id="guideGrid">
+    </div>
+
 </div>
 
 
+<!-- =====================================================
+     SETTINGS
+===================================================== -->
 
-<!-- =========================
-RIGHT PANEL
-========================= -->
+<div
+    id="settings"
+    class="page">
+
+    <div class="section-header">
+
+        <h2>
+            NETWORK SETTINGS
+        </h2>
+
+    </div>
+
+    <div class="settings-box">
+
+        <div class="settings-row">
+            <span>Network</span>
+            <span class="settings-value">
+                CROWRULES TV
+            </span>
+        </div>
+
+        <div class="settings-row">
+            <span>Version</span>
+            <span class="settings-value">
+                v11 ULTIMATE
+            </span>
+        </div>
+
+        <div class="settings-row">
+            <span>Theme</span>
+            <span class="settings-value">
+                CYBERPUNK
+            </span>
+        </div>
+
+        <div class="settings-row">
+            <span>Playlist</span>
+            <span class="settings-value">
+                AUTO LOOP
+            </span>
+        </div>
+
+        <div class="settings-row">
+            <span>Live Engine</span>
+            <span class="settings-value">
+                NO API KEY
+            </span>
+        </div>
+
+        <div class="settings-row">
+            <span>YouTube Live</span>
+            <span class="settings-value">
+                CHANNEL FALLBACK
+            </span>
+        </div>
+
+        <div class="settings-row">
+            <span>Project</span>
+            <span class="settings-value">
+                RAVEN ONLINE
+            </span>
+        </div>
+
+    </div>
+
+</div>
+
+
+        </div>
+
+
+<!-- =====================================================
+     RIGHT PANEL
+===================================================== -->
 
 <aside class="channel-panel">
 
+    <div class="panel-title">
+        CHANNELS
+    </div>
 
-<h2 class="section-title">
-CHANNELS
-</h2>
-
-
-<div id="channelList">
-</div>
+    <div id="channelList"></div>
 
 
+    <div
+        class="panel-title"
+        style="margin-top:25px;">
 
-<h2
-class="section-title"
-style="margin-top:25px;">
+        UP NEXT
 
-UP NEXT
+    </div>
 
-</h2>
+    <div class="up-next">
 
+        <div class="up-next-label">
+            NEXT PROGRAM
+        </div>
 
-<div id="upNext">
-Loading...
-</div>
+        <div id="upNext">
+            Loading...
+        </div>
 
-
-
-<h2
-class="section-title"
-style="margin-top:25px;">
-
-LIVE STATUS
-
-</h2>
+    </div>
 
 
-<div
-id="sideLiveStatus"
-class="card live-card">
+    <div
+        class="panel-title"
+        style="margin-top:25px;">
 
-Checking...
+        LIVE STATUS
 
-</div>
+    </div>
 
+    <div
+        id="sideLiveStatus"
+        class="side-live">
+
+        Checking...
+
+    </div>
 
 </aside>
 
 
-</section>
+    </section>
 
 </main>
 
 </div>
 
 
+<!-- =====================================================
+     MOBILE NAV
+===================================================== -->
+
+<nav class="mobile-nav">
+
+    <button onclick="openPage('home')">
+        🏠
+        <span>Home</span>
+    </button>
+
+    <button onclick="openPage('live')">
+        🔴
+        <span>Live</span>
+    </button>
+
+    <button onclick="openPage('library')">
+        🎬
+        <span>Library</span>
+    </button>
+
+    <button onclick="openPage('originals')">
+        🎙
+        <span>Originals</span>
+    </button>
+
+    <button onclick="openPage('guide')">
+        📅
+        <span>Guide</span>
+    </button>
+
+</nav>
+
 
 <script>
 
-/* ==========================================================
-   CROWRULES TV CHANNEL DATABASE
-========================================================== */
-
+/* =========================================================
+   CHANNEL DATABASE
+========================================================= */
 
 const CHANNELS = {
 
+    "D&J Show": {
 
-"D&J Show":{
+        description:
+            "Comedy variety show",
 
-description:
-"Comedy variety show",
+        videos: [
 
-videos:[
+            {
+                id: "vT-BRFf2Yk0",
+                title: "D&J Show Episode #1"
+            },
 
-{
-id:"vT-BRFf2Yk0",
-title:"D&J Show Episode #1"
-},
+            {
+                id: "bo-fv8gLU1U",
+                title: "D&J Show Episode #2"
+            },
 
-{
-id:"bo-fv8gLU1U",
-title:"D&J Show Episode #2"
-},
+            {
+                id: "x4W80w1wCZM",
+                title: "D&J Show Episode #3"
+            },
 
-{
-id:"x4W80w1wCZM",
-title:"D&J Show Episode #3"
-},
+            {
+                id: "Skdnn5cERuo",
+                title: "D&J Show Episode #4"
+            },
 
-{
-id:"Skdnn5cERuo",
-title:"D&J Show Episode #4"
-},
+            {
+                id: "6wsqHTc6Rl0",
+                title: "D&J Show Episode #5"
+            }
 
-{
-id:"6wsqHTc6Rl0",
-title:"D&J Show Episode #5"
-}
+        ],
 
-],
+        index: 0
 
-index:0
-
-},
-
+    },
 
 
-"Talk Radio":{
+    "Talk Radio": {
 
-description:
-"Community discussion show",
+        description:
+            "Community discussion show",
 
-videos:[
+        videos: [
 
-{
-id:"JkoTW5nNXLg",
-title:"Talk Radio Episode #1"
-},
+            {
+                id: "JkoTW5nNXLg",
+                title: "Talk Radio Episode #1"
+            },
 
-{
-id:"sgmxBU9y6A4",
-title:"Talk Radio Episode #2"
-},
+            {
+                id: "sgmxBU9y6A4",
+                title: "Talk Radio Episode #2"
+            },
 
-{
-id:"J3SkM_WAdLo",
-title:"Talk Radio Episode #3"
-}
+            {
+                id: "J3SkM_WAdLo",
+                title: "Talk Radio Episode #3"
+            }
 
-],
+        ],
 
-index:0
+        index: 0
 
-},
-
-
-
-"Tacoma Nights":{
-
-description:
-"CrowRules flagship original",
-
-videos:[
-
-{
-id:"YXcW0pN3KrE",
-title:"Tacoma Nights Trailer"
-},
-
-{
-id:"KQKBhSZrXd4",
-title:"Back Deck Fireworks Live"
-},
-
-{
-id:"uTvqIQjsxII",
-title:"Episode 1 — My Life & My Story"
-},
-
-{
-id:"56i8PhnjFHI",
-title:"Episode 2 — The Weight of Caregiving"
-}
-
-],
-
-index:0
-
-},
+    },
 
 
+    "Tacoma Nights": {
 
-"Bird Brains":{
+        description:
+            "CrowRules flagship original",
 
-description:
-"Comedy challenges coming soon",
+        videos: [
 
-videos:[
+            {
+                id: "YXcW0pN3KrE",
+                title: "Tacoma Nights Trailer"
+            },
 
-{
-id:"L1EVzWxiEAA",
-title:"First Live Stream"
-}
+            {
+                id: "KQKBhSZrXd4",
+                title: "Back Deck Fireworks Live"
+            },
 
-],
+            {
+                id: "uTvqIQjsxII",
+                title: "Episode 1 — My Life & My Story"
+            },
 
-index:0
+            {
+                id: "56i8PhnjFHI",
+                title: "Episode 2 — The Weight of Caregiving"
+            }
 
-}
+        ],
+
+        index: 0
+
+    },
+
+
+    "Bird Brains": {
+
+        description:
+            "Comedy challenges coming soon",
+
+        videos: [
+
+            {
+                id: "L1EVzWxiEAA",
+                title: "First Live Stream"
+            }
+
+        ],
+
+        index: 0
+
+    }
 
 };
 
 
-
-/* ==========================================================
+/* =========================================================
    ORIGINALS
-========================================================== */
+========================================================= */
 
+const ORIGINALS = [
 
-const ORIGINALS=[
+    {
+        name: "Tacoma Nights",
+        type: "Original Series",
+        description:
+            "Real stories from Tacoma and the journey of building CrowRules Entertainment."
+    },
 
-{
-name:"Tacoma Nights",
-type:"Original Series",
-description:
-"Real stories from Tacoma and the journey of building CrowRules Entertainment."
-},
+    {
+        name: "Bird Brains",
+        type: "Comedy",
+        description:
+            "Two guys. One brain. No common sense."
+    },
 
-{
-name:"Bird Brains",
-type:"Comedy",
-description:
-"Two guys. One brain. No common sense."
-},
+    {
+        name: "Gaming Nights",
+        type: "Gaming",
+        description:
+            "Roblox challenges and community events."
+    },
 
-{
-name:"Gaming Nights",
-type:"Gaming",
-description:
-"Roblox challenges and community events."
-},
-
-{
-name:"Voices From The Void",
-type:"Storytelling",
-description:
-"Mysteries, memories, and deeper conversations."
-}
+    {
+        name: "Voices From The Void",
+        type: "Storytelling",
+        description:
+            "Mysteries, memories, and deeper conversations."
+    }
 
 ];
 
 
-
-/* ==========================================================
+/* =========================================================
    TV GUIDE
-========================================================== */
+========================================================= */
 
+const SCHEDULE = [
 
-const SCHEDULE=[
+    {
+        time: "7:00 PM",
+        show: "Tacoma Nights"
+    },
 
-{
-time:"7:00 PM",
-show:"Tacoma Nights"
-},
+    {
+        time: "8:00 PM",
+        show: "Bird Brains"
+    },
 
-{
-time:"8:00 PM",
-show:"Bird Brains"
-},
+    {
+        time: "9:00 PM",
+        show: "Gaming Nights"
+    },
 
-{
-time:"9:00 PM",
-show:"Gaming Nights"
-},
-
-{
-time:"10:00 PM",
-show:"CrowRules Originals"
-}
+    {
+        time: "10:00 PM",
+        show: "CrowRules Originals"
+    }
 
 ];
 
 
-
-/* ==========================================================
-   NO-API-KEY YOUTUBE LIVE CONFIGURATION
-========================================================== */
-
-
-/*
-   ENTER YOUR YOUTUBE CHANNEL HANDLE HERE.
-
-   Example:
-
-   const YOUTUBE_CHANNEL =
-   "@CrowRulesEntertainment";
-
-*/
-
+/* =========================================================
+   YOUTUBE LIVE
+========================================================= */
 
 const YOUTUBE_CHANNEL =
-"@CrowRules_TV";
-
-
-
-/*
-   OPTIONAL:
-
-   If you know the current livestream's
-   YouTube video ID, enter it here.
-
-   Example:
-
-   const CONFIGURED_LIVE_VIDEO_ID =
-   "abc123xyz";
-
-   Leave it blank when you don't
-   want to specify one.
-*/
+    "@CrowRules_TV";
 
 
 const CONFIGURED_LIVE_VIDEO_ID =
-"RjxeF7IQ8Ok";
+    "RjxeF7IQ8Ok";
 
 
-
-/*
-   OPTIONAL LIVE FALLBACK.
-
-   Add known livestream IDs here.
-
-   The first valid entry is used.
-
-*/
-
-
-const LIVE_STREAMS=[
-
-/*
-{
-id:"YOUR_LIVE_VIDEO_ID",
-title:"CrowRules TV LIVE",
-description:"CrowRules TV Network Live"
-}
-*/
-
-];
-
-
-
-/*
-   Build YouTube channel live URL.
-*/
+const LIVE_STREAMS = [];
 
 
 const YOUTUBE_LIVE_URL =
-"https://www.youtube.com/" +
-YOUTUBE_CHANNEL +
-"/live";
+    "https://www.youtube.com/" +
+    YOUTUBE_CHANNEL +
+    "/live";
 
 
+let CURRENT_LIVE = null;
 
-/* Current live video */
+let livePlayerInstance = null;
 
-let CURRENT_LIVE=null;
-
-
-/* YouTube players */
-
-let livePlayerInstance=null;
-
-let livePlayerReady=false;
+let livePlayerReady = false;
 
 
-/* ==========================================================
-   MAIN PLAYER
-========================================================== */
+/* =========================================================
+   MAIN PLAYER STATE
+========================================================= */
 
+const PLAYER = {
 
-const PLAYER={
+    instance: null,
 
-instance:null,
+    channel:
+        localStorage.getItem("crow_channel")
+        ||
+        "Tacoma Nights",
 
-channel:
-localStorage.getItem(
-"crow_channel"
-)
-||
-"Tacoma Nights",
+    ready: false,
 
-ready:false
+    playing: false,
+
+    muted: true
 
 };
 
 
+function currentChannel() {
 
-function currentChannel(){
-
-return CHANNELS[
-PLAYER.channel
-];
-
-}
-
-
-
-function currentVideo(){
-
-return currentChannel()
-.videos[
-currentChannel().index
-];
+    return CHANNELS[
+        PLAYER.channel
+    ];
 
 }
 
 
+function currentVideo() {
 
-/* ==========================================================
-   YOUTUBE IFRAME API
-========================================================== */
+    const channel =
+        currentChannel();
 
+    if (!channel || !channel.videos.length) {
+        return null;
+    }
 
-function onYouTubeIframeAPIReady(){
-
-
-/* -------------------------
-   ON DEMAND PLAYER
-------------------------- */
-
-
-if(currentVideo()){
-
-PLAYER.instance=
-new YT.Player(
-"player",
-{
-
-videoId:
-currentVideo().id,
-
-playerVars:{
-
-autoplay:1,
-
-controls:1,
-
-rel:0,
-
-mute:1,
-
-playsinline:1
-
-},
-
-events:{
-
-onReady:function(){
-
-PLAYER.ready=true;
-
-hideLoading();
-
-updateNetwork();
-
-PLAYER.instance.playVideo();
-
-},
-
-onStateChange:
-playerChanged
-
-}
-
-});
+    return channel.videos[
+        channel.index
+    ];
 
 }
 
 
-/* -------------------------
-   LIVE PLAYER
-------------------------- */
+/* =========================================================
+   YOUTUBE API READY
+========================================================= */
+
+function onYouTubeIframeAPIReady() {
+
+    const video = currentVideo();
+
+    if (video) {
+
+        PLAYER.instance =
+            new YT.Player(
+                "player",
+                {
+
+                    videoId: video.id,
+
+                    playerVars: {
+
+                        autoplay: 1,
+                        controls: 1,
+                        rel: 0,
+                        mute: 1,
+                        playsinline: 1
+
+                    },
+
+                    events: {
+
+                        onReady:
+                            onPlayerReady,
+
+                        onStateChange:
+                            playerChanged
+
+                    }
+
+                }
+            );
+
+    }
 
 
-livePlayerInstance=
-new YT.Player(
-"livePlayer",
-{
+    livePlayerInstance =
+        new YT.Player(
+            "livePlayer",
+            {
 
-videoId:
-"",
+                videoId: "",
 
-playerVars:{
+                playerVars: {
 
-autoplay:1,
+                    autoplay: 1,
+                    controls: 1,
+                    rel: 0,
+                    mute: 1,
+                    playsinline: 1
 
-controls:1,
+                },
 
-rel:0,
+                events: {
 
-mute:1,
+                    onReady: function() {
 
-playsinline:1
+                        livePlayerReady = true;
 
-},
+                        loadConfiguredLive();
 
-events:{
+                    }
 
-onReady:function(){
+                }
 
-livePlayerReady=true;
-
-
-/*
-Load configured stream
-if one exists.
-*/
-
-loadConfiguredLive();
+            }
+        );
 
 }
 
+
+/* =========================================================
+   PLAYER READY
+========================================================= */
+
+function onPlayerReady() {
+
+    PLAYER.ready = true;
+
+    PLAYER.playing = true;
+
+    hideLoading();
+
+    updateNetwork();
+
+    renderPlaylist();
+
+    PLAYER.instance.playVideo();
+
 }
 
-});
 
-}
-
-
-
-/* ==========================================================
+/* =========================================================
    HIDE LOADING
-========================================================== */
+========================================================= */
 
+function hideLoading() {
 
-function hideLoading(){
+    const loading =
+        document.getElementById("loading");
 
-const load=
-document.getElementById(
-"loading"
-);
-
-if(load){
-
-load.style.display="none";
-
-}
+    if (loading) {
+        loading.style.display = "none";
+    }
 
 }
 
 
+/* =========================================================
+   PLAY CURRENT
+========================================================= */
 
-/* ==========================================================
-   LOAD CURRENT ON DEMAND VIDEO
-========================================================== */
+function playCurrent() {
 
+    if (!PLAYER.ready) return;
 
-function loadCurrent(){
+    PLAYER.instance.playVideo();
 
-if(!PLAYER.ready)
-return;
+    PLAYER.playing = true;
 
-
-const video=
-currentVideo();
-
-
-if(!video){
-
-document.getElementById(
-"loading"
-).style.display="flex";
-
-document.getElementById(
-"loading"
-).innerHTML=
-"COMING SOON";
-
-return;
+    updatePlayButton();
 
 }
 
 
-PLAYER.instance.loadVideoById(
-video.id
-);
+/* =========================================================
+   TOGGLE PLAY
+========================================================= */
 
+function togglePlay() {
 
-saveState();
+    if (!PLAYER.instance) return;
 
-updateNetwork();
+    if (PLAYER.playing) {
+
+        PLAYER.instance.pauseVideo();
+
+        PLAYER.playing = false;
+
+    } else {
+
+        PLAYER.instance.playVideo();
+
+        PLAYER.playing = true;
+
+    }
+
+    updatePlayButton();
 
 }
 
 
+/* =========================================================
+   PLAY BUTTON
+========================================================= */
 
-/* ==========================================================
+function updatePlayButton() {
+
+    const button =
+        document.getElementById("playButton");
+
+    if (!button) return;
+
+    button.innerHTML =
+        PLAYER.playing
+            ? "⏸"
+            : "▶";
+
+}
+
+
+/* =========================================================
+   MUTE
+========================================================= */
+
+function toggleMute() {
+
+    if (!PLAYER.instance) return;
+
+    if (PLAYER.muted) {
+
+        PLAYER.instance.unMute();
+
+        PLAYER.muted = false;
+
+    } else {
+
+        PLAYER.instance.mute();
+
+        PLAYER.muted = true;
+
+    }
+
+}
+
+
+/* =========================================================
    NEXT EPISODE
-========================================================== */
+   TRUE LOOP
+========================================================= */
 
+function nextEpisode() {
 
-function nextEpisode(){
+    const channel =
+        currentChannel();
 
-const channel=
-currentChannel();
+    if (!channel || !channel.videos.length) {
+        return;
+    }
 
+    channel.index++;
 
-channel.index++;
+    /*
+       THIS IS THE IMPORTANT LOOP.
 
+       Once the last video finishes,
+       index goes back to ZERO.
+    */
 
-if(
-channel.index>=
-channel.videos.length
-){
+    if (
+        channel.index >=
+        channel.videos.length
+    ) {
 
-channel.index=0;
+        channel.index = 0;
 
-}
+    }
 
-
-loadCurrent();
-
-}
-
-
-
-/* ==========================================================
-   PLAYER STATE
-========================================================== */
-
-
-function playerChanged(event){
-
-if(
-event.data===
-YT.PlayerState.ENDED
-){
-
-nextEpisode();
-
-}
+    loadCurrent();
 
 }
 
 
+/* =========================================================
+   PREVIOUS EPISODE
+========================================================= */
 
-/* ==========================================================
+function previousEpisode() {
+
+    const channel =
+        currentChannel();
+
+    if (!channel || !channel.videos.length) {
+        return;
+    }
+
+    channel.index--;
+
+    if (channel.index < 0) {
+
+        channel.index =
+            channel.videos.length - 1;
+
+    }
+
+    loadCurrent();
+
+}
+
+
+/* =========================================================
+   LOAD CURRENT VIDEO
+========================================================= */
+
+function loadCurrent() {
+
+    if (!PLAYER.instance) {
+        return;
+    }
+
+    const video =
+        currentVideo();
+
+    if (!video) {
+        return;
+    }
+
+    PLAYER.instance.loadVideoById(
+        video.id
+    );
+
+    PLAYER.playing = true;
+
+    saveState();
+
+    updateNetwork();
+
+    renderPlaylist();
+
+    updatePlayButton();
+
+}
+
+
+/* =========================================================
+   YOUTUBE PLAYER STATE
+========================================================= */
+
+function playerChanged(event) {
+
+    switch(event.data) {
+
+        case YT.PlayerState.PLAYING:
+
+            PLAYER.playing = true;
+
+            updatePlayButton();
+
+            break;
+
+
+        case YT.PlayerState.PAUSED:
+
+            PLAYER.playing = false;
+
+            updatePlayButton();
+
+            break;
+
+
+        case YT.PlayerState.ENDED:
+
+            /*
+                AUTOMATIC PLAYLIST LOOP
+
+                End of video →
+                next video →
+                last video →
+                first video →
+                repeat forever.
+            */
+
+            nextEpisode();
+
+            break;
+
+    }
+
+}
+
+
+/* =========================================================
    SWITCH CHANNEL
-========================================================== */
+========================================================= */
 
+function switchChannel(name) {
 
-function switchChannel(name){
+    if (!CHANNELS[name]) {
+        return;
+    }
 
-if(!CHANNELS[name])
-return;
+    PLAYER.channel = name;
 
+    CHANNELS[name].index = 0;
 
-PLAYER.channel=name;
+    saveState();
 
-CHANNELS[name].index=0;
+    loadCurrent();
 
+    renderChannels();
 
-localStorage.setItem(
-"crow_channel",
-name
-);
-
-
-loadCurrent();
-
-renderChannels();
+    renderPlaylist();
 
 }
 
 
+/* =========================================================
+   RENDER CHANNELS
+========================================================= */
 
-/* ==========================================================
-   CHANNEL MENU
-========================================================== */
+function renderChannels() {
 
+    const box =
+        document.getElementById("channelList");
 
-function renderChannels(){
+    if (!box) return;
 
-const box=
-document.getElementById(
-"channelList"
-);
+    box.innerHTML = "";
 
+    Object.keys(CHANNELS).forEach(name => {
 
-box.innerHTML="";
+        const channel =
+            CHANNELS[name];
 
+        const item =
+            document.createElement("div");
 
-Object.keys(CHANNELS)
-.forEach(name=>{
+        item.className =
+            "channel-item" +
+            (
+                name === PLAYER.channel
+                    ? " active"
+                    : ""
+            );
 
-const card=
-document.createElement(
-"div"
-);
+        item.innerHTML = `
 
+            <div class="channel-name">
+                ${name}
+            </div>
 
-card.className="card";
+            <div class="channel-description">
+                ${channel.description}
+            </div>
 
+        `;
 
-card.innerHTML=`
-<b>${name}</b>
-<br>
-<small>
-${CHANNELS[name].description}
-</small>
-`;
+        item.onclick = () =>
+            switchChannel(name);
 
+        box.appendChild(item);
 
-card.onclick=
-()=>switchChannel(name);
-
-
-box.appendChild(card);
-
-});
+    });
 
 }
 
 
-
-/* ==========================================================
+/* =========================================================
    UPDATE NETWORK
-========================================================== */
+========================================================= */
+
+function updateNetwork() {
+
+    const video =
+        currentVideo();
+
+    const channel =
+        currentChannel();
+
+    if (!video || !channel) {
+        return;
+    }
+
+    document.getElementById(
+        "currentTitle"
+    ).innerHTML =
+        video.title;
+
+    document.getElementById(
+        "currentDescription"
+    ).innerHTML =
+        channel.description;
+
+    document.getElementById(
+        "broadcastStatus"
+    ).innerHTML =
+        "● NETWORK ONLINE • PLAYLIST LOOP ACTIVE";
 
 
-function updateNetwork(){
+    const nextIndex =
+        (
+            channel.index + 1
+        ) %
+        channel.videos.length;
 
-const video=
-currentVideo();
+    const next =
+        channel.videos[nextIndex];
 
+    document.getElementById(
+        "upNext"
+    ).innerHTML =
+        next
+            ? next.title
+            : "Playlist Complete";
 
-if(!video)
-return;
-
-
-document.getElementById(
-"currentTitle"
-).innerHTML=
-video.title;
-
-
-document.getElementById(
-"currentDescription"
-).innerHTML=
-currentChannel()
-.description;
-
-
-document.getElementById(
-"broadcastStatus"
-).innerHTML=
-"● NETWORK ONLINE • BROADCAST ACTIVE";
-
-
-const next=
-currentChannel()
-.videos[
-currentChannel().index+1
-];
-
-
-document.getElementById(
-"upNext"
-).innerHTML=
-next ?
-next.title :
-"End of Playlist";
 
 }
 
 
+/* =========================================================
+   PLAYLIST DISPLAY
+========================================================= */
 
-/* ==========================================================
-   MEMORY
-========================================================== */
+function renderPlaylist() {
 
+    const box =
+        document.getElementById("playlist");
 
-function saveState(){
+    if (!box) return;
 
-localStorage.setItem(
-"crow_channel",
-PLAYER.channel
-);
+    const channel =
+        currentChannel();
 
+    if (!channel) return;
 
-localStorage.setItem(
-"crow_episode",
-currentChannel()
-.index
-);
+    box.innerHTML = "";
+
+    channel.videos.forEach(
+        (video, index) => {
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "episode-card" +
+                (
+                    index === channel.index
+                        ? " active"
+                        : ""
+                );
+
+            card.innerHTML = `
+
+                <div class="episode-number">
+                    EPISODE ${index + 1}
+                </div>
+
+                <div class="episode-title">
+                    ${video.title}
+                </div>
+
+                <div class="episode-status">
+                    ${
+                        index === channel.index
+                            ? "● NOW PLAYING"
+                            : "AVAILABLE"
+                    }
+                </div>
+
+            `;
+
+            card.onclick = () => {
+
+                channel.index = index;
+
+                loadCurrent();
+
+            };
+
+            box.appendChild(card);
+
+        }
+    );
 
 }
 
 
+/* =========================================================
+   SAVE STATE
+========================================================= */
 
-function loadState(){
+function saveState() {
 
-const episode=
-localStorage.getItem(
-"crow_episode"
-);
+    localStorage.setItem(
+        "crow_channel",
+        PLAYER.channel
+    );
 
-
-if(episode){
-
-CHANNELS[
-PLAYER.channel
-].index=
-parseInt(
-episode,
-10
-);
-
-}
+    localStorage.setItem(
+        "crow_episode",
+        currentChannel().index
+    );
 
 }
 
 
+/* =========================================================
+   LOAD STATE
+========================================================= */
 
-/* ==========================================================
+function loadState() {
+
+    const savedChannel =
+        localStorage.getItem(
+            "crow_channel"
+        );
+
+    const savedEpisode =
+        localStorage.getItem(
+            "crow_episode"
+        );
+
+
+    if (
+        savedChannel &&
+        CHANNELS[savedChannel]
+    ) {
+
+        PLAYER.channel =
+            savedChannel;
+
+    }
+
+
+    if (savedEpisode !== null) {
+
+        const index =
+            parseInt(
+                savedEpisode,
+                10
+            );
+
+        if (
+            !isNaN(index) &&
+            index >= 0 &&
+            index <
+            currentChannel().videos.length
+        ) {
+
+            currentChannel().index =
+                index;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+function fullscreenPlayer() {
+
+    const frame =
+        document.getElementById("player");
+
+    if (
+        frame &&
+        frame.requestFullscreen
+    ) {
+
+        frame.requestFullscreen();
+
+    }
+
+}
+
+
+/* =========================================================
    CLOCK
-========================================================== */
+========================================================= */
 
+function updateClock() {
 
-setInterval(()=>{
+    const clock =
+        document.getElementById("clock");
 
-document.getElementById(
-"clock"
-).innerHTML=
+    if (!clock) return;
 
-new Date()
-.toLocaleTimeString(
-[],
-{
-hour:"2-digit",
-minute:"2-digit"
+    clock.innerHTML =
+        new Date().toLocaleTimeString(
+            [],
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
 }
+
+setInterval(
+    updateClock,
+    1000
 );
 
-},1000);
+updateClock();
 
 
+/* =========================================================
+   LIVE ENGINE
+========================================================= */
 
-/* ==========================================================
-   NO-API LIVE ENGINE
-========================================================== */
+function getConfiguredLive() {
+
+    if (
+        CONFIGURED_LIVE_VIDEO_ID &&
+        CONFIGURED_LIVE_VIDEO_ID.trim()
+    ) {
+
+        return {
+
+            id:
+                CONFIGURED_LIVE_VIDEO_ID.trim(),
+
+            title:
+                "CrowRules TV LIVE",
+
+            description:
+                "CrowRules TV Network live broadcast"
+
+        };
+
+    }
 
 
-/*
-   IMPORTANT:
+    if (LIVE_STREAMS.length > 0) {
 
-   Browser JavaScript cannot query YouTube's
-   private/current livestream status without
-   an API or external service.
+        return LIVE_STREAMS[0];
 
-   This engine therefore uses:
-
-   1. Configured live video ID
-   2. Local fallback live video IDs
-   3. Your YouTube channel /live page
-
-   No API key is required.
-*/
+    }
 
 
-function getConfiguredLive(){
-
-if(
-CONFIGURED_LIVE_VIDEO_ID &&
-CONFIGURED_LIVE_VIDEO_ID.trim()
-){
-
-return{
-
-id:
-CONFIGURED_LIVE_VIDEO_ID.trim(),
-
-title:
-"CrowRules TV LIVE",
-
-description:
-"CrowRules TV Network live broadcast"
-
-};
+    return null;
 
 }
 
 
-if(
-LIVE_STREAMS.length>0
-){
+/* =========================================================
+   LOAD LIVE
+========================================================= */
 
-return LIVE_STREAMS[0];
+function loadConfiguredLive() {
 
-}
+    const configured =
+        getConfiguredLive();
 
+    if (configured) {
 
-return null;
+        CURRENT_LIVE =
+            configured;
 
-}
+        startLiveBroadcast();
 
+    } else {
 
+        setLiveStandby();
 
-/* ==========================================================
-   LOAD CONFIGURED LIVE
-========================================================== */
-
-
-function loadConfiguredLive(){
-
-const configured=
-getConfiguredLive();
-
-
-if(configured){
-
-CURRENT_LIVE=
-configured;
-
-
-startLiveBroadcast();
-
-return;
+    }
 
 }
 
 
-/*
-   No video ID supplied.
+/* =========================================================
+   START LIVE
+========================================================= */
 
-   Show the YouTube channel live
-   destination and standby state.
-*/
+function startLiveBroadcast() {
 
+    if (!CURRENT_LIVE) {
+        return;
+    }
 
-setLiveStandby();
+    const loading =
+        document.getElementById(
+            "liveLoading"
+        );
 
-}
-
-
-
-/* ==========================================================
-   START LIVE BROADCAST
-========================================================== */
-
-
-function startLiveBroadcast(){
-
-if(!CURRENT_LIVE)
-return;
+    loading.style.display =
+        "none";
 
 
-document.getElementById(
-"liveLoading"
-).style.display=
-"none";
+    document.getElementById(
+        "liveTitle"
+    ).innerHTML =
+        CURRENT_LIVE.title;
 
 
-document.getElementById(
-"liveTitle"
-).innerHTML=
-CURRENT_LIVE.title;
+    document.getElementById(
+        "liveDescription"
+    ).innerHTML =
+        CURRENT_LIVE.description ||
+        "CrowRules TV live broadcast";
 
 
-document.getElementById(
-"liveDescription"
-).innerHTML=
-CURRENT_LIVE.description ||
-"CrowRules TV live broadcast";
+    document.getElementById(
+        "liveBroadcastStatus"
+    ).innerHTML =
+        "● LIVE BROADCAST READY";
 
 
-document.getElementById(
-"liveBroadcastStatus"
-).innerHTML=
-"● LIVE BROADCAST READY";
+    document.getElementById(
+        "liveIndicator"
+    ).innerHTML =
+        "● LIVE";
 
 
-document.getElementById(
-"liveIndicator"
-).innerHTML=
-"● LIVE";
+    document.getElementById(
+        "liveIndicator"
+    ).style.color =
+        "var(--red)";
 
 
-document.getElementById(
-"liveIndicator"
-).style.color=
-"var(--red)";
+    document.getElementById(
+        "sideLiveStatus"
+    ).innerHTML = `
+
+        <strong style="
+            color:var(--red);
+        ">
+            ● LIVE
+        </strong>
+
+        <br><br>
+
+        ${CURRENT_LIVE.title}
+
+    `;
 
 
-document.getElementById(
-"sideLiveStatus"
-).innerHTML=
-`
-<b style="color:var(--red);">
-● LIVE
-</b>
-<br><br>
-${CURRENT_LIVE.title}
-`;
+    document.getElementById(
+        "youtubeLiveLink"
+    ).href =
+        YOUTUBE_LIVE_URL;
 
 
-document.getElementById(
-"youtubeLiveLink"
-).href=
-YOUTUBE_LIVE_URL;
+    if (
+        livePlayerInstance &&
+        livePlayerReady
+    ) {
+
+        livePlayerInstance.loadVideoById(
+            CURRENT_LIVE.id
+        );
+
+        livePlayerInstance.playVideo();
+
+    }
 
 
-if(
-livePlayerInstance &&
-livePlayerReady
-){
-
-livePlayerInstance.loadVideoById(
-CURRENT_LIVE.id
-);
-
-
-livePlayerInstance.playVideo();
+    renderLiveChannels();
 
 }
 
 
-renderLiveChannels();
-
-}
-
-
-
-/* ==========================================================
+/* =========================================================
    LIVE STANDBY
-========================================================== */
+========================================================= */
+
+function setLiveStandby() {
+
+    CURRENT_LIVE = null;
 
 
-function setLiveStandby(){
-
-CURRENT_LIVE=null;
-
-
-document.getElementById(
-"liveLoading"
-).style.display=
-"flex";
+    document.getElementById(
+        "liveLoading"
+    ).style.display =
+        "flex";
 
 
-document.getElementById(
-"liveLoading"
-).innerHTML=
-`
-CROWRULES TV LIVE<br><br>
-STANDBY<br><br>
-OPENING YOUTUBE LIVE...
-`;
+    document.getElementById(
+        "liveLoading"
+    ).innerHTML = `
+
+        CROWRULES TV LIVE
+        <br><br>
+        STANDBY
+        <br><br>
+        OPENING YOUTUBE LIVE...
+
+    `;
 
 
-document.getElementById(
-"liveTitle"
-).innerHTML=
-"CrowRules TV Live";
+    document.getElementById(
+        "liveTitle"
+    ).innerHTML =
+        "CrowRules TV Live";
 
 
-document.getElementById(
-"liveDescription"
-).innerHTML=
-`
-The network is waiting for a live YouTube broadcast.
-Use the YouTube Live button to open the current
-CrowRules livestream.
-`;
+    document.getElementById(
+        "liveDescription"
+    ).innerHTML =
+        "The network is waiting for a live YouTube broadcast.";
 
 
-document.getElementById(
-"liveBroadcastStatus"
-).innerHTML=
-"● LIVE DESTINATION READY";
+    document.getElementById(
+        "liveBroadcastStatus"
+    ).innerHTML =
+        "● LIVE DESTINATION READY";
 
 
-document.getElementById(
-"liveIndicator"
-).innerHTML=
-"● STANDBY";
+    document.getElementById(
+        "liveIndicator"
+    ).innerHTML =
+        "● STANDBY";
 
 
-document.getElementById(
-"liveIndicator"
-).style.color=
-"var(--yellow)";
+    document.getElementById(
+        "liveIndicator"
+    ).style.color =
+        "var(--yellow)";
 
 
-document.getElementById(
-"sideLiveStatus"
-).innerHTML=
-`
-<b style="color:var(--yellow);">
-● STANDBY
-</b>
-<br><br>
-Waiting for CrowRules TV Live.
-`;
+    document.getElementById(
+        "sideLiveStatus"
+    ).innerHTML = `
+
+        <strong style="
+            color:var(--yellow);
+        ">
+            ● STANDBY
+        </strong>
+
+        <br><br>
+
+        Waiting for CrowRules TV Live.
+
+    `;
 
 
-document.getElementById(
-"youtubeLiveLink"
-).href=
-YOUTUBE_LIVE_URL;
+    document.getElementById(
+        "youtubeLiveLink"
+    ).href =
+        YOUTUBE_LIVE_URL;
 
 
-renderLiveChannels();
+    renderLiveChannels();
 
 }
 
 
-
-/* ==========================================================
+/* =========================================================
    REFRESH LIVE
-========================================================== */
+========================================================= */
 
+function refreshLiveBroadcast() {
 
-function refreshLiveBroadcast(){
+    setLiveStandby();
 
-const loading=
-document.getElementById(
-"liveLoading"
-);
-
-
-loading.style.display=
-"flex";
-
-
-loading.innerHTML=
-`
-CONNECTING TO<br><br>
-CROWRULES TV LIVE...
-`;
-
-
-CURRENT_LIVE=
-null;
-
-
-/*
-   First try configured ID.
-*/
-
-
-const configured=
-getConfiguredLive();
-
-
-if(configured){
-
-CURRENT_LIVE=
-configured;
-
-startLiveBroadcast();
-
-return;
+    setTimeout(
+        loadConfiguredLive,
+        500
+    );
 
 }
 
 
-/*
-   Without API access, redirect/open
-   the channel's YouTube Live destination.
-*/
-
-
-setLiveStandby();
-
-}
-
-
-
-/* ==========================================================
+/* =========================================================
    OPEN YOUTUBE LIVE
-========================================================== */
+========================================================= */
 
+function openYouTubeLive() {
 
-function openYouTubeLive(){
-
-window.open(
-YOUTUBE_LIVE_URL,
-"_blank",
-"noopener,noreferrer"
-);
+    window.open(
+        YOUTUBE_LIVE_URL,
+        "_blank",
+        "noopener,noreferrer"
+    );
 
 }
 
 
-
-/* ==========================================================
+/* =========================================================
    LIVE CHANNEL CARD
-========================================================== */
+========================================================= */
+
+function renderLiveChannels() {
+
+    const grid =
+        document.getElementById(
+            "liveChannelGrid"
+        );
+
+    if (!grid) return;
+
+    grid.innerHTML = "";
 
 
-function renderLiveChannels(){
+    const card =
+        document.createElement("div");
 
-const grid=
-document.getElementById(
-"liveChannelGrid"
-);
-
-
-if(!grid)
-return;
+    card.className =
+        "card";
 
 
-grid.innerHTML="";
+    if (CURRENT_LIVE) {
+
+        card.innerHTML = `
+
+            <h3>
+                🔴 ${CURRENT_LIVE.title}
+            </h3>
+
+            <p>
+                ${CURRENT_LIVE.description || ""}
+            </p>
+
+            <small>
+                CrowRules TV Live
+            </small>
+
+        `;
+
+    } else {
+
+        card.innerHTML = `
+
+            <h3>
+                🔴 CrowRules TV Live
+            </h3>
+
+            <p>
+                No live video is currently
+                configured.
+            </p>
+
+            <small>
+                YouTube Live destination ready.
+            </small>
+
+        `;
+
+    }
 
 
-const card=
-document.createElement(
-"div"
-);
+    card.onclick =
+        openYouTubeLive;
 
 
-card.className=
-"card live-card";
-
-
-if(CURRENT_LIVE){
-
-card.innerHTML=`
-
-<h3>
-🔴 ${CURRENT_LIVE.title}
-</h3>
-
-<br>
-
-<p>
-${CURRENT_LIVE.description || ""}
-</p>
-
-<br>
-
-<small>
-CrowRules TV Live
-</small>
-
-`;
-
-}else{
-
-card.innerHTML=`
-
-<h3>
-🔴 CrowRules TV Live
-</h3>
-
-<br>
-
-<p>
-No live video ID is configured.
-</p>
-
-<br>
-
-<small>
-YouTube Live destination ready.
-</small>
-
-`;
+    grid.appendChild(card);
 
 }
 
 
-card.onclick=
-()=>openYouTubeLive();
-
-
-grid.appendChild(card);
-
-}
-
-
-
-/* ==========================================================
-   AUTOMATIC STANDBY REFRESH
-========================================================== */
-
-
-/*
-   There is intentionally NO YouTube API call here.
-
-   The browser checks the configured local
-   livestream information every 60 seconds.
-
-   If you want true automatic discovery of a
-   brand-new YouTube livestream, an API/backend
-   or external service is required.
-*/
-
-
-setInterval(()=>{
-
-if(
-!CONFIGURED_LIVE_VIDEO_ID &&
-LIVE_STREAMS.length===0
-){
-
-setLiveStandby();
-
-}
-
-},60000);
-
-
-
-/* ==========================================================
-   INITIAL ENGINE
-========================================================== */
-
-
-loadState();
-
-renderChannels();
-
-</script>
-
-
-
-<script>
-
-/* ==========================================================
+/* =========================================================
    PAGE NAVIGATION
-========================================================== */
+========================================================= */
+
+function openPage(page) {
+
+    document
+        .querySelectorAll(".page")
+        .forEach(p => {
+
+            p.classList.remove(
+                "active"
+            );
+
+        });
 
 
-function openPage(page){
+    const target =
+        document.getElementById(page);
 
-document
-.querySelectorAll(".page")
-.forEach(p=>{
+    if (target) {
 
-p.classList.remove(
-"active"
-);
+        target.classList.add(
+            "active"
+        );
 
-});
-
-
-const target=
-document.getElementById(
-page
-);
+    }
 
 
-if(target){
+    document
+        .querySelectorAll(".nav button")
+        .forEach(button => {
 
-target.classList.add(
-"active"
-);
+            button.classList.remove(
+                "active"
+            );
 
-}
-
-
-if(page==="live"){
-
-refreshLiveBroadcast();
-
-}
-
-}
+        });
 
 
+    if (page === "live") {
 
-/* ==========================================================
-   ON DEMAND LIBRARY
-========================================================== */
+        refreshLiveBroadcast();
 
-
-function renderLibrary(){
-
-const grid=
-document.getElementById(
-"libraryGrid"
-);
-
-
-if(!grid)
-return;
-
-
-grid.innerHTML="";
-
-
-Object.keys(CHANNELS)
-.forEach(channel=>{
-
-const item=
-CHANNELS[channel];
-
-
-const card=
-document.createElement(
-"div"
-);
-
-
-card.className=
-"card";
-
-
-card.innerHTML=`
-
-<h3>
-${channel}
-</h3>
-
-<p>
-${item.description}
-</p>
-
-<small>
-${item.videos.length}
-Episodes
-</small>
-
-`;
-
-
-card.onclick=()=>{
-
-switchChannel(channel);
-
-openPage("home");
-
-};
-
-
-grid.appendChild(card);
-
-});
+    }
 
 }
 
 
+/* =========================================================
+   LIBRARY
+========================================================= */
 
-/* ==========================================================
+function renderLibrary() {
+
+    const grid =
+        document.getElementById(
+            "libraryGrid"
+        );
+
+    if (!grid) return;
+
+    grid.innerHTML = "";
+
+
+    Object.keys(CHANNELS)
+        .forEach(channel => {
+
+            const item =
+                CHANNELS[channel];
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "card";
+
+
+            card.innerHTML = `
+
+                <h3>
+                    ${channel}
+                </h3>
+
+                <p>
+                    ${item.description}
+                </p>
+
+                <small>
+                    ${item.videos.length}
+                    Episodes
+                </small>
+
+            `;
+
+
+            card.onclick = () => {
+
+                switchChannel(channel);
+
+                openPage("home");
+
+            };
+
+
+            grid.appendChild(card);
+
+        });
+
+}
+
+
+/* =========================================================
    ORIGINALS
-========================================================== */
+========================================================= */
+
+function renderOriginals() {
+
+    const grid =
+        document.getElementById(
+            "originalGrid"
+        );
+
+    if (!grid) return;
+
+    grid.innerHTML = "";
 
 
-function renderOriginals(){
+    ORIGINALS.forEach(show => {
 
-const grid=
-document.getElementById(
-"originalGrid"
-);
+        const card =
+            document.createElement("div");
 
-
-if(!grid)
-return;
+        card.className =
+            "card";
 
 
-grid.innerHTML="";
+        card.innerHTML = `
+
+            <h2>
+                ${show.name}
+            </h2>
+
+            <p>
+                ${show.type}
+            </p>
+
+            <small>
+                ${show.description}
+            </small>
+
+        `;
 
 
-ORIGINALS.forEach(show=>{
+        grid.appendChild(card);
 
-const card=
-document.createElement(
-"div"
-);
-
-
-card.className=
-"card";
-
-
-card.innerHTML=`
-
-<h2>
-${show.name}
-</h2>
-
-<p>
-${show.type}
-</p>
-
-<br>
-
-<small>
-${show.description}
-</small>
-
-`;
-
-
-grid.appendChild(card);
-
-});
+    });
 
 }
 
 
+/* =========================================================
+   GUIDE
+========================================================= */
 
-/* ==========================================================
-   TV GUIDE
-========================================================== */
+function renderGuide() {
 
+    const grid =
+        document.getElementById(
+            "guideGrid"
+        );
 
-function renderGuide(){
+    if (!grid) return;
 
-const grid=
-document.getElementById(
-"guideGrid"
-);
-
-
-if(!grid)
-return;
+    grid.innerHTML = "";
 
 
-grid.innerHTML="";
+    SCHEDULE.forEach(item => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "card guide-card";
 
 
-SCHEDULE.forEach(item=>{
+        card.innerHTML = `
 
-const card=
-document.createElement(
-"div"
-);
+            <div class="guide-time">
+                ${item.time}
+            </div>
 
+            <div>
+                ${item.show}
+            </div>
 
-card.className=
-"card";
-
-
-card.innerHTML=`
-
-<h3>
-${item.time}
-</h3>
-
-<p>
-${item.show}
-</p>
-
-`;
+        `;
 
 
-grid.appendChild(card);
+        grid.appendChild(card);
 
-});
+    });
 
 }
 
 
-
-/* ==========================================================
-   SEARCH
-========================================================== */
-
-
-function searchNetwork(term){
-
-term=
-term.toLowerCase();
-
-
-let results=[];
-
-
-Object.keys(CHANNELS)
-.forEach(name=>{
-
-
-if(
-name.toLowerCase()
-.includes(term)
-){
-
-results.push(name);
-
-}
-
-
-CHANNELS[name]
-.videos
-.forEach(video=>{
-
-if(
-video.title
-.toLowerCase()
-.includes(term)
-){
-
-results.push(
-video.title
-);
-
-}
-
-});
-
-});
-
-
-return results;
-
-}
-
-
-
-/* ==========================================================
-   FAVORITES
-========================================================== */
-
-
-function addFavorite(channel){
-
-let list=
-JSON.parse(
-
-localStorage.getItem(
-"crow_favorites"
-)
-
-||
-"[]"
-
-);
-
-
-if(
-!list.includes(channel)
-){
-
-list.push(channel);
-
-}
-
-
-localStorage.setItem(
-
-"crow_favorites",
-
-JSON.stringify(list)
-
-);
-
-}
-
-
-
-function getFavorites(){
-
-return JSON.parse(
-
-localStorage.getItem(
-"crow_favorites"
-)
-
-||
-"[]"
-
-);
-
-}
-
-
-
-/* ==========================================================
-   CONTINUE WATCHING
-========================================================== */
-
-
-function continueWatching(){
-
-return{
-
-channel:
-localStorage.getItem(
-"crow_channel"
-),
-
-episode:
-localStorage.getItem(
-"crow_episode"
-)
-
-};
-
-}
-
-
-
-/* ==========================================================
-   LOAD PLATFORM
-========================================================== */
-
-
-setTimeout(()=>{
-
-renderLibrary();
-
-renderOriginals();
-
-renderGuide();
-
-renderLiveChannels();
-
-},500);
-
-</script>
-
-
-
-<script>
-
-/* ==========================================================
-   FINAL POLISH ENGINE
-========================================================== */
-
-
-const CROW_SETTINGS={
-
-version:
-"CrowRules TV v11 Ultimate",
-
-theme:
-"Cyberpunk",
-
-autoplay:
-true,
-
-liveMode:
-"No API Key"
-
-};
-
-
-
-/* ==========================================================
-   STARTUP SEQUENCE
-========================================================== */
-
-
-function broadcastStartup(){
-
-const loading=
-document.getElementById(
-"loading"
-);
-
-
-if(!loading)
-return;
-
-
-const messages=[
-
-"INITIALIZING BROADCAST SYSTEM...",
-
-"CONNECTING CROWRULES NETWORK...",
-
-"LOADING CHANNEL DATABASE...",
-
-"SYNCING ORIGINAL PROGRAMMING...",
-
-"INITIALIZING LIVE TV...",
-
-"CROWRULES TV ONLINE"
-
-];
-
-
-let index=0;
-
-
-const timer=
-setInterval(()=>{
-
-loading.innerHTML=
-messages[index];
-
-
-index++;
-
-
-if(index>=messages.length){
-
-clearInterval(timer);
-
-
-setTimeout(()=>{
-
-loading.style.display=
-"none";
-
-},800);
-
-}
-
-},800);
-
-}
-
-
-
-/* ==========================================================
-   DIAGNOSTICS
-========================================================== */
-
-
-function networkDiagnostics(){
-
-return{
-
-network:
-"CrowRules TV",
-
-version:
-CROW_SETTINGS.version,
-
-status:
-"ONLINE",
-
-liveMode:
-"No API Key",
-
-channel:
-PLAYER.channel,
-
-liveVideo:
-CURRENT_LIVE ?
-CURRENT_LIVE.id :
-"NOT CONFIGURED",
-
-youtubeLiveURL:
-YOUTUBE_LIVE_URL,
-
-time:
-new Date()
-.toLocaleString()
-
-};
-
-}
-
-
-
-/* ==========================================================
+/* =========================================================
    KEYBOARD CONTROLS
-========================================================== */
-
+========================================================= */
 
 document.addEventListener(
-"keydown",
-(event)=>{
+    "keydown",
+    event => {
 
-switch(event.key){
-
-case "ArrowRight":
-
-nextEpisode();
-
-break;
-
-
-case " ":
-
-if(
-PLAYER.instance
-){
-
-PLAYER.instance
-.pauseVideo();
-
-}
-
-break;
+        if (
+            event.target.tagName ===
+            "INPUT"
+        ) {
+            return;
+        }
 
 
-case "m":
+        switch(event.key) {
 
-if(
-PLAYER.instance
-){
+            case "ArrowRight":
+                nextEpisode();
+                break;
 
-PLAYER.instance
-.mute();
+            case "ArrowLeft":
+                previousEpisode();
+                break;
 
-}
+            case " ":
+                event.preventDefault();
+                togglePlay();
+                break;
 
-break;
+            case "m":
+            case "M":
+                toggleMute();
+                break;
 
+            case "f":
+            case "F":
+                fullscreenPlayer();
+                break;
 
-case "f":
+        }
 
-let frame=
-document.querySelector(
-"#player"
+    }
 );
 
 
-if(
-frame &&
-frame.requestFullscreen
-){
+/* =========================================================
+   STARTUP
+========================================================= */
 
-frame.requestFullscreen();
+function broadcastStartup() {
+
+    const loading =
+        document.getElementById(
+            "loading"
+        );
+
+    if (!loading) return;
+
+
+    const messages = [
+
+        "INITIALIZING BROADCAST SYSTEM...",
+
+        "CONNECTING CROWRULES NETWORK...",
+
+        "LOADING CHANNEL DATABASE...",
+
+        "SYNCING ORIGINAL PROGRAMMING...",
+
+        "INITIALIZING PLAYLIST ENGINE...",
+
+        "PLAYLIST LOOP ENABLED...",
+
+        "CROWRULES TV ONLINE"
+
+    ];
+
+
+    let index = 0;
+
+
+    const timer =
+        setInterval(() => {
+
+            loading.innerHTML =
+                messages[index];
+
+            index++;
+
+
+            if (
+                index >=
+                messages.length
+            ) {
+
+                clearInterval(timer);
+
+                setTimeout(() => {
+
+                    loading.style.display =
+                        "none";
+
+                }, 700);
+
+            }
+
+        }, 650);
 
 }
 
-break;
 
-}
-
-});
-
-
-
-/* ==========================================================
-   THEME SYSTEM
-========================================================== */
-
-
-function saveTheme(theme){
-
-localStorage.setItem(
-"crow_theme",
-theme
-);
-
-}
-
-
-
-function loadTheme(){
-
-const theme=
-localStorage.getItem(
-"crow_theme"
-);
-
-
-if(theme){
-
-document.body.dataset.theme=
-theme;
-
-}
-
-}
-
-
-
-/* ==========================================================
-   ERROR HANDLING
-========================================================== */
-
-
-window.onerror=
-function(message){
-
-console.log(
-"CrowRules Error:",
-message
-);
-
-};
-
-
-
-/* ==========================================================
+/* =========================================================
    FINAL BOOT
-========================================================== */
-
+========================================================= */
 
 window.addEventListener(
-"load",
-()=>{
+    "load",
+    () => {
 
-loadTheme();
+        loadState();
 
-broadcastStartup();
+        renderChannels();
 
+        renderPlaylist();
 
-setTimeout(()=>{
+        renderLibrary();
 
-refreshLiveBroadcast();
+        renderOriginals();
 
-},1500);
+        renderGuide();
 
+        renderLiveChannels();
 
-console.log(`
-
-================================
-
- CROWRULES TV
- BROADCAST NETWORK v11 ULTIMATE
-
- PROJECT RAVEN ONLINE
-
- LIVE TV ENGINE:
- NO API KEY
-
-================================
-
-`);
+        broadcastStartup();
 
 
-console.log(
-networkDiagnostics()
+        setTimeout(() => {
+
+            refreshLiveBroadcast();
+
+        }, 1500);
+
+
+        console.log(
+            "CrowRules TV v11 Ultimate Online"
+        );
+
+        console.log(
+            "Playlist Loop: ENABLED"
+        );
+
+        console.log(
+            "Live Engine: NO API KEY"
+        );
+
+    }
 );
 
-});
-
 </script>
 
 
-
-<!-- ==========================================================
+<!-- =====================================================
      YOUTUBE IFRAME API
-========================================================== -->
+===================================================== -->
 
-<script
-src="https://www.youtube.com/iframe_api">
-</script>
-
+<script src="https://www.youtube.com/iframe_api"></script>
 
 </body>
-
 </html>
-```
