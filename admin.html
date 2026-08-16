@@ -1,0 +1,4140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>CrowRules Admin | Control Center</title>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --cyan: #00ffff;
+    --green: #00ff66;
+    --red: #ff4444;
+    --yellow: #ffd84d;
+    --bg: #050505;
+    --panel: #0b0b0b;
+    --panel2: #111;
+    --border: rgba(0,255,255,.18);
+    --muted: #888;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: #fff;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+#loginScreen {
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 25px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(0,255,255,.08),
+            transparent 50%
+        );
+}
+
+.login-box {
+    width: 100%;
+    max-width: 430px;
+
+    background:
+        rgba(10,10,10,.92);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 20px;
+
+    padding: 40px;
+
+    box-shadow:
+        0 0 50px rgba(0,255,255,.05);
+}
+
+.login-logo {
+    text-align: center;
+
+    font-family: 'Orbitron';
+
+    color: var(--cyan);
+
+    font-size: 2rem;
+
+    letter-spacing: 2px;
+
+    text-shadow:
+        0 0 20px rgba(0,255,255,.6);
+}
+
+.login-subtitle {
+    text-align: center;
+
+    color: var(--muted);
+
+    margin-top: 10px;
+
+    font-size: 13px;
+}
+
+.form-group {
+    margin-top: 20px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 12px;
+
+    color: #aaa;
+}
+
+input,
+textarea,
+select {
+
+    width: 100%;
+
+    background: #050505;
+
+    color: #fff;
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    border-radius: 10px;
+
+    padding: 12px 14px;
+
+    font-family: inherit;
+
+    outline: none;
+
+    transition: .2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+
+    border-color: var(--cyan);
+
+    box-shadow:
+        0 0 12px rgba(0,255,255,.08);
+}
+
+textarea {
+    min-height: 120px;
+
+    resize: vertical;
+}
+
+.btn {
+
+    border: none;
+
+    border-radius: 9px;
+
+    padding: 11px 18px;
+
+    font-family: inherit;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: var(--cyan);
+
+    color: #000;
+}
+
+.btn-green {
+    background: var(--green);
+
+    color: #000;
+}
+
+.btn-danger {
+    background: var(--red);
+
+    color: #fff;
+}
+
+.btn-secondary {
+
+    background:
+        rgba(255,255,255,.06);
+
+    color: #fff;
+
+    border:
+        1px solid rgba(255,255,255,.1);
+}
+
+.login-button {
+
+    width: 100%;
+
+    margin-top: 25px;
+
+    padding: 14px;
+}
+
+.message {
+
+    margin-top: 15px;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+.message.error {
+    color: var(--red);
+}
+
+.message.success {
+    color: var(--green);
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+#app {
+    display: none;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+
+    height: 70px;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 100;
+
+    background:
+        rgba(0,0,0,.93);
+
+    backdrop-filter: blur(12px);
+
+    border-bottom:
+        1px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 25px;
+}
+
+.brand {
+
+    font-family: 'Orbitron';
+
+    color: var(--cyan);
+
+    letter-spacing: 2px;
+
+    font-size: 17px;
+}
+
+.admin-badge {
+
+    color: var(--green);
+
+    font-size: 10px;
+
+    border:
+        1px solid rgba(0,255,102,.3);
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    margin-left: 10px;
+}
+
+.top-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.user-email {
+
+    font-size: 12px;
+
+    color: #aaa;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+
+    position: fixed;
+
+    top: 70px;
+    bottom: 0;
+    left: 0;
+
+    width: 230px;
+
+    background:
+        #080808;
+
+    border-right:
+        1px solid var(--border);
+
+    padding: 25px 15px;
+
+    overflow-y: auto;
+}
+
+.sidebar button {
+
+    width: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    color: #aaa;
+
+    text-align: left;
+
+    padding: 13px 15px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    margin-bottom: 5px;
+
+    transition: .2s;
+}
+
+.sidebar button:hover,
+.sidebar button.active {
+
+    background:
+        rgba(0,255,255,.07);
+
+    color: var(--cyan);
+}
+
+.sidebar .section-label {
+
+    font-size: 9px;
+
+    color: #555;
+
+    letter-spacing: 2px;
+
+    margin:
+        20px 15px 8px;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+
+    margin-left: 230px;
+
+    padding:
+        105px 35px 50px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.page-title {
+
+    font-family: 'Orbitron';
+
+    color: var(--cyan);
+
+    font-size: 25px;
+
+    margin-bottom: 8px;
+}
+
+.page-subtitle {
+
+    color: #777;
+
+    font-size: 13px;
+
+    margin-bottom: 30px;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px,1fr)
+        );
+
+    gap: 18px;
+
+    margin-bottom: 30px;
+}
+
+.stat {
+
+    background:
+        rgba(255,255,255,.035);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 22px;
+}
+
+.stat-label {
+
+    color: #777;
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+.stat-value {
+
+    font-family: 'Orbitron';
+
+    color: var(--cyan);
+
+    font-size: 30px;
+
+    margin-top: 8px;
+}
+
+/* =========================================================
+   PANELS
+========================================================= */
+
+.panel {
+
+    background:
+        rgba(255,255,255,.025);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    margin-bottom: 25px;
+}
+
+.panel-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+}
+
+.panel-title {
+
+    font-family: 'Orbitron';
+
+    color: var(--cyan);
+
+    font-size: 15px;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 650px;
+}
+
+th {
+
+    color: #777;
+
+    text-transform: uppercase;
+
+    font-size: 10px;
+
+    letter-spacing: 1px;
+
+    text-align: left;
+
+    padding: 12px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.1);
+}
+
+td {
+
+    padding: 13px 12px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.06);
+
+    font-size: 13px;
+}
+
+.actions {
+
+    display: flex;
+
+    gap: 7px;
+}
+
+.actions .btn {
+
+    padding: 7px 10px;
+
+    font-size: 11px;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(0,0,0,.78);
+
+    z-index: 500;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-box {
+
+    width: 100%;
+
+    max-width: 650px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background:
+        #0b0b0b;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 18px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 0 60px rgba(0,0,0,.8);
+}
+
+.modal-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.modal-title {
+
+    font-family: 'Orbitron';
+
+    color: var(--cyan);
+}
+
+.close {
+
+    border: none;
+
+    background: transparent;
+
+    color: #aaa;
+
+    font-size: 25px;
+
+    cursor: pointer;
+}
+
+.modal-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty {
+
+    padding: 35px;
+
+    text-align: center;
+
+    color: #666;
+
+    border:
+        1px dashed rgba(255,255,255,.1);
+
+    border-radius: 10px;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+#toast {
+
+    position: fixed;
+
+    bottom: 25px;
+
+    right: 25px;
+
+    z-index: 1000;
+
+    background:
+        #111;
+
+    border:
+        1px solid var(--border);
+
+    padding: 14px 18px;
+
+    border-radius: 10px;
+
+    transform:
+        translateY(100px);
+
+    opacity: 0;
+
+    transition: .3s;
+
+    font-size: 13px;
+}
+
+#toast.show {
+
+    transform:
+        translateY(0);
+
+    opacity: 1;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:850px) {
+
+    .sidebar {
+
+        width: 65px;
+
+        padding:
+            20px 8px;
+    }
+
+    .sidebar button {
+
+        font-size: 0;
+
+        text-align: center;
+    }
+
+    .sidebar button::first-letter {
+
+        font-size: 18px;
+    }
+
+    .sidebar .section-label {
+
+        display: none;
+    }
+
+    .main {
+
+        margin-left: 65px;
+
+        padding:
+            100px 18px 40px;
+    }
+
+    .user-email {
+
+        display: none;
+    }
+
+    .brand {
+
+        font-size: 13px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- =========================================================
+     LOGIN
+========================================================= -->
+
+<div id="loginScreen">
+
+    <div class="login-box">
+
+        <div class="login-logo">
+            CROWRULES
+        </div>
+
+        <div class="login-subtitle">
+            ENTERTAINMENT CONTROL CENTER
+        </div>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label>
+                    EMAIL
+                </label>
+
+                <input
+                    id="loginEmail"
+                    type="email"
+                    required
+                    autocomplete="email"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    PASSWORD
+                </label>
+
+                <input
+                    id="loginPassword"
+                    type="password"
+                    required
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+            <button
+                class="btn btn-primary login-button"
+                type="submit"
+            >
+                ENTER CONTROL CENTER
+            </button>
+
+        </form>
+
+        <div
+            id="loginMessage"
+            class="message"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     APP
+========================================================= -->
+
+<div id="app">
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            CROWRULES
+
+            <span class="admin-badge">
+                ADMIN
+            </span>
+
+        </div>
+
+        <div class="top-right">
+
+            <span
+                id="userEmail"
+                class="user-email"
+            ></span>
+
+            <button
+                class="btn btn-secondary"
+                onclick="logout()"
+            >
+                LOG OUT
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="section-label">
+            CONTROL CENTER
+        </div>
+
+        <button
+            class="active"
+            onclick="showPage('dashboard', this)"
+        >
+            📊 Dashboard
+        </button>
+
+        <div class="section-label">
+            PROGRAMMING
+        </div>
+
+        <button
+            onclick="showPage('shows', this)"
+        >
+            🎬 Shows
+        </button>
+
+        <button
+            onclick="showPage('episodes', this)"
+        >
+            🎞 Episodes
+        </button>
+
+        <button
+            onclick="showPage('schedule', this)"
+        >
+            📅 Schedule
+        </button>
+
+        <div class="section-label">
+            BROADCAST
+        </div>
+
+        <button
+            onclick="showPage('announcements', this)"
+        >
+            📢 Announcements
+        </button>
+
+        <button
+            onclick="showPage('live', this)"
+        >
+            🔴 Live Events
+        </button>
+
+        <div class="section-label">
+            SYSTEM
+        </div>
+
+        <button
+            onclick="showPage('settings', this)"
+        >
+            ⚙️ Site Settings
+        </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <section
+            id="page-dashboard"
+            class="page active"
+        >
+
+            <h1 class="page-title">
+                CONTROL CENTER
+            </h1>
+
+            <p class="page-subtitle">
+                CrowRules Entertainment network overview.
+            </p>
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Published Shows
+                    </div>
+
+                    <div
+                        id="statShows"
+                        class="stat-value"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Episodes
+                    </div>
+
+                    <div
+                        id="statEpisodes"
+                        class="stat-value"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Schedule Items
+                    </div>
+
+                    <div
+                        id="statSchedule"
+                        class="stat-value"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Live Events
+                    </div>
+
+                    <div
+                        id="statLive"
+                        class="stat-value"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+                        CROWRULES NETWORK
+                    </div>
+
+                </div>
+
+                <p style="line-height:1.8;color:#aaa">
+
+                    Welcome to the CrowRules Entertainment
+                    Control Center. This is the administrative
+                    hub for managing programming, shows,
+                    episodes, schedules, announcements and
+                    live broadcasts.
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SHOWS
+        ================================================== -->
+
+        <section
+            id="page-shows"
+            class="page"
+        >
+
+            <h1 class="page-title">
+                SHOWS
+            </h1>
+
+            <p class="page-subtitle">
+                Manage CrowRules original programming.
+            </p>
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+                        ORIGINAL SERIES
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="openShowModal()"
+                    >
+                        + ADD SHOW
+                    </button>
+
+                </div>
+
+                <div
+                    id="showsTable"
+                    class="table-wrap"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             EPISODES
+        ================================================== -->
+
+        <section
+            id="page-episodes"
+            class="page"
+        >
+
+            <h1 class="page-title">
+                EPISODES
+            </h1>
+
+            <p class="page-subtitle">
+                Manage seasons and individual episodes.
+            </p>
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+                        EPISODE LIBRARY
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="openEpisodeModal()"
+                    >
+                        + ADD EPISODE
+                    </button>
+
+                </div>
+
+                <div
+                    id="episodesTable"
+                    class="table-wrap"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SCHEDULE
+        ================================================== -->
+
+        <section
+            id="page-schedule"
+            class="page"
+        >
+
+            <h1 class="page-title">
+                NETWORK SCHEDULE
+            </h1>
+
+            <p class="page-subtitle">
+                Manage upcoming CrowRules programming.
+            </p>
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+                        PROGRAMMING GRID
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="openScheduleModal()"
+                    >
+                        + ADD SCHEDULE ITEM
+                    </button>
+
+                </div>
+
+                <div
+                    id="scheduleTable"
+                    class="table-wrap"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ANNOUNCEMENTS
+        ================================================== -->
+
+        <section
+            id="page-announcements"
+            class="page"
+        >
+
+            <h1 class="page-title">
+                ANNOUNCEMENTS
+            </h1>
+
+            <p class="page-subtitle">
+                Manage the public CrowRules ticker.
+            </p>
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+                        NEWS TICKER
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="openAnnouncementModal()"
+                    >
+                        + ADD ANNOUNCEMENT
+                    </button>
+
+                </div>
+
+                <div
+                    id="announcementsTable"
+                    class="table-wrap"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LIVE
+        ================================================== -->
+
+        <section
+            id="page-live"
+            class="page"
+        >
+
+            <h1 class="page-title">
+                LIVE EVENTS
+            </h1>
+
+            <p class="page-subtitle">
+                Manage live CrowRules broadcasts.
+            </p>
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+                        LIVE BROADCASTS
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="openLiveModal()"
+                    >
+                        + ADD LIVE EVENT
+                    </button>
+
+                </div>
+
+                <div
+                    id="liveTable"
+                    class="table-wrap"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SETTINGS
+        ================================================== -->
+
+        <section
+            id="page-settings"
+            class="page"
+        >
+
+            <h1 class="page-title">
+                SITE SETTINGS
+            </h1>
+
+            <p class="page-subtitle">
+                Manage public CrowRules website settings.
+            </p>
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+                        GENERAL SETTINGS
+                    </div>
+
+                </div>
+
+                <div id="settingsForm">
+
+                    <div class="form-group">
+
+                        <label>
+                            SITE NAME
+                        </label>
+
+                        <input
+                            id="setting_site_name"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+                            DESCRIPTION
+                        </label>
+
+                        <textarea
+                            id="setting_site_description"
+                        ></textarea>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+                            TAGLINE
+                        </label>
+
+                        <input
+                            id="setting_tagline"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+                            CONTACT EMAIL
+                        </label>
+
+                        <input
+                            id="setting_contact_email"
+                            type="email"
+                        >
+
+                    </div>
+
+                    <button
+                        class="btn btn-green"
+                        style="margin-top:25px"
+                        onclick="saveSettings()"
+                    >
+                        SAVE SETTINGS
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     SHOW MODAL
+========================================================= -->
+
+<div
+    id="showModal"
+    class="modal"
+>
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                SHOW
+            </div>
+
+            <button
+                class="close"
+                onclick="closeModal('showModal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <input
+            type="hidden"
+            id="showId"
+        >
+
+        <div class="form-group">
+
+            <label>
+                TITLE
+            </label>
+
+            <input
+                id="showTitle"
+                required
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                DESCRIPTION
+            </label>
+
+            <textarea
+                id="showDescription"
+            ></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                TYPE
+            </label>
+
+            <input
+                id="showType"
+                placeholder="Original, Live, Podcast, etc."
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                STATUS
+            </label>
+
+            <select id="showStatus">
+
+                <option value="published">
+                    Published
+                </option>
+
+                <option value="draft">
+                    Draft
+                </option>
+
+                <option value="archived">
+                    Archived
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                FEATURED
+            </label>
+
+            <select id="showFeatured">
+
+                <option value="false">
+                    No
+                </option>
+
+                <option value="true">
+                    Yes
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                HOMEPAGE ORDER
+            </label>
+
+            <input
+                id="showOrder"
+                type="number"
+                value="0"
+            >
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="btn btn-secondary"
+                onclick="closeModal('showModal')"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="saveShow()"
+            >
+                SAVE SHOW
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     EPISODE MODAL
+========================================================= -->
+
+<div
+    id="episodeModal"
+    class="modal"
+>
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                EPISODE
+            </div>
+
+            <button
+                class="close"
+                onclick="closeModal('episodeModal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <input
+            type="hidden"
+            id="episodeId"
+        >
+
+        <div class="form-group">
+
+            <label>
+                SHOW
+            </label>
+
+            <select id="episodeShow"></select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                SEASON
+            </label>
+
+            <input
+                id="episodeSeason"
+                type="number"
+                value="1"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                EPISODE NUMBER
+            </label>
+
+            <input
+                id="episodeNumber"
+                type="number"
+                value="1"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                TITLE
+            </label>
+
+            <input
+                id="episodeTitle"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                DESCRIPTION
+            </label>
+
+            <textarea
+                id="episodeDescription"
+            ></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                VIDEO URL
+            </label>
+
+            <input
+                id="episodeVideo"
+                placeholder="YouTube URL"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                STATUS
+            </label>
+
+            <select id="episodeStatus">
+
+                <option value="published">
+                    Published
+                </option>
+
+                <option value="draft">
+                    Draft
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="btn btn-secondary"
+                onclick="closeModal('episodeModal')"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="saveEpisode()"
+            >
+                SAVE EPISODE
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SCHEDULE MODAL
+========================================================= -->
+
+<div
+    id="scheduleModal"
+    class="modal"
+>
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                SCHEDULE ITEM
+            </div>
+
+            <button
+                class="close"
+                onclick="closeModal('scheduleModal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <input
+            type="hidden"
+            id="scheduleId"
+        >
+
+        <div class="form-group">
+
+            <label>
+                SHOW
+            </label>
+
+            <select id="scheduleShow"></select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                START TIME
+            </label>
+
+            <input
+                id="scheduleStart"
+                type="datetime-local"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                END TIME
+            </label>
+
+            <input
+                id="scheduleEnd"
+                type="datetime-local"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                STATUS
+            </label>
+
+            <select id="scheduleStatus">
+
+                <option value="published">
+                    Published
+                </option>
+
+                <option value="draft">
+                    Draft
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="btn btn-secondary"
+                onclick="closeModal('scheduleModal')"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="saveSchedule()"
+            >
+                SAVE SCHEDULE
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ANNOUNCEMENT MODAL
+========================================================= -->
+
+<div
+    id="announcementModal"
+    class="modal"
+>
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                ANNOUNCEMENT
+            </div>
+
+            <button
+                class="close"
+                onclick="closeModal('announcementModal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <input
+            type="hidden"
+            id="announcementId"
+        >
+
+        <div class="form-group">
+
+            <label>
+                MESSAGE
+            </label>
+
+            <textarea
+                id="announcementMessage"
+            ></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                PRIORITY
+            </label>
+
+            <input
+                id="announcementPriority"
+                type="number"
+                value="0"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                ACTIVE
+            </label>
+
+            <select id="announcementActive">
+
+                <option value="true">
+                    Active
+                </option>
+
+                <option value="false">
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="btn btn-secondary"
+                onclick="closeModal('announcementModal')"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="saveAnnouncement()"
+            >
+                SAVE ANNOUNCEMENT
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     LIVE MODAL
+========================================================= -->
+
+<div
+    id="liveModal"
+    class="modal"
+>
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                LIVE EVENT
+            </div>
+
+            <button
+                class="close"
+                onclick="closeModal('liveModal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <input
+            type="hidden"
+            id="liveId"
+        >
+
+        <div class="form-group">
+
+            <label>
+                SHOW
+            </label>
+
+            <select id="liveShow"></select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                TITLE
+            </label>
+
+            <input
+                id="liveTitle"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                DESCRIPTION
+            </label>
+
+            <textarea
+                id="liveDescription"
+            ></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                YOUTUBE URL
+            </label>
+
+            <input
+                id="liveYoutube"
+                placeholder="https://youtube.com/..."
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                SCHEDULED START
+            </label>
+
+            <input
+                id="liveStart"
+                type="datetime-local"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                SCHEDULED END
+            </label>
+
+            <input
+                id="liveEnd"
+                type="datetime-local"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                PUBLIC
+            </label>
+
+            <select id="livePublic">
+
+                <option value="true">
+                    Yes
+                </option>
+
+                <option value="false">
+                    No
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="btn btn-secondary"
+                onclick="closeModal('liveModal')"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="saveLive()"
+            >
+                SAVE LIVE EVENT
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="toast"></div>
+
+
+<script>
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const SUPABASE_URL =
+    "https://rrdlrplcjqqnodlfiusx.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_PpcRuRCM6L1LHNR0fgl_TQ_j4KFS0e7";
+
+const db = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function esc(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) return "";
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+function toast(message) {
+
+    const el =
+        document.getElementById("toast");
+
+    el.textContent = message;
+
+    el.classList.add("show");
+
+    setTimeout(() => {
+
+        el.classList.remove("show");
+
+    }, 3000);
+}
+
+
+function closeModal(id) {
+
+    document
+        .getElementById(id)
+        .classList.remove("open");
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+document
+    .getElementById("loginForm")
+    .addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const email =
+                document
+                    .getElementById("loginEmail")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("loginPassword")
+                    .value;
+
+            const message =
+                document
+                    .getElementById("loginMessage");
+
+            message.textContent =
+                "Authenticating...";
+
+            message.className =
+                "message";
+
+            const {
+                data,
+                error
+            } = await db.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+
+                message.textContent =
+                    error.message;
+
+                message.className =
+                    "message error";
+
+                return;
+            }
+
+            await initializeApp(
+                data.user
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   AUTH CHECK
+========================================================= */
+
+async function checkSession() {
+
+    const {
+        data: {
+            session
+        }
+    } = await db.auth.getSession();
+
+    if (!session) {
+
+        showLogin();
+
+        return;
+    }
+
+    await initializeApp(
+        session.user
+    );
+}
+
+
+async function initializeApp(user) {
+
+    const {
+        data: roles,
+        error
+    } = await db
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+    if (error) {
+
+        showLoginError(
+            "Unable to verify administrator permissions."
+        );
+
+        await db.auth.signOut();
+
+        return;
+    }
+
+    const allowed =
+        roles &&
+        roles.some(item =>
+            [
+                "owner",
+                "admin",
+                "editor"
+            ].includes(item.role)
+        );
+
+    if (!allowed) {
+
+        showLoginError(
+            "This account does not have CrowRules administrative access."
+        );
+
+        await db.auth.signOut();
+
+        return;
+    }
+
+    document
+        .getElementById("loginScreen")
+        .style.display = "none";
+
+    document
+        .getElementById("app")
+        .style.display = "block";
+
+    document
+        .getElementById("userEmail")
+        .textContent = user.email || "";
+
+    loadDashboard();
+
+}
+
+
+function showLogin() {
+
+    document
+        .getElementById("loginScreen")
+        .style.display = "flex";
+
+    document
+        .getElementById("app")
+        .style.display = "none";
+}
+
+
+function showLoginError(message) {
+
+    const el =
+        document.getElementById(
+            "loginMessage"
+        );
+
+    el.textContent = message;
+
+    el.className =
+        "message error";
+}
+
+
+async function logout() {
+
+    await db.auth.signOut();
+
+    showLogin();
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function showPage(page, button) {
+
+    document
+        .querySelectorAll(".page")
+        .forEach(item =>
+            item.classList.remove("active")
+        );
+
+    document
+        .getElementById(
+            "page-" + page
+        )
+        .classList.add("active");
+
+    document
+        .querySelectorAll(".sidebar button")
+        .forEach(item =>
+            item.classList.remove("active")
+        );
+
+    if (button) {
+
+        button.classList.add("active");
+
+    }
+
+    if (page === "dashboard")
+        loadDashboard();
+
+    if (page === "shows")
+        loadShowsTable();
+
+    if (page === "episodes")
+        loadEpisodesTable();
+
+    if (page === "schedule")
+        loadScheduleTable();
+
+    if (page === "announcements")
+        loadAnnouncementsTable();
+
+    if (page === "live")
+        loadLiveTable();
+
+    if (page === "settings")
+        loadSettings();
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+async function countTable(
+    table,
+    filter = null
+) {
+
+    let query =
+        db
+            .from(table)
+            .select("*", {
+                count: "exact",
+                head: true
+            });
+
+    if (filter) {
+
+        query =
+            query.eq(
+                filter.column,
+                filter.value
+            );
+
+    }
+
+    const {
+        count,
+        error
+    } = await query;
+
+    if (error) {
+
+        console.error(
+            table,
+            error
+        );
+
+        return 0;
+    }
+
+    return count || 0;
+}
+
+
+async function loadDashboard() {
+
+    const [
+        shows,
+        episodes,
+        schedule,
+        live
+    ] = await Promise.all([
+
+        countTable(
+            "shows",
+            {
+                column: "status",
+                value: "published"
+            }
+        ),
+
+        countTable("episodes"),
+
+        countTable("schedule"),
+
+        countTable("live_events")
+
+    ]);
+
+    document
+        .getElementById("statShows")
+        .textContent = shows;
+
+    document
+        .getElementById("statEpisodes")
+        .textContent = episodes;
+
+    document
+        .getElementById("statSchedule")
+        .textContent = schedule;
+
+    document
+        .getElementById("statLive")
+        .textContent = live;
+}
+
+
+/* =========================================================
+   SHOWS
+========================================================= */
+
+async function loadShowsTable() {
+
+    const container =
+        document.getElementById(
+            "showsTable"
+        );
+
+    const {
+        data,
+        error
+    } = await db
+        .from("shows")
+        .select("*")
+        .order("homepage_order", {
+            ascending: true
+        });
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty">
+                No shows found.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Featured</th>
+                    <th>Order</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                ${data.map(show => `
+
+                    <tr>
+
+                        <td>
+                            ${esc(show.title)}
+                        </td>
+
+                        <td>
+                            ${esc(show.status)}
+                        </td>
+
+                        <td>
+                            ${show.featured ? "YES" : "NO"}
+                        </td>
+
+                        <td>
+                            ${show.homepage_order ?? 0}
+                        </td>
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="btn btn-secondary"
+                                    onclick='editShow(${JSON.stringify(show)})'
+                                >
+                                    EDIT
+                                </button>
+
+                                <button
+                                    class="btn btn-danger"
+                                    onclick="deleteShow('${show.id}')"
+                                >
+                                    DELETE
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+
+        </table>
+    `;
+}
+
+
+function openShowModal(show = null) {
+
+    document
+        .getElementById("showModal")
+        .classList.add("open");
+
+    document
+        .getElementById("showId")
+        .value =
+            show?.id || "";
+
+    document
+        .getElementById("showTitle")
+        .value =
+            show?.title || "";
+
+    document
+        .getElementById("showDescription")
+        .value =
+            show?.description || "";
+
+    document
+        .getElementById("showType")
+        .value =
+            show?.show_type || "";
+
+    document
+        .getElementById("showStatus")
+        .value =
+            show?.status || "published";
+
+    document
+        .getElementById("showFeatured")
+        .value =
+            String(
+                show?.featured || false
+            );
+
+    document
+        .getElementById("showOrder")
+        .value =
+            show?.homepage_order ?? 0;
+}
+
+
+function editShow(show) {
+
+    openShowModal(show);
+
+}
+
+
+async function saveShow() {
+
+    const id =
+        document
+            .getElementById("showId")
+            .value;
+
+    const payload = {
+
+        title:
+            document
+                .getElementById("showTitle")
+                .value
+                .trim(),
+
+        description:
+            document
+                .getElementById("showDescription")
+                .value
+                .trim(),
+
+        show_type:
+            document
+                .getElementById("showType")
+                .value
+                .trim(),
+
+        status:
+            document
+                .getElementById("showStatus")
+                .value,
+
+        featured:
+            document
+                .getElementById("showFeatured")
+                .value === "true",
+
+        homepage_order:
+            Number(
+                document
+                    .getElementById("showOrder")
+                    .value
+            )
+
+    };
+
+    let result;
+
+    if (id) {
+
+        result =
+            await db
+                .from("shows")
+                .update(payload)
+                .eq("id", id);
+
+    } else {
+
+        result =
+            await db
+                .from("shows")
+                .insert(payload);
+
+    }
+
+    if (result.error) {
+
+        toast(
+            result.error.message
+        );
+
+        return;
+    }
+
+    closeModal("showModal");
+
+    toast("Show saved.");
+
+    loadShowsTable();
+
+}
+
+
+async function deleteShow(id) {
+
+    if (
+        !confirm(
+            "Delete this show?"
+        )
+    ) return;
+
+    const {
+        error
+    } = await db
+        .from("shows")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+
+        toast(error.message);
+
+        return;
+    }
+
+    toast("Show deleted.");
+
+    loadShowsTable();
+
+}
+
+
+/* =========================================================
+   EPISODES
+========================================================= */
+
+async function loadShowOptions(
+    selectId
+) {
+
+    const {
+        data,
+        error
+    } = await db
+        .from("shows")
+        .select("id,title")
+        .order("title");
+
+    const select =
+        document.getElementById(
+            selectId
+        );
+
+    if (error) {
+
+        select.innerHTML =
+            "<option>Unable to load shows</option>";
+
+        return;
+    }
+
+    select.innerHTML =
+        (data || []).map(show => `
+
+            <option value="${show.id}">
+                ${esc(show.title)}
+            </option>
+
+        `).join("");
+}
+
+
+async function loadEpisodesTable() {
+
+    const container =
+        document.getElementById(
+            "episodesTable"
+        );
+
+    const {
+        data,
+        error
+    } = await db
+        .from("episodes")
+        .select(`
+            *,
+            shows(title)
+        `)
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty">
+                No episodes found.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Show</th>
+                    <th>Episode</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                ${data.map(ep => `
+
+                    <tr>
+
+                        <td>
+                            ${esc(
+                                ep.shows?.title || ""
+                            )}
+                        </td>
+
+                        <td>
+                            S${ep.season_number ?? 1}
+                            E${ep.episode_number ?? 1}
+                        </td>
+
+                        <td>
+                            ${esc(ep.title)}
+                        </td>
+
+                        <td>
+                            ${esc(ep.status)}
+                        </td>
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="btn btn-secondary"
+                                    onclick='editEpisode(${JSON.stringify(ep)})'
+                                >
+                                    EDIT
+                                </button>
+
+                                <button
+                                    class="btn btn-danger"
+                                    onclick="deleteEpisode('${ep.id}')"
+                                >
+                                    DELETE
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+
+        </table>
+    `;
+}
+
+
+async function openEpisodeModal(
+    episode = null
+) {
+
+    await loadShowOptions(
+        "episodeShow"
+    );
+
+    document
+        .getElementById("episodeModal")
+        .classList.add("open");
+
+    document
+        .getElementById("episodeId")
+        .value =
+            episode?.id || "";
+
+    document
+        .getElementById("episodeShow")
+        .value =
+            episode?.show_id ||
+            "";
+
+    document
+        .getElementById("episodeSeason")
+        .value =
+            episode?.season_number || 1;
+
+    document
+        .getElementById("episodeNumber")
+        .value =
+            episode?.episode_number || 1;
+
+    document
+        .getElementById("episodeTitle")
+        .value =
+            episode?.title || "";
+
+    document
+        .getElementById("episodeDescription")
+        .value =
+            episode?.description || "";
+
+    document
+        .getElementById("episodeVideo")
+        .value =
+            episode?.video_url || "";
+
+    document
+        .getElementById("episodeStatus")
+        .value =
+            episode?.status || "published";
+}
+
+
+function editEpisode(episode) {
+
+    openEpisodeModal(episode);
+
+}
+
+
+async function saveEpisode() {
+
+    const id =
+        document
+            .getElementById("episodeId")
+            .value;
+
+    const payload = {
+
+        show_id:
+            document
+                .getElementById("episodeShow")
+                .value,
+
+        season_number:
+            Number(
+                document
+                    .getElementById("episodeSeason")
+                    .value
+            ),
+
+        episode_number:
+            Number(
+                document
+                    .getElementById("episodeNumber")
+                    .value
+            ),
+
+        title:
+            document
+                .getElementById("episodeTitle")
+                .value
+                .trim(),
+
+        description:
+            document
+                .getElementById("episodeDescription")
+                .value
+                .trim(),
+
+        video_url:
+            document
+                .getElementById("episodeVideo")
+                .value
+                .trim(),
+
+        status:
+            document
+                .getElementById("episodeStatus")
+                .value
+
+    };
+
+    let result;
+
+    if (id) {
+
+        result =
+            await db
+                .from("episodes")
+                .update(payload)
+                .eq("id", id);
+
+    } else {
+
+        result =
+            await db
+                .from("episodes")
+                .insert(payload);
+
+    }
+
+    if (result.error) {
+
+        toast(result.error.message);
+
+        return;
+    }
+
+    closeModal("episodeModal");
+
+    toast("Episode saved.");
+
+    loadEpisodesTable();
+
+}
+
+
+async function deleteEpisode(id) {
+
+    if (
+        !confirm(
+            "Delete this episode?"
+        )
+    ) return;
+
+    const {
+        error
+    } = await db
+        .from("episodes")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+
+        toast(error.message);
+
+        return;
+    }
+
+    toast("Episode deleted.");
+
+    loadEpisodesTable();
+}
+
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+async function loadScheduleTable() {
+
+    const container =
+        document.getElementById(
+            "scheduleTable"
+        );
+
+    const {
+        data,
+        error
+    } = await db
+        .from("schedule")
+        .select(`
+            *,
+            shows(title)
+        `)
+        .order(
+            "start_time",
+            {
+                ascending: true
+            }
+        );
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty">
+                No schedule items found.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Show</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                ${data.map(item => `
+
+                    <tr>
+
+                        <td>
+                            ${esc(
+                                item.shows?.title ||
+                                item.title ||
+                                ""
+                            )}
+                        </td>
+
+                        <td>
+                            ${formatDate(item.start_time)}
+                        </td>
+
+                        <td>
+                            ${formatDate(item.end_time)}
+                        </td>
+
+                        <td>
+                            ${esc(item.status)}
+                        </td>
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="btn btn-secondary"
+                                    onclick='editSchedule(${JSON.stringify(item)})'
+                                >
+                                    EDIT
+                                </button>
+
+                                <button
+                                    class="btn btn-danger"
+                                    onclick="deleteSchedule('${item.id}')"
+                                >
+                                    DELETE
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+
+        </table>
+    `;
+}
+
+
+function formatDate(value) {
+
+    if (!value)
+        return "—";
+
+    return new Date(value)
+        .toLocaleString(
+            "en-US",
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
+        );
+}
+
+
+function toLocalInput(value) {
+
+    if (!value)
+        return "";
+
+    const date =
+        new Date(value);
+
+    const offset =
+        date.getTimezoneOffset();
+
+    const local =
+        new Date(
+            date.getTime() -
+            offset * 60000
+        );
+
+    return local
+        .toISOString()
+        .slice(0,16);
+}
+
+
+async function openScheduleModal(
+    item = null
+) {
+
+    await loadShowOptions(
+        "scheduleShow"
+    );
+
+    document
+        .getElementById("scheduleModal")
+        .classList.add("open");
+
+    document
+        .getElementById("scheduleId")
+        .value =
+            item?.id || "";
+
+    document
+        .getElementById("scheduleShow")
+        .value =
+            item?.show_id || "";
+
+    document
+        .getElementById("scheduleStart")
+        .value =
+            toLocalInput(
+                item?.start_time
+            );
+
+    document
+        .getElementById("scheduleEnd")
+        .value =
+            toLocalInput(
+                item?.end_time
+            );
+
+    document
+        .getElementById("scheduleStatus")
+        .value =
+            item?.status ||
+            "published";
+}
+
+
+function editSchedule(item) {
+
+    openScheduleModal(item);
+
+}
+
+
+async function saveSchedule() {
+
+    const id =
+        document
+            .getElementById("scheduleId")
+            .value;
+
+    const payload = {
+
+        show_id:
+            document
+                .getElementById("scheduleShow")
+                .value,
+
+        start_time:
+            new Date(
+                document
+                    .getElementById("scheduleStart")
+                    .value
+            ).toISOString(),
+
+        end_time:
+            new Date(
+                document
+                    .getElementById("scheduleEnd")
+                    .value
+            ).toISOString(),
+
+        status:
+            document
+                .getElementById("scheduleStatus")
+                .value
+
+    };
+
+    let result;
+
+    if (id) {
+
+        result =
+            await db
+                .from("schedule")
+                .update(payload)
+                .eq("id", id);
+
+    } else {
+
+        result =
+            await db
+                .from("schedule")
+                .insert(payload);
+
+    }
+
+    if (result.error) {
+
+        toast(result.error.message);
+
+        return;
+    }
+
+    closeModal("scheduleModal");
+
+    toast("Schedule saved.");
+
+    loadScheduleTable();
+}
+
+
+async function deleteSchedule(id) {
+
+    if (
+        !confirm(
+            "Delete this schedule item?"
+        )
+    ) return;
+
+    const {
+        error
+    } = await db
+        .from("schedule")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+
+        toast(error.message);
+
+        return;
+    }
+
+    toast("Schedule item deleted.");
+
+    loadScheduleTable();
+}
+
+
+/* =========================================================
+   ANNOUNCEMENTS
+========================================================= */
+
+async function loadAnnouncementsTable() {
+
+    const container =
+        document.getElementById(
+            "announcementsTable"
+        );
+
+    const {
+        data,
+        error
+    } = await db
+        .from("announcements")
+        .select("*")
+        .order(
+            "priority",
+            {
+                ascending: false
+            }
+        );
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty">
+                No announcements found.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Message</th>
+                    <th>Priority</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                ${data.map(item => `
+
+                    <tr>
+
+                        <td>
+                            ${esc(item.message)}
+                        </td>
+
+                        <td>
+                            ${item.priority ?? 0}
+                        </td>
+
+                        <td>
+                            ${item.active ? "YES" : "NO"}
+                        </td>
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="btn btn-secondary"
+                                    onclick='editAnnouncement(${JSON.stringify(item)})'
+                                >
+                                    EDIT
+                                </button>
+
+                                <button
+                                    class="btn btn-danger"
+                                    onclick="deleteAnnouncement('${item.id}')"
+                                >
+                                    DELETE
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+
+        </table>
+    `;
+}
+
+
+function openAnnouncementModal(
+    item = null
+) {
+
+    document
+        .getElementById("announcementModal")
+        .classList.add("open");
+
+    document
+        .getElementById("announcementId")
+        .value =
+            item?.id || "";
+
+    document
+        .getElementById("announcementMessage")
+        .value =
+            item?.message || "";
+
+    document
+        .getElementById("announcementPriority")
+        .value =
+            item?.priority || 0;
+
+    document
+        .getElementById("announcementActive")
+        .value =
+            String(
+                item?.active ?? true
+            );
+}
+
+
+function editAnnouncement(item) {
+
+    openAnnouncementModal(item);
+
+}
+
+
+async function saveAnnouncement() {
+
+    const id =
+        document
+            .getElementById("announcementId")
+            .value;
+
+    const payload = {
+
+        message:
+            document
+                .getElementById(
+                    "announcementMessage"
+                )
+                .value
+                .trim(),
+
+        priority:
+            Number(
+                document
+                    .getElementById(
+                        "announcementPriority"
+                    )
+                    .value
+            ),
+
+        active:
+            document
+                .getElementById(
+                    "announcementActive"
+                )
+                .value === "true"
+
+    };
+
+    let result;
+
+    if (id) {
+
+        result =
+            await db
+                .from("announcements")
+                .update(payload)
+                .eq("id", id);
+
+    } else {
+
+        result =
+            await db
+                .from("announcements")
+                .insert(payload);
+
+    }
+
+    if (result.error) {
+
+        toast(result.error.message);
+
+        return;
+    }
+
+    closeModal(
+        "announcementModal"
+    );
+
+    toast(
+        "Announcement saved."
+    );
+
+    loadAnnouncementsTable();
+}
+
+
+async function deleteAnnouncement(id) {
+
+    if (
+        !confirm(
+            "Delete this announcement?"
+        )
+    ) return;
+
+    const {
+        error
+    } = await db
+        .from("announcements")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+
+        toast(error.message);
+
+        return;
+    }
+
+    toast(
+        "Announcement deleted."
+    );
+
+    loadAnnouncementsTable();
+}
+
+
+/* =========================================================
+   LIVE EVENTS
+========================================================= */
+
+async function loadLiveTable() {
+
+    const container =
+        document.getElementById(
+            "liveTable"
+        );
+
+    const {
+        data,
+        error
+    } = await db
+        .from("live_events")
+        .select(`
+            *,
+            shows(title)
+        `)
+        .order(
+            "scheduled_start",
+            {
+                ascending: false
+            }
+        );
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty">
+                No live events found.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Event</th>
+                    <th>Show</th>
+                    <th>Start</th>
+                    <th>Public</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                ${data.map(item => `
+
+                    <tr>
+
+                        <td>
+                            ${esc(item.title)}
+                        </td>
+
+                        <td>
+                            ${esc(
+                                item.shows?.title ||
+                                ""
+                            )}
+                        </td>
+
+                        <td>
+                            ${formatDate(
+                                item.scheduled_start
+                            )}
+                        </td>
+
+                        <td>
+                            ${item.is_public ? "YES" : "NO"}
+                        </td>
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="btn btn-secondary"
+                                    onclick='editLive(${JSON.stringify(item)})'
+                                >
+                                    EDIT
+                                </button>
+
+                                <button
+                                    class="btn btn-danger"
+                                    onclick="deleteLive('${item.id}')"
+                                >
+                                    DELETE
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+
+        </table>
+    `;
+}
+
+
+async function openLiveModal(
+    item = null
+) {
+
+    await loadShowOptions(
+        "liveShow"
+    );
+
+    document
+        .getElementById("liveModal")
+        .classList.add("open");
+
+    document
+        .getElementById("liveId")
+        .value =
+            item?.id || "";
+
+    document
+        .getElementById("liveShow")
+        .value =
+            item?.show_id || "";
+
+    document
+        .getElementById("liveTitle")
+        .value =
+            item?.title || "";
+
+    document
+        .getElementById("liveDescription")
+        .value =
+            item?.description || "";
+
+    document
+        .getElementById("liveYoutube")
+        .value =
+            item?.youtube_url || "";
+
+    document
+        .getElementById("liveStart")
+        .value =
+            toLocalInput(
+                item?.scheduled_start
+            );
+
+    document
+        .getElementById("liveEnd")
+        .value =
+            toLocalInput(
+                item?.scheduled_end
+            );
+
+    document
+        .getElementById("livePublic")
+        .value =
+            String(
+                item?.is_public ?? true
+            );
+}
+
+
+function editLive(item) {
+
+    openLiveModal(item);
+
+}
+
+
+async function saveLive() {
+
+    const id =
+        document
+            .getElementById("liveId")
+            .value;
+
+    const payload = {
+
+        show_id:
+            document
+                .getElementById("liveShow")
+                .value,
+
+        title:
+            document
+                .getElementById("liveTitle")
+                .value
+                .trim(),
+
+        description:
+            document
+                .getElementById(
+                    "liveDescription"
+                )
+                .value
+                .trim(),
+
+        youtube_url:
+            document
+                .getElementById(
+                    "liveYoutube"
+                )
+                .value
+                .trim(),
+
+        scheduled_start:
+            new Date(
+                document
+                    .getElementById(
+                        "liveStart"
+                    )
+                    .value
+            ).toISOString(),
+
+        scheduled_end:
+            document
+                .getElementById(
+                    "liveEnd"
+                )
+                .value
+                ?
+                new Date(
+                    document
+                        .getElementById(
+                            "liveEnd"
+                        )
+                        .value
+                ).toISOString()
+                :
+                null,
+
+        is_public:
+            document
+                .getElementById(
+                    "livePublic"
+                )
+                .value === "true"
+
+    };
+
+    let result;
+
+    if (id) {
+
+        result =
+            await db
+                .from("live_events")
+                .update(payload)
+                .eq("id", id);
+
+    } else {
+
+        result =
+            await db
+                .from("live_events")
+                .insert(payload);
+
+    }
+
+    if (result.error) {
+
+        toast(result.error.message);
+
+        return;
+    }
+
+    closeModal("liveModal");
+
+    toast(
+        "Live event saved."
+    );
+
+    loadLiveTable();
+}
+
+
+async function deleteLive(id) {
+
+    if (
+        !confirm(
+            "Delete this live event?"
+        )
+    ) return;
+
+    const {
+        error
+    } = await db
+        .from("live_events")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+
+        toast(error.message);
+
+        return;
+    }
+
+    toast(
+        "Live event deleted."
+    );
+
+    loadLiveTable();
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+async function loadSettings() {
+
+    const {
+        data,
+        error
+    } = await db
+        .from("site_settings")
+        .select(
+            "setting_key,setting_value"
+        );
+
+    if (error) {
+
+        toast(error.message);
+
+        return;
+    }
+
+    const settings = {};
+
+    (data || []).forEach(item => {
+
+        settings[item.setting_key] =
+            item.setting_value;
+
+    });
+
+    document
+        .getElementById(
+            "setting_site_name"
+        )
+        .value =
+            settings.site_name || "";
+
+    document
+        .getElementById(
+            "setting_site_description"
+        )
+        .value =
+            settings.site_description || "";
+
+    document
+        .getElementById(
+            "setting_tagline"
+        )
+        .value =
+            settings.tagline || "";
+
+    document
+        .getElementById(
+            "setting_contact_email"
+        )
+        .value =
+            settings.contact_email || "";
+}
+
+
+async function saveSetting(
+    key,
+    value
+) {
+
+    const {
+        data: existing
+    } = await db
+        .from("site_settings")
+        .select("id")
+        .eq("setting_key", key)
+        .maybeSingle();
+
+    let result;
+
+    if (existing) {
+
+        result =
+            await db
+                .from("site_settings")
+                .update({
+                    setting_value: value
+                })
+                .eq("id", existing.id);
+
+    } else {
+
+        result =
+            await db
+                .from("site_settings")
+                .insert({
+                    setting_key: key,
+                    setting_value: value
+                });
+
+    }
+
+    return result;
+}
+
+
+async function saveSettings() {
+
+    const settings = {
+
+        site_name:
+            document
+                .getElementById(
+                    "setting_site_name"
+                )
+                .value
+                .trim(),
+
+        site_description:
+            document
+                .getElementById(
+                    "setting_site_description"
+                )
+                .value
+                .trim(),
+
+        tagline:
+            document
+                .getElementById(
+                    "setting_tagline"
+                )
+                .value
+                .trim(),
+
+        contact_email:
+            document
+                .getElementById(
+                    "setting_contact_email"
+                )
+                .value
+                .trim()
+
+    };
+
+    for (
+        const [
+            key,
+            value
+        ]
+        of Object.entries(settings)
+    ) {
+
+        const result =
+            await saveSetting(
+                key,
+                value
+            );
+
+        if (result.error) {
+
+            toast(
+                result.error.message
+            );
+
+            return;
+        }
+    }
+
+    toast(
+        "Site settings saved."
+    );
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+checkSession();
+
+</script>
+
+</body>
+</html>
