@@ -4808,154 +4808,729 @@ async function loadSchedule() {
 
 
 /* =========================================================
-   LIVE EVENTS
+   CROW RULES TV
+   LIVE EVENTS — v2.1
+   ---------------------------------------------------------
+   YouTube Live:
+   Tacoma Nights / CrowRules Live
+   Video ID: rETdZlUY6qU
+
+   Features:
+   • Upcoming event countdown
+   • Automatic transition to LIVE
+   • Automatic YouTube player
+   • Muted autoplay
+   • No manual refresh required
+   • 15-second event status checking
+   • Automatic return to OFF AIR
+========================================================= */
+
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const LIVE_REFRESH_INTERVAL = 15000;
+
+const DEFAULT_YOUTUBE_VIDEO_ID =
+    "rETdZlUY6qU";
+
+
+/* =========================================================
+   LIVE EVENT TIMERS
+========================================================= */
+
+let liveEventTimer = null;
+let liveEventRefreshTimer = null;
+
+
+/* =========================================================
+   LOAD LIVE EVENTS
 ========================================================= */
 
 async function loadLiveEvents() {
+
+    const container =
+        document.getElementById("liveContainer");
+
+    if (!container) return;
+
+
+    const now =
+        new Date();
+
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("live_events")
+            .select(`
+                *,
+                shows (
+                    title
+                )
+            `)
+            .eq("is_public", true)
+            .order("scheduled_start", {
+                ascending: true
+            })
+            .limit(10);
+
+
+        if (error) {
+
+            console.error(
+                "CrowRules Live Events:",
+                error
+            );
+
+            renderOffAir();
+
+            return;
+        }
+
+
+        if (!data || data.length === 0) {
+
+            renderOffAir();
+
+            return;
+        }
+
+
+        /* -----------------------------------------------------
+           FIND CURRENT LIVE EVENT
+        ----------------------------------------------------- */
+
+        const liveEvent =
+            data.find(event => {
+
+                const start =
+                    new Date(
+                        event.scheduled_start
+                    );
+
+
+                const end =
+                    event.scheduled_end
+                        ? new Date(
+                            event.scheduled_end
+                        )
+                        : null;
+
+
+                return (
+                    start <= now &&
+                    (
+                        !end ||
+                        end >= now
+                    )
+                );
+
+            });
+
+
+        /* -----------------------------------------------------
+           LIVE
+        ----------------------------------------------------- */
+
+        if (liveEvent) {
+
+            renderLiveEvent(
+                liveEvent
+            );
+
+            return;
+        }
+
+
+        /* -----------------------------------------------------
+           FIND NEXT EVENT
+        ----------------------------------------------------- */
+
+        const nextEvent =
+            data
+                .filter(event => {
+
+                    return (
+                        new Date(
+                            event.scheduled_start
+                        ) > now
+                    );
+
+                })
+                .sort((a, b) => {
+
+                    return (
+                        new Date(
+                            a.scheduled_start
+                        ) -
+                        new Date(
+                            b.scheduled_start
+                        )
+                    );
+
+                })[0];
+
+
+        if (nextEvent) {
+
+            renderUpcomingEvent(
+                nextEvent
+            );
+
+            return;
+        }
+
+
+        /* -----------------------------------------------------
+           NOTHING SCHEDULED
+        ----------------------------------------------------- */
+
+        renderOffAir();
+
+
+    } catch (error) {
+
+        console.error(
+            "CrowRules Live Event Error:",
+            error
+        );
+
+        renderOffAir();
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER LIVE EVENT
+========================================================= */
+
+function renderLiveEvent(event) {
 
     const container =
         document.getElementById(
             "liveContainer"
         );
 
-
-    const now =
-        new Date().toISOString();
+    if (!container) return;
 
 
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("live_events")
-        .select(`
-            *,
-            shows (
-                title
-            )
-        `)
-        .eq("is_public", true)
-        .lte(
-            "scheduled_start",
-            now
-        )
-        .or(
-            "scheduled_end.is.null,scheduled_end.gte." +
-            now
-        )
-        .limit(5);
+    clearLiveEventTimer();
 
 
-    if (error) {
+    const title =
+        event.shows?.title ||
+        event.title ||
+        "CrowRules Live";
 
-        console.error(
-            "Live events:",
-            error
+
+    const description =
+        event.description ||
+        "CrowRules Entertainment live broadcast.";
+
+
+    /*
+       Use the database YouTube URL first.
+
+       If no URL exists, use the CrowRules default
+       YouTube Live video ID.
+    */
+
+    const youtubeId =
+        getYouTubeVideoId(
+            event.youtube_url
+        ) ||
+        DEFAULT_YOUTUBE_VIDEO_ID;
+
+
+    /* ---------------------------------------------------------
+       YOUTUBE LIVE PLAYER
+    --------------------------------------------------------- */
+
+    const playerHTML = `
+
+        <div
+            class="crowrules-live-player"
+            style="
+                position:relative;
+                width:100%;
+                aspect-ratio:16 / 9;
+                margin-top:30px;
+                overflow:hidden;
+                background:#000;
+                border:1px solid rgba(0,255,255,.25);
+                box-shadow:
+                    0 0 35px rgba(0,255,255,.08);
+            "
+        >
+
+            <iframe
+
+                src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1"
+
+                title="${escapeHTML(title)}"
+
+                style="
+                    position:absolute;
+                    inset:0;
+                    width:100%;
+                    height:100%;
+                    border:0;
+                "
+
+                allow="
+                    autoplay;
+                    encrypted-media;
+                    picture-in-picture;
+                    fullscreen
+                "
+
+                allowfullscreen
+
+            ></iframe>
+
+        </div>
+
+    `;
+
+
+    /* ---------------------------------------------------------
+       LIVE EVENT HTML
+    --------------------------------------------------------- */
+
+    container.innerHTML = `
+
+        <div
+            class="crowrules-live-event"
+        >
+
+            <div class="live-status">
+
+                <span class="live-dot"></span>
+
+                LIVE NOW
+
+            </div>
+
+
+            <h3
+                style="
+                    margin-top:20px;
+                    font-family:'Orbitron';
+                    color:#00ffff;
+                "
+            >
+                ${escapeHTML(title)}
+            </h3>
+
+
+            <p
+                style="
+                    margin-top:12px;
+                    color:rgba(255,255,255,.65);
+                    line-height:1.8;
+                "
+            >
+                ${escapeHTML(description)}
+            </p>
+
+
+            ${playerHTML}
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    gap:15px;
+                    margin-top:15px;
+                    flex-wrap:wrap;
+                "
+            >
+
+                <span
+                    style="
+                        font-size:.72rem;
+                        letter-spacing:2px;
+                        color:rgba(255,255,255,.35);
+                    "
+                >
+                    CROW RULES TV
+                </span>
+
+
+                <a
+                    href="https://www.youtube.com/watch?v=${youtubeId}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-secondary"
+                >
+                    OPEN YOUTUBE
+                </a>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    scheduleLiveEventRefresh();
+
+}
+
+
+/* =========================================================
+   UPCOMING EVENT
+========================================================= */
+
+function renderUpcomingEvent(event) {
+
+    const container =
+        document.getElementById(
+            "liveContainer"
         );
 
-        renderOffAir();
-
-        return;
-
-    }
+    if (!container) return;
 
 
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        renderOffAir();
-
-        return;
-
-    }
+    clearLiveEventTimer();
 
 
-    container.innerHTML =
-        data.map(event => {
-
-            const title =
-                event.shows?.title ||
-                event.title ||
-                "CrowRules Live";
+    const title =
+        event.shows?.title ||
+        event.title ||
+        "CrowRules Live";
 
 
-            let button = "";
+    const description =
+        event.description ||
+        "Upcoming CrowRules Entertainment broadcast.";
 
 
-            if (
-                event.youtube_url
-            ) {
-
-                button = `
-
-                    <div
-                        style="
-                            margin-top:25px;
-                        "
-                    >
-
-                        <a
-                            href="${escapeHTML(
-                                event.youtube_url
-                            )}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="btn btn-primary"
-                        >
-                            WATCH LIVE
-                        </a>
-
-                    </div>
-
-                `;
-
-            }
+    const startTime =
+        new Date(
+            event.scheduled_start
+        );
 
 
-            return `
+    container.innerHTML = `
 
-                <div>
+        <div
+            class="crowrules-upcoming-event"
+        >
 
-                    <div class="live-status">
+            <div class="live-status">
 
-                        <span class="live-dot"></span>
+                <span class="live-dot"></span>
 
-                        LIVE NOW
+                NEXT UP
 
-                    </div>
+            </div>
 
-                    <h3
-                        style="
-                            margin-top:20px;
-                            font-family:'Orbitron';
-                            color:#00ffff;
-                        "
-                    >
-                        ${escapeHTML(title)}
-                    </h3>
 
-                    <p
-                        style="
-                            margin-top:12px;
-                            color:rgba(255,255,255,.65);
-                            line-height:1.8;
-                        "
-                    >
-                        ${escapeHTML(
-                            event.description ||
-                            "CrowRules Entertainment live broadcast."
-                        )}
-                    </p>
+            <h3
+                style="
+                    margin-top:20px;
+                    font-family:'Orbitron';
+                    color:#00ffff;
+                "
+            >
+                ${escapeHTML(title)}
+            </h3>
 
-                    ${button}
+
+            <p
+                style="
+                    margin-top:12px;
+                    color:rgba(255,255,255,.65);
+                    line-height:1.8;
+                "
+            >
+                ${escapeHTML(description)}
+            </p>
+
+
+            <div
+                style="
+                    margin-top:30px;
+                    padding:30px 20px;
+                    text-align:center;
+                    border:1px solid rgba(0,255,255,.18);
+                    background:rgba(0,255,255,.025);
+                "
+            >
+
+                <div
+                    style="
+                        font-family:'Orbitron';
+                        font-size:.75rem;
+                        letter-spacing:3px;
+                        color:rgba(255,255,255,.45);
+                        margin-bottom:12px;
+                    "
+                >
+                    STARTING IN
+                </div>
+
+
+                <div
+                    id="liveCountdown"
+                    style="
+                        font-family:'Orbitron';
+                        font-size:clamp(2rem,6vw,4rem);
+                        color:#00ffff;
+                        text-shadow:
+                            0 0 20px rgba(0,255,255,.35);
+                    "
+                >
+                    --:--:--
+                </div>
+
+
+                <div
+                    id="liveStartTime"
+                    style="
+                        margin-top:12px;
+                        color:rgba(255,255,255,.4);
+                        font-size:.8rem;
+                    "
+                >
+                    ${formatLiveDate(startTime)}
 
                 </div>
 
-            `;
+            </div>
 
-        }).join("");
+
+            <div
+                style="
+                    margin-top:20px;
+                    text-align:center;
+                    font-size:.72rem;
+                    color:rgba(255,255,255,.3);
+                    letter-spacing:1px;
+                "
+            >
+                THE BROADCAST WILL APPEAR HERE AUTOMATICALLY
+                WHEN IT GOES LIVE.
+            </div>
+
+        </div>
+
+    `;
+
+
+    startCountdown(
+        startTime
+    );
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+function startCountdown(startTime) {
+
+    clearLiveEventTimer();
+
+
+    function updateCountdown() {
+
+        const countdown =
+            document.getElementById(
+                "liveCountdown"
+            );
+
+
+        if (!countdown) {
+
+            clearLiveEventTimer();
+
+            return;
+        }
+
+
+        const now =
+            new Date();
+
+
+        const difference =
+            startTime.getTime() -
+            now.getTime();
+
+
+        /* -----------------------------------------------------
+           START TIME REACHED
+        ----------------------------------------------------- */
+
+        if (difference <= 0) {
+
+            clearLiveEventTimer();
+
+            loadLiveEvents();
+
+            return;
+        }
+
+
+        const totalSeconds =
+            Math.floor(
+                difference / 1000
+            );
+
+
+        const days =
+            Math.floor(
+                totalSeconds / 86400
+            );
+
+
+        const hours =
+            Math.floor(
+                (totalSeconds % 86400) / 3600
+            );
+
+
+        const minutes =
+            Math.floor(
+                (totalSeconds % 3600) / 60
+            );
+
+
+        const seconds =
+            totalSeconds % 60;
+
+
+        if (days > 0) {
+
+            countdown.textContent =
+                `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+        } else {
+
+            countdown.textContent =
+                `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+        }
+
+    }
+
+
+    updateCountdown();
+
+
+    liveEventTimer =
+        setInterval(
+            updateCountdown,
+            1000
+        );
+
+}
+
+
+/* =========================================================
+   YOUTUBE VIDEO ID PARSER
+========================================================= */
+
+function getYouTubeVideoId(url) {
+
+    if (!url) return null;
+
+
+    try {
+
+        const parsed =
+            new URL(url);
+
+
+        /* -----------------------------------------------------
+           Standard YouTube URL
+        ----------------------------------------------------- */
+
+        if (
+            parsed.hostname.includes(
+                "youtube.com"
+            ) &&
+            parsed.searchParams.get("v")
+        ) {
+
+            return parsed.searchParams.get(
+                "v"
+            );
+
+        }
+
+
+        /* -----------------------------------------------------
+           YouTube LIVE URL
+        ----------------------------------------------------- */
+
+        const liveMatch =
+            parsed.pathname.match(
+                /\/live\/([^/?]+)/
+            );
+
+
+        if (liveMatch) {
+
+            return liveMatch[1];
+
+        }
+
+
+        /* -----------------------------------------------------
+           YouTube EMBED URL
+        ----------------------------------------------------- */
+
+        const embedMatch =
+            parsed.pathname.match(
+                /\/embed\/([^/?]+)/
+            );
+
+
+        if (embedMatch) {
+
+            return embedMatch[1];
+
+        }
+
+
+        /* -----------------------------------------------------
+           Short YouTube URL
+        ----------------------------------------------------- */
+
+        if (
+            parsed.hostname ===
+            "youtu.be"
+        ) {
+
+            return parsed.pathname
+                .replace("/", "")
+                .split("?")[0];
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "YouTube URL error:",
+            error
+        );
+
+    }
+
+
+    return null;
 
 }
 
@@ -4971,6 +5546,11 @@ function renderOffAir() {
             "liveContainer"
         );
 
+    if (!container) return;
+
+
+    clearLiveEventTimer();
+
 
     container.innerHTML = `
 
@@ -4984,6 +5564,7 @@ function renderOffAir() {
 
             </div>
 
+
             <p
                 style="
                     margin-top:18px;
@@ -4995,6 +5576,7 @@ function renderOffAir() {
                 Check the network schedule for upcoming
                 programming and Tacoma Nights.
             </p>
+
 
             <div
                 style="
@@ -5016,6 +5598,125 @@ function renderOffAir() {
     `;
 
 }
+
+
+/* =========================================================
+   NUMBER PADDING
+========================================================= */
+
+function pad(number) {
+
+    return String(
+        number
+    ).padStart(
+        2,
+        "0"
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT EVENT DATE
+========================================================= */
+
+function formatLiveDate(date) {
+
+    try {
+
+        return date.toLocaleString(
+            undefined,
+            {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit"
+            }
+        );
+
+    } catch (error) {
+
+        return "";
+
+    }
+
+}
+
+
+/* =========================================================
+   TIMER CLEANUP
+========================================================= */
+
+function clearLiveEventTimer() {
+
+    if (liveEventTimer) {
+
+        clearInterval(
+            liveEventTimer
+        );
+
+        liveEventTimer = null;
+
+    }
+
+}
+
+
+/* =========================================================
+   AUTOMATIC REFRESH
+========================================================= */
+
+function scheduleLiveEventRefresh() {
+
+    if (liveEventRefreshTimer) {
+
+        clearTimeout(
+            liveEventRefreshTimer
+        );
+
+    }
+
+
+    liveEventRefreshTimer =
+        setTimeout(
+            () => {
+
+                loadLiveEvents();
+
+            },
+            LIVE_REFRESH_INTERVAL
+        );
+
+}
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+loadLiveEvents();
+
+
+/* =========================================================
+   REFRESH WHEN USER RETURNS TO TAB
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+
+            loadLiveEvents();
+
+        }
+
+    }
+);
 
 
 /* =========================================================
