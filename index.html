@@ -9,8 +9,13 @@
     content="width=device-width, initial-scale=1.0"
 >
 
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+
 <title>
-    CrowRules Entertainment v2.0
+    CrowRules Entertainment v2.1
 </title>
 
 <meta
@@ -30,7 +35,7 @@
 <style>
 
 /* =========================================================
-   CROWRULES v2.0
+   CROWRULES v2.1
    GLOBAL
 ========================================================= */
 
@@ -1268,11 +1273,144 @@ footer {
 
 }
 
+
+/* =========================================================
+   v2.1 UX / ACCESSIBILITY / MOBILE UPGRADES
+========================================================= */
+
+:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 3px;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.skip-link {
+    position: fixed;
+    left: 12px;
+    top: 12px;
+    z-index: 10000;
+    transform: translateY(-160%);
+    background: var(--accent);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-weight: 800;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+.site-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    white-space: nowrap;
+}
+
+.site-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--warning);
+    box-shadow: 0 0 8px rgba(244,185,66,.45);
+}
+
+.site-status.online::before {
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(54,217,138,.55);
+}
+
+.site-status.offline::before {
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(224,0,0,.45);
+}
+
+.card-image {
+    position: relative;
+}
+
+.card-image img {
+    transition: transform .3s ease;
+}
+
+.content-card:hover .card-image img {
+    transform: scale(1.025);
+}
+
+.card-lock {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 9px;
+    border: 1px solid rgba(224,0,0,.55);
+    border-radius: 5px;
+    background: rgba(0,0,0,.78);
+    color: #ff8a8a;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+    transform: none;
+}
+
+.auth-note {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: .75rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.modal-panel {
+    max-height: min(90vh, 900px);
+    overflow-y: auto;
+}
+
+.modal-backdrop-close {
+    position: absolute;
+    inset: 0;
+}
+
+@media (max-width: 900px) {
+    .site-status {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
 </style>
 
 </head>
 
 <body>
+
+<a class="skip-link" href="#app">Skip to content</a>
 
 
 <!-- =========================================================
@@ -1346,6 +1484,9 @@ footer {
 
 
     <div class="nav-actions">
+        <span id="siteStatus" class="site-status" aria-live="polite">
+            Connecting...
+        </span>
 
         <button
             id="searchNavButton"
@@ -1907,6 +2048,7 @@ footer {
             <button
                 id="closeAuth"
                 class="close-btn"
+                aria-label="Close login dialog"
             >
                 ×
             </button>
@@ -2032,6 +2174,7 @@ footer {
             <button
                 id="closeContent"
                 class="close-btn"
+                aria-label="Close content dialog"
             >
                 ×
             </button>
@@ -2147,7 +2290,7 @@ footer {
         © <span id="year"></span>
         CrowRules Entertainment.
         All rights reserved.
-        CrowRules Supabase v2.0.
+        CrowRules Supabase v2.1.
 
     </div>
 
@@ -2157,7 +2300,7 @@ footer {
 <script>
 
 /* =========================================================
-   CROWRULES v2.0
+   CROWRULES v2.1
    SUPABASE CONFIGURATION
 ========================================================= */
 
@@ -2173,10 +2316,10 @@ footer {
 */
 
 const SUPABASE_URL =
-    "YOUR_SUPABASE_PROJECT_URL";
+    "https://gpbpyqkkahzzmrqzbawc.supabase.co";
 
 const SUPABASE_ANON_KEY =
-    "YOUR_SUPABASE_ANON_KEY";
+    "sb_publishable_h__4L43Vc2EYAY7AmK2URQ_W1aMFfrX";
 
 
 /* =========================================================
@@ -2185,20 +2328,29 @@ const SUPABASE_ANON_KEY =
 
 let supabaseClient = null;
 
+const SUPABASE_CONFIGURED =
+    /^https:\/\/[^\s]+\.supabase\.co$/i.test(SUPABASE_URL) &&
+    /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/.test(SUPABASE_ANON_KEY);
+
 if (
-    SUPABASE_URL !==
-        "https://gpbpyqkkahzzmrqzbawc.supabase.co"
-    &&
-    SUPABASE_ANON_KEY !==
-        "sb_publishable_h__4L43Vc2EYAY7AmK2URQ_W1aMFfrX"
+    SUPABASE_CONFIGURED &&
+    window.supabase?.createClient
 ) {
-
-    supabaseClient =
-        window.supabase.createClient(
+    try {
+        supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
-            SUPABASE_ANON_KEY
+            SUPABASE_ANON_KEY,
+            {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true
+                }
+            }
         );
-
+    } catch (error) {
+        console.error("Supabase initialization failed:", error);
+    }
 }
 
 
@@ -2399,8 +2551,7 @@ function openAuth(mode = "login") {
     state.authMode =
         mode;
 
-    $("#authModal")
-        .classList.add("show");
+    openModal("#authModal");
 
     updateAuthMode();
 
@@ -2408,8 +2559,7 @@ function openAuth(mode = "login") {
 
 function closeAuth() {
 
-    $("#authModal")
-        .classList.remove("show");
+    closeModal("#authModal");
 
 }
 
@@ -2621,68 +2771,148 @@ $("#authForm")
     );
 
 
+
+/* =========================================================
+   PASSWORD RESET
+========================================================= */
+
+$("#forgotPasswordButton")?.addEventListener(
+    "click",
+    async () => {
+
+        if (!supabaseClient) {
+            showToast("Supabase is not configured.");
+            return;
+        }
+
+        const email =
+            $("#authEmail").value.trim();
+
+        if (!email) {
+            $("#authMessage").textContent =
+                "Enter your email address first.";
+            $("#authEmail").focus();
+            return;
+        }
+
+        try {
+
+            $("#authMessage").textContent =
+                "Sending password reset email...";
+
+            const {
+                error
+            } = await supabaseClient.auth.resetPasswordForEmail(
+                email,
+                {
+                    redirectTo:
+                        `${window.location.origin}${window.location.pathname}`
+                }
+            );
+
+            if (error) {
+                throw error;
+            }
+
+            $("#authMessage").textContent =
+                "Password reset instructions were sent if that email is registered.";
+
+            showToast(
+                "Check your email for password reset instructions."
+            );
+
+        } catch (error) {
+
+            console.error(error);
+
+            $("#authMessage").textContent =
+                error.message ||
+                "Unable to send password reset email.";
+
+        }
+
+    }
+);
+
 /* =========================================================
    AUTH STATE
 ========================================================= */
 
 async function initializeAuth() {
 
+    const status = $("#siteStatus");
+
     if (!supabaseClient) {
 
+        if (status) {
+            status.textContent = "Supabase not configured";
+            status.classList.add("offline");
+        }
+
         console.warn(
-            "Supabase configuration has not been added."
+            "Supabase is not configured or the public key is invalid."
         );
 
+        updateAccountButton();
         return;
-
     }
 
+    if (status) {
+        status.textContent = "Connected";
+        status.classList.add("online");
+    }
 
-    const {
-        data
-    } =
-        await supabaseClient
-            .auth
-            .getSession();
+    try {
 
+        const {
+            data,
+            error
+        } = await supabaseClient.auth.getSession();
 
-    state.user =
-        data.session
-            ? data.session.user
-            : null;
+        if (error) {
+            throw error;
+        }
 
+        state.user =
+            data?.session?.user || null;
 
-    updateAccountButton();
+        updateAccountButton();
 
+        if (state.user) {
+            await loadMemberStatus();
+        }
 
-    supabaseClient
-        .auth
-        .onAuthStateChange(
-            async (
-                event,
-                session
-            ) => {
+        supabaseClient.auth.onAuthStateChange(
+            async (event, session) => {
 
                 state.user =
-                    session
-                        ? session.user
-                        : null;
+                    session?.user || null;
 
                 updateAccountButton();
 
                 if (state.user) {
-
                     await loadMemberStatus();
-
                 } else {
-
-                    state.isMember =
-                        false;
-
+                    state.isMember = false;
                 }
 
             }
         );
+
+    } catch (error) {
+
+        console.error(
+            "Auth initialization failed:",
+            error
+        );
+
+        if (status) {
+            status.textContent = "Auth unavailable";
+            status.classList.remove("online");
+            status.classList.add("offline");
+        }
+
+    }
 
 }
 
@@ -2695,6 +2925,10 @@ function updateAccountButton() {
 
     const button =
         $("#accountButton");
+
+    if (!button) {
+        return;
+    }
 
     if (state.user) {
 
@@ -2760,7 +2994,7 @@ async function loadFeatured() {
 
         container.innerHTML =
             emptyState(
-                "Connect Supabase to load featured content."
+                "Supabase is not connected. Check the public project URL and publishable key."
             );
 
         return;
@@ -3170,8 +3404,10 @@ function contentCard(item) {
         !state.isMember;
 
     const image =
-        item.thumbnail_url ||
-        item.banner_url;
+        safeHttpUrl(
+            item.thumbnail_url ||
+            item.banner_url
+        );
 
     return `
 
@@ -3180,6 +3416,12 @@ function contentCard(item) {
         >
 
             <div class="card-image">
+
+                ${
+                    memberOnly
+                    ? `<span class="card-lock">MEMBERS</span>`
+                    : ""
+                }
 
                 ${
                     image
@@ -3369,6 +3611,15 @@ async function openContent(
     const item =
         data[0];
 
+    const safeThumbnail =
+        safeHttpUrl(item.thumbnail_url);
+
+    const safeVideo =
+        safeEmbedUrl(item.video_url);
+
+    const safeExternal =
+        safeHttpUrl(item.external_url);
+
 
     if (
         item.member_only &&
@@ -3397,13 +3648,13 @@ async function openContent(
             <div>
 
                 ${
-                    item.thumbnail_url
+                    safeThumbnail
 
                     ?
 
                     `<img
                         src="${escapeAttribute(
-                            item.thumbnail_url
+                            safeThumbnail
                         )}"
                         style="
                             width:100%;
@@ -3433,7 +3684,7 @@ async function openContent(
 
 
                 ${
-                    item.video_url
+                    safeVideo
 
                     ?
 
@@ -3446,7 +3697,7 @@ async function openContent(
 
                         <iframe
                             src="${escapeAttribute(
-                                item.video_url
+                                safeVideo
                             )}"
                             style="
                                 width:100%;
@@ -3464,7 +3715,7 @@ async function openContent(
 
 
                 ${
-                    item.external_url
+                    safeExternal
 
                     ?
 
@@ -3476,7 +3727,7 @@ async function openContent(
 
                         <a
                             href="${escapeAttribute(
-                                item.external_url
+                                safeExternal
                             )}"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -3523,8 +3774,7 @@ async function openContent(
         `;
 
 
-    $("#contentModal")
-        .classList.add("show");
+    openModal("#contentModal");
 
 
     /*
@@ -3558,6 +3808,69 @@ async function openContent(
 }
 
 
+
+/* =========================================================
+   MODAL UX
+========================================================= */
+
+function closeModal(id) {
+
+    const modal = $(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove("show");
+
+    if (
+        !document.querySelector(".modal.show")
+    ) {
+        document.body.classList.remove("modal-open");
+    }
+
+}
+
+function openModal(id) {
+
+    const modal = $(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add("show");
+    document.body.classList.add("modal-open");
+
+}
+
+document.addEventListener("keydown", event => {
+
+    if (event.key !== "Escape") {
+        return;
+    }
+
+    closeModal("#authModal");
+    closeModal("#contentModal");
+
+});
+
+$("#authModal")?.addEventListener("click", event => {
+
+    if (event.target === event.currentTarget) {
+        closeModal("#authModal");
+    }
+
+});
+
+$("#contentModal")?.addEventListener("click", event => {
+
+    if (event.target === event.currentTarget) {
+        closeModal("#contentModal");
+    }
+
+});
+
 /* =========================================================
    CLOSE CONTENT
 ========================================================= */
@@ -3567,8 +3880,7 @@ $("#closeContent")
         "click",
         () => {
 
-            $("#contentModal")
-                .classList.remove("show");
+            closeModal("#contentModal");
 
         }
     );
@@ -4429,6 +4741,11 @@ $("#logoutButton")
             state.isMember =
                 false;
 
+            state.dashboard =
+                null;
+
+            closeModal("#authModal");
+            closeModal("#contentModal");
             updateAccountButton();
 
             showPage(
@@ -4530,20 +4847,86 @@ function escapeAttribute(
 
 }
 
+function safeHttpUrl(value) {
+
+    if (!value) {
+        return "";
+    }
+
+    try {
+        const url = new URL(
+            String(value),
+            window.location.href
+        );
+
+        if (
+            url.protocol !== "http:" &&
+            url.protocol !== "https:"
+        ) {
+            return "";
+        }
+
+        return url.href;
+
+    } catch {
+        return "";
+    }
+
+}
+
+function safeEmbedUrl(value) {
+
+    const url = safeHttpUrl(value);
+
+    if (!url) {
+        return "";
+    }
+
+    return url;
+}
+
+
+/* =========================================================
+   GLOBAL ERROR HANDLING
+========================================================= */
+
+window.addEventListener("unhandledrejection", event => {
+
+    console.error(
+        "Unhandled CrowRules error:",
+        event.reason
+    );
+
+    showToast(
+        "Something went wrong. Please try again."
+    );
+
+});
+
+window.addEventListener("error", event => {
+
+    console.error(
+        "CrowRules runtime error:",
+        event.error || event.message
+    );
+
+});
+
 
 /* =========================================================
    INITIALIZE
 ========================================================= */
 
+
 async function initializeApp() {
 
     await initializeAuth();
 
-    await loadFeatured();
-
-    await loadLatest();
-
-    await renderHomeBranches();
+    await Promise.allSettled([
+        loadFeatured(),
+        loadLatest(),
+        renderHomeBranches()
+    ]);
 
 }
 
