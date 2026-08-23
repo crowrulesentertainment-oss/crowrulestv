@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,7 +25,8 @@
 /* =========================================================
    CROWRULES TV
    PLUTO-TV INSPIRED STREAMING NETWORK
-   VERSION 1.2
+   VERSION 1.3
+   LIVE TV + YOUTUBE LIVE + SUPABASE AUTH
 ========================================================= */
 
 :root {
@@ -85,6 +87,10 @@ input {
 
     font:inherit;
 
+}
+
+button {
+    -webkit-tap-highlight-color:transparent;
 }
 
 
@@ -244,7 +250,7 @@ input {
 
 
 /* =========================================================
-   MEMBER BUTTON
+   ACCOUNT
 ========================================================= */
 
 .accountButton {
@@ -455,7 +461,7 @@ input {
 
 
 /* =========================================================
-   PLAYER
+   LIVE PLAYER
 ========================================================= */
 
 .liveSection {
@@ -497,6 +503,18 @@ input {
             #050609 70%
         );
 
+    overflow:hidden;
+
+}
+
+.playerScreen iframe {
+
+    width:100%;
+
+    height:100%;
+
+    border:0;
+
 }
 
 .playerPlaceholder {
@@ -504,6 +522,8 @@ input {
     text-align:center;
 
     color:var(--muted);
+
+    padding:30px;
 
 }
 
@@ -581,6 +601,28 @@ input {
 
 }
 
+.liveDot.green {
+
+    background:var(--green);
+
+}
+
+.offlineBadge {
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    font-weight:800;
+
+}
+
 .progress {
 
     height:4px;
@@ -602,6 +644,44 @@ input {
     height:100%;
 
     background:var(--purple);
+
+}
+
+.liveMeta {
+
+    display:flex;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+
+    margin-top:12px;
+
+}
+
+.liveMetaItem {
+
+    padding:5px 9px;
+
+    background:#151922;
+
+    border:1px solid var(--border);
+
+    border-radius:999px;
+
+    color:var(--muted);
+
+    font-size:11px;
+
+}
+
+.liveMetaItem.live {
+
+    color:#86efac;
+
+    border-color:rgba(34,197,94,.3);
+
+    background:rgba(34,197,94,.08);
 
 }
 
@@ -757,6 +837,30 @@ input {
     font-size:10px;
 
     font-weight:800;
+
+}
+
+.cardBadge.live {
+
+    background:var(--red);
+
+    color:white;
+
+}
+
+.cardBadge.soon {
+
+    background:var(--yellow);
+
+    color:#111;
+
+}
+
+.cardBadge.offline {
+
+    background:#272c36;
+
+    color:#c4cad5;
 
 }
 
@@ -1027,6 +1131,92 @@ input {
 
 
 /* =========================================================
+   LIVE STATUS
+========================================================= */
+
+.liveStatusPanel {
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    padding:13px 15px;
+
+    margin-bottom:15px;
+
+    background:#0d1016;
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+}
+
+.liveStatusLeft {
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.statusIndicator {
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    background:var(--muted);
+
+}
+
+.statusIndicator.live {
+
+    background:var(--red);
+
+    box-shadow:
+        0 0 12px rgba(239,68,68,.8);
+
+}
+
+.statusIndicator.soon {
+
+    background:var(--yellow);
+
+}
+
+.statusIndicator.offline {
+
+    background:#4b5563;
+
+}
+
+.statusText {
+
+    font-size:13px;
+
+    font-weight:800;
+
+}
+
+.refreshText {
+
+    color:var(--muted);
+
+    font-size:11px;
+
+}
+
+
+/* =========================================================
    FOOTER
 ========================================================= */
 
@@ -1197,7 +1387,7 @@ input {
 
 
 /* =========================================================
-   MEMBER AUTH PANEL
+   AUTH
 ========================================================= */
 
 .authCard {
@@ -1407,6 +1597,8 @@ input {
     font-size:13px;
 
     line-height:1.5;
+
+    margin-bottom:15px;
 
 }
 
@@ -1761,6 +1953,14 @@ input {
 
     }
 
+    .liveStatusPanel {
+
+        align-items:flex-start;
+
+        flex-direction:column;
+
+    }
+
 }
 
 .hidden {
@@ -1786,6 +1986,7 @@ input {
     <button
         id="mobileToggle"
         class="mobileToggle"
+        aria-label="Open navigation"
     >
         ☰
     </button>
@@ -1909,10 +2110,45 @@ input {
 
 
 <!-- =========================================================
-     LIVE PLAYER
+     LIVE TV PLAYER
 ========================================================= -->
 
-<section class="liveSection">
+<section
+    id="livePlayerSection"
+    class="liveSection"
+>
+
+    <div
+        id="liveStatusPanel"
+        class="liveStatusPanel"
+    >
+
+        <div class="liveStatusLeft">
+
+            <span
+                id="liveStatusIndicator"
+                class="statusIndicator offline"
+            ></span>
+
+            <span
+                id="liveStatusText"
+                class="statusText"
+            >
+                Checking Live TV...
+            </span>
+
+        </div>
+
+        <div
+            id="refreshText"
+            class="refreshText"
+        >
+            Updating...
+
+        </div>
+
+    </div>
+
 
     <div class="player">
 
@@ -1925,7 +2161,8 @@ input {
 
                 <button
                     class="playButton"
-                    onclick="startPlayer()"
+                    onclick="startSelectedLiveEvent()"
+                    aria-label="Play Live TV"
                 >
                     ▶
                 </button>
@@ -1935,7 +2172,7 @@ input {
                 </div>
 
                 <small>
-                    Select a program to begin watching.
+                    Select a live program to begin watching.
                 </small>
 
             </div>
@@ -1949,11 +2186,18 @@ input {
 
                 <div>
 
-                    <div class="liveBadge">
+                    <div
+                        id="playerBadge"
+                        class="offlineBadge"
+                    >
 
-                        <span class="liveDot"></span>
+                        <span
+                            id="playerDot"
+                            class="liveDot"
+                            style="background:#4b5563"
+                        ></span>
 
-                        LIVE TV
+                        OFF AIR
 
                     </div>
 
@@ -1961,7 +2205,8 @@ input {
                         id="nowPlaying"
                         class="nowPlaying"
                     >
-                        CrowRules TV — Channel 001
+                        CrowRules TV — Select a Channel
+
                     </div>
 
                 </div>
@@ -1973,16 +2218,28 @@ input {
                         font-size:12px
                     "
                 >
-                    Up Next: Tacoma Nights
+                    Up Next: —
+
                 </div>
 
             </div>
 
+
             <div class="progress">
 
-                <div class="progressBar"></div>
+                <div
+                    id="progressBar"
+                    class="progressBar"
+                    style="width:0%"
+                ></div>
 
             </div>
+
+
+            <div
+                id="liveMeta"
+                class="liveMeta"
+            ></div>
 
         </div>
 
@@ -2056,6 +2313,10 @@ input {
 </section>
 
 
+<!-- =========================================================
+     LIVE CHANNELS
+========================================================= -->
+
 <section
     id="liveSection"
     class="section"
@@ -2067,8 +2328,10 @@ input {
             🔴 Live TV
         </h2>
 
-        <a>
-            View All
+        <a
+            onclick="refreshLiveTV()"
+        >
+            Refresh
         </a>
 
     </div>
@@ -2080,6 +2343,10 @@ input {
 
 </section>
 
+
+<!-- =========================================================
+     ON DEMAND
+========================================================= -->
 
 <section
     id="ondemandSection"
@@ -2105,6 +2372,10 @@ input {
 
 </section>
 
+
+<!-- =========================================================
+     FEATURED
+========================================================= -->
 
 <section class="section">
 
@@ -2148,6 +2419,10 @@ input {
 </section>
 
 
+<!-- =========================================================
+     ORIGINALS
+========================================================= -->
+
 <section
     id="originalsSection"
     class="section"
@@ -2173,6 +2448,10 @@ input {
 </section>
 
 
+<!-- =========================================================
+     GUIDE
+========================================================= -->
+
 <section
     id="guideSection"
     class="section"
@@ -2184,8 +2463,10 @@ input {
             📅 TV Guide
         </h2>
 
-        <a>
-            Full Schedule
+        <a
+            onclick="renderGuide()"
+        >
+            Refresh Guide
         </a>
 
     </div>
@@ -2197,6 +2478,10 @@ input {
 
 </section>
 
+
+<!-- =========================================================
+     SEARCH
+========================================================= -->
 
 <section
     id="searchSection"
@@ -2333,11 +2618,7 @@ input {
         <div class="modalBody">
 
 
-            <!-- AUTH PANEL -->
-
-            <div
-                id="authPanel"
-            >
+            <div id="authPanel">
 
                 <div class="authLogo">
                     CR
@@ -2559,9 +2840,10 @@ input {
 
                 <div class="memberStatus">
 
-                    <span class="liveDot"
-                          style="background:var(--green)">
-                    </span>
+                    <span
+                        class="liveDot"
+                        style="background:var(--green)"
+                    ></span>
 
                     MEMBER ACCOUNT ACTIVE
 
@@ -2631,6 +2913,23 @@ let supabaseClient = null;
 let currentUser = null;
 
 
+/* =========================================================
+   LIVE TV STATE
+========================================================= */
+
+let liveEvents = [];
+
+let selectedLiveEvent = null;
+
+let liveRefreshTimer = null;
+
+const LIVE_REFRESH_INTERVAL = 30000;
+
+
+/* =========================================================
+   INITIALIZE SUPABASE
+========================================================= */
+
 try {
 
     supabaseClient =
@@ -2650,7 +2949,7 @@ try {
 
 
 /* =========================================================
-   CONTENT
+   STATIC CONTENT
 ========================================================= */
 
 const content = [
@@ -2764,7 +3063,1711 @@ const channels = [
 
 
 /* =========================================================
-   CARD
+   HELPERS
+========================================================= */
+
+function escapeHTML(value) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+function escapeAttribute(value) {
+
+    return escapeHTML(value);
+
+}
+
+
+/* =========================================================
+   YOUTUBE ID
+========================================================= */
+
+function getYouTubeId(url) {
+
+    if (!url) return null;
+
+    const value =
+        String(url).trim();
+
+
+    if (
+        /^[a-zA-Z0-9_-]{11}$/.test(value)
+    ) {
+
+        return value;
+
+    }
+
+
+    const patterns = [
+
+        /youtube\.com\/watch\?v=([^?&/]+)/,
+
+        /youtube\.com\/live\/([^?&/]+)/,
+
+        /youtube\.com\/embed\/([^?&/]+)/,
+
+        /youtu\.be\/([^?&/]+)/
+
+    ];
+
+
+    for (
+        const pattern of patterns
+    ) {
+
+        const match =
+            value.match(pattern);
+
+
+        if (match) {
+
+            return match[1];
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   YOUTUBE EMBED
+========================================================= */
+
+function buildYouTubeEmbed(
+    youtubeUrl,
+    autoplay = true
+) {
+
+    const videoId =
+        getYouTubeId(youtubeUrl);
+
+
+    if (!videoId) {
+
+        return null;
+
+    }
+
+
+    const autoplayValue =
+        autoplay ? "1" : "0";
+
+
+    return `
+
+        <iframe
+
+            src="
+                https://www.youtube.com/embed/${videoId}
+                ?autoplay=${autoplayValue}
+                &rel=0
+                &modestbranding=1
+                &playsinline=1
+            "
+
+            title="CrowRules TV Live"
+
+            allow="
+                autoplay;
+                encrypted-media;
+                picture-in-picture;
+                fullscreen
+            "
+
+            allowfullscreen
+
+        ></iframe>
+
+    `;
+
+}
+
+
+/* =========================================================
+   LIVE EVENT FIELD NORMALIZATION
+========================================================= */
+
+function getLiveEventTitle(row) {
+
+    return (
+
+        row.title ||
+
+        row.name ||
+
+        row.event_title ||
+
+        row.program_title ||
+
+        row.show_title ||
+
+        "CrowRules TV Live Event"
+
+    );
+
+}
+
+
+function getLiveEventDescription(row) {
+
+    return (
+
+        row.description ||
+
+        row.event_description ||
+
+        ""
+
+    );
+
+}
+
+
+function getLiveEventYouTube(row) {
+
+    return (
+
+        row.youtube_url ||
+
+        row.youtube_link ||
+
+        row.youtube_live_url ||
+
+        row.video_url ||
+
+        row.video_link ||
+
+        ""
+
+    );
+
+}
+
+
+function getLiveEventVideoId(row) {
+
+    return (
+
+        row.youtube_video_id ||
+
+        row.video_id ||
+
+        getYouTubeId(
+            getLiveEventYouTube(row)
+        )
+
+    );
+
+}
+
+
+function getLiveEventStart(row) {
+
+    return (
+
+        row.start_time ||
+
+        row.scheduled_start_time ||
+
+        row.starts_at ||
+
+        row.start_at ||
+
+        row.scheduled_at ||
+
+        null
+
+    );
+
+}
+
+
+function getLiveEventEnd(row) {
+
+    return (
+
+        row.end_time ||
+
+        row.scheduled_end_time ||
+
+        row.ends_at ||
+
+        row.end_at ||
+
+        null
+
+    );
+
+}
+
+
+function getLiveEventStatus(row) {
+
+    const status =
+        String(
+            row.status ||
+            ""
+        ).toLowerCase()
+        .trim();
+
+
+    if (
+        row.is_live === true ||
+        row.live === true ||
+        status === "live" ||
+        status === "streaming" ||
+        status === "on_air"
+    ) {
+
+        return "live";
+
+    }
+
+
+    if (
+        status === "cancelled" ||
+        status === "canceled"
+    ) {
+
+        return "cancelled";
+
+    }
+
+
+    if (
+        status === "ended" ||
+        status === "complete" ||
+        status === "completed"
+    ) {
+
+        return "ended";
+
+    }
+
+
+    return status || "scheduled";
+
+}
+
+
+/* =========================================================
+   DETERMINE EVENT STATE
+========================================================= */
+
+function getEventState(event) {
+
+    const status =
+        getLiveEventStatus(event);
+
+
+    if (
+        status === "cancelled" ||
+        status === "ended"
+    ) {
+
+        return status;
+
+    }
+
+
+    if (status === "live") {
+
+        return "live";
+
+    }
+
+
+    const start =
+        getLiveEventStart(event);
+
+
+    const end =
+        getLiveEventEnd(event);
+
+
+    if (!start) {
+
+        return "scheduled";
+
+    }
+
+
+    const now =
+        Date.now();
+
+
+    const startTime =
+        new Date(start).getTime();
+
+
+    const endTime =
+        end
+            ? new Date(end).getTime()
+            : null;
+
+
+    if (
+        Number.isFinite(startTime) &&
+        now >= startTime &&
+        (
+            !endTime ||
+            now < endTime
+        )
+    ) {
+
+        return "live";
+
+    }
+
+
+    if (
+        Number.isFinite(startTime) &&
+        now < startTime
+    ) {
+
+        return "scheduled";
+
+    }
+
+
+    if (
+        endTime &&
+        now >= endTime
+    ) {
+
+        return "ended";
+
+    }
+
+
+    return "scheduled";
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatLiveTime(value) {
+
+    if (!value) return "";
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    return date.toLocaleString(
+        undefined,
+        {
+            weekday:"short",
+            month:"short",
+            day:"numeric",
+            hour:"numeric",
+            minute:"2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LIVE EVENT NORMALIZATION
+========================================================= */
+
+function normalizeLiveEvent(row,index) {
+
+    const youtube =
+        getLiveEventYouTube(row);
+
+
+    const videoId =
+        getLiveEventVideoId(row);
+
+
+    const state =
+        getEventState(row);
+
+
+    return {
+
+        raw:row,
+
+        id:
+            row.id ||
+            "live-" + index,
+
+        title:
+            getLiveEventTitle(row),
+
+        description:
+            getLiveEventDescription(row),
+
+        youtubeUrl:
+            youtube,
+
+        videoId:
+            videoId,
+
+        thumbnail:
+            row.thumbnail_url ||
+            row.youtube_thumbnail_url ||
+            (
+                videoId
+                    ?
+                    `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+                    :
+                    ""
+            ),
+
+        start:
+            getLiveEventStart(row),
+
+        end:
+            getLiveEventEnd(row),
+
+        status:
+            state,
+
+        channel:
+            row.channel_number ||
+            row.channel ||
+            row.channel_id ||
+            "001"
+
+    };
+
+}
+
+
+/* =========================================================
+   LOAD LIVE EVENTS
+========================================================= */
+
+async function loadLiveEvents() {
+
+    if (!supabaseClient) {
+
+        setLiveStatus(
+            "offline",
+            "Live TV unavailable"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("live_events")
+                .select("*")
+                .order(
+                    "scheduled_start_time",
+                    {
+                        ascending:true
+                    }
+                )
+                .limit(100);
+
+
+        if (error) {
+
+            console.warn(
+                "live_events query failed:",
+                error.message
+            );
+
+            setLiveStatus(
+                "offline",
+                "Live TV is currently unavailable"
+            );
+
+            renderLiveChannels([]);
+
+            renderGuide();
+
+            return;
+
+        }
+
+
+        liveEvents =
+            (data || [])
+                .map(
+                    normalizeLiveEvent
+                )
+                .sort(
+                    sortLiveEvents
+                );
+
+
+        renderLiveChannels(
+            liveEvents
+        );
+
+        renderGuide();
+
+        updateLivePlayerState();
+
+        updateRefreshText();
+
+    } catch(error) {
+
+        console.error(
+            "Live TV loading error:",
+            error
+        );
+
+        setLiveStatus(
+            "offline",
+            "Unable to load Live TV"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SORT LIVE EVENTS
+========================================================= */
+
+function sortLiveEvents(a,b) {
+
+    const stateRank = {
+
+        live:0,
+
+        scheduled:1,
+
+        ended:2,
+
+        cancelled:3
+
+    };
+
+
+    const rankA =
+        stateRank[a.status] ?? 9;
+
+
+    const rankB =
+        stateRank[b.status] ?? 9;
+
+
+    if (rankA !== rankB) {
+
+        return rankA - rankB;
+
+    }
+
+
+    const timeA =
+        a.start
+            ?
+            new Date(a.start).getTime()
+            :
+            Number.MAX_SAFE_INTEGER;
+
+
+    const timeB =
+        b.start
+            ?
+            new Date(b.start).getTime()
+            :
+            Number.MAX_SAFE_INTEGER;
+
+
+    return timeA - timeB;
+
+}
+
+
+/* =========================================================
+   LIVE CHANNEL CARD
+========================================================= */
+
+function renderLiveChannels(events) {
+
+    const container =
+        document.getElementById(
+            "liveChannels"
+        );
+
+
+    if (!events.length) {
+
+        container.innerHTML = `
+
+            <div
+                style="
+                    color:var(--muted);
+                    padding:30px;
+                    grid-column:1/-1;
+                    text-align:center;
+                "
+            >
+
+                No live programming is currently scheduled.
+
+                <br>
+
+                <small>
+                    Check back when CrowRules TV goes live.
+                </small>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const visible =
+        events
+            .filter(
+                event =>
+                    event.status !== "cancelled"
+            )
+            .slice(0,12);
+
+
+    container.innerHTML =
+        visible
+            .map(
+                event =>
+                    renderLiveEventCard(
+                        event
+                    )
+            )
+            .join("");
+
+}
+
+
+/* =========================================================
+   LIVE EVENT CARD
+========================================================= */
+
+function renderLiveEventCard(event) {
+
+    let badgeClass =
+        "offline";
+
+    let badgeText =
+        "SCHEDULED";
+
+
+    if (
+        event.status === "live"
+    ) {
+
+        badgeClass =
+            "live";
+
+        badgeText =
+            "LIVE NOW";
+
+    }
+
+
+    if (
+        event.status === "scheduled"
+    ) {
+
+        badgeClass =
+            "soon";
+
+        badgeText =
+            "STARTING SOON";
+
+    }
+
+
+    const image =
+        event.thumbnail
+            ?
+            `
+                <img
+                    src="${escapeAttribute(event.thumbnail)}"
+                    alt=""
+                >
+            `
+            :
+            `
+                <div class="cardPlaceholder">
+                    CR
+                </div>
+            `;
+
+
+    const time =
+        event.start
+            ?
+            formatLiveTime(
+                event.start
+            )
+            :
+            "Live programming";
+
+
+    return `
+
+        <article
+            class="card"
+            onclick="selectLiveEvent('${escapeAttribute(event.id)}')"
+        >
+
+            <div class="cardImage">
+
+                ${image}
+
+                <div
+                    class="
+                        cardBadge
+                        ${badgeClass}
+                    "
+                >
+                    ${badgeText}
+                </div>
+
+            </div>
+
+            <div class="cardBody">
+
+                <div class="cardTitle">
+
+                    ${escapeHTML(
+                        event.title
+                    )}
+
+                </div>
+
+                <div class="cardMeta">
+
+                    ${escapeHTML(time)}
+
+                </div>
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+
+/* =========================================================
+   SELECT LIVE EVENT
+========================================================= */
+
+function selectLiveEvent(id) {
+
+    const event =
+        liveEvents.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+
+    if (!event) return;
+
+
+    selectedLiveEvent =
+        event;
+
+
+    updateLivePlayerState();
+
+
+    scrollToSection(
+        "livePlayerSection"
+    );
+
+}
+
+
+/* =========================================================
+   START SELECTED EVENT
+========================================================= */
+
+function startSelectedLiveEvent() {
+
+    if (
+        !selectedLiveEvent
+    ) {
+
+        const live =
+            liveEvents.find(
+                event =>
+                    event.status ===
+                    "live"
+            );
+
+
+        if (live) {
+
+            selectedLiveEvent =
+                live;
+
+        } else {
+
+            const next =
+                liveEvents.find(
+                    event =>
+                        event.status ===
+                        "scheduled"
+                );
+
+
+            if (next) {
+
+                selectedLiveEvent =
+                    next;
+
+            }
+
+        }
+
+    }
+
+
+    if (
+        selectedLiveEvent
+    ) {
+
+        playLiveEvent(
+            selectedLiveEvent
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PLAY LIVE EVENT
+========================================================= */
+
+function playLiveEvent(event) {
+
+    if (!event) return;
+
+
+    selectedLiveEvent =
+        event;
+
+
+    const player =
+        document.getElementById(
+            "playerScreen"
+        );
+
+
+    const state =
+        getEventState(
+            event.raw || event
+        );
+
+
+    event.status =
+        state;
+
+
+    if (
+        state === "live"
+    ) {
+
+        const youtubeUrl =
+            event.youtubeUrl;
+
+
+        const videoId =
+            event.videoId ||
+            getYouTubeId(
+                youtubeUrl
+            );
+
+
+        if (!videoId) {
+
+            player.innerHTML = `
+
+                <div class="playerPlaceholder">
+
+                    <div
+                        style="
+                            font-size:48px;
+                            font-weight:900;
+                            margin-bottom:10px;
+                        "
+                    >
+                        CR
+                    </div>
+
+                    <strong>
+                        ${escapeHTML(event.title)}
+                    </strong>
+
+                    <p>
+                        This event is marked LIVE,
+                        but no YouTube video has been connected yet.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        player.innerHTML = `
+
+            <iframe
+
+                src="
+                    https://www.youtube.com/embed/${escapeAttribute(videoId)}
+                    ?autoplay=1
+                    &rel=0
+                    &modestbranding=1
+                    &playsinline=1
+                "
+
+                title="${escapeAttribute(event.title)}"
+
+                allow="
+                    autoplay;
+                    encrypted-media;
+                    picture-in-picture;
+                    fullscreen
+                "
+
+                allowfullscreen
+
+            ></iframe>
+
+        `;
+
+
+        setLiveStatus(
+            "live",
+            "LIVE NOW — " + event.title
+        );
+
+
+    } else if (
+        state === "scheduled"
+    ) {
+
+        player.innerHTML = `
+
+            <div class="playerPlaceholder">
+
+                <div
+                    style="
+                        font-size:48px;
+                        font-weight:900;
+                        margin-bottom:10px;
+                    "
+                >
+                    ⏰
+                </div>
+
+                <strong>
+                    ${escapeHTML(event.title)}
+                </strong>
+
+                <p>
+                    Starting
+                    ${
+                        event.start
+                            ?
+                            escapeHTML(
+                                formatLiveTime(
+                                    event.start
+                                )
+                            )
+                            :
+                            "soon"
+                    }
+                </p>
+
+                <button
+                    class="btn primary"
+                    onclick="refreshLiveTV()"
+                >
+                    Check Live Status
+                </button>
+
+            </div>
+
+        `;
+
+
+        setLiveStatus(
+            "soon",
+            "STARTING SOON — " + event.title
+        );
+
+
+    } else {
+
+        player.innerHTML = `
+
+            <div class="playerPlaceholder">
+
+                <div
+                    style="
+                        font-size:48px;
+                        font-weight:900;
+                        margin-bottom:10px;
+                    "
+                >
+                    CR
+                </div>
+
+                <strong>
+                    CrowRules TV
+                </strong>
+
+                <p>
+                    This live event is not currently on air.
+                </p>
+
+            </div>
+
+        `;
+
+
+        setLiveStatus(
+            "offline",
+            "OFF AIR"
+        );
+
+    }
+
+
+    updateLivePlayerInfo(
+        event
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE PLAYER STATE
+========================================================= */
+
+function updateLivePlayerState() {
+
+    if (!liveEvents.length) {
+
+        selectedLiveEvent =
+            null;
+
+
+        updateLivePlayerOffline();
+
+        return;
+
+    }
+
+
+    const liveEvent =
+        liveEvents.find(
+            event =>
+                event.status ===
+                "live"
+        );
+
+
+    const scheduledEvent =
+        liveEvents.find(
+            event =>
+                event.status ===
+                "scheduled"
+        );
+
+
+    if (
+        selectedLiveEvent
+    ) {
+
+        const refreshed =
+            liveEvents.find(
+                event =>
+                    String(event.id) ===
+                    String(selectedLiveEvent.id)
+            );
+
+
+        if (refreshed) {
+
+            selectedLiveEvent =
+                refreshed;
+
+        }
+
+    }
+
+
+    if (
+        selectedLiveEvent
+    ) {
+
+        updateLivePlayerInfo(
+            selectedLiveEvent
+        );
+
+
+        const currentState =
+            selectedLiveEvent.status;
+
+
+        if (
+            currentState ===
+            "live"
+        ) {
+
+            if (
+                !document.querySelector(
+                    "#playerScreen iframe"
+                )
+            ) {
+
+                playLiveEvent(
+                    selectedLiveEvent
+                );
+
+            }
+
+        } else {
+
+            playLiveEvent(
+                selectedLiveEvent
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    if (liveEvent) {
+
+        selectedLiveEvent =
+            liveEvent;
+
+
+        playLiveEvent(
+            liveEvent
+        );
+
+
+        return;
+
+    }
+
+
+    if (scheduledEvent) {
+
+        selectedLiveEvent =
+            scheduledEvent;
+
+
+        playLiveEvent(
+            scheduledEvent
+        );
+
+
+        return;
+
+    }
+
+
+    updateLivePlayerOffline();
+
+}
+
+
+/* =========================================================
+   OFFLINE PLAYER
+========================================================= */
+
+function updateLivePlayerOffline() {
+
+    const player =
+        document.getElementById(
+            "playerScreen"
+        );
+
+
+    player.innerHTML = `
+
+        <div class="playerPlaceholder">
+
+            <button
+                class="playButton"
+                onclick="startSelectedLiveEvent()"
+            >
+                ▶
+            </button>
+
+            <div>
+                CrowRules TV
+            </div>
+
+            <small>
+                No live program is currently on air.
+            </small>
+
+        </div>
+
+    `;
+
+
+    document.getElementById(
+        "nowPlaying"
+    ).textContent =
+        "CrowRules TV — Off Air";
+
+
+    document.getElementById(
+        "upNext"
+    ).textContent =
+        getNextEventText();
+
+
+    document.getElementById(
+        "progressBar"
+    ).style.width =
+        "0%";
+
+
+    setLiveStatus(
+        "offline",
+        "OFF AIR"
+    );
+
+}
+
+
+/* =========================================================
+   PLAYER INFO
+========================================================= */
+
+function updateLivePlayerInfo(event) {
+
+    if (!event) return;
+
+
+    document.getElementById(
+        "nowPlaying"
+    ).textContent =
+        event.title;
+
+
+    const next =
+        getNextEvent(
+            event
+        );
+
+
+    document.getElementById(
+        "upNext"
+    ).textContent =
+        next
+            ?
+            "Up Next: " +
+            next.title
+            :
+            "Up Next: —";
+
+
+    const meta =
+        document.getElementById(
+            "liveMeta"
+        );
+
+
+    const state =
+        event.status;
+
+
+    let html = "";
+
+
+    if (
+        state === "live"
+    ) {
+
+        html += `
+
+            <span class="liveMetaItem live">
+                🔴 LIVE NOW
+            </span>
+
+        `;
+
+    } else if (
+        state === "scheduled"
+    ) {
+
+        html += `
+
+            <span class="liveMetaItem">
+                ⏰ ${escapeHTML(
+                    event.start
+                        ?
+                        formatLiveTime(
+                            event.start
+                        )
+                        :
+                        "Scheduled"
+                )}
+            </span>
+
+        `;
+
+    }
+
+
+    if (
+        event.channel
+    ) {
+
+        html += `
+
+            <span class="liveMetaItem">
+                Channel ${escapeHTML(
+                    String(event.channel)
+                )}
+            </span>
+
+        `;
+
+    }
+
+
+    if (
+        event.description
+    ) {
+
+        html += `
+
+            <span class="liveMetaItem">
+                ${escapeHTML(
+                    event.description
+                )}
+            </span>
+
+        `;
+
+    }
+
+
+    meta.innerHTML =
+        html;
+
+
+    document.getElementById(
+        "progressBar"
+    ).style.width =
+        state === "live"
+            ? "100%"
+            : "0%";
+
+}
+
+
+/* =========================================================
+   STATUS DISPLAY
+========================================================= */
+
+function setLiveStatus(
+    status,
+    text
+) {
+
+    const indicator =
+        document.getElementById(
+            "liveStatusIndicator"
+        );
+
+
+    const statusText =
+        document.getElementById(
+            "liveStatusText"
+        );
+
+
+    indicator.className =
+        "statusIndicator " +
+        status;
+
+
+    statusText.textContent =
+        text;
+
+
+    const badge =
+        document.getElementById(
+            "playerBadge"
+        );
+
+
+    const dot =
+        document.getElementById(
+            "playerDot"
+        );
+
+
+    if (
+        status === "live"
+    ) {
+
+        badge.className =
+            "liveBadge";
+
+        badge.innerHTML =
+            `
+                <span
+                    id="playerDot"
+                    class="liveDot"
+                ></span>
+
+                LIVE NOW
+            `;
+
+    } else if (
+        status === "soon"
+    ) {
+
+        badge.className =
+            "offlineBadge";
+
+        badge.innerHTML =
+            `
+                <span
+                    id="playerDot"
+                    class="liveDot"
+                    style="background:var(--yellow)"
+                ></span>
+
+                STARTING SOON
+            `;
+
+    } else {
+
+        badge.className =
+            "offlineBadge";
+
+        badge.innerHTML =
+            `
+                <span
+                    id="playerDot"
+                    class="liveDot"
+                    style="background:#4b5563"
+                ></span>
+
+                OFF AIR
+            `;
+
+    }
+
+}
+
+
+/* =========================================================
+   NEXT EVENT
+========================================================= */
+
+function getNextEvent(currentEvent=null) {
+
+    const now =
+        Date.now();
+
+
+    return (
+        liveEvents
+            .filter(
+                event => {
+
+                    if (
+                        currentEvent &&
+                        String(event.id) ===
+                        String(currentEvent.id)
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    if (
+                        event.status ===
+                        "cancelled"
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    if (
+                        !event.start
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    const time =
+                        new Date(
+                            event.start
+                        ).getTime();
+
+
+                    return (
+                        Number.isFinite(time) &&
+                        time > now
+                    );
+
+                }
+            )
+            .sort(
+                (a,b) =>
+                    new Date(a.start) -
+                    new Date(b.start)
+            )[0]
+    );
+
+}
+
+
+function getNextEventText() {
+
+    const next =
+        getNextEvent();
+
+
+    return next
+        ?
+        "Up Next: " +
+        next.title
+        :
+        "Up Next: —";
+
+}
+
+
+/* =========================================================
+   REFRESH LIVE TV
+========================================================= */
+
+async function refreshLiveTV() {
+
+    const text =
+        document.getElementById(
+            "refreshText"
+        );
+
+
+    text.textContent =
+        "Refreshing Live TV...";
+
+
+    await loadLiveEvents();
+
+
+    updateRefreshText();
+
+}
+
+
+function updateRefreshText() {
+
+    document.getElementById(
+        "refreshText"
+    ).textContent =
+        "Auto-refresh: 30 seconds";
+
+}
+
+
+/* =========================================================
+   AUTO REFRESH
+========================================================= */
+
+function startLiveRefresh() {
+
+    if (
+        liveRefreshTimer
+    ) {
+
+        clearInterval(
+            liveRefreshTimer
+        );
+
+    }
+
+
+    liveRefreshTimer =
+        setInterval(
+            async () => {
+
+                await loadLiveEvents();
+
+            },
+            LIVE_REFRESH_INTERVAL
+        );
+
+}
+
+
+/* =========================================================
+   STATIC CONTENT CARDS
 ========================================================= */
 
 function renderCard(item) {
@@ -2794,7 +4797,9 @@ function renderCard(item) {
                 ${thumbnail}
 
                 <div class="cardBadge">
-                    ${escapeHTML(item.type || "Video")}
+                    ${escapeHTML(
+                        item.type || "Video"
+                    )}
                 </div>
 
             </div>
@@ -2816,59 +4821,6 @@ function renderCard(item) {
         </article>
 
     `;
-
-}
-
-
-/* =========================================================
-   CHANNELS
-========================================================= */
-
-function renderChannels() {
-
-    document.getElementById(
-        "liveChannels"
-    ).innerHTML =
-        channels.map(
-            channel => `
-
-                <article
-                    class="card"
-                    onclick="
-                        selectChannel(
-                            '${escapeAttribute(channel.number)}'
-                        )
-                    "
-                >
-
-                    <div class="cardImage">
-
-                        <div class="cardPlaceholder">
-                            ${escapeHTML(channel.number)}
-                        </div>
-
-                        <div class="cardBadge">
-                            LIVE
-                        </div>
-
-                    </div>
-
-                    <div class="cardBody">
-
-                        <div class="cardTitle">
-                            ${escapeHTML(channel.name)}
-                        </div>
-
-                        <div class="cardMeta">
-                            ${escapeHTML(channel.title)}
-                        </div>
-
-                    </div>
-
-                </article>
-
-            `
-        ).join("");
 
 }
 
@@ -2917,6 +4869,171 @@ function renderOriginals() {
 
 function renderGuide() {
 
+    const guide =
+        document.getElementById(
+            "guide"
+        );
+
+
+    if (
+        liveEvents.length
+    ) {
+
+        const grouped = {};
+
+
+        liveEvents
+            .filter(
+                event =>
+                    event.status !==
+                    "cancelled"
+            )
+            .forEach(
+                event => {
+
+                    const channel =
+                        String(
+                            event.channel ||
+                            "001"
+                        );
+
+
+                    if (
+                        !grouped[channel]
+                    ) {
+
+                        grouped[channel] =
+                            [];
+
+                    }
+
+
+                    grouped[channel].push(
+                        event
+                    );
+
+                }
+            );
+
+
+        const rows =
+            Object.keys(grouped)
+                .sort()
+                .map(
+                    channelNumber => {
+
+                        const events =
+                            grouped[
+                                channelNumber
+                            ];
+
+
+                        return `
+
+                            <div class="guideRow">
+
+                                <div class="channel">
+
+                                    <div class="channelNumber">
+                                        ${escapeHTML(
+                                            channelNumber
+                                        )}
+                                    </div>
+
+                                    <div class="channelName">
+                                        CrowRules TV
+                                    </div>
+
+                                </div>
+
+                                <div class="programs">
+
+                                    ${events
+                                        .slice(0,8)
+                                        .map(
+                                            event => `
+
+                                                <div
+                                                    class="
+                                                        program
+                                                        ${
+                                                            event.status ===
+                                                            "live"
+                                                                ?
+                                                                "current"
+                                                                :
+                                                                ""
+                                                        }
+                                                    "
+                                                    onclick="
+                                                        selectLiveEvent(
+                                                            '${escapeAttribute(event.id)}'
+                                                        )
+                                                    "
+                                                    style="cursor:pointer"
+                                                >
+
+                                                    <div class="programTime">
+
+                                                        ${
+                                                            event.start
+                                                                ?
+                                                                formatLiveTime(
+                                                                    event.start
+                                                                )
+                                                                :
+                                                                "Scheduled"
+                                                        }
+
+                                                    </div>
+
+                                                    <div class="programTitle">
+
+                                                        ${
+                                                            escapeHTML(
+                                                                event.title
+                                                            )
+                                                        }
+
+                                                    </div>
+
+                                                </div>
+
+                                            `
+                                        )
+                                        .join("")
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        guide.innerHTML =
+            rows ||
+            `
+                <div
+                    style="
+                        padding:25px;
+                        color:var(--muted);
+                    "
+                >
+                    No live schedule available.
+                </div>
+            `;
+
+
+        return;
+
+    }
+
+
     const programs = [
 
         ["8:00 PM","D&J Show"],
@@ -2927,9 +5044,7 @@ function renderGuide() {
     ];
 
 
-    document.getElementById(
-        "guide"
-    ).innerHTML =
+    guide.innerHTML =
         channels.map(
             (channel,index) => `
 
@@ -2938,11 +5053,15 @@ function renderGuide() {
                     <div class="channel">
 
                         <div class="channelNumber">
-                            ${escapeHTML(channel.number)}
+                            ${escapeHTML(
+                                channel.number
+                            )}
                         </div>
 
                         <div class="channelName">
-                            ${escapeHTML(channel.name)}
+                            ${escapeHTML(
+                                channel.name
+                            )}
                         </div>
 
                     </div>
@@ -2957,8 +5076,10 @@ function renderGuide() {
                                         program
                                         ${
                                             programIndex === index
-                                                ? "current"
-                                                : ""
+                                                ?
+                                                "current"
+                                                :
+                                                ""
                                         }
                                     "
                                 >
@@ -3030,7 +5151,10 @@ function playContent(id) {
                 <iframe
                     class="videoFrame"
                     src="
-                        https://www.youtube.com/embed/${videoId}?autoplay=1
+                        https://www.youtube.com/embed/${escapeAttribute(videoId)}
+                        ?autoplay=1
+                        &rel=0
+                        &playsinline=1
                     "
                     allow="
                         autoplay;
@@ -3112,7 +5236,9 @@ function playShow(title) {
 
     if (item) {
 
-        playContent(item.id);
+        playContent(
+            item.id
+        );
 
     }
 
@@ -3120,15 +5246,56 @@ function playShow(title) {
 
 
 /* =========================================================
-   CHANNEL
+   CHANNEL SELECTION
 ========================================================= */
 
 function selectChannel(number) {
 
+    const matching =
+        liveEvents.filter(
+            event =>
+                String(event.channel) ===
+                String(number)
+        );
+
+
+    const live =
+        matching.find(
+            event =>
+                event.status ===
+                "live"
+        );
+
+
+    const scheduled =
+        matching.find(
+            event =>
+                event.status ===
+                "scheduled"
+        );
+
+
+    const event =
+        live ||
+        scheduled;
+
+
+    if (event) {
+
+        selectLiveEvent(
+            event.id
+        );
+
+        return;
+
+    }
+
+
     const channel =
         channels.find(
             item =>
-                item.number === number
+                item.number ===
+                number
         );
 
 
@@ -3148,48 +5315,7 @@ function selectChannel(number) {
         channel.next;
 
 
-    startPlayer();
-
-}
-
-
-/* =========================================================
-   PLAYER
-========================================================= */
-
-function startPlayer() {
-
-    document.getElementById(
-        "playerScreen"
-    ).innerHTML = `
-
-        <div style="text-align:center">
-
-            <div
-                style="
-                    font-size:48px;
-                    font-weight:900;
-                    margin-bottom:10px;
-                "
-            >
-                CR
-            </div>
-
-            <div>
-                CrowRules TV is ready.
-            </div>
-
-            <small
-                style="
-                    color:var(--muted);
-                "
-            >
-                Live channel playback will connect here.
-            </small>
-
-        </div>
-
-    `;
+    updateLivePlayerOffline();
 
 }
 
@@ -3245,29 +5371,7 @@ function closeModal() {
 
 
 /* =========================================================
-   YOUTUBE
-========================================================= */
-
-function getYouTubeId(url) {
-
-    if (!url) return null;
-
-
-    const match =
-        url.match(
-            /(?:youtube\.com\/(?:watch\?v=|embed\/|live\/)|youtu\.be\/)([^?&/]+)/
-        );
-
-
-    return match
-        ? match[1]
-        : null;
-
-}
-
-
-/* =========================================================
-   AUTH — OPEN MEMBER AREA
+   MEMBER AUTH
 ========================================================= */
 
 async function openMemberArea() {
@@ -3303,10 +5407,6 @@ async function openMemberArea() {
 
 }
 
-
-/* =========================================================
-   AUTH — CLOSE
-========================================================= */
 
 function closeMemberModal() {
 
@@ -3347,25 +5447,43 @@ function showAuthMode(mode) {
         );
 
 
-    if (mode === "signup") {
+    if (
+        mode === "signup"
+    ) {
 
-        signUpTab.classList.add("active");
+        signUpTab.classList.add(
+            "active"
+        );
 
-        signInTab.classList.remove("active");
+        signInTab.classList.remove(
+            "active"
+        );
 
-        signUpForm.classList.remove("hidden");
+        signUpForm.classList.remove(
+            "hidden"
+        );
 
-        signInForm.classList.add("hidden");
+        signInForm.classList.add(
+            "hidden"
+        );
 
     } else {
 
-        signInTab.classList.add("active");
+        signInTab.classList.add(
+            "active"
+        );
 
-        signUpTab.classList.remove("active");
+        signUpTab.classList.remove(
+            "active"
+        );
 
-        signInForm.classList.remove("hidden");
+        signInForm.classList.remove(
+            "hidden"
+        );
 
-        signUpForm.classList.add("hidden");
+        signUpForm.classList.add(
+            "hidden"
+        );
 
     }
 
@@ -3373,10 +5491,13 @@ function showAuthMode(mode) {
 
 
 /* =========================================================
-   AUTH MESSAGE
+   AUTH MESSAGES
 ========================================================= */
 
-function showAuthMessage(message,type="error") {
+function showAuthMessage(
+    message,
+    type="error"
+) {
 
     const box =
         document.getElementById(
@@ -3403,7 +5524,8 @@ function clearAuthMessage() {
         );
 
 
-    box.textContent = "";
+    box.textContent =
+        "";
 
     box.className =
         "authMessage";
@@ -3459,7 +5581,8 @@ document
                 ).value;
 
 
-            button.disabled = true;
+            button.disabled =
+                true;
 
             button.textContent =
                 "Signing In...";
@@ -3472,8 +5595,11 @@ document
                     error
                 } =
                     await supabaseClient.auth.signInWithPassword({
+
                         email,
+
                         password
+
                     });
 
 
@@ -3521,7 +5647,8 @@ document
 
             } finally {
 
-                button.disabled = false;
+                button.disabled =
+                    false;
 
                 button.textContent =
                     "Sign In";
@@ -3569,7 +5696,8 @@ document
             const name =
                 document.getElementById(
                     "signUpName"
-                ).value.trim();
+                ).value
+                .trim();
 
 
             const email =
@@ -3607,7 +5735,9 @@ document
             }
 
 
-            if (password.length < 8) {
+            if (
+                password.length < 8
+            ) {
 
                 showAuthMessage(
                     "Password must be at least 8 characters.",
@@ -3619,7 +5749,8 @@ document
             }
 
 
-            button.disabled = true;
+            button.disabled =
+                true;
 
             button.textContent =
                 "Creating Account...";
@@ -3689,7 +5820,10 @@ document
                         "success"
                     );
 
-                    showAuthMode("signin");
+
+                    showAuthMode(
+                        "signin"
+                    );
 
                 }
 
@@ -3711,7 +5845,8 @@ document
 
             } finally {
 
-                button.disabled = false;
+                button.disabled =
+                    false;
 
                 button.textContent =
                     "Create CrowRules Account";
@@ -3768,9 +5903,11 @@ async function resetPassword() {
             await supabaseClient.auth.resetPasswordForEmail(
                 email,
                 {
+
                     redirectTo:
                         window.location.origin +
                         "/reset-password.html"
+
                 }
             );
 
@@ -3797,7 +5934,9 @@ async function resetPassword() {
 
 
         showAuthMessage(
-            friendlyAuthError(error),
+            friendlyAuthError(
+                error
+            ),
             "error"
         );
 
@@ -3807,7 +5946,7 @@ async function resetPassword() {
 
 
 /* =========================================================
-   UPDATE MEMBER INTERFACE
+   MEMBER INTERFACE
 ========================================================= */
 
 function updateMemberInterface() {
@@ -3830,13 +5969,18 @@ function updateMemberInterface() {
 
     if (currentUser) {
 
-        authPanel.classList.add("hidden");
+        authPanel.classList.add(
+            "hidden"
+        );
 
-        memberPanel.classList.remove("hidden");
+        memberPanel.classList.remove(
+            "hidden"
+        );
 
 
         const metadata =
-            currentUser.user_metadata || {};
+            currentUser.user_metadata ||
+            {};
 
 
         const displayName =
@@ -3856,7 +6000,8 @@ function updateMemberInterface() {
         document.getElementById(
             "memberEmail"
         ).textContent =
-            currentUser.email || "";
+            currentUser.email ||
+            "";
 
 
         accountButton.textContent =
@@ -3870,9 +6015,13 @@ function updateMemberInterface() {
 
     } else {
 
-        authPanel.classList.remove("hidden");
+        authPanel.classList.remove(
+            "hidden"
+        );
 
-        memberPanel.classList.add("hidden");
+        memberPanel.classList.add(
+            "hidden"
+        );
 
 
         accountButton.textContent =
@@ -3894,7 +6043,8 @@ function updateMemberInterface() {
 
 async function signOut() {
 
-    if (!supabaseClient) return;
+    if (!supabaseClient)
+        return;
 
 
     try {
@@ -3912,7 +6062,8 @@ async function signOut() {
         }
 
 
-        currentUser = null;
+        currentUser =
+            null;
 
 
         closeMemberModal();
@@ -3926,6 +6077,7 @@ async function signOut() {
             "Sign out error:",
             error
         );
+
 
         alert(
             "Unable to sign out. Please try again."
@@ -3964,7 +6116,8 @@ function friendlyAuthError(error) {
 
     const message =
         String(
-            error?.message || ""
+            error?.message ||
+            ""
         ).toLowerCase();
 
 
@@ -4026,11 +6179,8 @@ function friendlyAuthError(error) {
 
 async function initializeAuth() {
 
-    if (!supabaseClient) {
-
+    if (!supabaseClient)
         return;
-
-    }
 
 
     try {
@@ -4042,7 +6192,8 @@ async function initializeAuth() {
 
 
         currentUser =
-            data?.session?.user || null;
+            data?.session?.user ||
+            null;
 
 
         updateMemberInterface();
@@ -4055,7 +6206,8 @@ async function initializeAuth() {
             ) => {
 
                 currentUser =
-                    session?.user || null;
+                    session?.user ||
+                    null;
 
 
                 updateMemberInterface();
@@ -4150,9 +6302,9 @@ document
             searchGrid.innerHTML =
                 results.length
                     ?
-                    results.map(
-                        renderCard
-                    ).join("")
+                    results
+                        .map(renderCard)
+                        .join("")
                     :
                     `
                         <div
@@ -4340,7 +6492,8 @@ document
 
 
                     if (
-                        category !== "all"
+                        category !==
+                        "all"
                     ) {
 
                         results =
@@ -4368,12 +6521,13 @@ document
 
 
 /* =========================================================
-   SUPABASE CONTENT
+   SUPABASE EPISODES
 ========================================================= */
 
 async function loadSupabaseContent() {
 
-    if (!supabaseClient) return;
+    if (!supabaseClient)
+        return;
 
 
     try {
@@ -4400,7 +6554,8 @@ async function loadSupabaseContent() {
         }
 
 
-        if (!data?.length) return;
+        if (!data?.length)
+            return;
 
 
         const mapped =
@@ -4416,9 +6571,11 @@ async function loadSupabaseContent() {
                         "Untitled Episode",
 
                     category:
+                        row.category ||
                         "originals",
 
                     type:
+                        row.type ||
                         "Episode",
 
                     description:
@@ -4454,7 +6611,9 @@ async function loadSupabaseContent() {
 
                 if (!existing) {
 
-                    content.push(item);
+                    content.push(
+                        item
+                    );
 
                 }
 
@@ -4474,46 +6633,6 @@ async function loadSupabaseContent() {
         );
 
     }
-
-}
-
-
-/* =========================================================
-   ESCAPE
-========================================================= */
-
-function escapeHTML(value) {
-
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-function escapeAttribute(value) {
-
-    return escapeHTML(value);
 
 }
 
@@ -4584,8 +6703,6 @@ document
    INITIALIZE
 ========================================================= */
 
-renderChannels();
-
 renderOnDemand();
 
 renderOriginals();
@@ -4596,7 +6713,23 @@ initializeAuth();
 
 loadSupabaseContent();
 
+loadLiveEvents();
+
+startLiveRefresh();
+
+
+/* =========================================================
+   INITIAL PLAYER STATE
+========================================================= */
+
+setLiveStatus(
+    "offline",
+    "Checking Live TV..."
+);
+
 </script>
 
 </body>
+
 </html>
+```
