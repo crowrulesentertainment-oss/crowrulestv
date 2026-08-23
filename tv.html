@@ -2,13 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>CrowRules TV v1.14</title>
 
 <meta
     name="description"
     content="CrowRules TV — independent streaming television."
+>
+
+<meta
+    name="theme-color"
+    content="#080808"
 >
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,9 +28,30 @@
     rel="stylesheet"
 >
 
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- HLS.js for browsers without native HLS support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
+
+/* =========================================================
+   CROWRULES TV v1.14
+   NON-DOWNLOAD STREAMING EDITION
+========================================================= */
+
+:root {
+    --bg: #080808;
+    --panel: #111;
+    --panel-2: #151515;
+    --border: #242424;
+    --border-hover: #444;
+    --text: #f5f5f5;
+    --muted: #999;
+    --muted-2: #666;
+    --white: #fff;
+}
 
 /* =========================================================
    RESET
@@ -38,10 +68,14 @@ html {
 }
 
 body {
-    background: #080808;
-    color: #f5f5f5;
-    font-family: "Montserrat", sans-serif;
     min-height: 100vh;
+
+    background: var(--bg);
+    color: var(--text);
+
+    font-family: "Montserrat", sans-serif;
+
+    overflow-x: hidden;
 }
 
 button,
@@ -53,9 +87,18 @@ button {
     cursor: pointer;
 }
 
+button:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
 a {
     color: inherit;
     text-decoration: none;
+}
+
+img {
+    max-width: 100%;
 }
 
 
@@ -66,49 +109,59 @@ a {
 .header {
     position: sticky;
     top: 0;
+
     z-index: 1000;
 
-    height: 72px;
+    min-height: 72px;
 
-    background: rgba(8, 8, 8, 0.96);
-    border-bottom: 1px solid #222;
+    background: rgba(8, 8, 8, .97);
 
-    display: flex;
-    align-items: center;
+    border-bottom: 1px solid var(--border);
+
+    backdrop-filter: blur(15px);
 }
 
 .header-inner {
     width: min(1500px, 94%);
+    min-height: 72px;
+
     margin: auto;
 
     display: flex;
     align-items: center;
-    gap: 28px;
+
+    gap: 25px;
 }
 
 .logo {
     font-family: "Orbitron", sans-serif;
-    font-size: 22px;
+
+    font-size: 21px;
     font-weight: 800;
 
     white-space: nowrap;
 }
 
 .logo span {
-    color: #999;
+    color: #777;
 }
 
 .nav {
     display: flex;
-    gap: 22px;
+    align-items: center;
+
+    gap: 20px;
 }
 
 .nav button {
-    background: transparent;
     border: 0;
-    color: #aaa;
-    font-size: 14px;
-    font-weight: 600;
+
+    background: transparent;
+
+    color: #999;
+
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .nav button:hover {
@@ -120,11 +173,13 @@ a {
 }
 
 .search-box {
-    width: 240px;
+    width: 230px;
 }
 
 .search-box input {
     width: 100%;
+
+    padding: 10px 13px;
 
     background: #151515;
     color: white;
@@ -132,7 +187,6 @@ a {
     border: 1px solid #292929;
     border-radius: 7px;
 
-    padding: 10px 13px;
     outline: none;
 }
 
@@ -143,24 +197,27 @@ a {
 .member-area {
     display: flex;
     align-items: center;
-    gap: 8px;
+
+    gap: 7px;
 }
 
 .member-button {
-    border: 1px solid #333;
+    padding: 10px 13px;
+
     background: #151515;
     color: white;
 
+    border: 1px solid #333;
     border-radius: 7px;
-    padding: 10px 14px;
 
-    font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 800;
 }
 
 .member-button.primary {
     background: white;
     color: black;
+
     border-color: white;
 }
 
@@ -174,28 +231,18 @@ a {
 ========================================================= */
 
 .hero {
+    position: relative;
+
     width: min(1500px, 94%);
+    min-height: 440px;
+
     margin: 30px auto 0;
 
-    min-height: 430px;
-
-    position: relative;
     overflow: hidden;
 
     border-radius: 12px;
 
-    background:
-        linear-gradient(
-            90deg,
-            rgba(0,0,0,.95),
-            rgba(0,0,0,.55),
-            rgba(0,0,0,.15)
-        ),
-        linear-gradient(
-            0deg,
-            #080808,
-            #151515
-        );
+    background: #111;
 }
 
 .hero-image {
@@ -207,56 +254,78 @@ a {
 
     object-fit: cover;
 
-    opacity: .55;
+    opacity: .52;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0,0,0,.95),
+            rgba(0,0,0,.55),
+            rgba(0,0,0,.12)
+        ),
+        linear-gradient(
+            0deg,
+            rgba(0,0,0,.7),
+            transparent
+        );
 }
 
 .hero-content {
     position: relative;
     z-index: 2;
 
-    max-width: 620px;
+    max-width: 650px;
 
-    padding: 70px 55px;
+    padding: 75px 55px;
 }
 
 .hero-label {
+    margin-bottom: 12px;
+
     color: #aaa;
 
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
 
     letter-spacing: 2px;
     text-transform: uppercase;
-
-    margin-bottom: 12px;
 }
 
 .hero-title {
+    margin-bottom: 18px;
+
     font-family: "Orbitron", sans-serif;
 
     font-size: clamp(30px, 5vw, 58px);
-    line-height: 1.05;
 
-    margin-bottom: 18px;
+    line-height: 1.05;
 }
 
 .hero-description {
-    color: #ccc;
-    line-height: 1.7;
     margin-bottom: 25px;
+
+    color: #ccc;
+
+    line-height: 1.7;
 }
 
 .hero-actions {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
+
+    gap: 10px;
 }
 
 .hero-btn {
+    padding: 13px 20px;
+
     border: 0;
     border-radius: 7px;
-
-    padding: 13px 20px;
 
     font-weight: 800;
 }
@@ -271,6 +340,10 @@ a {
     color: white;
 }
 
+.hero-btn:hover {
+    opacity: .86;
+}
+
 
 /* =========================================================
    MAIN
@@ -278,6 +351,7 @@ a {
 
 main {
     width: min(1500px, 94%);
+
     margin: 40px auto 80px;
 }
 
@@ -287,101 +361,22 @@ main {
 
 .section-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 
     margin-bottom: 16px;
 }
 
 .section-title {
     font-family: "Orbitron", sans-serif;
+
     font-size: 20px;
 }
 
 .section-subtitle {
-    color: #777;
-    font-size: 13px;
-}
-
-
-/* =========================================================
-   CARDS
-========================================================= */
-
-.card-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fill, minmax(220px, 1fr));
-
-    gap: 16px;
-}
-
-.card {
-    background: #121212;
-
-    border: 1px solid #202020;
-    border-radius: 9px;
-
-    overflow: hidden;
-
-    transition:
-        transform .2s ease,
-        border-color .2s ease;
-
-    cursor: pointer;
-}
-
-.card:hover {
-    transform: translateY(-4px);
-    border-color: #444;
-}
-
-.card-image {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-
-    object-fit: cover;
-
-    display: block;
-
-    background: #1b1b1b;
-}
-
-.card-body {
-    padding: 13px;
-}
-
-.card-title {
-    font-size: 14px;
-    font-weight: 800;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.card-meta {
-    color: #777;
-
-    font-size: 11px;
-
-    margin-top: 7px;
-}
-
-.card-description {
-    color: #999;
+    color: #666;
 
     font-size: 12px;
-    line-height: 1.5;
-
-    margin-top: 8px;
-
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-
-    overflow: hidden;
 }
 
 
@@ -399,67 +394,134 @@ main {
     display: block;
 }
 
+/*
+===========================================================
+IMPORTANT PLAYER RULE
+
+NO TEXT IS POSITIONED OVER THE VIDEO.
+
+All metadata appears BELOW the player.
+
+===========================================================
+*/
+
 .player-wrapper {
+    position: relative;
+
     width: 100%;
 
     background: #000;
 
+    border: 1px solid #222;
     border-radius: 10px;
+
     overflow: hidden;
 
-    border: 1px solid #202020;
+    user-select: none;
 }
+
+/*
+The video itself is intentionally clean.
+*/
 
 .video-player {
     display: block;
 
     width: 100%;
+
     height: auto;
 
-    min-height: 300px;
-    max-height: 75vh;
+    min-height: 320px;
+    max-height: 78vh;
 
     background: #000;
 
     object-fit: contain;
+
+    /*
+    Prevent common casual interactions.
+    */
+    user-select: none;
+
+    -webkit-user-select: none;
+
+    -webkit-touch-callout: none;
+
+    -webkit-user-drag: none;
 }
 
 /*
-IMPORTANT:
-No text, title, labels, descriptions, overlays,
-badges, advertisements, or metadata are positioned
-inside the player.
+No custom overlay.
+No title.
+No watermark.
+No text.
+No badges.
+No ads.
+No metadata.
 */
+
+/* =========================================================
+   PLAYER STATUS
+========================================================= */
+
+.player-status {
+    display: none;
+
+    padding: 10px 15px;
+
+    background: #151515;
+
+    color: #aaa;
+
+    font-size: 12px;
+
+    border-top: 1px solid #222;
+}
+
+.player-status.show {
+    display: block;
+}
+
+.player-status.error {
+    color: #ffb3b3;
+}
+
+
+/* =========================================================
+   PLAYER INFORMATION BELOW VIDEO
+========================================================= */
 
 .player-info {
     margin-top: 18px;
 
-    background: #111;
-    border: 1px solid #222;
+    padding: 22px;
+
+    background: var(--panel);
+
+    border: 1px solid var(--border);
 
     border-radius: 9px;
-
-    padding: 22px;
 }
 
 .player-show {
+    margin-bottom: 7px;
+
     color: #888;
 
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
 
-    text-transform: uppercase;
     letter-spacing: 1px;
 
-    margin-bottom: 7px;
+    text-transform: uppercase;
 }
 
 .player-title {
+    margin-bottom: 10px;
+
     font-family: "Orbitron", sans-serif;
 
     font-size: 25px;
-
-    margin-bottom: 10px;
 }
 
 .player-description {
@@ -470,28 +532,116 @@ inside the player.
 
 .player-actions {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+
+    gap: 9px;
 
     margin-top: 18px;
-
-    flex-wrap: wrap;
 }
 
 .action-button {
-    border: 1px solid #333;
-
-    background: #191919;
-    color: white;
-
     padding: 10px 14px;
 
+    background: #191919;
+
+    color: white;
+
+    border: 1px solid #333;
     border-radius: 7px;
 
+    font-size: 12px;
     font-weight: 700;
 }
 
 .action-button:hover {
     border-color: #666;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(220px, 1fr));
+
+    gap: 16px;
+}
+
+.card {
+    overflow: hidden;
+
+    background: #121212;
+
+    border: 1px solid #202020;
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+
+    border-color: #444;
+}
+
+.card-image {
+    display: block;
+
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    object-fit: cover;
+
+    background: #1b1b1b;
+
+    user-select: none;
+}
+
+.card-body {
+    padding: 13px;
+}
+
+.card-title {
+    overflow: hidden;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.card-meta {
+    margin-top: 7px;
+
+    color: #777;
+
+    font-size: 11px;
+}
+
+.card-description {
+    display: -webkit-box;
+
+    margin-top: 8px;
+
+    overflow: hidden;
+
+    color: #999;
+
+    font-size: 12px;
+    line-height: 1.5;
+
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 
@@ -509,15 +659,16 @@ inside the player.
 }
 
 .episode-card {
+    overflow: hidden;
+
     background: #111;
 
     border: 1px solid #222;
-
     border-radius: 8px;
 
-    overflow: hidden;
-
     cursor: pointer;
+
+    transition: border-color .2s ease;
 }
 
 .episode-card:hover {
@@ -525,12 +676,19 @@ inside the player.
 }
 
 .episode-thumb {
+    display: block;
+
     width: 100%;
+
     aspect-ratio: 16 / 9;
 
     object-fit: cover;
 
     background: #1a1a1a;
+
+    user-select: none;
+
+    -webkit-user-drag: none;
 }
 
 .episode-body {
@@ -538,12 +696,12 @@ inside the player.
 }
 
 .episode-number {
+    margin-bottom: 5px;
+
     color: #777;
 
     font-size: 11px;
     font-weight: 700;
-
-    margin-bottom: 5px;
 }
 
 .episode-title {
@@ -552,173 +710,30 @@ inside the player.
 }
 
 .episode-desc {
+    margin-top: 7px;
+
     color: #888;
 
     font-size: 12px;
     line-height: 1.5;
-
-    margin-top: 7px;
 }
 
 
 /* =========================================================
-   MODAL
+   CONTINUE WATCHING
 ========================================================= */
 
-.modal {
-    position: fixed;
-    inset: 0;
-
-    z-index: 5000;
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 20px;
-
-    background: rgba(0,0,0,.78);
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-box {
-    width: min(460px, 100%);
-
-    background: #111;
-
-    border: 1px solid #333;
-
-    border-radius: 12px;
-
-    padding: 28px;
-
-    position: relative;
-}
-
-.modal-close {
-    position: absolute;
-
-    top: 13px;
-    right: 15px;
-
-    border: 0;
-
-    background: transparent;
-    color: #777;
-
-    font-size: 24px;
-}
-
-.modal-close:hover {
-    color: white;
-}
-
-.modal-title {
-    font-family: "Orbitron", sans-serif;
-
-    font-size: 22px;
-
-    margin-bottom: 20px;
-}
-
-.form-group {
-    margin-bottom: 14px;
-}
-
-.form-group label {
-    display: block;
-
-    color: #aaa;
-
-    font-size: 12px;
-    font-weight: 700;
-
-    margin-bottom: 6px;
-}
-
-.form-group input {
+.progress-bar {
     width: 100%;
+    height: 3px;
 
-    padding: 12px;
-
-    background: #181818;
-    color: white;
-
-    border: 1px solid #333;
-
-    border-radius: 7px;
-
-    outline: none;
+    background: #222;
 }
 
-.form-group input:focus {
-    border-color: #777;
-}
-
-.form-submit {
-    width: 100%;
-
-    border: 0;
+.progress-fill {
+    height: 100%;
 
     background: white;
-    color: black;
-
-    padding: 12px;
-
-    border-radius: 7px;
-
-    font-weight: 800;
-
-    margin-top: 5px;
-}
-
-.form-switch {
-    text-align: center;
-
-    color: #777;
-
-    font-size: 12px;
-
-    margin-top: 16px;
-}
-
-.form-switch button {
-    border: 0;
-
-    background: transparent;
-    color: white;
-
-    font-weight: 800;
-}
-
-.form-message {
-    margin-top: 12px;
-
-    padding: 10px;
-
-    border-radius: 6px;
-
-    display: none;
-
-    font-size: 12px;
-}
-
-.form-message.show {
-    display: block;
-}
-
-.form-message.error {
-    background: #2a1515;
-    color: #ffb3b3;
-}
-
-.form-message.success {
-    background: #152a1a;
-    color: #b7ffca;
 }
 
 
@@ -745,34 +760,200 @@ inside the player.
 }
 
 .profile-email {
+    margin: 10px 0 15px;
+
     color: #aaa;
-    margin-bottom: 15px;
 }
 
 .profile-buttons {
     display: flex;
-    gap: 8px;
     flex-wrap: wrap;
+
+    gap: 8px;
 }
 
 
 /* =========================================================
-   EMPTY / LOADING
+   MODAL
+========================================================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+
+    z-index: 5000;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0,0,0,.82);
+
+    backdrop-filter: blur(7px);
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-box {
+    position: relative;
+
+    width: min(460px, 100%);
+
+    padding: 28px;
+
+    background: #111;
+
+    border: 1px solid #333;
+    border-radius: 12px;
+}
+
+.modal-close {
+    position: absolute;
+
+    top: 12px;
+    right: 14px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #777;
+
+    font-size: 24px;
+}
+
+.modal-close:hover {
+    color: white;
+}
+
+.modal-title {
+    margin-bottom: 20px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 22px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #aaa;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.form-group input {
+    width: 100%;
+
+    padding: 12px;
+
+    background: #181818;
+
+    color: white;
+
+    border: 1px solid #333;
+    border-radius: 7px;
+
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #777;
+}
+
+.form-submit {
+    width: 100%;
+
+    margin-top: 5px;
+
+    padding: 12px;
+
+    border: 0;
+    border-radius: 7px;
+
+    background: white;
+    color: black;
+
+    font-weight: 800;
+}
+
+.form-switch {
+    margin-top: 16px;
+
+    color: #777;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+.form-switch button {
+    border: 0;
+
+    background: transparent;
+
+    color: white;
+
+    font-weight: 800;
+}
+
+.form-message {
+    display: none;
+
+    margin-top: 12px;
+
+    padding: 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+}
+
+.form-message.show {
+    display: block;
+}
+
+.form-message.error {
+    background: #2a1515;
+
+    color: #ffb3b3;
+}
+
+.form-message.success {
+    background: #152a1a;
+
+    color: #b7ffca;
+}
+
+
+/* =========================================================
+   LOADING / EMPTY
 ========================================================= */
 
 .loading,
 .empty {
-    color: #777;
-
     padding: 30px;
-
-    text-align: center;
 
     background: #101010;
 
-    border: 1px solid #202020;
+    color: #777;
 
+    border: 1px solid #202020;
     border-radius: 8px;
+
+    text-align: center;
 }
 
 
@@ -783,22 +964,22 @@ inside the player.
 .toast {
     position: fixed;
 
-    bottom: 25px;
     right: 25px;
+    bottom: 25px;
 
     z-index: 9000;
 
-    background: #fff;
-    color: #000;
+    display: none;
 
     padding: 13px 18px;
+
+    background: white;
+    color: black;
 
     border-radius: 7px;
 
     font-size: 13px;
     font-weight: 700;
-
-    display: none;
 
     box-shadow: 0 10px 40px rgba(0,0,0,.4);
 }
@@ -813,9 +994,9 @@ inside the player.
 ========================================================= */
 
 footer {
-    border-top: 1px solid #202020;
-
     padding: 35px 5%;
+
+    border-top: 1px solid #202020;
 
     color: #666;
 
@@ -832,12 +1013,12 @@ footer {
 @media (max-width: 900px) {
 
     .header {
-        height: auto;
-        padding: 14px 0;
+        padding: 12px 0;
     }
 
     .header-inner {
         flex-wrap: wrap;
+
         gap: 12px;
     }
 
@@ -852,12 +1033,13 @@ footer {
 
         overflow-x: auto;
 
-        padding-top: 5px;
+        padding-top: 4px;
     }
 
     .search-box {
-        margin-left: auto;
         width: 180px;
+
+        margin-left: auto;
     }
 
     .hero {
@@ -865,9 +1047,8 @@ footer {
     }
 
     .hero-content {
-        padding: 45px 30px;
+        padding: 50px 30px;
     }
-
 }
 
 @media (max-width: 600px) {
@@ -877,18 +1058,21 @@ footer {
     }
 
     .search-box {
-        width: 140px;
+        width: 135px;
     }
 
     .member-button {
-        padding: 8px 10px;
-        font-size: 11px;
+        padding: 8px 9px;
+
+        font-size: 10px;
     }
 
     .hero {
         width: 100%;
-        border-radius: 0;
+
         margin-top: 0;
+
+        border-radius: 0;
     }
 
     main {
@@ -914,9 +1098,11 @@ footer {
     }
 
     .player-wrapper {
-        border-radius: 0;
-        margin-left: -3%;
         width: 106%;
+
+        margin-left: -3%;
+
+        border-radius: 0;
     }
 
     .video-player {
@@ -926,7 +1112,6 @@ footer {
     .player-title {
         font-size: 19px;
     }
-
 }
 
 </style>
@@ -935,9 +1120,9 @@ footer {
 <body>
 
 
-<!-- =======================================================
+<!-- =========================================================
      HEADER
-======================================================== -->
+========================================================= -->
 
 <header class="header">
 
@@ -1010,9 +1195,9 @@ footer {
 </header>
 
 
-<!-- =======================================================
+<!-- =========================================================
      HERO
-======================================================== -->
+========================================================= -->
 
 <section
     id="home"
@@ -1024,8 +1209,11 @@ footer {
         class="hero-image"
         src=""
         alt=""
+        draggable="false"
         style="display:none;"
     >
+
+    <div class="hero-overlay"></div>
 
     <div class="hero-content">
 
@@ -1072,23 +1260,37 @@ footer {
 </section>
 
 
-<!-- =======================================================
+<!-- =========================================================
      MAIN
-======================================================== -->
+========================================================= -->
 
 <main>
 
 
-<!-- =======================================================
+<!-- =========================================================
      PLAYER
-======================================================== -->
+========================================================= -->
 
 <section
     id="playerSection"
     class="player-section"
 >
 
-    <div class="player-wrapper">
+    <div
+        id="playerWrapper"
+        class="player-wrapper"
+    >
+
+        <!--
+        =====================================================
+        NON-DOWNLOAD STREAMING PLAYER
+
+        No text overlays.
+        No title overlays.
+        No metadata overlays.
+        No custom watermark.
+        =====================================================
+        -->
 
         <video
             id="videoPlayer"
@@ -1096,17 +1298,22 @@ footer {
             controls
             playsinline
             preload="metadata"
-            controlsList="nodownload"
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
+            disableremoteplayback
+            draggable="false"
             oncontextmenu="return false;"
         ></video>
 
+        <div
+            id="playerStatus"
+            class="player-status"
+        ></div>
+
     </div>
 
-    <!--
-        IMPORTANT:
-        Episode metadata is BELOW the video.
-        Nothing is overlaid on the video.
-    -->
+
+    <!-- ALL INFORMATION IS BELOW THE VIDEO -->
 
     <div class="player-info">
 
@@ -1149,9 +1356,9 @@ footer {
 </section>
 
 
-<!-- =======================================================
+<!-- =========================================================
      CONTINUE WATCHING
-======================================================== -->
+========================================================= -->
 
 <section
     id="continue"
@@ -1175,9 +1382,9 @@ footer {
 </section>
 
 
-<!-- =======================================================
-     FEATURED SHOWS
-======================================================== -->
+<!-- =========================================================
+     SHOWS
+========================================================= -->
 
 <section
     id="shows"
@@ -1211,9 +1418,9 @@ footer {
 </section>
 
 
-<!-- =======================================================
+<!-- =========================================================
      EPISODES
-======================================================== -->
+========================================================= -->
 
 <section
     id="episodes"
@@ -1247,9 +1454,9 @@ footer {
 </section>
 
 
-<!-- =======================================================
+<!-- =========================================================
      SEARCH RESULTS
-======================================================== -->
+========================================================= -->
 
 <section
     id="searchResults"
@@ -1273,9 +1480,9 @@ footer {
 </section>
 
 
-<!-- =======================================================
+<!-- =========================================================
      MEMBER PROFILE
-======================================================== -->
+========================================================= -->
 
 <section
     id="profilePanel"
@@ -1314,9 +1521,9 @@ footer {
 </main>
 
 
-<!-- =======================================================
+<!-- =========================================================
      AUTH MODAL
-======================================================== -->
+========================================================= -->
 
 <div
     id="authModal"
@@ -1349,7 +1556,7 @@ footer {
 
             <div class="form-group">
 
-                <label>
+                <label for="loginEmail">
                     Email
                 </label>
 
@@ -1364,7 +1571,7 @@ footer {
 
             <div class="form-group">
 
-                <label>
+                <label for="loginPassword">
                     Password
                 </label>
 
@@ -1418,7 +1625,7 @@ footer {
         </form>
 
 
-        <!-- SIGNUP -->
+        <!-- SIGN UP -->
 
         <form
             id="signupForm"
@@ -1428,7 +1635,7 @@ footer {
 
             <div class="form-group">
 
-                <label>
+                <label for="signupEmail">
                     Email
                 </label>
 
@@ -1443,7 +1650,7 @@ footer {
 
             <div class="form-group">
 
-                <label>
+                <label for="signupPassword">
                     Password
                 </label>
 
@@ -1459,7 +1666,7 @@ footer {
 
             <div class="form-group">
 
-                <label>
+                <label for="signupConfirm">
                     Confirm Password
                 </label>
 
@@ -1501,7 +1708,7 @@ footer {
         </form>
 
 
-        <!-- RESET -->
+        <!-- PASSWORD RESET -->
 
         <form
             id="resetForm"
@@ -1511,7 +1718,7 @@ footer {
 
             <div class="form-group">
 
-                <label>
+                <label for="resetEmail">
                     Account Email
                 </label>
 
@@ -1553,9 +1760,9 @@ footer {
 </div>
 
 
-<!-- =======================================================
+<!-- =========================================================
      TOAST
-======================================================== -->
+========================================================= -->
 
 <div
     id="toast"
@@ -1563,9 +1770,9 @@ footer {
 ></div>
 
 
-<!-- =======================================================
+<!-- =========================================================
      FOOTER
-======================================================== -->
+========================================================= -->
 
 <footer>
 
@@ -1580,7 +1787,12 @@ footer {
 
 /* =========================================================
    CROWRULES TV v1.14
-   CONFIGURATION
+   JAVASCRIPT
+========================================================= */
+
+
+/* =========================================================
+   SUPABASE CONFIG
 ========================================================= */
 
 const SUPABASE_URL =
@@ -1591,21 +1803,32 @@ const SUPABASE_ANON_KEY =
 
 
 /* =========================================================
-   SUPABASE
+   SUPABASE CLIENT
 ========================================================= */
 
 let supabaseClient = null;
 
-if (
-    SUPABASE_URL !== "YOUR_SUPABASE_URL" &&
-    SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY"
-) {
+try {
 
-    supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_ANON_KEY
-        );
+    if (
+        SUPABASE_URL &&
+        SUPABASE_ANON_KEY
+    ) {
+
+        supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_ANON_KEY
+            );
+
+    }
+
+} catch (error) {
+
+    console.error(
+        "Supabase initialization error:",
+        error
+    );
 
 }
 
@@ -1624,7 +1847,11 @@ let featuredEpisode = null;
 
 let currentEpisode = null;
 
+let currentHls = null;
+
 let searchTimeout = null;
+
+let progressSaveTimer = null;
 
 
 /* =========================================================
@@ -1636,8 +1863,7 @@ const DEFAULT_THUMBNAIL =
     encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg"
              width="1280"
-             height="720"
-             viewBox="0 0 1280 720">
+             height="720">
             <rect width="1280"
                   height="720"
                   fill="#151515"/>
@@ -1655,7 +1881,7 @@ const DEFAULT_THUMBNAIL =
 
 
 /* =========================================================
-   INIT
+   DOM READY
 ========================================================= */
 
 document.addEventListener(
@@ -1664,28 +1890,28 @@ document.addEventListener(
 );
 
 
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
 async function init() {
 
-    document.getElementById("year").textContent =
+    document.getElementById(
+        "year"
+    ).textContent =
         new Date().getFullYear();
+
 
     setupSearch();
 
+    setupVideoProtection();
+
+    setupVideoEvents();
+
+
     if (!supabaseClient) {
 
-        showToast(
-            "Add your Supabase URL and anon key."
-        );
-
-        document.getElementById("showGrid").innerHTML =
-            `<div class="empty">
-                Supabase configuration is required.
-            </div>`;
-
-        document.getElementById("episodeGrid").innerHTML =
-            `<div class="empty">
-                Supabase configuration is required.
-            </div>`;
+        showConfigurationError();
 
         return;
     }
@@ -1705,6 +1931,31 @@ async function init() {
 
 
 /* =========================================================
+   CONFIGURATION ERROR
+========================================================= */
+
+function showConfigurationError() {
+
+    document.getElementById(
+        "showGrid"
+    ).innerHTML = `
+        <div class="empty">
+            Supabase configuration is required.
+        </div>
+    `;
+
+    document.getElementById(
+        "episodeGrid"
+    ).innerHTML = `
+        <div class="empty">
+            Supabase configuration is required.
+        </div>
+    `;
+
+}
+
+
+/* =========================================================
    AUTH SESSION
 ========================================================= */
 
@@ -1716,17 +1967,18 @@ async function restoreSession() {
             data,
             error
         } =
-            await supabaseClient.auth.getSession();
+            await supabaseClient.auth
+                .getSession();
 
-        if (error) {
 
-            console.error(error);
+        if (error)
+            throw error;
 
-            return;
-        }
 
         currentUser =
-            data?.session?.user || null;
+            data?.session?.user ||
+            null;
+
 
         updateMemberUI();
 
@@ -1743,20 +1995,29 @@ async function restoreSession() {
 
 
 /* =========================================================
-   AUTH LISTENER
+   AUTH STATE
 ========================================================= */
 
 function setupAuthListener() {
 
     supabaseClient.auth.onAuthStateChange(
-        async (event, session) => {
+        async (
+            event,
+            session
+        ) => {
 
             currentUser =
-                session?.user || null;
+                session?.user ||
+                null;
+
 
             updateMemberUI();
 
-            if (event === "SIGNED_IN") {
+
+            if (
+                event ===
+                "SIGNED_IN"
+            ) {
 
                 closeAuth();
 
@@ -1768,11 +2029,19 @@ function setupAuthListener() {
 
             }
 
-            if (event === "SIGNED_OUT") {
+
+            if (
+                event ===
+                "SIGNED_OUT"
+            ) {
 
                 document
-                    .getElementById("profilePanel")
-                    .classList.remove("active");
+                    .getElementById(
+                        "profilePanel"
+                    )
+                    .classList.remove(
+                        "active"
+                    );
 
                 renderContinueWatching();
 
@@ -1791,7 +2060,10 @@ function setupAuthListener() {
 function updateMemberUI() {
 
     const area =
-        document.getElementById("memberArea");
+        document.getElementById(
+            "memberArea"
+        );
+
 
     if (!currentUser) {
 
@@ -1818,7 +2090,14 @@ function updateMemberUI() {
 
 
     const email =
-        currentUser.email || "Member";
+        currentUser.email ||
+        "Member";
+
+
+    const username =
+        email
+            .split("@")[0]
+            .slice(0, 20);
 
 
     area.innerHTML = `
@@ -1827,9 +2106,7 @@ function updateMemberUI() {
             class="member-button"
             onclick="toggleProfile()"
         >
-            ${escapeHtml(
-                email.split("@")[0]
-            )}
+            ${escapeHtml(username)}
         </button>
 
         <button
@@ -1841,8 +2118,11 @@ function updateMemberUI() {
 
     `;
 
-    document.getElementById("profileEmail")
-        .textContent = email;
+
+    document.getElementById(
+        "profileEmail"
+    ).textContent =
+        email;
 
 }
 
@@ -1854,7 +2134,10 @@ function updateMemberUI() {
 async function loadShows() {
 
     const grid =
-        document.getElementById("showGrid");
+        document.getElementById(
+            "showGrid"
+        );
+
 
     try {
 
@@ -1879,8 +2162,14 @@ async function loadShows() {
                     is_active,
                     sort_order
                 `)
-                .eq("is_active", true)
-                .eq("status", "published")
+                .eq(
+                    "is_active",
+                    true
+                )
+                .eq(
+                    "status",
+                    "published"
+                )
                 .order(
                     "is_featured",
                     {
@@ -1905,11 +2194,13 @@ async function loadShows() {
             throw error;
 
 
-        shows = data || [];
+        shows =
+            data || [];
 
 
-        document.getElementById("showCount")
-            .textContent =
+        document.getElementById(
+            "showCount"
+        ).textContent =
             `${shows.length} shows`;
 
 
@@ -1921,6 +2212,7 @@ async function loadShows() {
             "Show loading error:",
             error
         );
+
 
         grid.innerHTML = `
             <div class="empty">
@@ -1940,63 +2232,68 @@ async function loadShows() {
 function renderShows() {
 
     const grid =
-        document.getElementById("showGrid");
+        document.getElementById(
+            "showGrid"
+        );
+
 
     if (!shows.length) {
 
-        grid.innerHTML =
-            `<div class="empty">
+        grid.innerHTML = `
+            <div class="empty">
                 No shows are currently available.
-            </div>`;
+            </div>
+        `;
 
         return;
     }
 
 
     grid.innerHTML =
-        shows.map(show => `
+        shows
+            .map(
+                show => `
 
-            <article
-                class="card"
-                onclick="openShow('${show.id}')"
-            >
+                    <article
+                        class="card"
+                        onclick="openShow('${escapeAttribute(show.id)}')"
+                    >
 
-                <img
-                    class="card-image"
-                    src="${safeImage(
-                        show.thumbnail_url
-                    )}"
-                    alt=""
-                    loading="lazy"
-                >
+                        <img
+                            class="card-image"
+                            src="${safeImage(show.thumbnail_url)}"
+                            alt=""
+                            loading="lazy"
+                            draggable="false"
+                        >
 
-                <div class="card-body">
+                        <div class="card-body">
 
-                    <div class="card-title">
-                        ${escapeHtml(
-                            show.title
-                        )}
-                    </div>
+                            <div class="card-title">
+                                ${escapeHtml(show.title)}
+                            </div>
 
-                    <div class="card-meta">
-                        ${escapeHtml(
-                            show.content_type ||
-                            "SERIES"
-                        )}
-                    </div>
+                            <div class="card-meta">
+                                ${escapeHtml(
+                                    show.content_type ||
+                                    "SERIES"
+                                )}
+                            </div>
 
-                    <div class="card-description">
-                        ${escapeHtml(
-                            show.description ||
-                            ""
-                        )}
-                    </div>
+                            <div class="card-description">
+                                ${escapeHtml(
+                                    show.description ||
+                                    ""
+                                )}
+                            </div>
 
-                </div>
+                        </div>
 
-            </article>
+                    </article>
 
-        `).join("");
+                `
+            )
+            .join("");
 
 }
 
@@ -2011,6 +2308,7 @@ async function loadEpisodes() {
         document.getElementById(
             "episodeGrid"
         );
+
 
     try {
 
@@ -2042,8 +2340,14 @@ async function loadEpisodes() {
                     is_free,
                     views
                 `)
-                .eq("is_active", true)
-                .eq("status", "published")
+                .eq(
+                    "is_active",
+                    true
+                )
+                .eq(
+                    "status",
+                    "published"
+                )
                 .order(
                     "published_at",
                     {
@@ -2058,7 +2362,8 @@ async function loadEpisodes() {
             throw error;
 
 
-        episodes = data || [];
+        episodes =
+            data || [];
 
 
         document.getElementById(
@@ -2075,7 +2380,8 @@ async function loadEpisodes() {
 
         featuredEpisode =
             episodes.find(
-                e => e.is_featured
+                episode =>
+                    episode.is_featured
             ) ||
             episodes[0] ||
             null;
@@ -2089,6 +2395,7 @@ async function loadEpisodes() {
             "Episode loading error:",
             error
         );
+
 
         grid.innerHTML = `
             <div class="empty">
@@ -2112,75 +2419,86 @@ function renderEpisodes(
 
     if (!list.length) {
 
-        container.innerHTML =
-            `<div class="empty">
+        container.innerHTML = `
+            <div class="empty">
                 No episodes are currently available.
-            </div>`;
+            </div>
+        `;
 
         return;
     }
 
 
     container.innerHTML =
-        list.map(episode => {
+        list
+            .map(
+                episode => {
 
-            const show =
-                shows.find(
-                    s =>
-                        s.id ===
-                        episode.show_id
-                );
+                    const show =
+                        shows.find(
+                            item =>
+                                item.id ===
+                                episode.show_id
+                        );
 
 
-            return `
+                    return `
 
-                <article
-                    class="episode-card"
-                    onclick="playEpisode('${episode.id}')"
-                >
+                        <article
+                            class="episode-card"
+                            onclick="playEpisode('${escapeAttribute(episode.id)}')"
+                        >
 
-                    <img
-                        class="episode-thumb"
-                        src="${safeImage(
-                            episode.thumbnail_url
-                        )}"
-                        alt=""
-                        loading="lazy"
-                    >
+                            <img
+                                class="episode-thumb"
+                                src="${safeImage(
+                                    episode.thumbnail_url
+                                )}"
+                                alt=""
+                                loading="lazy"
+                                draggable="false"
+                            >
 
-                    <div class="episode-body">
+                            <div class="episode-body">
 
-                        <div class="episode-number">
-                            ${show
-                                ? escapeHtml(
-                                    show.title
-                                )
-                                : "CrowRules TV"}
-                            • Episode
-                            ${episode.episode_number}
-                        </div>
+                                <div class="episode-number">
 
-                        <div class="episode-title">
-                            ${escapeHtml(
-                                episode.title
-                            )}
-                        </div>
+                                    ${escapeHtml(
+                                        show?.title ||
+                                        "CrowRules TV"
+                                    )}
 
-                        <div class="episode-desc">
-                            ${escapeHtml(
-                                episode.short_description ||
-                                episode.description ||
-                                ""
-                            )}
-                        </div>
+                                    • Episode
 
-                    </div>
+                                    ${escapeHtml(
+                                        episode.episode_number
+                                    )}
 
-                </article>
+                                </div>
 
-            `;
+                                <div class="episode-title">
+                                    ${escapeHtml(
+                                        episode.title
+                                    )}
+                                </div>
 
-        }).join("");
+                                <div class="episode-desc">
+                                    ${escapeHtml(
+                                        episode.short_description ||
+                                        episode.description ||
+                                        ""
+                                    )}
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    `;
+
+                }
+            )
+            .join("");
 
 }
 
@@ -2197,8 +2515,8 @@ function setupHero() {
 
     const show =
         shows.find(
-            s =>
-                s.id ===
+            item =>
+                item.id ===
                 featuredEpisode.show_id
         );
 
@@ -2231,8 +2549,11 @@ function setupHero() {
 
     if (imageURL) {
 
-        image.src = imageURL;
-        image.style.display = "block";
+        image.src =
+            safeImage(imageURL);
+
+        image.style.display =
+            "block";
 
     }
 
@@ -2240,7 +2561,7 @@ function setupHero() {
 
 
 /* =========================================================
-   PLAY FEATURED
+   FEATURED PLAY
 ========================================================= */
 
 function playFeatured() {
@@ -2248,11 +2569,12 @@ function playFeatured() {
     if (!featuredEpisode) {
 
         showToast(
-            "No featured episode available."
+            "No featured episode is available."
         );
 
         return;
     }
+
 
     playEpisode(
         featuredEpisode.id
@@ -2271,8 +2593,9 @@ async function playEpisode(
 
     const episode =
         episodes.find(
-            e =>
-                e.id === episodeId
+            item =>
+                item.id ===
+                episodeId
         );
 
 
@@ -2302,15 +2625,9 @@ async function playEpisode(
 
     const show =
         shows.find(
-            s =>
-                s.id ===
+            item =>
+                item.id ===
                 episode.show_id
-        );
-
-
-    const player =
-        document.getElementById(
-            "videoPlayer"
         );
 
 
@@ -2335,91 +2652,478 @@ async function playEpisode(
         "";
 
 
-    player.pause();
-
-    player.src =
-        episode.video_url;
-
-    player.load();
-
-
-    document
-        .getElementById(
+    const section =
+        document.getElementById(
             "playerSection"
-        )
-        .classList.add("active");
+        );
+
+
+    section.classList.add(
+        "active"
+    );
 
 
     updateMyListButton();
 
 
-    document
-        .getElementById(
-            "playerSection"
+    clearPlayer();
+
+
+    showPlayerStatus(
+        "Loading stream...",
+        false
+    );
+
+
+    /*
+    Resume position from local history.
+    */
+
+    const saved =
+        getWatchHistory()[
+            episode.id
+        ];
+
+
+    const resumeTime =
+        saved?.progress > 0 &&
+        saved?.progress < .98
+            ? saved.progress
+            : 0;
+
+
+    await loadVideoSource(
+        episode.video_url,
+        episode.video_type,
+        resumeTime
+    );
+
+
+    section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+}
+
+
+/* =========================================================
+   VIDEO SOURCE LOADER
+========================================================= */
+
+async function loadVideoSource(
+    url,
+    videoType,
+    resumeProgress = 0
+) {
+
+    const video =
+        document.getElementById(
+            "videoPlayer"
+        );
+
+
+    if (!url) {
+
+        showPlayerStatus(
+            "No video source is available.",
+            true
+        );
+
+        return;
+    }
+
+
+    const normalized =
+        String(url)
+            .trim();
+
+
+    const type =
+        String(
+            videoType || ""
         )
-        .scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
+            .toLowerCase();
 
 
-    saveWatchProgress(
-        episode.id,
-        0
+    /*
+    HLS
+    */
+
+    const isHLS =
+        type.includes("hls") ||
+        type.includes("m3u8") ||
+        /\.m3u8(\?.*)?$/i.test(
+            normalized
+        );
+
+
+    if (isHLS) {
+
+        if (
+            video.canPlayType(
+                "application/vnd.apple.mpegurl"
+            )
+        ) {
+
+            video.src =
+                normalized;
+
+            video.load();
+
+            attachResume(
+                video,
+                resumeProgress
+            );
+
+            return;
+        }
+
+
+        if (
+            window.Hls &&
+            Hls.isSupported()
+        ) {
+
+            currentHls =
+                new Hls({
+                    enableWorker: true,
+
+                    lowLatencyMode: false,
+
+                    backBufferLength: 30
+                });
+
+
+            currentHls.loadSource(
+                normalized
+            );
+
+
+            currentHls.attachMedia(
+                video
+            );
+
+
+            currentHls.on(
+                Hls.Events.MANIFEST_PARSED,
+                () => {
+
+                    attachResume(
+                        video,
+                        resumeProgress
+                    );
+
+                }
+            );
+
+
+            currentHls.on(
+                Hls.Events.ERROR,
+                (
+                    event,
+                    data
+                ) => {
+
+                    console.error(
+                        "HLS error:",
+                        data
+                    );
+
+
+                    if (
+                        data.fatal
+                    ) {
+
+                        showPlayerStatus(
+                            "Unable to play this stream.",
+                            true
+                        );
+
+                    }
+
+                }
+            );
+
+
+            return;
+        }
+
+
+        showPlayerStatus(
+            "This browser does not support HLS playback.",
+            true
+        );
+
+
+        return;
+    }
+
+
+    /*
+    STANDARD MP4 / WEBM
+    */
+
+    video.src =
+        normalized;
+
+    video.load();
+
+
+    attachResume(
+        video,
+        resumeProgress
     );
 
 }
 
 
 /* =========================================================
-   PLAYER EVENTS
+   RESUME VIDEO
 ========================================================= */
 
-document
-    .getElementById("videoPlayer")
-    .addEventListener(
-        "timeupdate",
-        function() {
+function attachResume(
+    video,
+    progress
+) {
 
-            if (
-                !currentEpisode ||
-                !currentUser
-            )
-                return;
+    const handler =
+        () => {
 
-
-            const duration =
-                this.duration || 0;
-
-            const current =
-                this.currentTime || 0;
+            video.removeEventListener(
+                "loadedmetadata",
+                handler
+            );
 
 
             if (
-                duration > 0 &&
-                current > 5
+                progress > 0 &&
+                video.duration &&
+                isFinite(video.duration)
             ) {
 
-                saveWatchProgress(
-                    currentEpisode.id,
-                    current / duration
-                );
+                const position =
+                    video.duration *
+                    progress;
+
+
+                if (
+                    position <
+                    video.duration - 5
+                ) {
+
+                    try {
+
+                        video.currentTime =
+                            position;
+
+                    } catch {}
+
+                }
 
             }
+
+
+            hidePlayerStatus();
+
+        };
+
+
+    video.addEventListener(
+        "loadedmetadata",
+        handler
+    );
+
+}
+
+
+/* =========================================================
+   CLEAR PLAYER
+========================================================= */
+
+function clearPlayer() {
+
+    const video =
+        document.getElementById(
+            "videoPlayer"
+        );
+
+
+    video.pause();
+
+
+    if (currentHls) {
+
+        try {
+
+            currentHls.destroy();
+
+        } catch {}
+
+        currentHls = null;
+
+    }
+
+
+    video.removeAttribute(
+        "src"
+    );
+
+
+    video.load();
+
+}
+
+
+/* =========================================================
+   CLOSE PLAYER
+========================================================= */
+
+function closePlayer() {
+
+    const video =
+        document.getElementById(
+            "videoPlayer"
+        );
+
+
+    if (
+        currentEpisode &&
+        video.duration > 0
+    ) {
+
+        saveWatchProgress(
+            currentEpisode.id,
+            video.currentTime /
+            video.duration
+        );
+
+    }
+
+
+    clearPlayer();
+
+
+    document.getElementById(
+        "playerSection"
+    ).classList.remove(
+        "active"
+    );
+
+
+    currentEpisode =
+        null;
+
+
+    hidePlayerStatus();
+
+}
+
+
+/* =========================================================
+   VIDEO EVENTS
+========================================================= */
+
+function setupVideoEvents() {
+
+    const video =
+        document.getElementById(
+            "videoPlayer"
+        );
+
+
+    video.addEventListener(
+        "play",
+        () => {
+
+            hidePlayerStatus();
 
         }
     );
 
 
-document
-    .getElementById("videoPlayer")
-    .addEventListener(
-        "ended",
-        function() {
+    video.addEventListener(
+        "waiting",
+        () => {
+
+            showPlayerStatus(
+                "Buffering...",
+                false
+            );
+
+        }
+    );
+
+
+    video.addEventListener(
+        "canplay",
+        () => {
+
+            hidePlayerStatus();
+
+        }
+    );
+
+
+    video.addEventListener(
+        "error",
+        () => {
+
+            showPlayerStatus(
+                "The video could not be played.",
+                true
+            );
+
+        }
+    );
+
+
+    video.addEventListener(
+        "timeupdate",
+        () => {
 
             if (
-                currentEpisode &&
-                currentUser
+                !currentEpisode
+            )
+                return;
+
+
+            if (
+                !video.duration ||
+                !isFinite(video.duration)
+            )
+                return;
+
+
+            clearTimeout(
+                progressSaveTimer
+            );
+
+
+            progressSaveTimer =
+                setTimeout(
+                    () => {
+
+                        saveWatchProgress(
+                            currentEpisode.id,
+                            video.currentTime /
+                            video.duration
+                        );
+
+                    },
+                    1500
+                );
+
+        }
+    );
+
+
+    video.addEventListener(
+        "ended",
+        () => {
+
+            if (
+                currentEpisode
             ) {
 
                 saveWatchProgress(
@@ -2432,33 +3136,138 @@ document
         }
     );
 
+}
+
 
 /* =========================================================
-   CLOSE PLAYER
+   PLAYER STATUS
 ========================================================= */
 
-function closePlayer() {
+function showPlayerStatus(
+    message,
+    isError = false
+) {
 
-    const player =
+    const element =
+        document.getElementById(
+            "playerStatus"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        "player-status show";
+
+
+    if (isError) {
+
+        element.classList.add(
+            "error"
+        );
+
+    }
+
+}
+
+
+function hidePlayerStatus() {
+
+    const element =
+        document.getElementById(
+            "playerStatus"
+        );
+
+
+    element.className =
+        "player-status";
+
+
+    element.textContent =
+        "";
+
+}
+
+
+/* =========================================================
+   VIDEO PROTECTION
+========================================================= */
+
+function setupVideoProtection() {
+
+    const video =
         document.getElementById(
             "videoPlayer"
         );
 
-    player.pause();
 
-    player.removeAttribute("src");
+    /*
+    Disable context menu.
+    */
 
-    player.load();
+    video.addEventListener(
+        "contextmenu",
+        event => {
+
+            event.preventDefault();
+
+        }
+    );
 
 
-    document
-        .getElementById(
-            "playerSection"
-        )
-        .classList.remove("active");
+    /*
+    Disable drag.
+    */
+
+    video.addEventListener(
+        "dragstart",
+        event => {
+
+            event.preventDefault();
+
+        }
+    );
 
 
-    currentEpisode = null;
+    /*
+    Prevent common save/open shortcuts while
+    the player is focused.
+    */
+
+    video.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.ctrlKey &&
+                [
+                    "s",
+                    "S",
+                    "u",
+                    "U"
+                ].includes(
+                    event.key
+                )
+            ) {
+
+                event.preventDefault();
+
+            }
+
+        }
+    );
+
+
+    /*
+    Prevent image-like dragging.
+    */
+
+    video.setAttribute(
+        "draggable",
+        "false"
+    );
 
 }
 
@@ -2473,8 +3282,9 @@ async function openShow(
 
     const show =
         shows.find(
-            s =>
-                s.id === showId
+            item =>
+                item.id ===
+                showId
         );
 
 
@@ -2484,17 +3294,10 @@ async function openShow(
 
     const showEpisodes =
         episodes.filter(
-            e =>
-                e.show_id ===
+            episode =>
+                episode.show_id ===
                 showId
         );
-
-
-    document.getElementById(
-        "episodes"
-    ).scrollIntoView({
-        behavior: "smooth"
-    });
 
 
     renderEpisodes(
@@ -2509,6 +3312,11 @@ async function openShow(
         "episodeCount"
     ).textContent =
         `${showEpisodes.length} episodes`;
+
+
+    scrollToSection(
+        "episodes"
+    );
 
 }
 
@@ -2536,10 +3344,13 @@ function setupSearch() {
 
             searchTimeout =
                 setTimeout(
-                    () =>
+                    () => {
+
                         performSearch(
                             this.value.trim()
-                        ),
+                        );
+
+                    },
                     200
                 );
 
@@ -2557,6 +3368,7 @@ function performSearch(
         document.getElementById(
             "searchResults"
         );
+
 
     const grid =
         document.getElementById(
@@ -2583,8 +3395,8 @@ function performSearch(
 
                 const show =
                     shows.find(
-                        s =>
-                            s.id ===
+                        item =>
+                            item.id ===
                             episode.show_id
                     );
 
@@ -2598,6 +3410,12 @@ function performSearch(
                     ||
 
                     episode.description
+                        ?.toLowerCase()
+                        .includes(q)
+
+                    ||
+
+                    episode.short_description
                         ?.toLowerCase()
                         .includes(q)
 
@@ -2638,25 +3456,27 @@ function openAuth(
     mode = "login"
 ) {
 
-    document
-        .getElementById(
-            "authModal"
-        )
-        .classList.add("active");
+    document.getElementById(
+        "authModal"
+    ).classList.add(
+        "active"
+    );
 
 
-    switchAuth(mode);
+    switchAuth(
+        mode
+    );
 
 }
 
 
 function closeAuth() {
 
-    document
-        .getElementById(
-            "authModal"
-        )
-        .classList.remove("active");
+    document.getElementById(
+        "authModal"
+    ).classList.remove(
+        "active"
+    );
 
 }
 
@@ -2697,13 +3517,6 @@ function switchAuth(
             : mode === "signup"
                 ? "Create Member Account"
                 : "Reset Password";
-
-}
-
-
-function showResetForm() {
-
-    switchAuth("reset");
 
 }
 
@@ -2763,7 +3576,9 @@ async function handleLogin(
 
         showMessage(
             message,
-            error.message,
+            friendlyAuthError(
+                error
+            ),
             "error"
         );
 
@@ -2807,7 +3622,10 @@ async function handleSignup(
         );
 
 
-    if (password !== confirm) {
+    if (
+        password !==
+        confirm
+    ) {
 
         showMessage(
             message,
@@ -2827,11 +3645,8 @@ async function handleSignup(
         } =
             await supabaseClient.auth
                 .signUp({
-
                     email,
-
                     password
-
                 });
 
 
@@ -2864,7 +3679,9 @@ async function handleSignup(
 
         showMessage(
             message,
-            error.message,
+            friendlyAuthError(
+                error
+            ),
             "error"
         );
 
@@ -2876,6 +3693,15 @@ async function handleSignup(
 /* =========================================================
    PASSWORD RESET
 ========================================================= */
+
+function showResetForm() {
+
+    switchAuth(
+        "reset"
+    );
+
+}
+
 
 async function handleReset(
     event
@@ -2930,11 +3756,55 @@ async function handleReset(
 
         showMessage(
             message,
-            error.message,
+            friendlyAuthError(
+                error
+            ),
             "error"
         );
 
     }
+
+}
+
+
+/* =========================================================
+   AUTH ERROR
+========================================================= */
+
+function friendlyAuthError(
+    error
+) {
+
+    const text =
+        error?.message ||
+        "Authentication failed.";
+
+
+    if (
+        text.toLowerCase()
+            .includes(
+                "invalid login credentials"
+            )
+    ) {
+
+        return "Incorrect email or password.";
+
+    }
+
+
+    if (
+        text.toLowerCase()
+            .includes(
+                "email not confirmed"
+            )
+    ) {
+
+        return "Please verify your email before logging in.";
+
+    }
+
+
+    return text;
 
 }
 
@@ -2945,29 +3815,31 @@ async function handleReset(
 
 async function signOut() {
 
-    if (!supabaseClient)
-        return;
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient.auth
+                .signOut();
 
 
-    const {
-        error
-    } =
-        await supabaseClient.auth.signOut();
+        if (error)
+            throw error;
 
-
-    if (error) {
 
         showToast(
-            error.message
+            "You have been logged out."
         );
 
-        return;
+    } catch (error) {
+
+        showToast(
+            error.message ||
+            "Unable to log out."
+        );
+
     }
-
-
-    showToast(
-        "You have been logged out."
-    );
 
 }
 
@@ -2980,7 +3852,9 @@ function toggleProfile() {
 
     if (!currentUser) {
 
-        openAuth("login");
+        openAuth(
+            "login"
+        );
 
         return;
     }
@@ -3023,7 +3897,8 @@ function getLocalMyList() {
         return JSON.parse(
             localStorage.getItem(
                 "crowrules_my_list"
-            ) || "[]"
+            ) ||
+            "[]"
         );
 
     } catch {
@@ -3041,7 +3916,9 @@ function saveLocalMyList(
 
     localStorage.setItem(
         "crowrules_my_list",
-        JSON.stringify(list)
+        JSON.stringify(
+            list
+        )
     );
 
 }
@@ -3051,7 +3928,9 @@ function toggleMyList() {
 
     if (!currentUser) {
 
-        openAuth("login");
+        openAuth(
+            "login"
+        );
 
         showToast(
             "Log in to use My List."
@@ -3082,6 +3961,7 @@ function toggleMyList() {
                     currentEpisode.id
             );
 
+
         showToast(
             "Removed from My List."
         );
@@ -3091,6 +3971,7 @@ function toggleMyList() {
         list.push(
             currentEpisode.id
         );
+
 
         showToast(
             "Added to My List."
@@ -3147,7 +4028,9 @@ function loadMyList() {
 
     if (!currentUser) {
 
-        openAuth("login");
+        openAuth(
+            "login"
+        );
 
         return;
     }
@@ -3166,12 +4049,6 @@ function loadMyList() {
         );
 
 
-    const section =
-        document.getElementById(
-            "episodes"
-        );
-
-
     renderEpisodes(
         results,
         document.getElementById(
@@ -3186,9 +4063,9 @@ function loadMyList() {
         `${results.length} saved`;
 
 
-    section.scrollIntoView({
-        behavior: "smooth"
-    });
+    scrollToSection(
+        "episodes"
+    );
 
 }
 
@@ -3204,7 +4081,8 @@ function getWatchHistory() {
         return JSON.parse(
             localStorage.getItem(
                 "crowrules_watch_history"
-            ) || "{}"
+            ) ||
+            "{}"
         );
 
     } catch {
@@ -3221,7 +4099,11 @@ function saveWatchProgress(
     progress
 ) {
 
-    let history =
+    if (!episodeId)
+        return;
+
+
+    const history =
         getWatchHistory();
 
 
@@ -3254,6 +4136,10 @@ function saveWatchProgress(
 
 }
 
+
+/* =========================================================
+   CONTINUE WATCHING
+========================================================= */
 
 function renderContinueWatching() {
 
@@ -3292,7 +4178,7 @@ function renderContinueWatching() {
                 item.progress < .98
         )
         .sort(
-            (a,b) =>
+            (a, b) =>
                 b[1].updatedAt -
                 a[1].updatedAt
         )
@@ -3300,11 +4186,15 @@ function renderContinueWatching() {
             ([id]) =>
                 episodes.find(
                     episode =>
-                        episode.id === id
+                        episode.id ===
+                        id
                 )
         )
         .filter(Boolean)
-        .slice(0, 12);
+        .slice(
+            0,
+            12
+        );
 
 
     if (!results.length) {
@@ -3321,52 +4211,67 @@ function renderContinueWatching() {
 
 
     grid.innerHTML =
-        results.map(
-            episode => {
+        results
+            .map(
+                episode => {
 
-                const progress =
-                    history[
-                        episode.id
-                    ]?.progress || 0;
+                    const progress =
+                        history[
+                            episode.id
+                        ]?.progress ||
+                        0;
 
 
-                return `
+                    return `
 
-                    <article
-                        class="card"
-                        onclick="playEpisode('${episode.id}')"
-                    >
-
-                        <img
-                            class="card-image"
-                            src="${safeImage(
-                                episode.thumbnail_url
-                            )}"
-                            alt=""
+                        <article
+                            class="card"
+                            onclick="playEpisode('${escapeAttribute(episode.id)}')"
                         >
 
-                        <div class="card-body">
+                            <img
+                                class="card-image"
+                                src="${safeImage(
+                                    episode.thumbnail_url
+                                )}"
+                                alt=""
+                                draggable="false"
+                            >
 
-                            <div class="card-title">
-                                ${escapeHtml(
-                                    episode.title
-                                )}
+                            <div class="progress-bar">
+
+                                <div
+                                    class="progress-fill"
+                                    style="width:${Math.round(
+                                        progress * 100
+                                    )}%"
+                                ></div>
+
                             </div>
 
-                            <div class="card-meta">
-                                ${Math.round(
-                                    progress * 100
-                                )}% watched
+                            <div class="card-body">
+
+                                <div class="card-title">
+                                    ${escapeHtml(
+                                        episode.title
+                                    )}
+                                </div>
+
+                                <div class="card-meta">
+                                    ${Math.round(
+                                        progress * 100
+                                    )}% watched
+                                </div>
+
                             </div>
 
-                        </div>
+                        </article>
 
-                    </article>
+                    `;
 
-                `;
-
-            }
-        ).join("");
+                }
+            )
+            .join("");
 
 }
 
@@ -3388,7 +4293,8 @@ function scrollToSection(
     if (element) {
 
         element.scrollIntoView({
-            behavior: "smooth"
+            behavior: "smooth",
+            block: "start"
         });
 
     }
@@ -3403,13 +4309,14 @@ function goHome() {
         behavior: "smooth"
     });
 
+
     return false;
 
 }
 
 
 /* =========================================================
-   MESSAGES
+   MESSAGE
 ========================================================= */
 
 function showMessage(
@@ -3421,11 +4328,18 @@ function showMessage(
     element.textContent =
         message;
 
+
     element.className =
         `form-message show ${type}`;
 
 }
 
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer = null;
 
 function showToast(
     message
@@ -3446,13 +4360,22 @@ function showToast(
     );
 
 
-    setTimeout(
-        () =>
-            toast.classList.remove(
-                "show"
-            ),
-        3500
+    clearTimeout(
+        toastTimer
     );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            3500
+        );
 
 }
 
@@ -3479,8 +4402,10 @@ function safeImage(
 
 
         if (
-            parsed.protocol !== "http:" &&
-            parsed.protocol !== "https:"
+            parsed.protocol !==
+                "http:" &&
+            parsed.protocol !==
+                "https:"
         ) {
 
             return DEFAULT_THUMBNAIL;
@@ -3539,8 +4464,23 @@ function escapeHtml(
 }
 
 
+function escapeAttribute(
+    value
+) {
+
+    return escapeHtml(
+        value
+    )
+        .replace(
+            /`/g,
+            "&#096;"
+        );
+
+}
+
+
 /* =========================================================
-   KEYBOARD SUPPORT
+   KEYBOARD
 ========================================================= */
 
 document.addEventListener(
@@ -3561,11 +4501,13 @@ document.addEventListener(
 
 
 /* =========================================================
-   MODAL OUTSIDE CLICK
+   AUTH MODAL OUTSIDE CLICK
 ========================================================= */
 
 document
-    .getElementById("authModal")
+    .getElementById(
+        "authModal"
+    )
     .addEventListener(
         "click",
         event => {
@@ -3584,41 +4526,63 @@ document
 
 
 /* =========================================================
-   VIDEO ERROR
+   GLOBAL CONTEXT MENU PROTECTION
 ========================================================= */
 
-document
-    .getElementById("videoPlayer")
-    .addEventListener(
-        "error",
-        function() {
+document.addEventListener(
+    "contextmenu",
+    event => {
+
+        if (
+            event.target.closest(
+                "#videoPlayer"
+            )
+        ) {
+
+            event.preventDefault();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PAGE VISIBILITY
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if (
+            document.hidden &&
+            currentEpisode
+        ) {
+
+            const video =
+                document.getElementById(
+                    "videoPlayer"
+                );
+
 
             if (
-                currentEpisode
+                video.duration > 0 &&
+                isFinite(video.duration)
             ) {
 
-                showToast(
-                    "The video could not be played."
+                saveWatchProgress(
+                    currentEpisode.id,
+                    video.currentTime /
+                    video.duration
                 );
 
             }
 
         }
-    );
 
-
-/* =========================================================
-   PREVENT DOWNLOAD CONTEXT MENU
-========================================================= */
-
-document
-    .getElementById("videoPlayer")
-    .addEventListener(
-        "contextmenu",
-        event => {
-            event.preventDefault();
-        }
-    );
+    }
+);
 
 </script>
 
