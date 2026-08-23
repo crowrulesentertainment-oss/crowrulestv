@@ -1,698 +1,1354 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>CrowRules Entertainment — Admin v1.2</title>
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    CrowRules Entertainment — Admin v1.2
+</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
-    --bg:#07090d;
-    --panel:#10141b;
-    --panel2:#151a23;
-    --panel3:#0b0f15;
-    --border:#262d38;
-    --text:#f4f7fb;
-    --muted:#8b96a8;
-    --accent:#7c3aed;
-    --accent2:#a855f7;
-    --green:#22c55e;
-    --red:#ef4444;
-    --yellow:#eab308;
-    --blue:#3b82f6;
-    --cyan:#06b6d4;
-    --shadow:0 20px 60px rgba(0,0,0,.45);
+
+/* =========================================================
+   CROW RULES ENTERTAINMENT
+   ADMIN v1.2
+   COMPLETE SINGLE-FILE ADMIN APPLICATION
+========================================================= */
+
+:root {
+
+    --bg: #06080c;
+    --bg2: #090d13;
+
+    --panel: #10151d;
+    --panel2: #151b24;
+
+    --border: #252d39;
+
+    --text: #f4f7fb;
+    --muted: #8c97a8;
+
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --blue: #3b82f6;
+    --cyan: #06b6d4;
+
+    --shadow:
+        0 20px 60px rgba(0,0,0,.45);
+
+    --radius:
+        14px;
+
 }
 
-*{box-sizing:border-box}
 
-html,body{
-    margin:0;
-    min-height:100%;
-    background:var(--bg);
-    color:var(--text);
-    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
 }
 
-body{overflow-x:hidden}
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
 
-button,input,textarea,select{font:inherit}
+body {
 
-button{cursor:pointer}
+    background:
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(124,58,237,.16),
+            transparent 40%
+        ),
+        var(--bg);
 
-a{color:#c4b5fd}
+    color: var(--text);
 
-.hidden{display:none!important}
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+}
+
+button,
+input,
+textarea,
+select {
+
+    font: inherit;
+
+}
+
+button {
+
+    cursor: pointer;
+
+}
+
 
 /* =========================================================
    LOGIN
 ========================================================= */
 
-#loginScreen{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:25px;
+#loginScreen {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px;
+
+}
+
+.loginCard {
+
+    width:
+        min(440px, 100%);
+
     background:
-        radial-gradient(circle at 50% 0%,rgba(124,58,237,.25),transparent 40%),
-        radial-gradient(circle at 10% 90%,rgba(59,130,246,.08),transparent 35%),
-        #07090d;
+        rgba(16,21,29,.97);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        22px;
+
+    padding:
+        34px;
+
+    box-shadow:
+        var(--shadow);
+
 }
 
-.loginCard{
-    width:min(450px,100%);
-    background:rgba(16,20,27,.97);
-    border:1px solid var(--border);
-    border-radius:22px;
-    padding:34px;
-    box-shadow:var(--shadow);
+.logo {
+
+    text-align: center;
+
+    margin-bottom:
+        28px;
+
 }
 
-.logo{
-    text-align:center;
-    margin-bottom:28px;
+.logoMark {
+
+    width:
+        72px;
+
+    height:
+        72px;
+
+    margin:
+        0 auto 17px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            #111827
+        );
+
+    font-size:
+        28px;
+
+    font-weight:
+        900;
+
 }
 
-.logoMark{
-    width:72px;
-    height:72px;
-    margin:auto auto 16px;
-    border-radius:20px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg,var(--accent),#111827);
-    font-size:30px;
-    font-weight:900;
+.logo h1 {
+
+    margin:
+        0;
+
+    font-size:
+        22px;
+
 }
 
-.logo h1{
-    margin:0;
-    font-size:23px;
+.logo p {
+
+    margin:
+        7px 0 0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
 }
 
-.logo p{
-    margin:7px 0 0;
-    color:var(--muted);
-    font-size:13px;
+.formGroup {
+
+    margin-bottom:
+        16px;
+
 }
 
-.formGroup{
-    margin-bottom:16px;
-}
+.formGroup label {
 
-.formGroup label{
-    display:block;
-    margin-bottom:7px;
-    color:#cbd5e1;
-    font-size:13px;
-    font-weight:600;
+    display:
+        block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        #cbd5e1;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
 }
 
 .formGroup input,
 .formGroup textarea,
-.formGroup select{
-    width:100%;
-    padding:12px 13px;
-    background:#090c11;
-    border:1px solid var(--border);
-    border-radius:10px;
-    color:white;
-    outline:none;
+.formGroup select {
+
+    width:
+        100%;
+
+    padding:
+        12px 13px;
+
+    background:
+        #090c11;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        9px;
+
+    color:
+        white;
+
+    outline:
+        none;
+
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus,
-.formGroup select:focus{
-    border-color:var(--accent);
-    box-shadow:0 0 0 3px rgba(124,58,237,.12);
+.formGroup select:focus {
+
+    border-color:
+        var(--accent);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(124,58,237,.12);
+
 }
 
-.formHint{
-    display:block;
-    margin-top:6px;
-    color:var(--muted);
-    font-size:11px;
+.primaryButton {
+
+    width:
+        100%;
+
+    padding:
+        13px;
+
+    border:
+        0;
+
+    border-radius:
+        10px;
+
+    color:
+        white;
+
+    font-weight:
+        800;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent2)
+        );
+
 }
 
-.primaryButton{
-    width:100%;
-    border:0;
-    border-radius:10px;
-    padding:13px;
-    color:white;
-    font-weight:800;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
+.primaryButton:disabled {
+
+    opacity:
+        .55;
+
+    cursor:
+        not-allowed;
+
 }
 
-.primaryButton:disabled{
-    opacity:.55;
-    cursor:not-allowed;
+.loginStatus {
+
+    min-height:
+        22px;
+
+    margin-top:
+        15px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
 }
 
-.loginStatus{
-    margin-top:15px;
-    min-height:20px;
-    text-align:center;
-    color:var(--muted);
-    font-size:13px;
+.loginStatus.error {
+
+    color:
+        #f87171;
+
 }
 
-.loginStatus.error{color:#f87171}
-.loginStatus.success{color:#4ade80}
+.loginStatus.success {
+
+    color:
+        #4ade80;
+
+}
+
 
 /* =========================================================
-   APP
+   APPLICATION
 ========================================================= */
 
-#adminApp{
-    display:none;
-    min-height:100vh;
+#adminApp {
+
+    display:
+        none;
+
+    min-height:
+        100vh;
+
 }
 
-.layout{
-    min-height:100vh;
-    display:flex;
+.layout {
+
+    min-height:
+        100vh;
+
+    display:
+        flex;
+
 }
+
 
 /* =========================================================
    SIDEBAR
 ========================================================= */
 
-.sidebar{
-    width:255px;
-    flex-shrink:0;
-    position:fixed;
-    inset:0 auto 0 0;
-    z-index:100;
-    overflow-y:auto;
-    background:#0b0e13;
-    border-right:1px solid var(--border);
-    padding:18px 13px;
+.sidebar {
+
+    position:
+        fixed;
+
+    left:
+        0;
+
+    top:
+        0;
+
+    bottom:
+        0;
+
+    width:
+        255px;
+
+    padding:
+        18px 14px;
+
+    background:
+        #0a0d12;
+
+    border-right:
+        1px solid var(--border);
+
+    overflow-y:
+        auto;
+
+    z-index:
+        100;
+
 }
 
-.sidebarBrand{
-    padding:10px 12px 22px;
-    margin-bottom:13px;
-    border-bottom:1px solid var(--border);
+.sidebarBrand {
+
+    padding:
+        10px 12px 22px;
+
+    margin-bottom:
+        14px;
+
+    border-bottom:
+        1px solid var(--border);
+
 }
 
-.sidebarBrand strong{
-    display:block;
-    font-size:16px;
+.sidebarBrand strong {
+
+    display:
+        block;
+
+    font-size:
+        16px;
+
 }
 
-.sidebarBrand span{
-    color:var(--muted);
-    font-size:11px;
+.sidebarBrand span {
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
 }
 
-.adminIndicator{
-    margin-top:12px;
-    padding:9px 10px;
-    border:1px solid rgba(34,197,94,.25);
-    border-radius:9px;
-    background:rgba(34,197,94,.06);
-    color:#86efac;
-    font-size:11px;
+.roleBadge {
+
+    display:
+        inline-block;
+
+    margin-top:
+        9px;
+
+    padding:
+        4px 8px;
+
+    border:
+        1px solid
+        rgba(168,85,247,.35);
+
+    border-radius:
+        999px;
+
+    color:
+        #d8b4fe;
+
+    background:
+        rgba(124,58,237,.12);
+
+    font-size:
+        10px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .08em;
+
 }
 
-.navSection{
-    margin:18px 9px 7px;
-    color:#5f6b7c;
-    font-size:10px;
-    text-transform:uppercase;
-    letter-spacing:.12em;
-    font-weight:800;
+.navButton {
+
+    width:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    padding:
+        11px 13px;
+
+    margin-bottom:
+        5px;
+
+    border:
+        0;
+
+    border-radius:
+        9px;
+
+    background:
+        transparent;
+
+    color:
+        #aeb7c6;
+
+    text-align:
+        left;
+
 }
 
-.navButton{
-    width:100%;
-    display:flex;
-    align-items:center;
-    gap:11px;
-    padding:11px 13px;
-    margin-bottom:4px;
-    border:0;
-    border-radius:9px;
-    background:transparent;
-    color:#aeb7c6;
-    text-align:left;
+.navButton:hover {
+
+    background:
+        #151a22;
+
+    color:
+        white;
+
 }
 
-.navButton:hover{
-    background:#151923;
-    color:white;
+.navButton.active {
+
+    background:
+        rgba(124,58,237,.18);
+
+    color:
+        white;
+
 }
 
-.navButton.active{
-    background:rgba(124,58,237,.18);
-    color:white;
+.navIcon {
+
+    width:
+        20px;
+
+    text-align:
+        center;
+
 }
 
-.navIcon{
-    width:20px;
-    text-align:center;
+.sidebarBottom {
+
+    position:
+        absolute;
+
+    left:
+        14px;
+
+    right:
+        14px;
+
+    bottom:
+        16px;
+
 }
 
-.sidebarBottom{
-    position:absolute;
-    left:13px;
-    right:13px;
-    bottom:16px;
+.logoutButton {
+
+    width:
+        100%;
+
+    padding:
+        10px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        9px;
+
+    background:
+        transparent;
+
+    color:
+        #f87171;
+
 }
 
-.logoutButton{
-    width:100%;
-    padding:10px;
-    border-radius:9px;
-    border:1px solid rgba(239,68,68,.25);
-    background:transparent;
-    color:#f87171;
-}
 
 /* =========================================================
    MAIN
 ========================================================= */
 
-.main{
-    width:calc(100% - 255px);
-    margin-left:255px;
-    min-height:100vh;
+.main {
+
+    width:
+        calc(100% - 255px);
+
+    margin-left:
+        255px;
+
+    min-height:
+        100vh;
+
 }
 
-.topbar{
-    height:70px;
-    position:sticky;
-    top:0;
-    z-index:50;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 27px;
-    background:rgba(7,9,13,.94);
-    border-bottom:1px solid var(--border);
-    backdrop-filter:blur(14px);
+.topbar {
+
+    height:
+        70px;
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        50;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 26px;
+
+    background:
+        rgba(6,8,12,.94);
+
+    border-bottom:
+        1px solid var(--border);
+
+    backdrop-filter:
+        blur(14px);
+
 }
 
-.topbarTitle{
-    font-weight:800;
+.topbarTitle {
+
+    font-weight:
+        800;
+
 }
 
-.userBadge{
-    display:flex;
-    align-items:center;
-    gap:9px;
-    color:var(--muted);
-    font-size:12px;
+.userBadge {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
 }
 
-.statusDot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:var(--green);
-    box-shadow:0 0 10px rgba(34,197,94,.6);
+.statusDot {
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--green);
+
+    box-shadow:
+        0 0 10px
+        rgba(34,197,94,.6);
+
 }
 
-.mobileMenu{
-    display:none;
-    border:0;
-    background:transparent;
-    color:white;
-    font-size:22px;
+.content {
+
+    padding:
+        28px;
+
 }
 
-.content{
-    padding:28px;
-}
 
 /* =========================================================
    PAGES
 ========================================================= */
 
-.page{
-    display:none;
+.page {
+
+    display:
+        none;
+
 }
 
-.page.active{
-    display:block;
+.page.active {
+
+    display:
+        block;
+
 }
 
-.pageHeader{
-    margin-bottom:23px;
+.pageHeader {
+
+    margin-bottom:
+        24px;
+
 }
 
-.pageHeader h2{
-    margin:0;
-    font-size:28px;
+.pageHeader h2 {
+
+    margin:
+        0;
+
+    font-size:
+        27px;
+
 }
 
-.pageHeader p{
-    margin:7px 0 0;
-    color:var(--muted);
+.pageHeader p {
+
+    margin:
+        7px 0 0;
+
+    color:
+        var(--muted);
+
 }
+
 
 /* =========================================================
    DASHBOARD
 ========================================================= */
 
-.statsGrid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-    gap:15px;
-    margin-bottom:22px;
+.statsGrid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px,1fr)
+        );
+
+    gap:
+        15px;
+
+    margin-bottom:
+        22px;
+
 }
 
-.statCard{
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:15px;
-    padding:19px;
+.statCard {
+
+    padding:
+        19px;
+
+    background:
+        var(--panel);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius);
+
 }
 
-.statLabel{
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.09em;
+.statLabel {
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .08em;
+
 }
 
-.statValue{
-    margin-top:7px;
-    font-size:30px;
-    font-weight:900;
+.statValue {
+
+    margin-top:
+        7px;
+
+    font-size:
+        29px;
+
+    font-weight:
+        900;
+
 }
 
-.statMeta{
-    margin-top:5px;
-    color:var(--muted);
-    font-size:11px;
+.panel {
+
+    padding:
+        20px;
+
+    margin-bottom:
+        20px;
+
+    background:
+        var(--panel);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius);
+
 }
 
-.panel{
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:15px;
-    padding:21px;
-    margin-bottom:19px;
+.panelHeader {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    margin-bottom:
+        18px;
+
 }
 
-.panelHeader{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:14px;
-    margin-bottom:17px;
+.panelHeader h3 {
+
+    margin:
+        0;
+
 }
 
-.panelHeader h3{
-    margin:0;
-}
-
-.statusPanel{
-    display:grid;
-    gap:9px;
-}
-
-.statusRow{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px;
-    padding:12px;
-    border-radius:9px;
-    background:var(--panel3);
-    border:1px solid var(--border);
-}
-
-.statusGood{color:#86efac}
-.statusBad{color:#fca5a5}
-.statusWarn{color:#fde68a}
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.button{
-    border:1px solid var(--border);
-    background:#171c25;
-    color:white;
-    padding:9px 13px;
-    border-radius:8px;
-}
-
-.button:hover{
-    background:#202633;
-}
-
-.button.accent{
-    border-color:transparent;
-    background:var(--accent);
-}
-
-.button.success{color:#86efac}
-.button.danger{color:#f87171}
-.button.blue{color:#93c5fd}
-
-.button.small{
-    padding:6px 9px;
-    font-size:11px;
-}
-
-/* =========================================================
-   FORMS
-========================================================= */
-
-.formGrid{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:15px;
-}
-
-.full{
-    grid-column:1/-1;
-}
-
-.formActions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:9px;
-}
 
 /* =========================================================
    TABLE
 ========================================================= */
 
-.tableWrap{
-    overflow-x:auto;
+.tableWrap {
+
+    overflow-x:
+        auto;
+
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
 }
 
-th,td{
-    padding:12px 10px;
-    border-bottom:1px solid var(--border);
-    text-align:left;
-    vertical-align:middle;
-    font-size:12px;
+th,
+td {
+
+    padding:
+        12px 10px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    text-align:
+        left;
+
+    font-size:
+        13px;
+
+    vertical-align:
+        middle;
+
 }
 
-th{
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.05em;
+th {
+
+    color:
+        var(--muted);
+
+    font-weight:
+        700;
+
 }
 
-td{
-    color:#dbe2eb;
+td {
+
+    color:
+        #dbe2eb;
+
 }
 
-.thumb{
-    width:80px;
-    height:45px;
-    object-fit:cover;
-    border-radius:6px;
-    background:#090c11;
-    border:1px solid var(--border);
+.emptyState {
+
+    padding:
+        35px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
 }
 
-.emptyState{
-    text-align:center;
-    padding:35px;
-    color:var(--muted);
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.button {
+
+    padding:
+        9px 13px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        8px;
+
+    background:
+        #171c25;
+
+    color:
+        white;
+
 }
+
+.button:hover {
+
+    background:
+        #202633;
+
+}
+
+.button.accent {
+
+    border:
+        0;
+
+    background:
+        var(--accent);
+
+}
+
+.button.success {
+
+    color:
+        #4ade80;
+
+}
+
+.button.danger {
+
+    color:
+        #f87171;
+
+}
+
+.button.blue {
+
+    color:
+        #60a5fa;
+
+}
+
+.button.small {
+
+    padding:
+        6px 9px;
+
+    font-size:
+        11px;
+
+}
+
+
+/* =========================================================
+   FORMS
+========================================================= */
+
+.formGrid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(220px,1fr)
+        );
+
+    gap:
+        15px;
+
+}
+
+.full {
+
+    grid-column:
+        1 / -1;
+
+}
+
+.formActions {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        9px;
+
+}
+
 
 /* =========================================================
    BADGES
 ========================================================= */
 
-.badge{
-    display:inline-flex;
-    align-items:center;
-    padding:4px 8px;
-    border-radius:999px;
-    border:1px solid var(--border);
-    font-size:10px;
-    font-weight:800;
-    text-transform:uppercase;
+.badge {
+
+    display:
+        inline-block;
+
+    padding:
+        4px 8px;
+
+    border-radius:
+        999px;
+
+    background:
+        #1b2330;
+
+    color:
+        #cbd5e1;
+
+    font-size:
+        10px;
+
+    text-transform:
+        uppercase;
+
 }
 
-.badge.active,
-.badge.live{
-    color:#86efac;
-    background:rgba(34,197,94,.08);
+.badge.live {
+
+    color:
+        #86efac;
+
+    background:
+        rgba(34,197,94,.12);
+
 }
 
-.badge.scheduled{
-    color:#93c5fd;
-    background:rgba(59,130,246,.08);
+.badge.scheduled {
+
+    color:
+        #93c5fd;
+
+    background:
+        rgba(59,130,246,.12);
+
 }
 
-.badge.ended,
-.badge.inactive{
-    color:#94a3b8;
+.badge.owner {
+
+    color:
+        #f0abfc;
+
+    background:
+        rgba(168,85,247,.15);
+
 }
 
-.badge.draft{
-    color:#fde68a;
+.badge.admin {
+
+    color:
+        #93c5fd;
+
+    background:
+        rgba(59,130,246,.12);
+
 }
 
-/* =========================================================
-   EPISODE PREVIEW
-========================================================= */
-
-.episodePreview{
-    display:grid;
-    grid-template-columns:180px 1fr;
-    gap:18px;
-    align-items:start;
-}
-
-.episodePreview img{
-    width:180px;
-    aspect-ratio:16/9;
-    object-fit:cover;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:#080b10;
-}
 
 /* =========================================================
    TOAST
 ========================================================= */
 
-#toastContainer{
-    position:fixed;
-    right:20px;
-    bottom:20px;
-    z-index:1000;
+#toastContainer {
+
+    position:
+        fixed;
+
+    right:
+        20px;
+
+    bottom:
+        20px;
+
+    z-index:
+        1000;
+
 }
 
-.toast{
-    min-width:260px;
-    max-width:400px;
-    margin-top:9px;
-    padding:13px 15px;
-    border:1px solid var(--border);
-    border-radius:10px;
-    background:#171c25;
-    box-shadow:var(--shadow);
-    font-size:12px;
+.toast {
+
+    min-width:
+        260px;
+
+    max-width:
+        420px;
+
+    margin-top:
+        9px;
+
+    padding:
+        13px 15px;
+
+    background:
+        #171c25;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        var(--shadow);
+
+    font-size:
+        13px;
+
 }
 
-.toast.success{border-color:rgba(34,197,94,.4)}
-.toast.error{border-color:rgba(239,68,68,.4)}
-.toast.warn{border-color:rgba(234,179,8,.4)}
+.toast.success {
+
+    border-color:
+        rgba(34,197,94,.4);
+
+}
+
+.toast.error {
+
+    border-color:
+        rgba(239,68,68,.5);
+
+}
+
 
 /* =========================================================
-   RESPONSIVE
+   DIAGNOSTIC
 ========================================================= */
 
-@media(max-width:900px){
+.diagnostic {
 
-    .sidebar{
-        transform:translateX(-100%);
-        transition:.25s;
-    }
+    padding:
+        13px;
 
-    .sidebar.open{
-        transform:translateX(0);
-    }
+    border:
+        1px solid var(--border);
 
-    .main{
-        width:100%;
-        margin-left:0;
-    }
+    border-radius:
+        9px;
 
-    .mobileMenu{
-        display:block;
-    }
+    background:
+        #090c11;
 
-    .content{
-        padding:18px;
-    }
+    color:
+        var(--muted);
 
-    .formGrid{
-        grid-template-columns:1fr;
-    }
+    font-family:
+        monospace;
 
-    .episodePreview{
-        grid-template-columns:1fr;
-    }
+    font-size:
+        12px;
 
-    .episodePreview img{
-        width:100%;
-        max-width:420px;
-    }
+    white-space:
+        pre-wrap;
+
+    word-break:
+        break-word;
+
 }
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+.mobileMenu {
+
+    display:
+        none;
+
+    border:
+        0;
+
+    background:
+        transparent;
+
+    color:
+        white;
+
+    font-size:
+        22px;
+
+}
+
+@media(max-width:850px) {
+
+    .sidebar {
+
+        transform:
+            translateX(-100%);
+
+        transition:
+            .25s;
+
+    }
+
+    .sidebar.open {
+
+        transform:
+            translateX(0);
+
+    }
+
+    .main {
+
+        width:
+            100%;
+
+        margin-left:
+            0;
+
+    }
+
+    .mobileMenu {
+
+        display:
+            block;
+
+    }
+
+    .topbar {
+
+        padding:
+            0 16px;
+
+    }
+
+    .content {
+
+        padding:
+            18px;
+
+    }
+
+}
+
 </style>
+
 </head>
 
 <body>
 
-<!-- =========================================================
+
+<!-- =======================================================
      LOGIN
-========================================================= -->
+======================================================= -->
 
 <section id="loginScreen">
 
     <div class="loginCard">
 
         <div class="logo">
-            <div class="logoMark">CR</div>
 
-            <h1>CrowRules Entertainment</h1>
+            <div class="logoMark">
+                CR
+            </div>
+
+            <h1>
+                CrowRules Entertainment
+            </h1>
 
             <p>
                 Administrative Control Center v1.2
             </p>
+
         </div>
+
 
         <form id="loginForm">
 
             <div class="formGroup">
-                <label for="email">Administrator Email</label>
+
+                <label for="email">
+                    Email
+                </label>
 
                 <input
                     id="email"
                     type="email"
                     autocomplete="username"
                     placeholder="admin email"
-                    value=""
                     required
                 >
+
             </div>
 
+
             <div class="formGroup">
-                <label for="password">Password</label>
+
+                <label for="password">
+                    Password
+                </label>
 
                 <input
                     id="password"
@@ -701,7 +1357,9 @@ td{
                     placeholder="Password"
                     required
                 >
+
             </div>
+
 
             <button
                 id="loginButton"
@@ -713,93 +1371,162 @@ td{
 
         </form>
 
-        <div id="loginStatus" class="loginStatus"></div>
+
+        <div
+            id="loginStatus"
+            class="loginStatus"
+        ></div>
 
     </div>
 
 </section>
 
 
-<!-- =========================================================
+<!-- =======================================================
      ADMIN APP
-========================================================= -->
+======================================================= -->
 
 <section id="adminApp">
 
 <div class="layout">
 
-<aside id="sidebar" class="sidebar">
+
+<!-- =====================================================
+     SIDEBAR
+====================================================== -->
+
+<aside
+    id="sidebar"
+    class="sidebar"
+>
 
     <div class="sidebarBrand">
-        <strong>CrowRules Admin</strong>
-        <span>Control Center v1.2</span>
 
-        <div class="adminIndicator">
-            ● Administrator Authorized
+        <strong>
+            CrowRules Admin
+        </strong>
+
+        <span>
+            Entertainment Control Center
+        </span>
+
+        <div
+            id="sidebarRole"
+            class="roleBadge"
+        >
+            AUTHENTICATING
         </div>
+
     </div>
 
-    <div class="navSection">Management</div>
 
-    <button class="navButton active" data-page="dashboard">
+    <button
+        class="navButton active"
+        data-page="dashboard"
+    >
         <span class="navIcon">⌂</span>
         Dashboard
     </button>
 
-    <button class="navButton" data-page="shows">
+
+    <button
+        class="navButton"
+        data-page="shows"
+    >
         <span class="navIcon">▣</span>
         Shows
     </button>
 
-    <button class="navButton" data-page="episodes">
+
+    <button
+        class="navButton"
+        data-page="episodes"
+    >
         <span class="navIcon">▶</span>
         Episodes
     </button>
 
-    <button class="navButton" data-page="live">
+
+    <button
+        class="navButton"
+        data-page="live"
+    >
         <span class="navIcon">●</span>
         Live Events
     </button>
 
-    <button class="navButton" data-page="schedule">
+
+    <button
+        class="navButton"
+        data-page="schedule"
+    >
         <span class="navIcon">◷</span>
         Schedule
     </button>
 
-    <div class="navSection">System</div>
 
-    <button class="navButton" data-page="members">
+    <button
+        class="navButton"
+        data-page="members"
+    >
         <span class="navIcon">♟</span>
         Members
     </button>
 
-    <button class="navButton" data-page="settings">
+
+    <button
+        class="navButton"
+        data-page="settings"
+    >
         <span class="navIcon">⚙</span>
         Settings
     </button>
 
+
     <div class="sidebarBottom">
-        <button id="logoutButton" class="logoutButton">
+
+        <button
+            id="logoutButton"
+            class="logoutButton"
+        >
             Sign Out
         </button>
+
     </div>
 
 </aside>
 
 
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
 <main class="main">
+
 
 <header class="topbar">
 
-    <button id="mobileMenu" class="mobileMenu">☰</button>
+    <button
+        id="mobileMenu"
+        class="mobileMenu"
+    >
+        ☰
+    </button>
+
 
     <div class="topbarTitle">
-        CrowRules Entertainment Admin
+        CrowRules Entertainment Control Center
     </div>
 
+
     <div class="userBadge">
+
         <span class="statusDot"></span>
-        <span id="currentUser">Checking authorization...</span>
+
+        <span id="currentUser">
+            Checking session...
+        </span>
+
     </div>
 
 </header>
@@ -807,71 +1534,150 @@ td{
 
 <div class="content">
 
-<!-- =========================================================
-     DASHBOARD
-========================================================= -->
 
-<section id="page-dashboard" class="page active">
+<!-- ===================================================
+     DASHBOARD
+==================================================== -->
+
+<section
+    id="page-dashboard"
+    class="page active"
+>
 
     <div class="pageHeader">
-        <h2>Dashboard</h2>
+
+        <h2>
+            Dashboard
+        </h2>
+
         <p>
             Central control center for CrowRules Entertainment.
         </p>
+
     </div>
+
 
     <div class="statsGrid">
 
         <div class="statCard">
-            <div class="statLabel">Shows</div>
-            <div id="statShows" class="statValue">—</div>
-            <div class="statMeta">Programming brands</div>
+
+            <div class="statLabel">
+                Shows
+            </div>
+
+            <div
+                id="statShows"
+                class="statValue"
+            >
+                —
+            </div>
+
         </div>
 
-        <div class="statCard">
-            <div class="statLabel">Episodes</div>
-            <div id="statEpisodes" class="statValue">—</div>
-            <div class="statMeta">Published content</div>
-        </div>
 
         <div class="statCard">
-            <div class="statLabel">Live Events</div>
-            <div id="statLive" class="statValue">—</div>
-            <div class="statMeta">Broadcast events</div>
+
+            <div class="statLabel">
+                Episodes
+            </div>
+
+            <div
+                id="statEpisodes"
+                class="statValue"
+            >
+                —
+            </div>
+
         </div>
 
+
         <div class="statCard">
-            <div class="statLabel">Schedule</div>
-            <div id="statSchedule" class="statValue">—</div>
-            <div class="statMeta">Programming records</div>
+
+            <div class="statLabel">
+                Live Events
+            </div>
+
+            <div
+                id="statLive"
+                class="statValue"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="statCard">
+
+            <div class="statLabel">
+                Schedule
+            </div>
+
+            <div
+                id="statSchedule"
+                class="statValue"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="statCard">
+
+            <div class="statLabel">
+                Members
+            </div>
+
+            <div
+                id="statMembers"
+                class="statValue"
+            >
+                —
+            </div>
+
         </div>
 
     </div>
 
+
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Authorization Status</h3>
+
+            <h3>
+                Authorization
+            </h3>
 
             <button
                 class="button"
-                onclick="refreshAuthorization()"
+                onclick="loadDashboard()"
             >
                 Refresh
             </button>
+
         </div>
 
-        <div id="authorizationStatus"></div>
+
+        <div id="authorizationSummary">
+            Loading...
+        </div>
 
     </div>
+
 
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>System Status</h3>
+
+            <h3>
+                System Status
+            </h3>
+
         </div>
 
-        <div class="statusPanel" id="systemStatus">
+
+        <div id="systemStatus">
             Loading...
         </div>
 
@@ -880,63 +1686,75 @@ td{
 </section>
 
 
-<!-- =========================================================
+<!-- ===================================================
      SHOWS
-========================================================= -->
+==================================================== -->
 
-<section id="page-shows" class="page">
+<section
+    id="page-shows"
+    class="page"
+>
 
     <div class="pageHeader">
-        <h2>Shows</h2>
+
+        <h2>
+            Shows
+        </h2>
+
         <p>
             Create and manage CrowRules Entertainment shows.
         </p>
+
     </div>
+
 
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Create Show</h3>
+
+            <h3>
+                Add Show
+            </h3>
+
         </div>
+
 
         <form id="showForm">
 
             <div class="formGrid">
 
-                <div class="formGroup">
-                    <label for="showTitle">Show Title</label>
-                    <input id="showTitle" required>
-                </div>
 
                 <div class="formGroup">
-                    <label for="showSlug">Slug</label>
+
+                    <label>
+                        Title
+                    </label>
+
+                    <input
+                        id="showTitle"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="formGroup">
+
+                    <label>
+                        Slug
+                    </label>
+
                     <input
                         id="showSlug"
                         placeholder="tacoma-nights"
                     >
+
                 </div>
 
-                <div class="formGroup">
-                    <label for="showStatus">Status</label>
-
-                    <select id="showStatus">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="draft">Draft</option>
-                    </select>
-                </div>
-
-                <div class="formGroup">
-                    <label for="showThumbnail">Thumbnail URL</label>
-                    <input
-                        id="showThumbnail"
-                        type="url"
-                        placeholder="https://..."
-                    >
-                </div>
 
                 <div class="formGroup full">
-                    <label for="showDescription">
+
+                    <label>
                         Description
                     </label>
 
@@ -944,20 +1762,47 @@ td{
                         id="showDescription"
                         rows="4"
                     ></textarea>
+
                 </div>
 
+
+                <div class="formGroup">
+
+                    <label>
+                        Thumbnail URL
+                    </label>
+
+                    <input
+                        id="showThumbnail"
+                        placeholder="https://..."
+                    >
+
+                </div>
+
+
+                <div class="formGroup">
+
+                    <label>
+                        YouTube URL
+                    </label>
+
+                    <input
+                        id="showYoutube"
+                        placeholder="https://youtube.com/..."
+                    >
+
+                </div>
+
+
                 <div class="formActions full">
-                    <button class="button accent" type="submit">
-                        Create Show
-                    </button>
 
                     <button
-                        class="button"
-                        type="button"
-                        onclick="document.getElementById('showForm').reset()"
+                        class="button accent"
+                        type="submit"
                     >
-                        Clear
+                        Add Show
                     </button>
+
                 </div>
 
             </div>
@@ -971,7 +1816,9 @@ td{
 
         <div class="panelHeader">
 
-            <h3>Show Library</h3>
+            <h3>
+                Shows
+            </h3>
 
             <button
                 class="button"
@@ -982,7 +1829,11 @@ td{
 
         </div>
 
-        <div id="showsTable" class="tableWrap">
+
+        <div
+            id="showsTable"
+            class="tableWrap"
+        >
             Loading...
         </div>
 
@@ -991,19 +1842,23 @@ td{
 </section>
 
 
-<!-- =========================================================
+<!-- ===================================================
      EPISODES
-========================================================= -->
+==================================================== -->
 
-<section id="page-episodes" class="page">
+<section
+    id="page-episodes"
+    class="page"
+>
 
     <div class="pageHeader">
 
-        <h2>Episodes</h2>
+        <h2>
+            Episodes
+        </h2>
 
         <p>
-            Manage individual episodes, YouTube links,
-            thumbnails, seasons, and publication status.
+            Manage individual episodes and YouTube presentation data.
         </p>
 
     </div>
@@ -1012,51 +1867,42 @@ td{
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Create Episode</h3>
+
+            <h3>
+                Add Episode
+            </h3>
+
         </div>
+
 
         <form id="episodeForm">
 
             <div class="formGrid">
 
+
                 <div class="formGroup">
-                    <label for="episodeShow">
+
+                    <label>
                         Show
                     </label>
 
-                    <select id="episodeShow" required>
-                        <option value="">
-                            Select a show
-                        </option>
-                    </select>
-                </div>
-
-                <div class="formGroup">
-                    <label for="episodeTitle">
-                        Episode Title
-                    </label>
-
-                    <input
-                        id="episodeTitle"
+                    <select
+                        id="episodeShow"
                         required
                     >
+
+                        <option value="">
+                            Select show
+                        </option>
+
+                    </select>
+
                 </div>
 
-                <div class="formGroup">
-                    <label for="episodeSeason">
-                        Season
-                    </label>
-
-                    <input
-                        id="episodeSeason"
-                        type="number"
-                        min="1"
-                        placeholder="1"
-                    >
-                </div>
 
                 <div class="formGroup">
-                    <label for="episodeNumber">
+
+                    <label>
                         Episode Number
                     </label>
 
@@ -1066,62 +1912,52 @@ td{
                         min="1"
                         placeholder="1"
                     >
+
                 </div>
 
+
                 <div class="formGroup">
-                    <label for="episodeYoutube">
-                        YouTube URL
+
+                    <label>
+                        Title
                     </label>
 
                     <input
-                        id="episodeYoutube"
-                        type="url"
-                        placeholder="https://youtube.com/watch?v=..."
+                        id="episodeTitle"
+                        required
                     >
 
-                    <small class="formHint">
-                        Thumbnail can be generated automatically.
-                    </small>
                 </div>
 
-                <div class="formGroup">
-                    <label for="episodeThumbnail">
-                        YouTube Thumbnail URL
-                    </label>
-
-                    <input
-                        id="episodeThumbnail"
-                        type="url"
-                        placeholder="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg"
-                    >
-                </div>
 
                 <div class="formGroup">
-                    <label for="episodeStatus">
+
+                    <label>
                         Status
                     </label>
 
                     <select id="episodeStatus">
-                        <option value="draft">Draft</option>
-                        <option value="published">Published</option>
-                        <option value="archived">Archived</option>
+
+                        <option value="draft">
+                            Draft
+                        </option>
+
+                        <option value="published">
+                            Published
+                        </option>
+
+                        <option value="scheduled">
+                            Scheduled
+                        </option>
+
                     </select>
+
                 </div>
 
-                <div class="formGroup">
-                    <label for="episodeFeatured">
-                        Featured
-                    </label>
-
-                    <select id="episodeFeatured">
-                        <option value="false">No</option>
-                        <option value="true">Yes</option>
-                    </select>
-                </div>
 
                 <div class="formGroup full">
 
-                    <label for="episodeDescription">
+                    <label>
                         Description
                     </label>
 
@@ -1132,18 +1968,48 @@ td{
 
                 </div>
 
+
                 <div class="formGroup">
 
-                    <label for="episodePremiere">
-                        Premiere Date / Time
+                    <label>
+                        YouTube Video URL
                     </label>
 
                     <input
-                        id="episodePremiere"
+                        id="episodeYoutube"
+                        placeholder="https://youtube.com/watch?v=..."
+                    >
+
+                </div>
+
+
+                <div class="formGroup">
+
+                    <label>
+                        YouTube Thumbnail URL
+                    </label>
+
+                    <input
+                        id="episodeThumbnail"
+                        placeholder="https://..."
+                    >
+
+                </div>
+
+
+                <div class="formGroup">
+
+                    <label>
+                        Publish Date
+                    </label>
+
+                    <input
+                        id="episodePublishAt"
                         type="datetime-local"
                     >
 
                 </div>
+
 
                 <div class="formActions full">
 
@@ -1151,23 +2017,7 @@ td{
                         class="button accent"
                         type="submit"
                     >
-                        Create Episode
-                    </button>
-
-                    <button
-                        class="button"
-                        type="button"
-                        onclick="autoThumbnail()"
-                    >
-                        Generate Thumbnail URL
-                    </button>
-
-                    <button
-                        class="button"
-                        type="button"
-                        onclick="document.getElementById('episodeForm').reset()"
-                    >
-                        Clear
+                        Add Episode
                     </button>
 
                 </div>
@@ -1183,7 +2033,9 @@ td{
 
         <div class="panelHeader">
 
-            <h3>Episode Library</h3>
+            <h3>
+                Episodes
+            </h3>
 
             <button
                 class="button"
@@ -1194,7 +2046,11 @@ td{
 
         </div>
 
-        <div id="episodesTable" class="tableWrap">
+
+        <div
+            id="episodesTable"
+            class="tableWrap"
+        >
             Loading...
         </div>
 
@@ -1203,18 +2059,23 @@ td{
 </section>
 
 
-<!-- =========================================================
+<!-- ===================================================
      LIVE EVENTS
-========================================================= -->
+==================================================== -->
 
-<section id="page-live" class="page">
+<section
+    id="page-live"
+    class="page"
+>
 
     <div class="pageHeader">
 
-        <h2>Live Events</h2>
+        <h2>
+            Live Events
+        </h2>
 
         <p>
-            Control upcoming, live, and completed broadcasts.
+            Manage live broadcasts and YouTube live events.
         </p>
 
     </div>
@@ -1223,59 +2084,50 @@ td{
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Create Live Event</h3>
+
+            <h3>
+                Add Live Event
+            </h3>
+
         </div>
+
 
         <form id="liveForm">
 
             <div class="formGrid">
 
+
                 <div class="formGroup">
-                    <label for="liveTitle">
+
+                    <label>
                         Event Title
                     </label>
 
-                    <input id="liveTitle" required>
+                    <input
+                        id="liveTitle"
+                        required
+                    >
+
                 </div>
 
-                <div class="formGroup">
-                    <label for="liveShow">
-                        Show
-                    </label>
-
-                    <select id="liveShow">
-                        <option value="">
-                            No show selected
-                        </option>
-                    </select>
-                </div>
 
                 <div class="formGroup">
-                    <label for="liveYoutube">
+
+                    <label>
                         YouTube URL
                     </label>
 
                     <input
                         id="liveYoutube"
-                        type="url"
                         placeholder="https://youtube.com/watch?v=..."
                     >
+
                 </div>
 
-                <div class="formGroup">
-                    <label for="liveStatus">
-                        Status
-                    </label>
-
-                    <select id="liveStatus">
-                        <option value="scheduled">Scheduled</option>
-                        <option value="live">Live</option>
-                        <option value="ended">Ended</option>
-                    </select>
-                </div>
 
                 <div class="formGroup">
-                    <label for="liveStart">
+
+                    <label>
                         Start Time
                     </label>
 
@@ -1283,21 +2135,38 @@ td{
                         id="liveStart"
                         type="datetime-local"
                     >
+
                 </div>
+
 
                 <div class="formGroup">
-                    <label for="liveEnd">
-                        End Time
+
+                    <label>
+                        Status
                     </label>
 
-                    <input
-                        id="liveEnd"
-                        type="datetime-local"
-                    >
+                    <select id="liveStatus">
+
+                        <option value="scheduled">
+                            Scheduled
+                        </option>
+
+                        <option value="live">
+                            Live
+                        </option>
+
+                        <option value="ended">
+                            Ended
+                        </option>
+
+                    </select>
+
                 </div>
 
+
                 <div class="formGroup full">
-                    <label for="liveDescription">
+
+                    <label>
                         Description
                     </label>
 
@@ -1305,7 +2174,9 @@ td{
                         id="liveDescription"
                         rows="4"
                     ></textarea>
+
                 </div>
+
 
                 <div class="formActions full">
 
@@ -1313,7 +2184,7 @@ td{
                         class="button accent"
                         type="submit"
                     >
-                        Create Live Event
+                        Add Live Event
                     </button>
 
                 </div>
@@ -1329,7 +2200,9 @@ td{
 
         <div class="panelHeader">
 
-            <h3>Broadcast Events</h3>
+            <h3>
+                Live Events
+            </h3>
 
             <button
                 class="button"
@@ -1340,7 +2213,11 @@ td{
 
         </div>
 
-        <div id="liveTable" class="tableWrap">
+
+        <div
+            id="liveTable"
+            class="tableWrap"
+        >
             Loading...
         </div>
 
@@ -1349,18 +2226,23 @@ td{
 </section>
 
 
-<!-- =========================================================
+<!-- ===================================================
      SCHEDULE
-========================================================= -->
+==================================================== -->
 
-<section id="page-schedule" class="page">
+<section
+    id="page-schedule"
+    class="page"
+>
 
     <div class="pageHeader">
 
-        <h2>Schedule</h2>
+        <h2>
+            Schedule
+        </h2>
 
         <p>
-            Manage the CrowRules programming schedule.
+            Manage programming schedule records.
         </p>
 
     </div>
@@ -1369,116 +2251,10 @@ td{
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Create Schedule Item</h3>
-        </div>
 
-        <form id="scheduleForm">
-
-            <div class="formGrid">
-
-                <div class="formGroup">
-                    <label for="scheduleTitle">
-                        Program Title
-                    </label>
-
-                    <input id="scheduleTitle" required>
-                </div>
-
-                <div class="formGroup">
-                    <label for="scheduleShow">
-                        Show
-                    </label>
-
-                    <select id="scheduleShow">
-                        <option value="">
-                            No show selected
-                        </option>
-                    </select>
-                </div>
-
-                <div class="formGroup">
-                    <label for="scheduleStart">
-                        Start Time
-                    </label>
-
-                    <input
-                        id="scheduleStart"
-                        type="datetime-local"
-                        required
-                    >
-                </div>
-
-                <div class="formGroup">
-                    <label for="scheduleEnd">
-                        End Time
-                    </label>
-
-                    <input
-                        id="scheduleEnd"
-                        type="datetime-local"
-                    >
-                </div>
-
-                <div class="formGroup">
-                    <label for="scheduleType">
-                        Program Type
-                    </label>
-
-                    <select id="scheduleType">
-                        <option value="episode">Episode</option>
-                        <option value="live">Live</option>
-                        <option value="special">Special</option>
-                        <option value="movie">Movie</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-
-                <div class="formGroup">
-                    <label for="scheduleStatus">
-                        Status
-                    </label>
-
-                    <select id="scheduleStatus">
-                        <option value="scheduled">Scheduled</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </div>
-
-                <div class="formGroup full">
-                    <label for="scheduleDescription">
-                        Description
-                    </label>
-
-                    <textarea
-                        id="scheduleDescription"
-                        rows="4"
-                    ></textarea>
-                </div>
-
-                <div class="formActions full">
-
-                    <button
-                        class="button accent"
-                        type="submit"
-                    >
-                        Add Schedule Item
-                    </button>
-
-                </div>
-
-            </div>
-
-        </form>
-
-    </div>
-
-
-    <div class="panel">
-
-        <div class="panelHeader">
-
-            <h3>Programming Schedule</h3>
+            <h3>
+                Schedule
+            </h3>
 
             <button
                 class="button"
@@ -1489,7 +2265,11 @@ td{
 
         </div>
 
-        <div id="scheduleTable" class="tableWrap">
+
+        <div
+            id="scheduleTable"
+            class="tableWrap"
+        >
             Loading...
         </div>
 
@@ -1498,27 +2278,35 @@ td{
 </section>
 
 
-<!-- =========================================================
+<!-- ===================================================
      MEMBERS
-========================================================= -->
+==================================================== -->
 
-<section id="page-members" class="page">
+<section
+    id="page-members"
+    class="page"
+>
 
     <div class="pageHeader">
 
-        <h2>Members</h2>
+        <h2>
+            Members & Roles
+        </h2>
 
         <p>
-            View member profile information available to this
-            administrator account.
+            Manage CrowRules user profiles and administrative roles.
         </p>
 
     </div>
 
+
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Profiles</h3>
+
+            <h3>
+                User Roles
+            </h3>
 
             <button
                 class="button"
@@ -1526,9 +2314,14 @@ td{
             >
                 Refresh
             </button>
+
         </div>
 
-        <div id="membersTable" class="tableWrap">
+
+        <div
+            id="membersTable"
+            class="tableWrap"
+        >
             Loading...
         </div>
 
@@ -1537,96 +2330,157 @@ td{
 </section>
 
 
-<!-- =========================================================
+<!-- ===================================================
      SETTINGS
-========================================================= -->
+==================================================== -->
 
-<section id="page-settings" class="page">
+<section
+    id="page-settings"
+    class="page"
+>
 
     <div class="pageHeader">
 
-        <h2>Settings</h2>
+        <h2>
+            Settings
+        </h2>
 
         <p>
-            Application and Supabase connection information.
+            CrowRules system configuration and diagnostics.
         </p>
 
     </div>
 
+
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Supabase Connection</h3>
+
+            <h3>
+                Supabase Connection
+            </h3>
+
+            <button
+                class="button"
+                onclick="runDiagnostics()"
+            >
+                Test Connection
+            </button>
+
         </div>
 
+
         <div class="formGroup">
-            <label>Project URL</label>
+
+            <label>
+                Project URL
+            </label>
 
             <input
                 id="projectUrl"
                 readonly
             >
+
         </div>
 
+
         <div class="formGroup">
-            <label>Client Key</label>
+
+            <label>
+                API Key
+            </label>
 
             <input
-                value="Publishable Key"
+                id="keyStatus"
                 readonly
             >
 
-            <small class="formHint">
-                A publishable key is appropriate for browser-side
-                Supabase clients. Never place a service_role or
-                secret key in this file.
-            </small>
         </div>
 
+
         <div class="formGroup">
-            <label>Connection</label>
+
+            <label>
+                Authentication
+            </label>
 
             <input
-                id="connectionStatus"
+                id="authStatus"
                 readonly
             >
+
         </div>
 
+
         <div class="formGroup">
-            <label>Authorization</label>
+
+            <label>
+                Profile Authorization
+            </label>
 
             <input
-                id="settingsAuthorization"
+                id="profileStatus"
                 readonly
             >
+
+        </div>
+
+
+        <div class="formGroup">
+
+            <label>
+                Current Role
+            </label>
+
+            <input
+                id="roleStatus"
+                readonly
+            >
+
+        </div>
+
+
+        <div
+            id="diagnosticOutput"
+            class="diagnostic"
+        >
+            Diagnostics have not been run.
         </div>
 
     </div>
 
+
     <div class="panel">
 
         <div class="panelHeader">
-            <h3>Admin v1.2</h3>
+
+            <h3>
+                CrowRules Administration
+            </h3>
+
         </div>
 
         <p>
-            Centralized administrator authorization.
+            Admin v1.2 uses centralized role authorization.
         </p>
 
-        <p style="color:var(--muted);font-size:13px">
-            Authentication is handled by Supabase Auth.
-            Database access remains protected by PostgreSQL
-            Row Level Security.
+        <p style="color:var(--muted)">
+            Owner, Super Admin, and Admin accounts receive
+            administrative access. Lower-level roles remain
+            available for future permission controls.
         </p>
 
     </div>
 
 </section>
 
+
 </div>
+
 </main>
 
 </div>
+
 </section>
 
 
@@ -1634,94 +2488,143 @@ td{
 
 
 <script>
+
 /* =========================================================
-   CROW RULES ENTERTAINMENT
-   ADMIN v1.2
-   CENTRALIZED AUTHORIZATION
+   SUPABASE CONFIGURATION
 ========================================================= */
 
-/*
-    IMPORTANT:
-
-    Replace only the publishableKey if your Supabase project
-    has issued a different current Publishable key.
-
-    NEVER put a service_role or secret key here.
-*/
-
 const SUPABASE_CONFIG = {
+
     url:
         "https://zauxdqyssratvzmomozf.supabase.co",
 
     publishableKey:
         "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9"
+
 };
 
 
 /* =========================================================
-   CLIENT
+   GLOBAL STATE
 ========================================================= */
 
 let supabaseClient = null;
 
-try{
+let currentAuth = null;
 
-    if(
-        !SUPABASE_CONFIG.url ||
-        !SUPABASE_CONFIG.publishableKey
-    ){
-        throw new Error(
-            "Supabase configuration is incomplete."
-        );
-    }
-
-    supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_CONFIG.url,
-            SUPABASE_CONFIG.publishableKey,
-            {
-                auth:{
-                    persistSession:true,
-                    autoRefreshToken:true,
-                    detectSessionInUrl:true
-                }
-            }
-        );
-
-}catch(error){
-
-    console.error(
-        "Supabase initialization failed:",
-        error
-    );
-
-    setLoginStatus(
-        "Supabase initialization failed: " +
-        error.message,
-        "error"
-    );
-}
+let schemaCache = {};
 
 
 /* =========================================================
-   GLOBAL ADMIN STATE
+   ROLE SYSTEM
 ========================================================= */
 
-const ADMIN_STATE = {
+const ROLE_HIERARCHY = {
 
-    initialized:false,
+    owner: 100,
 
-    authenticated:false,
+    super_admin: 90,
 
-    authorized:false,
+    admin: 80,
 
-    user:null,
+    manager: 60,
 
-    profile:null,
+    producer: 50,
 
-    session:null
+    editor: 40,
+
+    creator: 30,
+
+    member: 10,
+
+    viewer: 1
 
 };
+
+
+const ADMIN_ROLES = [
+
+    "owner",
+
+    "super_admin",
+
+    "admin"
+
+];
+
+
+/* =========================================================
+   SUPABASE INITIALIZATION
+========================================================= */
+
+function initializeSupabase() {
+
+    try {
+
+        if (
+            !SUPABASE_CONFIG.url ||
+            !SUPABASE_CONFIG.publishableKey
+        ) {
+
+            throw new Error(
+                "Supabase configuration is incomplete."
+            );
+
+        }
+
+
+        if (
+            !window.supabase ||
+            !window.supabase.createClient
+        ) {
+
+            throw new Error(
+                "Supabase JavaScript library failed to load."
+            );
+
+        }
+
+
+        supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_CONFIG.url,
+                SUPABASE_CONFIG.publishableKey,
+                {
+
+                    auth: {
+
+                        persistSession: true,
+
+                        autoRefreshToken: true,
+
+                        detectSessionInUrl: true
+
+                    }
+
+                }
+            );
+
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Supabase initialization error:",
+            error
+        );
+
+        setLoginError(
+            error.message
+        );
+
+        return false;
+
+    }
+
+}
 
 
 /* =========================================================
@@ -1729,35 +2632,54 @@ const ADMIN_STATE = {
 ========================================================= */
 
 const loginScreen =
-    document.getElementById("loginScreen");
+    document.getElementById(
+        "loginScreen"
+    );
 
 const adminApp =
-    document.getElementById("adminApp");
+    document.getElementById(
+        "adminApp"
+    );
 
 const loginForm =
-    document.getElementById("loginForm");
+    document.getElementById(
+        "loginForm"
+    );
 
 const loginButton =
-    document.getElementById("loginButton");
+    document.getElementById(
+        "loginButton"
+    );
 
 const loginStatus =
-    document.getElementById("loginStatus");
+    document.getElementById(
+        "loginStatus"
+    );
 
 
 /* =========================================================
    LOGIN STATUS
 ========================================================= */
 
-function setLoginStatus(
-    message,
-    type=""
-){
+function setLoginError(message) {
 
     loginStatus.textContent =
         message || "";
 
     loginStatus.className =
-        "loginStatus " + type;
+        "loginStatus error";
+
+}
+
+
+function setLoginSuccess(message) {
+
+    loginStatus.textContent =
+        message || "";
+
+    loginStatus.className =
+        "loginStatus success";
+
 }
 
 
@@ -1767,8 +2689,8 @@ function setLoginStatus(
 
 function toast(
     message,
-    type="success"
-){
+    type = "success"
+) {
 
     const container =
         document.getElementById(
@@ -1776,25 +2698,30 @@ function toast(
         );
 
     const item =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     item.className =
-        "toast " + type;
+        `toast ${type}`;
 
     item.textContent =
         message;
 
-    container.appendChild(item);
+    container.appendChild(
+        item
+    );
 
     setTimeout(
         () => item.remove(),
         4500
     );
+
 }
 
 
 /* =========================================================
-   LOGIN
+   AUTHENTICATION
 ========================================================= */
 
 loginForm.addEventListener(
@@ -1803,15 +2730,16 @@ loginForm.addEventListener(
 
         event.preventDefault();
 
-        if(!supabaseClient){
+        if (!supabaseClient) {
 
-            setLoginStatus(
-                "Supabase is not initialized.",
-                "error"
+            setLoginError(
+                "Supabase is not initialized."
             );
 
             return;
+
         }
+
 
         const email =
             document
@@ -1824,14 +2752,18 @@ loginForm.addEventListener(
                 .getElementById("password")
                 .value;
 
-        loginButton.disabled = true;
+
+        loginButton.disabled =
+            true;
 
         loginButton.textContent =
             "Signing In...";
 
-        setLoginStatus("");
+        loginStatus.textContent =
+            "";
 
-        try{
+
+        try {
 
             const {
                 data,
@@ -1839,424 +2771,304 @@ loginForm.addEventListener(
             } =
                 await supabaseClient.auth
                     .signInWithPassword({
+
                         email,
+
                         password
+
                     });
 
-            if(error){
+
+            if (error) {
+
                 throw error;
+
             }
 
-            if(!data.session){
+
+            if (!data?.session) {
 
                 throw new Error(
                     "Authentication succeeded but no session was returned."
                 );
+
             }
 
-            ADMIN_STATE.session =
-                data.session;
 
-            ADMIN_STATE.user =
-                data.user;
+            await authorizeCrowRulesAdmin();
 
-            setLoginStatus(
-                "Authentication successful. Checking administrator authorization...",
-                "success"
+
+            setLoginSuccess(
+                "Login successful."
             );
 
-            const authorized =
-                await verifyAdminAuthorization(
-                    data.user
-                );
-
-            if(!authorized){
-
-                await supabaseClient.auth.signOut();
-
-                showLogin();
-
-                return;
-            }
 
             await showAdmin();
 
-        }catch(error){
+
+        }
+
+        catch (error) {
 
             console.error(
                 "Login error:",
                 error
             );
 
-            setLoginStatus(
-                friendlyAuthError(error),
-                "error"
+
+            await supabaseClient.auth.signOut();
+
+
+            setLoginError(
+                friendlyAuthError(
+                    error
+                )
             );
 
-        }finally{
+        }
 
-            loginButton.disabled = false;
+        finally {
+
+            loginButton.disabled =
+                false;
 
             loginButton.textContent =
                 "Sign In";
+
         }
+
     }
 );
-
-
-/* =========================================================
-   AUTHORIZATION
-========================================================= */
-
-async function verifyAdminAuthorization(
-    user=null
-){
-
-    if(!supabaseClient){
-
-        return false;
-    }
-
-    try{
-
-        if(!user){
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient.auth.getUser();
-
-            if(error){
-                throw error;
-            }
-
-            user =
-                data?.user || null;
-        }
-
-        if(!user){
-
-            ADMIN_STATE.authenticated =
-                false;
-
-            ADMIN_STATE.authorized =
-                false;
-
-            return false;
-        }
-
-        ADMIN_STATE.authenticated =
-            true;
-
-        ADMIN_STATE.user =
-            user;
-
-
-        /*
-            The current CrowRules authorization model uses:
-
-            public.profiles.id = auth.users.id
-            public.profiles.role = 'admin'
-        */
-
-        const {
-            data:profile,
-            error:profileError
-        } =
-            await supabaseClient
-                .from("profiles")
-                .select("*")
-                .eq("id",user.id)
-                .maybeSingle();
-
-        if(profileError){
-
-            console.error(
-                "Profile authorization error:",
-                profileError
-            );
-
-            renderAuthorizationStatus(
-                "error",
-                "Unable to verify administrator profile.",
-                profileError.message
-            );
-
-            ADMIN_STATE.authorized =
-                false;
-
-            return false;
-        }
-
-
-        if(!profile){
-
-            ADMIN_STATE.profile =
-                null;
-
-            ADMIN_STATE.authorized =
-                false;
-
-            renderAuthorizationStatus(
-                "warning",
-                "Admin profile not found.",
-                "Your Supabase Auth account exists, but public.profiles does not contain a matching profile."
-            );
-
-            setLoginStatus(
-                "Authenticated, but this account is not configured as a CrowRules administrator.",
-                "error"
-            );
-
-            return false;
-        }
-
-
-        ADMIN_STATE.profile =
-            profile;
-
-
-        const role =
-            String(
-                profile.role || ""
-            )
-                .trim()
-                .toLowerCase();
-
-
-        if(role !== "admin"){
-
-            ADMIN_STATE.authorized =
-                false;
-
-            renderAuthorizationStatus(
-                "warning",
-                "Administrator privileges not granted.",
-                "Current profile role: " +
-                (profile.role || "none")
-            );
-
-            setLoginStatus(
-                "Authenticated, but administrator privileges are not assigned.",
-                "error"
-            );
-
-            return false;
-        }
-
-
-        ADMIN_STATE.authorized =
-            true;
-
-        renderAuthorizationStatus(
-            "success",
-            "CrowRules administrator authorized.",
-            "Profile role: admin"
-        );
-
-        return true;
-
-    }catch(error){
-
-        console.error(
-            "Authorization check failed:",
-            error
-        );
-
-        ADMIN_STATE.authorized =
-            false;
-
-        renderAuthorizationStatus(
-            "error",
-            "Administrator authorization failed.",
-            error.message
-        );
-
-        return false;
-    }
-}
-
-
-/* =========================================================
-   AUTHORIZATION UI
-========================================================= */
-
-function renderAuthorizationStatus(
-    type,
-    title,
-    detail
-){
-
-    const target =
-        document.getElementById(
-            "authorizationStatus"
-        );
-
-    if(!target){
-        return;
-    }
-
-    let className =
-        "statusBad";
-
-    if(type === "success"){
-        className =
-            "statusGood";
-    }
-
-    if(type === "warning"){
-        className =
-            "statusWarn";
-    }
-
-    target.innerHTML = `
-        <div class="statusRow">
-
-            <div>
-                <strong>
-                    ${escapeHTML(title)}
-                </strong>
-
-                <div style="
-                    margin-top:5px;
-                    color:var(--muted);
-                    font-size:11px;
-                ">
-                    ${escapeHTML(detail || "")}
-                </div>
-            </div>
-
-            <strong class="${className}">
-                ${type === "success" ? "AUTHORIZED" :
-                  type === "warning" ? "ACTION REQUIRED" :
-                  "ERROR"}
-            </strong>
-
-        </div>
-    `;
-}
-
-
-/* =========================================================
-   REFRESH AUTHORIZATION
-========================================================= */
-
-async function refreshAuthorization(){
-
-    const authorized =
-        await verifyAdminAuthorization();
-
-    if(!authorized){
-
-        toast(
-            "Administrator authorization is not active.",
-            "error"
-        );
-
-        return;
-    }
-
-    toast(
-        "Administrator authorization verified."
-    );
-
-    await loadDashboard();
-}
 
 
 /* =========================================================
    FRIENDLY AUTH ERRORS
 ========================================================= */
 
-function friendlyAuthError(error){
+function friendlyAuthError(error) {
 
     const message =
         String(
             error?.message || ""
-        ).toLowerCase();
+        );
 
-    if(
-        message.includes(
+    const lower =
+        message.toLowerCase();
+
+
+    if (
+        lower.includes(
             "invalid login credentials"
         )
-    ){
+    ) {
+
         return "Invalid email or password.";
+
     }
 
-    if(
-        message.includes(
+
+    if (
+        lower.includes(
             "email not confirmed"
         )
-    ){
-        return "This account's email has not been confirmed.";
+    ) {
+
+        return "This Supabase account's email has not been confirmed.";
+
     }
 
-    if(
-        message.includes(
-            "rate limit"
-        )
-    ){
-        return "Too many login attempts. Please wait and try again.";
-    }
 
-    if(
-        message.includes(
+    if (
+        lower.includes(
             "api key"
         )
-    ){
-        return "Supabase rejected the API key. Verify that the current Publishable key is being used.";
+    ) {
+
+        return "Supabase rejected the Publishable key. Verify the current project's Publishable key.";
+
     }
 
+
+    if (
+        lower.includes(
+            "row-level security"
+        ) ||
+        lower.includes(
+            "violates row-level security"
+        )
+    ) {
+
+        return "Authentication succeeded, but Supabase Row Level Security blocked this operation.";
+
+    }
+
+
     return (
-        error?.message ||
+        message ||
         "Unable to sign in."
     );
+
 }
 
 
 /* =========================================================
-   LOGIN / ADMIN VISIBILITY
+   CENTRAL AUTHORIZATION
 ========================================================= */
 
-function showLogin(){
+async function authorizeCrowRulesAdmin() {
 
-    loginScreen.style.display =
-        "flex";
+    if (!supabaseClient) {
 
-    adminApp.style.display =
-        "none";
+        throw new Error(
+            "Supabase is not initialized."
+        );
 
-    ADMIN_STATE.authenticated =
-        false;
+    }
 
-    ADMIN_STATE.authorized =
-        false;
 
-    ADMIN_STATE.session =
-        null;
+    const {
+        data: userData,
+        error: userError
+    } =
+        await supabaseClient.auth
+            .getUser();
 
-    ADMIN_STATE.user =
-        null;
 
-    ADMIN_STATE.profile =
-        null;
+    if (
+        userError ||
+        !userData?.user
+    ) {
 
-    document.getElementById(
-        "password"
-    ).value = "";
+        throw new Error(
+            "You are not authenticated."
+        );
+
+    }
+
+
+    const user =
+        userData.user;
+
+
+    const {
+        data: profile,
+        error: profileError
+    } =
+        await supabaseClient
+            .from("profiles")
+            .select(
+                `
+                id,
+                email,
+                display_name,
+                role,
+                is_active
+                `
+            )
+            .eq(
+                "id",
+                user.id
+            )
+            .maybeSingle();
+
+
+    if (profileError) {
+
+        console.error(
+            "Profile authorization error:",
+            profileError
+        );
+
+
+        throw new Error(
+            "Unable to verify your CrowRules administrator profile: " +
+            profileError.message
+        );
+
+    }
+
+
+    if (!profile) {
+
+        throw new Error(
+            "Authenticated, but no CrowRules profile exists for this account."
+        );
+
+    }
+
+
+    if (
+        profile.is_active !== true
+    ) {
+
+        throw new Error(
+            "Your CrowRules account is currently inactive."
+        );
+
+    }
+
+
+    const role =
+        String(
+            profile.role || ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+    if (
+        !ADMIN_ROLES.includes(
+            role
+        )
+    ) {
+
+        throw new Error(
+            `Authenticated, but the role "${role || "none"}" does not have administrative access.`
+        );
+
+    }
+
+
+    currentAuth = {
+
+        user,
+
+        profile,
+
+        role,
+
+        isOwner:
+            role === "owner",
+
+        isSuperAdmin:
+            role === "super_admin",
+
+        isAdmin:
+            role === "admin",
+
+        isAdministrator:
+            true
+
+    };
+
+
+    return currentAuth;
 
 }
 
 
-async function showAdmin(){
+/* =========================================================
+   SHOW ADMIN
+========================================================= */
 
-    if(!ADMIN_STATE.authorized){
+async function showAdmin() {
 
-        showLogin();
+    if (!currentAuth) {
 
-        return;
+        await authorizeCrowRulesAdmin();
+
     }
+
 
     loginScreen.style.display =
         "none";
@@ -2265,15 +3077,23 @@ async function showAdmin(){
         "block";
 
 
-    const user =
-        ADMIN_STATE.user;
+    const profile =
+        currentAuth.profile;
 
 
     document.getElementById(
         "currentUser"
     ).textContent =
-        user?.email ||
-        "Administrator";
+        profile.display_name ||
+        profile.email;
+
+
+    document.getElementById(
+        "sidebarRole"
+    ).textContent =
+        formatRole(
+            currentAuth.role
+        );
 
 
     document.getElementById(
@@ -2283,15 +3103,29 @@ async function showAdmin(){
 
 
     document.getElementById(
-        "connectionStatus"
+        "keyStatus"
     ).value =
-        "Connected";
+        "Publishable key configured";
 
 
     document.getElementById(
-        "settingsAuthorization"
+        "authStatus"
     ).value =
-        "AUTHORIZED — ADMIN";
+        "Authenticated";
+
+
+    document.getElementById(
+        "profileStatus"
+    ).value =
+        "Authorized";
+
+
+    document.getElementById(
+        "roleStatus"
+    ).value =
+        formatRole(
+            currentAuth.role
+        );
 
 
     await loadDashboard();
@@ -2300,132 +3134,17 @@ async function showAdmin(){
 
 
 /* =========================================================
-   SESSION CHECK
+   SHOW LOGIN
 ========================================================= */
 
-async function checkSession(){
+function showLogin() {
 
-    if(!supabaseClient){
+    loginScreen.style.display =
+        "flex";
 
-        showLogin();
+    adminApp.style.display =
+        "none";
 
-        return;
-    }
-
-    try{
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth
-                .getSession();
-
-        if(error){
-
-            console.error(error);
-
-            showLogin();
-
-            return;
-        }
-
-
-        if(
-            data?.session?.user
-        ){
-
-            ADMIN_STATE.session =
-                data.session;
-
-            const authorized =
-                await verifyAdminAuthorization(
-                    data.session.user
-                );
-
-            if(authorized){
-
-                await showAdmin();
-
-            }else{
-
-                showLogin();
-
-            }
-
-        }else{
-
-            showLogin();
-
-        }
-
-    }catch(error){
-
-        console.error(
-            "Session check failed:",
-            error
-        );
-
-        showLogin();
-    }
-}
-
-
-/* =========================================================
-   AUTH STATE
-========================================================= */
-
-if(supabaseClient){
-
-    supabaseClient.auth
-        .onAuthStateChange(
-            async (
-                event,
-                session
-            ) => {
-
-                console.log(
-                    "Auth state:",
-                    event
-                );
-
-                if(
-                    event === "SIGNED_OUT"
-                ){
-
-                    showLogin();
-
-                    return;
-                }
-
-                if(
-                    event === "SIGNED_IN" &&
-                    session
-                ){
-
-                    ADMIN_STATE.session =
-                        session;
-
-                    const authorized =
-                        await verifyAdminAuthorization(
-                            session.user
-                        );
-
-                    if(authorized){
-
-                        await showAdmin();
-
-                    }else{
-
-                        await supabaseClient
-                            .auth
-                            .signOut();
-
-                        showLogin();
-                    }
-                }
-            }
-        );
 }
 
 
@@ -2434,21 +3153,190 @@ if(supabaseClient){
 ========================================================= */
 
 document
-    .getElementById("logoutButton")
+    .getElementById(
+        "logoutButton"
+    )
     .addEventListener(
         "click",
         async () => {
 
-            if(supabaseClient){
+            if (supabaseClient) {
+
+                await supabaseClient.auth.signOut();
+
+            }
+
+            currentAuth =
+                null;
+
+            document.getElementById(
+                "password"
+            ).value =
+                "";
+
+            showLogin();
+
+        }
+    );
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+async function setupAuthListener() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+
+    supabaseClient.auth.onAuthStateChange(
+        async (
+            event,
+            session
+        ) => {
+
+            console.log(
+                "Supabase auth event:",
+                event
+            );
+
+
+            if (
+                event === "SIGNED_OUT"
+            ) {
+
+                currentAuth =
+                    null;
+
+                showLogin();
+
+                return;
+
+            }
+
+
+            if (
+                event === "SIGNED_IN" &&
+                session
+            ) {
+
+                try {
+
+                    await authorizeCrowRulesAdmin();
+
+                    await showAdmin();
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        error
+                    );
+
+                    await supabaseClient
+                        .auth
+                        .signOut();
+
+                    setLoginError(
+                        friendlyAuthError(
+                            error
+                        )
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SESSION CHECK
+========================================================= */
+
+async function checkSession() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .getSession();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (
+            data?.session
+        ) {
+
+            try {
+
+                await authorizeCrowRulesAdmin();
+
+                await showAdmin();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Existing session is not authorized:",
+                    error
+                );
 
                 await supabaseClient
                     .auth
                     .signOut();
+
+                setLoginError(
+                    friendlyAuthError(
+                        error
+                    )
+                );
+
             }
 
-            showLogin();
         }
-    );
+
+        else {
+
+            showLogin();
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Session check:",
+            error
+        );
+
+        showLogin();
+
+    }
+
+}
 
 
 /* =========================================================
@@ -2456,162 +3344,151 @@ document
 ========================================================= */
 
 document
-    .querySelectorAll(".navButton")
-    .forEach(button => {
+    .querySelectorAll(
+        ".navButton"
+    )
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            async function(){
+            button.addEventListener(
+                "click",
+                async () => {
 
-                if(
-                    !ADMIN_STATE.authorized
-                ){
-
-                    showLogin();
-
-                    return;
-                }
-
-                const page =
-                    this.dataset.page;
+                    const page =
+                        button.dataset.page;
 
 
-                document
-                    .querySelectorAll(
-                        ".navButton"
-                    )
-                    .forEach(
-                        item =>
-                            item.classList
-                                .remove("active")
-                    );
+                    document
+                        .querySelectorAll(
+                            ".navButton"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    )
+                        );
 
 
-                this.classList.add(
-                    "active"
-                );
-
-
-                document
-                    .querySelectorAll(
-                        ".page"
-                    )
-                    .forEach(
-                        item =>
-                            item.classList
-                                .remove("active")
-                    );
-
-
-                const target =
-                    document.getElementById(
-                        "page-" + page
-                    );
-
-
-                if(target){
-                    target.classList.add(
+                    button.classList.add(
                         "active"
                     );
+
+
+                    document
+                        .querySelectorAll(
+                            ".page"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    )
+                        );
+
+
+                    const target =
+                        document.getElementById(
+                            `page-${page}`
+                        );
+
+
+                    if (target) {
+
+                        target.classList.add(
+                            "active"
+                        );
+
+                    }
+
+
+                    document
+                        .getElementById(
+                            "sidebar"
+                        )
+                        .classList
+                        .remove(
+                            "open"
+                        );
+
+
+                    switch(page) {
+
+                        case "dashboard":
+                            await loadDashboard();
+                            break;
+
+                        case "shows":
+                            await loadShows();
+                            await loadShowOptions();
+                            break;
+
+                        case "episodes":
+                            await loadShowOptions();
+                            await loadEpisodes();
+                            break;
+
+                        case "live":
+                            await loadLiveEvents();
+                            break;
+
+                        case "schedule":
+                            await loadSchedule();
+                            break;
+
+                        case "members":
+                            await loadMembers();
+                            break;
+
+                        case "settings":
+                            await runDiagnostics();
+                            break;
+
+                    }
+
                 }
+            );
 
-
-                document
-                    .getElementById("sidebar")
-                    .classList.remove(
-                        "open"
-                    );
-
-
-                if(page === "dashboard"){
-                    await loadDashboard();
-                }
-
-                if(page === "shows"){
-                    await loadShows();
-                    await loadShowOptions();
-                }
-
-                if(page === "episodes"){
-                    await loadShowOptions();
-                    await loadEpisodes();
-                }
-
-                if(page === "live"){
-                    await loadShowOptions();
-                    await loadLiveEvents();
-                }
-
-                if(page === "schedule"){
-                    await loadShowOptions();
-                    await loadSchedule();
-                }
-
-                if(page === "members"){
-                    await loadMembers();
-                }
-
-            }
-        );
-
-    });
-
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
-document
-    .getElementById("mobileMenu")
-    .addEventListener(
-        "click",
-        () => {
-
-            document
-                .getElementById("sidebar")
-                .classList.toggle(
-                    "open"
-                );
         }
     );
 
 
 /* =========================================================
-   ADMIN GUARD
+   MOBILE
 ========================================================= */
 
-function requireAdmin(){
+document
+    .getElementById(
+        "mobileMenu"
+    )
+    .addEventListener(
+        "click",
+        () => {
 
-    if(
-        !ADMIN_STATE.authenticated ||
-        !ADMIN_STATE.authorized
-    ){
+            document
+                .getElementById(
+                    "sidebar"
+                )
+                .classList
+                .toggle(
+                    "open"
+                );
 
-        toast(
-            "Administrator authorization required.",
-            "error"
-        );
-
-        return false;
-    }
-
-    return true;
-}
+        }
+    );
 
 
 /* =========================================================
-   COUNT HELPER
+   DATABASE HELPERS
 ========================================================= */
 
 async function safeCount(
     table
-){
+) {
 
-    if(!requireAdmin()){
-        return null;
-    }
-
-    try{
+    try {
 
         const {
             count,
@@ -2622,32 +3499,88 @@ async function safeCount(
                 .select(
                     "*",
                     {
-                        count:"exact",
-                        head:true
+                        count:
+                            "exact",
+                        head:
+                            true
                     }
                 );
 
-        if(error){
 
-            console.error(
-                table,
-                error
+        if (error) {
+
+            console.warn(
+                `Count failed for ${table}:`,
+                error.message
             );
 
             return null;
+
         }
+
 
         return count ?? 0;
 
-    }catch(error){
+    }
 
-        console.error(
-            table,
-            error
-        );
+    catch {
 
         return null;
+
     }
+
+}
+
+
+/* =========================================================
+   GENERIC TABLE FETCH
+========================================================= */
+
+async function fetchTable(
+    table,
+    options = {}
+) {
+
+    let query =
+        supabaseClient
+            .from(table)
+            .select(
+                options.select ||
+                "*"
+            );
+
+
+    if (
+        options.orderColumn
+    ) {
+
+        query =
+            query.order(
+                options.orderColumn,
+                {
+                    ascending:
+                        options.ascending ??
+                        false
+                }
+            );
+
+    }
+
+
+    if (
+        options.limit
+    ) {
+
+        query =
+            query.limit(
+                options.limit
+            );
+
+    }
+
+
+    return await query;
+
 }
 
 
@@ -2655,218 +3588,140 @@ async function safeCount(
    DASHBOARD
 ========================================================= */
 
-async function loadDashboard(){
+async function loadDashboard() {
 
-    if(!requireAdmin()){
-        return;
-    }
-
-    const [
-        shows,
-        episodes,
-        live,
-        schedule
-    ] =
+    const results =
         await Promise.all([
+
             safeCount("shows"),
+
             safeCount("episodes"),
+
             safeCount("live_events"),
-            safeCount("schedule_items")
+
+            safeCount("schedule"),
+
+            safeCount("profiles")
+
         ]);
 
 
     document.getElementById(
         "statShows"
     ).textContent =
-        shows === null ? "—" : shows;
+        results[0] === null
+            ? "—"
+            : results[0];
 
 
     document.getElementById(
         "statEpisodes"
     ).textContent =
-        episodes === null ? "—" : episodes;
+        results[1] === null
+            ? "—"
+            : results[1];
 
 
     document.getElementById(
         "statLive"
     ).textContent =
-        live === null ? "—" : live;
+        results[2] === null
+            ? "—"
+            : results[2];
 
 
     document.getElementById(
         "statSchedule"
     ).textContent =
-        schedule === null ? "—" : schedule;
+        results[3] === null
+            ? "—"
+            : results[3];
 
 
-    renderAuthorizationStatus(
-        "success",
-        "CrowRules administrator authorized.",
-        ADMIN_STATE.user?.email || "Authenticated administrator"
-    );
+    document.getElementById(
+        "statMembers"
+    ).textContent =
+        results[4] === null
+            ? "—"
+            : results[4];
+
+
+    document.getElementById(
+        "authorizationSummary"
+    ).innerHTML = `
+
+        <p>
+            <strong>Account:</strong>
+            ${escapeHTML(
+                currentAuth?.profile?.email || ""
+            )}
+        </p>
+
+        <p>
+            <strong>Role:</strong>
+            <span class="badge owner">
+                ${escapeHTML(
+                    formatRole(
+                        currentAuth?.role || ""
+                    )
+                )}
+            </span>
+        </p>
+
+        <p>
+            <strong>Active:</strong>
+            ${currentAuth?.profile?.is_active
+                ? "Yes"
+                : "No"}
+        </p>
+
+    `;
 
 
     document.getElementById(
         "systemStatus"
     ).innerHTML = `
 
-        <div class="statusRow">
+        <p>
+            <strong>Supabase:</strong>
+            Connected
+        </p>
 
-            <span>Supabase Connection</span>
+        <p>
+            <strong>Authentication:</strong>
+            Active
+        </p>
 
-            <strong class="statusGood">
-                CONNECTED
-            </strong>
+        <p>
+            <strong>Authorization:</strong>
+            ${escapeHTML(
+                formatRole(
+                    currentAuth?.role || ""
+                )
+            )}
+        </p>
 
-        </div>
+        <p style="color:var(--muted)">
+            CrowRules Admin v1.2 is operating with
+            centralized profile-based authorization.
+        </p>
 
-        <div class="statusRow">
-
-            <span>Supabase Auth</span>
-
-            <strong class="statusGood">
-                AUTHENTICATED
-            </strong>
-
-        </div>
-
-        <div class="statusRow">
-
-            <span>CrowRules Authorization</span>
-
-            <strong class="statusGood">
-                ADMIN
-            </strong>
-
-        </div>
-
-        <div class="statusRow">
-
-            <span>RLS</span>
-
-            <strong class="statusGood">
-                ENABLED / DATABASE CONTROLLED
-            </strong>
-
-        </div>
     `;
+
 }
 
 
 /* =========================================================
-   SHOW OPTIONS
+   SHOWS
 ========================================================= */
 
-async function loadShowOptions(){
-
-    if(!requireAdmin()){
-        return;
-    }
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("shows")
-            .select("id,title")
-            .order(
-                "title",
-                {ascending:true}
-            );
-
-
-    if(error){
-
-        console.error(
-            "Show options:",
-            error
-        );
-
-        return;
-    }
-
-
-    const selectors = [
-        "episodeShow",
-        "liveShow",
-        "scheduleShow"
-    ];
-
-
-    selectors.forEach(
-        id => {
-
-            const select =
-                document.getElementById(
-                    id
-                );
-
-            if(!select){
-                return;
-            }
-
-
-            const current =
-                select.value;
-
-
-            const emptyText =
-                id === "episodeShow"
-                ? "Select a show"
-                : "No show selected";
-
-
-            select.innerHTML =
-                `<option value="">
-                    ${emptyText}
-                </option>`;
-
-
-            (data || []).forEach(
-                show => {
-
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-                    option.value =
-                        show.id;
-
-                    option.textContent =
-                        show.title;
-
-                    select.appendChild(
-                        option
-                    );
-                }
-            );
-
-
-            if(current){
-                select.value =
-                    current;
-            }
-        }
-    );
-}
-
-
-/* =========================================================
-   SHOWS — LOAD
-========================================================= */
-
-async function loadShows(){
-
-    if(!requireAdmin()){
-        return;
-    }
+async function loadShows() {
 
     const container =
         document.getElementById(
             "showsTable"
         );
+
 
     container.innerHTML =
         "Loading...";
@@ -2876,35 +3731,37 @@ async function loadShows(){
         data,
         error
     } =
-        await supabaseClient
-            .from("shows")
-            .select("*")
-            .order(
-                "created_at",
-                {ascending:false}
-            );
+        await fetchTable(
+            "shows",
+            {
+                orderColumn:
+                    "created_at"
+            }
+        );
 
 
-    if(error){
+    if (error) {
 
         container.innerHTML =
-            errorBox(
-                "Unable to load shows.",
-                error.message
+            databaseErrorHTML(
+                error,
+                "shows"
             );
 
         return;
+
     }
 
 
-    if(!data?.length){
+    if (!data?.length) {
 
         container.innerHTML =
-            emptyBox(
+            emptyHTML(
                 "No shows found."
             );
 
         return;
+
     }
 
 
@@ -2915,10 +3772,23 @@ async function loadShows(){
             <thead>
 
                 <tr>
-                    <th>Title</th>
-                    <th>Slug</th>
-                    <th>Status</th>
-                    <th>Created</th>
+
+                    <th>
+                        Title
+                    </th>
+
+                    <th>
+                        Slug
+                    </th>
+
+                    <th>
+                        YouTube
+                    </th>
+
+                    <th>
+                        Created
+                    </th>
+
                 </tr>
 
             </thead>
@@ -2933,21 +3803,26 @@ async function loadShows(){
                         <td>
                             <strong>
                                 ${escapeHTML(
-                                    show.title || ""
+                                    show.title
                                 )}
                             </strong>
                         </td>
 
                         <td>
                             ${escapeHTML(
-                                show.slug || ""
+                                show.slug || "—"
                             )}
                         </td>
 
                         <td>
-                            ${statusBadge(
-                                show.status
-                            )}
+                            ${
+                                show.youtube_url
+                                    ? linkHTML(
+                                        show.youtube_url,
+                                        "Open"
+                                    )
+                                    : "—"
+                            }
                         </td>
 
                         <td>
@@ -2964,249 +3839,193 @@ async function loadShows(){
             </tbody>
 
         </table>
+
     `;
+
 }
 
 
 /* =========================================================
-   SHOWS — CREATE
+   SHOW FORM
 ========================================================= */
 
 document
-    .getElementById("showForm")
+    .getElementById(
+        "showForm"
+    )
     .addEventListener(
         "submit",
         async event => {
 
             event.preventDefault();
 
-            if(!requireAdmin()){
-                return;
-            }
-
-
-            const title =
-                document.getElementById(
-                    "showTitle"
-                ).value.trim();
-
-
-            const slug =
-                document.getElementById(
-                    "showSlug"
-                ).value.trim() ||
-                slugify(title);
-
-
-            const status =
-                document.getElementById(
-                    "showStatus"
-                ).value;
-
-
-            const thumbnail_url =
-                document.getElementById(
-                    "showThumbnail"
-                ).value.trim();
-
-
-            const description =
-                document.getElementById(
-                    "showDescription"
-                ).value.trim();
-
 
             const payload = {
-                title,
-                slug,
-                status,
-                description
+
+                title:
+                    value("showTitle"),
+
+                slug:
+                    value("showSlug") ||
+                    slugify(
+                        value("showTitle")
+                    ),
+
+                description:
+                    value(
+                        "showDescription"
+                    ),
+
+                thumbnail_url:
+                    value(
+                        "showThumbnail"
+                    ),
+
+                youtube_url:
+                    value(
+                        "showYoutube"
+                    )
+
             };
 
 
-            /*
-                Only add thumbnail_url if supplied.
+            try {
 
-                This helps avoid schema errors if the current
-                shows table does not contain this optional field.
-            */
-
-            if(thumbnail_url){
-
-                payload.thumbnail_url =
-                    thumbnail_url;
-            }
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .from("shows")
+                        .insert(
+                            payload
+                        );
 
 
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from("shows")
-                    .insert(payload);
+                if (error) {
+
+                    throw error;
+
+                }
 
 
-            if(error){
-
-                handleDatabaseError(
-                    error,
-                    "creating the show"
+                toast(
+                    "Show added successfully."
                 );
 
-                return;
+
+                event.target.reset();
+
+
+                await loadShows();
+
+                await loadShowOptions();
+
+                await loadDashboard();
+
             }
 
+            catch(error) {
 
-            toast(
-                "Show created successfully."
+                toast(
+                    databaseFriendlyError(
+                        error
+                    ),
+                    "error"
+                );
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   SHOW OPTIONS
+========================================================= */
+
+async function loadShowOptions() {
+
+    const select =
+        document.getElementById(
+            "episodeShow"
+        );
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("shows")
+            .select(
+                "id,title"
+            )
+            .order(
+                "title",
+                {
+                    ascending:
+                        true
+                }
             );
 
 
-            event.target.reset();
-
-
-            await loadShows();
-            await loadShowOptions();
-            await loadDashboard();
-
-        }
-    );
-
-
-/* =========================================================
-   EPISODES — THUMBNAIL
-========================================================= */
-
-function getYouTubeVideoId(
-    url
-){
-
-    if(!url){
-        return null;
-    }
-
-    try{
-
-        const parsed =
-            new URL(url);
-
-
-        if(
-            parsed.hostname
-                .includes("youtu.be")
-        ){
-
-            return parsed
-                .pathname
-                .replace(/^\/+/,"")
-                .split("/")[0];
-        }
-
-
-        if(
-            parsed.hostname
-                .includes("youtube.com")
-        ){
-
-            return parsed
-                .searchParams
-                .get("v");
-        }
-
-
-        return null;
-
-    }catch{
-
-        return null;
-    }
-}
-
-
-function getYouTubeThumbnail(
-    url
-){
-
-    const videoId =
-        getYouTubeVideoId(url);
-
-
-    if(!videoId){
-        return "";
-    }
-
-
-    return (
-        "https://img.youtube.com/vi/" +
-        encodeURIComponent(videoId) +
-        "/maxresdefault.jpg"
-    );
-}
-
-
-function autoThumbnail(){
-
-    const youtube =
-        document.getElementById(
-            "episodeYoutube"
-        ).value.trim();
-
-
-    const thumbnail =
-        getYouTubeThumbnail(
-            youtube
-        );
-
-
-    if(!thumbnail){
-
-        toast(
-            "Enter a valid YouTube URL first.",
-            "warn"
-        );
+    if (error) {
 
         return;
+
     }
 
 
-    document.getElementById(
-        "episodeThumbnail"
-    ).value =
-        thumbnail;
+    select.innerHTML = `
 
+        <option value="">
+            Select show
+        </option>
 
-    toast(
-        "YouTube thumbnail URL generated."
-    );
+        ${(
+            data || []
+        ).map(
+            show => `
+
+            <option value="${escapeAttribute(
+                show.id
+            )}">
+                ${escapeHTML(
+                    show.title
+                )}
+            </option>
+
+        `
+        ).join("")}
+
+    `;
+
 }
 
 
 /* =========================================================
-   EPISODES — LOAD
+   EPISODES
 ========================================================= */
 
-async function loadEpisodes(){
-
-    if(!requireAdmin()){
-        return;
-    }
+async function loadEpisodes() {
 
     const container =
         document.getElementById(
             "episodesTable"
         );
 
+
     container.innerHTML =
         "Loading...";
 
 
     /*
-        We intentionally use a simple select.
-
-        This avoids requiring the episodes table to have
-        columns such as featured, premiere_at, or season.
-        The application detects optional columns when
-        displaying records.
+       Deliberately select only fields that are
+       normally present in the episode structure.
+       We do NOT assume:
+       season
+       featured
+       premiere_at
     */
 
     const {
@@ -3215,33 +4034,45 @@ async function loadEpisodes(){
     } =
         await supabaseClient
             .from("episodes")
-            .select("*")
+            .select(
+                `
+                *,
+                shows (
+                    title
+                )
+                `
+            )
             .order(
                 "created_at",
-                {ascending:false}
+                {
+                    ascending:
+                        false
+                }
             );
 
 
-    if(error){
+    if (error) {
 
         container.innerHTML =
-            errorBox(
-                "Unable to load episodes.",
-                error.message
+            databaseErrorHTML(
+                error,
+                "episodes"
             );
 
         return;
+
     }
 
 
-    if(!data?.length){
+    if (!data?.length) {
 
         container.innerHTML =
-            emptyBox(
+            emptyHTML(
                 "No episodes found."
             );
 
         return;
+
     }
 
 
@@ -3252,13 +4083,31 @@ async function loadEpisodes(){
             <thead>
 
                 <tr>
-                    <th>Thumbnail</th>
-                    <th>Episode</th>
-                    <th>Season</th>
-                    <th>Status</th>
-                    <th>Featured</th>
-                    <th>YouTube</th>
-                    <th>Created</th>
+
+                    <th>
+                        Episode
+                    </th>
+
+                    <th>
+                        Show
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        YouTube
+                    </th>
+
+                    <th>
+                        Thumbnail
+                    </th>
+
+                    <th>
+                        Created
+                    </th>
+
                 </tr>
 
             </thead>
@@ -3266,345 +4115,291 @@ async function loadEpisodes(){
             <tbody>
 
                 ${data.map(
-                    episode => {
+                    episode => `
 
-                        const thumbnail =
-                            episode.thumbnail_url ||
-                            episode.youtube_thumbnail_url ||
-                            getYouTubeThumbnail(
-                                episode.youtube_url
-                            );
+                    <tr>
 
+                        <td>
 
-                        const season =
-                            episode.season ??
-                            episode.season_number ??
-                            "—";
+                            <strong>
+                                ${escapeHTML(
+                                    episode.title ||
+                                    episode.name ||
+                                    "Untitled"
+                                )}
+                            </strong>
 
-
-                        const featured =
-                            episode.featured ??
-                            false;
-
-
-                        return `
-
-                            <tr>
-
-                                <td>
-                                    ${
-                                        thumbnail
-                                        ?
-                                        `<img
-                                            class="thumb"
-                                            src="${escapeAttribute(thumbnail)}"
-                                            alt=""
-                                            loading="lazy"
-                                        >`
-                                        :
-                                        "—"
-                                    }
-                                </td>
-
-                                <td>
-
-                                    <strong>
-                                        ${escapeHTML(
-                                            episode.title || ""
-                                        )}
-                                    </strong>
-
-                                    <div style="
-                                        color:var(--muted);
-                                        margin-top:4px;
-                                        font-size:10px;
-                                    ">
-                                        ${escapeHTML(
-                                            episode.description
-                                            ? episode.description.substring(0,100)
-                                            : ""
-                                        )}
-                                    </div>
-
-                                </td>
-
-                                <td>
-                                    ${escapeHTML(
-                                        String(season)
-                                    )}
-                                </td>
-
-                                <td>
-                                    ${statusBadge(
-                                        episode.status
-                                    )}
-                                </td>
-
-                                <td>
-                                    ${
-                                        featured
-                                        ? "★"
-                                        : "—"
-                                    }
-                                </td>
-
-                                <td>
-                                    ${
-                                        episode.youtube_url
-                                        ?
-                                        `<a
-                                            href="${escapeAttribute(episode.youtube_url)}"
-                                            target="_blank"
-                                            rel="noopener"
+                            ${
+                                episode.episode_number
+                                    ? `
+                                        <br>
+                                        <span
+                                            style="color:var(--muted)"
                                         >
-                                            Open
-                                        </a>`
-                                        :
-                                        "—"
-                                    }
-                                </td>
+                                            Episode
+                                            ${escapeHTML(
+                                                episode.episode_number
+                                            )}
+                                        </span>
+                                      `
+                                    : ""
+                            }
 
-                                <td>
-                                    ${formatDate(
-                                        episode.created_at
-                                    )}
-                                </td>
+                        </td>
 
-                            </tr>
-                        `;
-                    }
+
+                        <td>
+
+                            ${escapeHTML(
+                                episode.shows?.title ||
+                                episode.show_title ||
+                                "—"
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="badge"
+                            >
+
+                                ${escapeHTML(
+                                    episode.status ||
+                                    "draft"
+                                )}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            ${
+                                episode.youtube_url
+                                    ? linkHTML(
+                                        episode.youtube_url,
+                                        "Open"
+                                    )
+                                    : "—"
+                            }
+
+                        </td>
+
+
+                        <td>
+
+                            ${
+                                episode.youtube_thumbnail_url ||
+                                episode.thumbnail_url
+                                    ? "Available"
+                                    : "—"
+                            }
+
+                        </td>
+
+
+                        <td>
+
+                            ${formatDate(
+                                episode.created_at
+                            )}
+
+                        </td>
+
+                    </tr>
+
+                `
                 ).join("")}
 
             </tbody>
 
         </table>
+
     `;
+
 }
 
 
 /* =========================================================
-   EPISODES — CREATE
+   EPISODE FORM
 ========================================================= */
 
 document
-    .getElementById("episodeForm")
+    .getElementById(
+        "episodeForm"
+    )
     .addEventListener(
         "submit",
         async event => {
 
             event.preventDefault();
 
-            if(!requireAdmin()){
-                return;
-            }
-
-
-            const show_id =
-                document.getElementById(
-                    "episodeShow"
-                ).value || null;
-
-
-            const title =
-                document.getElementById(
-                    "episodeTitle"
-                ).value.trim();
-
-
-            const season =
-                document.getElementById(
-                    "episodeSeason"
-                ).value;
-
-
-            const episode_number =
-                document.getElementById(
-                    "episodeNumber"
-                ).value;
-
-
-            const youtube_url =
-                document.getElementById(
-                    "episodeYoutube"
-                ).value.trim();
-
-
-            let thumbnail_url =
-                document.getElementById(
-                    "episodeThumbnail"
-                ).value.trim();
-
-
-            if(
-                !thumbnail_url &&
-                youtube_url
-            ){
-
-                thumbnail_url =
-                    getYouTubeThumbnail(
-                        youtube_url
-                    );
-            }
-
-
-            const status =
-                document.getElementById(
-                    "episodeStatus"
-                ).value;
-
-
-            const featured =
-                document.getElementById(
-                    "episodeFeatured"
-                ).value === "true";
-
-
-            const description =
-                document.getElementById(
-                    "episodeDescription"
-                ).value.trim();
-
-
-            const premiere =
-                document.getElementById(
-                    "episodePremiere"
-                ).value;
-
-
-            /*
-                Base payload.
-
-                Only fields that have historically been
-                relevant to this application are sent.
-            */
 
             const payload = {
-                title,
-                description,
-                youtube_url,
-                thumbnail_url,
-                status,
-                featured
+
+                title:
+                    value(
+                        "episodeTitle"
+                    ),
+
+                description:
+                    value(
+                        "episodeDescription"
+                    ),
+
+                youtube_url:
+                    value(
+                        "episodeYoutube"
+                    ),
+
+                thumbnail_url:
+                    value(
+                        "episodeThumbnail"
+                    ),
+
+                episode_number:
+                    numberValue(
+                        "episodeNumber"
+                    ),
+
+                status:
+                    value(
+                        "episodeStatus"
+                    )
+
             };
 
 
-            if(show_id){
+            const showId =
+                value(
+                    "episodeShow"
+                );
+
+
+            if (showId) {
+
                 payload.show_id =
-                    show_id;
+                    showId;
+
             }
 
 
-            if(season){
-                payload.season =
-                    Number(season);
-            }
+            const publishAt =
+                value(
+                    "episodePublishAt"
+                );
 
 
-            if(episode_number){
-                payload.episode_number =
-                    Number(episode_number);
-            }
+            if (publishAt) {
+
+                /*
+                   We only send premiere_at/publish_at
+                   if the existing table actually has it.
+                   This prevents the previous schema-cache
+                   failures.
+                */
+
+                const supported =
+                    await columnExists(
+                        "episodes",
+                        "premiere_at"
+                    );
 
 
-            if(premiere){
+                if (supported) {
 
-                payload.premiere_at =
-                    new Date(
-                        premiere
-                    ).toISOString();
-            }
+                    payload.premiere_at =
+                        new Date(
+                            publishAt
+                        ).toISOString();
 
-
-            let {
-                error
-            } =
-                await supabaseClient
-                    .from("episodes")
-                    .insert(payload);
-
-
-            /*
-                Schema compatibility fallback.
-
-                If the existing database doesn't contain one
-                of the optional episode columns, retry using
-                a smaller payload rather than leaving the user
-                with a confusing schema-cache failure.
-            */
-
-            if(
-                error &&
-                isMissingColumnError(error)
-            ){
-
-                const minimalPayload = {
-                    title,
-                    description,
-                    youtube_url,
-                    thumbnail_url,
-                    status
-                };
-
-
-                if(show_id){
-                    minimalPayload.show_id =
-                        show_id;
                 }
 
+                else {
 
-                const retry =
-                    await supabaseClient
-                        .from("episodes")
-                        .insert(
-                            minimalPayload
+                    const hasPublish =
+                        await columnExists(
+                            "episodes",
+                            "published_at"
                         );
 
 
-                error =
-                    retry.error;
+                    if (hasPublish) {
+
+                        payload.published_at =
+                            new Date(
+                                publishAt
+                            ).toISOString();
+
+                    }
+
+                }
+
             }
 
 
-            if(error){
+            try {
 
-                handleDatabaseError(
-                    error,
-                    "creating the episode"
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .from("episodes")
+                        .insert(
+                            payload
+                        );
+
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+
+                toast(
+                    "Episode added successfully."
                 );
 
-                return;
+
+                event.target.reset();
+
+
+                await loadEpisodes();
+
+                await loadDashboard();
+
             }
 
+            catch(error) {
 
-            toast(
-                "Episode created successfully."
-            );
+                toast(
+                    databaseFriendlyError(
+                        error
+                    ),
+                    "error"
+                );
 
-
-            event.target.reset();
-
-
-            await loadEpisodes();
-            await loadDashboard();
+            }
 
         }
     );
 
 
 /* =========================================================
-   LIVE EVENTS — LOAD
+   LIVE EVENTS
 ========================================================= */
 
-async function loadLiveEvents(){
-
-    if(!requireAdmin()){
-        return;
-    }
+async function loadLiveEvents() {
 
     const container =
         document.getElementById(
             "liveTable"
         );
+
 
     container.innerHTML =
         "Loading...";
@@ -3616,33 +4411,45 @@ async function loadLiveEvents(){
     } =
         await supabaseClient
             .from("live_events")
-            .select("*")
+            .select(
+                `
+                *,
+                shows (
+                    title
+                )
+                `
+            )
             .order(
                 "created_at",
-                {ascending:false}
+                {
+                    ascending:
+                        false
+                }
             );
 
 
-    if(error){
+    if (error) {
 
         container.innerHTML =
-            errorBox(
-                "Unable to load live events.",
-                error.message
+            databaseErrorHTML(
+                error,
+                "live_events"
             );
 
         return;
+
     }
 
 
-    if(!data?.length){
+    if (!data?.length) {
 
         container.innerHTML =
-            emptyBox(
+            emptyHTML(
                 "No live events found."
             );
 
         return;
+
     }
 
 
@@ -3653,11 +4460,27 @@ async function loadLiveEvents(){
             <thead>
 
                 <tr>
-                    <th>Event</th>
-                    <th>Status</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>YouTube</th>
+
+                    <th>
+                        Event
+                    </th>
+
+                    <th>
+                        Show
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Start
+                    </th>
+
+                    <th>
+                        YouTube
+                    </th>
+
                 </tr>
 
             </thead>
@@ -3665,241 +4488,199 @@ async function loadLiveEvents(){
             <tbody>
 
                 ${data.map(
-                    item => `
+                    event => `
 
                     <tr>
 
                         <td>
                             <strong>
                                 ${escapeHTML(
-                                    item.title ||
-                                    item.name ||
-                                    ""
+                                    event.title ||
+                                    event.name ||
+                                    "Untitled"
                                 )}
                             </strong>
                         </td>
 
                         <td>
-                            ${statusBadge(
-                                item.status
+                            ${escapeHTML(
+                                event.shows?.title ||
+                                "—"
                             )}
                         </td>
 
                         <td>
-                            ${formatDate(
-                                item.start_time ||
-                                item.starts_at
-                            )}
+
+                            <span
+                                class="badge ${
+                                    event.status === "live"
+                                        ? "live"
+                                        : event.status === "scheduled"
+                                            ? "scheduled"
+                                            : ""
+                                }"
+                            >
+
+                                ${escapeHTML(
+                                    event.status ||
+                                    "unknown"
+                                )}
+
+                            </span>
+
                         </td>
 
                         <td>
                             ${formatDate(
-                                item.end_time ||
-                                item.ends_at
+                                event.start_time ||
+                                event.starts_at
                             )}
                         </td>
 
                         <td>
 
                             ${
-                                item.youtube_url
-                                ?
-                                `<a
-                                    href="${escapeAttribute(item.youtube_url)}"
-                                    target="_blank"
-                                    rel="noopener"
-                                >
-                                    Open
-                                </a>`
-                                :
-                                "—"
+                                event.youtube_url
+                                    ? linkHTML(
+                                        event.youtube_url,
+                                        "Open"
+                                    )
+                                    : "—"
                             }
 
                         </td>
 
                     </tr>
+
                 `
                 ).join("")}
 
             </tbody>
 
         </table>
+
     `;
+
 }
 
 
 /* =========================================================
-   LIVE EVENTS — CREATE
+   LIVE FORM
 ========================================================= */
 
 document
-    .getElementById("liveForm")
+    .getElementById(
+        "liveForm"
+    )
     .addEventListener(
         "submit",
         async event => {
 
             event.preventDefault();
 
-            if(!requireAdmin()){
-                return;
-            }
-
-
-            const title =
-                document.getElementById(
-                    "liveTitle"
-                ).value.trim();
-
-
-            const show_id =
-                document.getElementById(
-                    "liveShow"
-                ).value || null;
-
-
-            const youtube_url =
-                document.getElementById(
-                    "liveYoutube"
-                ).value.trim();
-
-
-            const status =
-                document.getElementById(
-                    "liveStatus"
-                ).value;
-
-
-            const start =
-                document.getElementById(
-                    "liveStart"
-                ).value;
-
-
-            const end =
-                document.getElementById(
-                    "liveEnd"
-                ).value;
-
-
-            const description =
-                document.getElementById(
-                    "liveDescription"
-                ).value.trim();
-
 
             const payload = {
-                title,
-                youtube_url,
-                status,
-                description
+
+                title:
+                    value(
+                        "liveTitle"
+                    ),
+
+                youtube_url:
+                    value(
+                        "liveYoutube"
+                    ),
+
+                status:
+                    value(
+                        "liveStatus"
+                    ),
+
+                description:
+                    value(
+                        "liveDescription"
+                    )
+
             };
 
 
-            if(show_id){
-                payload.show_id =
-                    show_id;
-            }
+            const start =
+                value(
+                    "liveStart"
+                );
 
 
-            if(start){
+            if (start) {
 
                 payload.start_time =
                     new Date(
                         start
                     ).toISOString();
+
             }
 
 
-            if(end){
+            try {
 
-                payload.end_time =
-                    new Date(
-                        end
-                    ).toISOString();
-            }
-
-
-            let {
-                error
-            } =
-                await supabaseClient
-                    .from("live_events")
-                    .insert(payload);
-
-
-            if(
-                error &&
-                isMissingColumnError(error)
-            ){
-
-                const fallback = {
-                    title,
-                    youtube_url,
-                    status
-                };
-
-
-                if(start){
-                    fallback.start_time =
-                        new Date(
-                            start
-                        ).toISOString();
-                }
-
-
-                const retry =
+                const {
+                    error
+                } =
                     await supabaseClient
-                        .from("live_events")
+                        .from(
+                            "live_events"
+                        )
                         .insert(
-                            fallback
+                            payload
                         );
 
 
-                error =
-                    retry.error;
-            }
+                if (error) {
+
+                    throw error;
+
+                }
 
 
-            if(error){
-
-                handleDatabaseError(
-                    error,
-                    "creating the live event"
+                toast(
+                    "Live event added."
                 );
 
-                return;
+
+                event.target.reset();
+
+
+                await loadLiveEvents();
+
+                await loadDashboard();
+
             }
 
+            catch(error) {
 
-            toast(
-                "Live event created."
-            );
+                toast(
+                    databaseFriendlyError(
+                        error
+                    ),
+                    "error"
+                );
 
-
-            event.target.reset();
-
-
-            await loadLiveEvents();
-            await loadDashboard();
+            }
 
         }
     );
 
 
 /* =========================================================
-   SCHEDULE — LOAD
+   SCHEDULE
 ========================================================= */
 
-async function loadSchedule(){
-
-    if(!requireAdmin()){
-        return;
-    }
+async function loadSchedule() {
 
     const container =
         document.getElementById(
             "scheduleTable"
         );
+
 
     container.innerHTML =
         "Loading...";
@@ -3909,36 +4690,47 @@ async function loadSchedule(){
         data,
         error
     } =
-        await supabaseClient
-            .from("schedule_items")
-            .select("*")
-            .order(
-                "start_time",
-                {ascending:true}
-            );
+        await fetchTable(
+            "schedule",
+            {
+                orderColumn:
+                    "created_at"
+            }
+        );
 
 
-    if(error){
+    if (error) {
 
         container.innerHTML =
-            errorBox(
-                "Unable to load schedule.",
-                error.message
+            databaseErrorHTML(
+                error,
+                "schedule"
             );
 
         return;
+
     }
 
 
-    if(!data?.length){
+    if (!data?.length) {
 
         container.innerHTML =
-            emptyBox(
-                "No schedule items found."
+            emptyHTML(
+                "No schedule records found."
             );
 
         return;
+
     }
+
+
+    const columns =
+        Object.keys(
+            data[0]
+        ).slice(
+            0,
+            8
+        );
 
 
     container.innerHTML = `
@@ -3948,11 +4740,17 @@ async function loadSchedule(){
             <thead>
 
                 <tr>
-                    <th>Program</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Start</th>
-                    <th>End</th>
+
+                    ${columns.map(
+                        column => `
+                            <th>
+                                ${escapeHTML(
+                                    column
+                                )}
+                            </th>
+                        `
+                    ).join("")}
+
                 </tr>
 
             </thead>
@@ -3960,231 +4758,52 @@ async function loadSchedule(){
             <tbody>
 
                 ${data.map(
-                    item => `
+                    row => `
 
                     <tr>
 
-                        <td>
-                            <strong>
+                        ${columns.map(
+                            column => `
+
+                            <td>
+
                                 ${escapeHTML(
-                                    item.title ||
-                                    item.name ||
-                                    ""
+                                    String(
+                                        row[column] ??
+                                        ""
+                                    )
                                 )}
-                            </strong>
-                        </td>
 
-                        <td>
-                            ${escapeHTML(
-                                item.type ||
-                                item.program_type ||
-                                "—"
-                            )}
-                        </td>
+                            </td>
 
-                        <td>
-                            ${statusBadge(
-                                item.status
-                            )}
-                        </td>
-
-                        <td>
-                            ${formatDate(
-                                item.start_time ||
-                                item.starts_at
-                            )}
-                        </td>
-
-                        <td>
-                            ${formatDate(
-                                item.end_time ||
-                                item.ends_at
-                            )}
-                        </td>
+                            `
+                        ).join("")}
 
                     </tr>
+
                 `
                 ).join("")}
 
             </tbody>
 
         </table>
+
     `;
+
 }
-
-
-/* =========================================================
-   SCHEDULE — CREATE
-========================================================= */
-
-document
-    .getElementById("scheduleForm")
-    .addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-            if(!requireAdmin()){
-                return;
-            }
-
-
-            const title =
-                document.getElementById(
-                    "scheduleTitle"
-                ).value.trim();
-
-
-            const show_id =
-                document.getElementById(
-                    "scheduleShow"
-                ).value || null;
-
-
-            const start =
-                document.getElementById(
-                    "scheduleStart"
-                ).value;
-
-
-            const end =
-                document.getElementById(
-                    "scheduleEnd"
-                ).value;
-
-
-            const type =
-                document.getElementById(
-                    "scheduleType"
-                ).value;
-
-
-            const status =
-                document.getElementById(
-                    "scheduleStatus"
-                ).value;
-
-
-            const description =
-                document.getElementById(
-                    "scheduleDescription"
-                ).value.trim();
-
-
-            const payload = {
-
-                title,
-
-                type,
-
-                status,
-
-                description,
-
-                start_time:
-                    new Date(
-                        start
-                    ).toISOString()
-
-            };
-
-
-            if(show_id){
-                payload.show_id =
-                    show_id;
-            }
-
-
-            if(end){
-
-                payload.end_time =
-                    new Date(
-                        end
-                    ).toISOString();
-            }
-
-
-            let {
-                error
-            } =
-                await supabaseClient
-                    .from("schedule_items")
-                    .insert(payload);
-
-
-            if(
-                error &&
-                isMissingColumnError(error)
-            ){
-
-                const fallback = {
-
-                    title,
-
-                    status,
-
-                    start_time:
-                        new Date(
-                            start
-                        ).toISOString()
-
-                };
-
-
-                const retry =
-                    await supabaseClient
-                        .from("schedule_items")
-                        .insert(
-                            fallback
-                        );
-
-
-                error =
-                    retry.error;
-            }
-
-
-            if(error){
-
-                handleDatabaseError(
-                    error,
-                    "creating the schedule item"
-                );
-
-                return;
-            }
-
-
-            toast(
-                "Schedule item created."
-            );
-
-
-            event.target.reset();
-
-
-            await loadSchedule();
-            await loadDashboard();
-
-        }
-    );
 
 
 /* =========================================================
    MEMBERS
 ========================================================= */
 
-async function loadMembers(){
-
-    if(!requireAdmin()){
-        return;
-    }
+async function loadMembers() {
 
     const container =
         document.getElementById(
             "membersTable"
         );
+
 
     container.innerHTML =
         "Loading...";
@@ -4196,33 +4815,48 @@ async function loadMembers(){
     } =
         await supabaseClient
             .from("profiles")
-            .select("*")
+            .select(
+                `
+                id,
+                email,
+                display_name,
+                role,
+                is_active,
+                created_at,
+                updated_at
+                `
+            )
             .order(
                 "created_at",
-                {ascending:false}
+                {
+                    ascending:
+                        false
+                }
             );
 
 
-    if(error){
+    if (error) {
 
         container.innerHTML =
-            errorBox(
-                "Unable to load profiles.",
-                error.message
+            databaseErrorHTML(
+                error,
+                "profiles"
             );
 
         return;
+
     }
 
 
-    if(!data?.length){
+    if (!data?.length) {
 
         container.innerHTML =
-            emptyBox(
-                "No profile records found."
+            emptyHTML(
+                "No profiles found."
             );
 
         return;
+
     }
 
 
@@ -4233,227 +4867,772 @@ async function loadMembers(){
             <thead>
 
                 <tr>
-                    <th>ID</th>
-                    <th>Role</th>
-                    <th>Created</th>
+
+                    <th>
+                        User
+                    </th>
+
+                    <th>
+                        Role
+                    </th>
+
+                    <th>
+                        Active
+                    </th>
+
+                    <th>
+                        Created
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+
                 </tr>
 
             </thead>
 
+
             <tbody>
 
                 ${data.map(
-                    profile => `
+                    member => `
 
                     <tr>
 
                         <td>
-                            <code>
+
+                            <strong>
                                 ${escapeHTML(
-                                    profile.id || ""
+                                    member.display_name ||
+                                    "Unnamed User"
                                 )}
-                            </code>
+                            </strong>
+
+                            <br>
+
+                            <span
+                                style="color:var(--muted)"
+                            >
+                                ${escapeHTML(
+                                    member.email ||
+                                    ""
+                                )}
+                            </span>
+
                         </td>
 
-                        <td>
-                            ${statusBadge(
-                                profile.role
-                            )}
-                        </td>
 
                         <td>
+
+                            <span
+                                class="badge ${
+                                    member.role === "owner"
+                                        ? "owner"
+                                        : member.role === "admin"
+                                            ? "admin"
+                                            : ""
+                                }"
+                            >
+
+                                ${escapeHTML(
+                                    formatRole(
+                                        member.role
+                                    )
+                                )}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            ${
+                                member.is_active
+                                    ? "Yes"
+                                    : "No"
+                            }
+
+                        </td>
+
+
+                        <td>
+
                             ${formatDate(
-                                profile.created_at
+                                member.created_at
                             )}
+
+                        </td>
+
+
+                        <td>
+
+                            ${
+                                canManageMember(
+                                    member
+                                )
+                                    ? memberRoleControls(
+                                        member
+                                    )
+                                    : "—"
+                            }
+
                         </td>
 
                     </tr>
+
                 `
                 ).join("")}
 
             </tbody>
 
         </table>
+
     `;
+
 }
 
 
 /* =========================================================
-   DATABASE ERROR HANDLING
+   MEMBER MANAGEMENT
 ========================================================= */
 
-function isMissingColumnError(
-    error
-){
+function canManageMember(
+    member
+) {
 
-    const message =
-        String(
-            error?.message ||
-            ""
-        ).toLowerCase();
+    if (!currentAuth) {
+
+        return false;
+
+    }
 
 
-    return (
-        message.includes(
-            "could not find the"
-        ) &&
-        message.includes(
-            "column"
-        )
-    );
+    if (
+        currentAuth.role === "owner"
+    ) {
+
+        return (
+            member.id !==
+            currentAuth.user.id
+        );
+
+    }
+
+
+    if (
+        currentAuth.role === "super_admin"
+    ) {
+
+        return (
+            member.id !==
+            currentAuth.user.id &&
+            member.role !== "owner" &&
+            member.role !== "super_admin"
+        );
+
+    }
+
+
+    if (
+        currentAuth.role === "admin"
+    ) {
+
+        return (
+            member.id !==
+            currentAuth.user.id &&
+            ![
+                "owner",
+                "super_admin",
+                "admin"
+            ].includes(
+                member.role
+            )
+        );
+
+    }
+
+
+    return false;
+
 }
 
 
-function handleDatabaseError(
-    error,
-    action
-){
+function memberRoleControls(
+    member
+) {
 
-    console.error(
-        "Database error:",
-        error
-    );
+    const roles = [
+
+        "viewer",
+
+        "member",
+
+        "creator",
+
+        "editor",
+
+        "producer",
+
+        "manager",
+
+        "admin",
+
+        "super_admin",
+
+        "owner"
+
+    ];
 
 
-    const message =
-        String(
-            error?.message ||
-            ""
-        );
+    return `
+
+        <select
+            class="memberRoleSelect"
+            data-user-id="${escapeAttribute(
+                member.id
+            )}"
+            data-original-role="${escapeAttribute(
+                member.role || ""
+            )}"
+        >
+
+            ${roles.map(
+                role => `
+
+                <option
+                    value="${role}"
+                    ${
+                        member.role === role
+                            ? "selected"
+                            : ""
+                    }
+                >
+                    ${formatRole(
+                        role
+                    )}
+                </option>
+
+            `
+            ).join("")}
+
+        </select>
+
+    `;
+
+}
 
 
-    if(
-        message
-            .toLowerCase()
-            .includes(
-                "row-level security"
+document.addEventListener(
+    "change",
+    async event => {
+
+        if (
+            !event.target.classList.contains(
+                "memberRoleSelect"
             )
-    ){
+        ) {
 
-        toast(
-            "RLS blocked " +
-            action +
-            ". Verify that the signed-in account has profiles.role = admin.",
-            "error"
+            return;
+
+        }
+
+
+        const userId =
+            event.target.dataset.userId;
+
+        const role =
+            event.target.value;
+
+
+        try {
+
+            await updateMemberRole(
+                userId,
+                role
+            );
+
+        }
+
+        catch(error) {
+
+            toast(
+                error.message,
+                "error"
+            );
+
+            await loadMembers();
+
+        }
+
+    }
+);
+
+
+async function updateMemberRole(
+    userId,
+    role
+) {
+
+    if (!currentAuth) {
+
+        throw new Error(
+            "Not authorized."
         );
 
-        return;
+    }
+
+
+    if (
+        currentAuth.role !== "owner" &&
+        role === "owner"
+    ) {
+
+        throw new Error(
+            "Only the Owner can assign the Owner role."
+        );
+
+    }
+
+
+    if (
+        currentAuth.role === "admin" &&
+        [
+            "admin",
+            "super_admin",
+            "owner"
+        ].includes(role)
+    ) {
+
+        throw new Error(
+            "Your role cannot assign this administrative level."
+        );
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("profiles")
+            .update({
+
+                role,
+
+                updated_at:
+                    new Date()
+                        .toISOString()
+
+            })
+            .eq(
+                "id",
+                userId
+            );
+
+
+    if (error) {
+
+        throw error;
+
     }
 
 
     toast(
-        "Database error while " +
-        action +
-        ": " +
-        message,
-        "error"
+        `User role changed to ${formatRole(role)}.`
     );
+
+
+    await loadMembers();
+
 }
 
 
 /* =========================================================
-   UI HELPERS
+   DIAGNOSTICS
 ========================================================= */
 
-function errorBox(
-    title,
-    detail
-){
+async function runDiagnostics() {
 
-    return `
-
-        <div class="emptyState">
-
-            <strong
-                style="color:#fca5a5"
-            >
-                ${escapeHTML(title)}
-            </strong>
-
-            <div style="
-                margin-top:8px;
-                font-size:11px;
-            ">
-                ${escapeHTML(detail)}
-            </div>
-
-        </div>
-    `;
-}
-
-
-function emptyBox(
-    message
-){
-
-    return `
-
-        <div class="emptyState">
-            ${escapeHTML(message)}
-        </div>
-    `;
-}
-
-
-function statusBadge(
-    status
-){
-
-    if(!status){
-        return "—";
-    }
-
-
-    const normalized =
-        String(status)
-            .toLowerCase()
-            .replace(/\s+/g,"-");
-
-
-    return `
-        <span class="badge ${escapeAttribute(normalized)}">
-            ${escapeHTML(status)}
-        </span>
-    `;
-}
-
-
-function formatDate(
-    value
-){
-
-    if(!value){
-        return "—";
-    }
-
-
-    const date =
-        new Date(value);
-
-
-    if(
-        Number.isNaN(
-            date.getTime()
-        )
-    ){
-
-        return escapeHTML(
-            String(value)
+    const output =
+        document.getElementById(
+            "diagnosticOutput"
         );
+
+
+    const results = [];
+
+
+    results.push(
+        "CrowRules Admin v1.2 diagnostics"
+    );
+
+    results.push(
+        "--------------------------------"
+    );
+
+
+    results.push(
+        `Project: ${SUPABASE_CONFIG.url}`
+    );
+
+
+    results.push(
+        "Publishable key: configured"
+    );
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .getUser();
+
+
+        if (
+            error ||
+            !data?.user
+        ) {
+
+            results.push(
+                "Authentication: FAILED"
+            );
+
+            document.getElementById(
+                "authStatus"
+            ).value =
+                "Not authenticated";
+
+        }
+
+        else {
+
+            results.push(
+                `Authentication: OK (${data.user.email})`
+            );
+
+            document.getElementById(
+                "authStatus"
+            ).value =
+                "Authenticated";
+
+        }
+
+    }
+
+    catch(error) {
+
+        results.push(
+            `Authentication: ERROR — ${error.message}`
+        );
+
     }
 
 
-    return escapeHTML(
-        date.toLocaleString()
+    if (currentAuth) {
+
+        results.push(
+            `Profile: OK`
+        );
+
+        results.push(
+            `Role: ${currentAuth.role}`
+        );
+
+        results.push(
+            `Active: ${currentAuth.profile.is_active}`
+        );
+
+    }
+
+    else {
+
+        results.push(
+            "Profile: Not authorized"
+        );
+
+    }
+
+
+    output.textContent =
+        results.join(
+            "\n"
+        );
+
+}
+
+
+/* =========================================================
+   COLUMN DETECTION
+========================================================= */
+
+async function columnExists(
+    table,
+    column
+) {
+
+    /*
+       Supabase's browser API does not expose a direct
+       information_schema helper through the REST endpoint.
+
+       Cache known results based on an actual select.
+       This prevents us from repeatedly guessing fields.
+    */
+
+    const key =
+        `${table}.${column}`;
+
+
+    if (
+        Object.prototype.hasOwnProperty.call(
+            schemaCache,
+            key
+        )
+    ) {
+
+        return schemaCache[key];
+
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from(table)
+                .select(
+                    column
+                )
+                .limit(
+                    1
+                );
+
+
+        const exists =
+            !error ||
+            !String(
+                error.message
+            )
+            .toLowerCase()
+            .includes(
+                "does not exist"
+            );
+
+
+        schemaCache[key] =
+            exists;
+
+
+        return exists;
+
+    }
+
+    catch {
+
+        schemaCache[key] =
+            false;
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   ERROR HANDLING
+========================================================= */
+
+function databaseErrorHTML(
+    error,
+    table
+) {
+
+    const message =
+        String(
+            error?.message ||
+            "Unknown database error."
+        );
+
+
+    let explanation =
+        "";
+
+
+    const lower =
+        message.toLowerCase();
+
+
+    if (
+        lower.includes(
+            "row-level security"
+        )
+    ) {
+
+        explanation =
+            `
+            <br><br>
+            <strong>
+                RLS blocked this operation.
+            </strong>
+            <br>
+            Verify that your public.profiles role is
+            owner, super_admin, or admin and that
+            is_active is true.
+            `;
+
+    }
+
+
+    if (
+        lower.includes(
+            "schema cache"
+        )
+    ) {
+
+        explanation =
+            `
+            <br><br>
+            <strong>
+                Schema mismatch.
+            </strong>
+            <br>
+            Admin v1.2 avoids optional episode
+            columns where possible.
+            `;
+
+    }
+
+
+    return `
+
+        <div class="emptyState">
+
+            Unable to load
+            ${escapeHTML(table)}.
+
+            <br><br>
+
+            ${escapeHTML(
+                message
+            )}
+
+            ${explanation}
+
+        </div>
+
+    `;
+
+}
+
+
+function databaseFriendlyError(
+    error
+) {
+
+    const message =
+        String(
+            error?.message ||
+            "Database operation failed."
+        );
+
+
+    const lower =
+        message.toLowerCase();
+
+
+    if (
+        lower.includes(
+            "row-level security"
+        )
+    ) {
+
+        return (
+            "Supabase RLS blocked this operation. " +
+            "Your authenticated role may not have permission."
+        );
+
+    }
+
+
+    if (
+        lower.includes(
+            "schema cache"
+        )
+    ) {
+
+        return (
+            "The database schema does not contain one of the fields being used."
+        );
+
+    }
+
+
+    return message;
+
+}
+
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function value(
+    id
+) {
+
+    return (
+        document
+            .getElementById(id)
+            ?.value
+            ?.trim() ||
+        ""
     );
+
+}
+
+
+function numberValue(
+    id
+) {
+
+    const raw =
+        value(id);
+
+
+    if (!raw) {
+
+        return null;
+
+    }
+
+
+    const number =
+        Number(raw);
+
+
+    return Number.isFinite(
+        number
+    )
+        ? number
+        : null;
+
 }
 
 
 function slugify(
     text
-){
+) {
 
-    return text
+    return String(
+        text || ""
+    )
         .toLowerCase()
         .trim()
         .replace(
@@ -4464,12 +5643,126 @@ function slugify(
             /^-+|-+$/g,
             ""
         );
+
+}
+
+
+function formatRole(
+    role
+) {
+
+    if (!role) {
+
+        return "Unknown";
+
+    }
+
+
+    return String(
+        role
+    )
+        .replace(
+            /_/g,
+            " "
+        )
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
+
+}
+
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return escapeHTML(
+            String(value)
+        );
+
+    }
+
+
+    return escapeHTML(
+        date.toLocaleString()
+    );
+
+}
+
+
+function linkHTML(
+    url,
+    text
+) {
+
+    if (!url) {
+
+        return "—";
+
+    }
+
+
+    return `
+
+        <a
+            href="${escapeAttribute(
+                url
+            )}"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="color:#a78bfa"
+        >
+            ${escapeHTML(
+                text
+            )}
+        </a>
+
+    `;
+
+}
+
+
+function emptyHTML(
+    message
+) {
+
+    return `
+
+        <div class="emptyState">
+            ${escapeHTML(
+                message
+            )}
+        </div>
+
+    `;
+
 }
 
 
 function escapeHTML(
     value
-){
+) {
 
     return String(
         value ?? ""
@@ -4494,28 +5787,49 @@ function escapeHTML(
             /'/g,
             "&#039;"
         );
+
 }
 
 
 function escapeAttribute(
     value
-){
+) {
 
-    return escapeHTML(value);
+    return escapeHTML(
+        value
+    );
+
 }
 
 
 /* =========================================================
-   INITIALIZE
+   INITIALIZATION
 ========================================================= */
 
-document.getElementById(
-    "projectUrl"
-).value =
-    SUPABASE_CONFIG.url;
+(async function init() {
+
+    const initialized =
+        initializeSupabase();
 
 
-checkSession();
+    if (!initialized) {
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "projectUrl"
+    ).value =
+        SUPABASE_CONFIG.url;
+
+
+    await setupAuthListener();
+
+    await checkSession();
+
+})();
 
 </script>
 
