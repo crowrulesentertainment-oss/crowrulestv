@@ -3,2919 +3,716 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>CrowRules Admin Dashboard</title>
 
-<meta
-    name="description"
-    content="CrowRules Entertainment administration dashboard."
->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
-    rel="stylesheet"
->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-
-/* =========================================================
-   RESET
-========================================================= */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    background: #070709;
-    color: #f5f5f5;
-    font-family: "Montserrat", sans-serif;
-    min-height: 100vh;
-}
-
-button,
-input,
-select,
-textarea {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
-}
-
-/* =========================================================
-   VARIABLES
-========================================================= */
-
-:root {
-    --bg: #070709;
-    --panel: #101014;
-    --panel2: #15151b;
-    --panel3: #1b1b22;
-    --line: #292932;
-    --text: #ffffff;
-    --muted: #a7a7b2;
-
-    --red: #ff1648;
-    --red2: #b8002f;
-
-    --purple: #8c2cff;
-    --blue: #3478ff;
-    --green: #25e57a;
-    --yellow: #ffd43b;
-    --orange: #ff8a30;
-
-    --sidebar: 260px;
-}
-
-/* =========================================================
-   AUTH SCREEN
-========================================================= */
-
-#authScreen {
-    min-height: 100vh;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 25px;
-
-    background:
-        radial-gradient(
-            circle at 50% 30%,
-            rgba(255,22,72,.12),
-            transparent 35%
-        ),
-        #070709;
-}
-
-.auth-box {
-    width: 100%;
-    max-width: 430px;
-
-    padding: 40px;
-
-    background: var(--panel);
-
-    border: 1px solid var(--line);
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 30px 100px rgba(0,0,0,.55);
-}
-
-.auth-logo {
-    text-align: center;
-
-    font-family: "Orbitron", sans-serif;
-    font-size: 25px;
-    font-weight: 900;
-
-    margin-bottom: 8px;
-}
-
-.auth-logo span {
-    color: var(--red);
-}
-
-.auth-subtitle {
-    text-align: center;
-
-    color: var(--muted);
-
-    font-size: 12px;
-
-    margin-bottom: 30px;
-}
-
-.form-group {
-    margin-bottom: 17px;
-}
-
-.form-group label {
-    display: block;
-
-    color: #cfcfd6;
-
-    font-size: 11px;
-    font-weight: 800;
-
-    margin-bottom: 7px;
-}
-
-input,
-select,
-textarea {
-    width: 100%;
-
-    background: #09090c;
-
-    color: white;
-
-    border: 1px solid #33333d;
-
-    border-radius: 5px;
-
-    padding: 12px 13px;
-
-    outline: none;
-
-    transition: .2s;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: var(--red);
-
-    box-shadow:
-        0 0 0 3px rgba(255,22,72,.08);
-}
-
-textarea {
-    min-height: 110px;
-    resize: vertical;
-}
-
-.auth-button {
-    width: 100%;
-
-    border: 0;
-
-    padding: 14px;
-
-    border-radius: 5px;
-
-    background: var(--red);
-
-    color: white;
-
-    font-weight: 900;
-
-    margin-top: 8px;
-}
-
-.auth-button:hover {
-    background: #ff3b65;
-}
-
-.auth-message {
-    min-height: 20px;
-
-    margin-top: 15px;
-
-    text-align: center;
-
-    font-size: 12px;
-
-    color: var(--red);
-}
-
-/* =========================================================
-   APP
-========================================================= */
-
-#app {
-    display: none;
-}
-
-.app-layout {
-    min-height: 100vh;
-
-    display: grid;
-
-    grid-template-columns: var(--sidebar) 1fr;
-}
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
-.sidebar {
-    position: fixed;
-
-    top: 0;
-    left: 0;
-    bottom: 0;
-
-    width: var(--sidebar);
-
-    padding: 22px 15px;
-
-    background: #0a0a0d;
-
-    border-right: 1px solid var(--line);
-
-    overflow-y: auto;
-
-    z-index: 100;
-}
-
-.brand {
-    padding: 5px 12px 25px;
-
-    font-family: "Orbitron", sans-serif;
-
-    font-size: 20px;
-
-    font-weight: 900;
-}
-
-.brand span {
-    color: var(--red);
-}
-
-.brand small {
-    display: block;
-
-    margin-top: 7px;
-
-    color: #666672;
-
-    font-family: "Montserrat", sans-serif;
-
-    font-size: 9px;
-
-    letter-spacing: 2px;
-}
-
-.sidebar-section {
-    margin-bottom: 25px;
-}
-
-.sidebar-label {
-    color: #5e5e69;
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 2px;
-
-    padding: 0 12px 8px;
-}
-
-.side-button {
-    width: 100%;
-
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 11px 12px;
-
-    border: 0;
-
-    border-radius: 5px;
-
-    background: transparent;
-
-    color: #aaaab5;
-
-    text-align: left;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    margin-bottom: 3px;
-}
-
-.side-button:hover,
-.side-button.active {
-    background: rgba(255,22,72,.1);
-
-    color: white;
-}
-
-.side-button.active {
-    border-left: 3px solid var(--red);
-
-    padding-left: 9px;
-
-    color: var(--red);
-}
-
-.side-icon {
-    width: 20px;
-
-    text-align: center;
-
-    font-size: 14px;
-}
-
-.sidebar-bottom {
-    padding-top: 20px;
-
-    border-top: 1px solid var(--line);
-}
-
-.user-mini {
-    padding: 12px;
-
-    margin-bottom: 10px;
-
-    background: #0f0f13;
-
-    border: 1px solid var(--line);
-
-    border-radius: 5px;
+:root{
+    --bg:#070709;
+    --panel:#101014;
+    --panel2:#15151b;
+    --line:#292932;
+    --text:#fff;
+    --muted:#9999a5;
+    --red:#ff1648;
+    --green:#25e57a;
+    --yellow:#ffc107;
+    --blue:#388cff;
+    --danger:#ff3155;
 }
-
-.user-mini-name {
-    font-weight: 800;
-
-    font-size: 11px;
-}
-
-.user-mini-role {
-    color: var(--green);
-
-    font-size: 9px;
 
-    margin-top: 4px;
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
-/* =========================================================
-   MAIN
-========================================================= */
-
-.main {
-    grid-column: 2;
-
-    min-width: 0;
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:Montserrat,sans-serif;
 }
-
-.topbar {
-    position: sticky;
-
-    top: 0;
-
-    z-index: 50;
-
-    height: 70px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 30px;
-
-    background: rgba(7,7,9,.92);
 
-    border-bottom: 1px solid var(--line);
-
-    backdrop-filter: blur(15px);
+button,input,textarea,select{
+    font:inherit;
 }
-
-.page-title {
-    font-family: "Orbitron", sans-serif;
 
-    font-size: 19px;
-
-    font-weight: 800;
+button{
+    cursor:pointer;
 }
-
-.topbar-right {
-    display: flex;
 
-    align-items: center;
-
-    gap: 12px;
+header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    background:rgba(7,7,9,.96);
+    border-bottom:1px solid var(--line);
+    backdrop-filter:blur(12px);
 }
-
-.status-pill {
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-
-    padding: 7px 10px;
-
-    background: rgba(37,229,122,.08);
 
-    border: 1px solid rgba(37,229,122,.2);
-
-    border-radius: 20px;
-
-    color: var(--green);
-
-    font-size: 9px;
-
-    font-weight: 900;
+.logo{
+    font-family:Orbitron,sans-serif;
+    font-weight:900;
+    letter-spacing:1px;
 }
 
-.status-dot {
-    width: 7px;
-    height: 7px;
-
-    background: var(--green);
-
-    border-radius: 50%;
+.logo span{
+    color:var(--red);
 }
-
-.logout-button {
-    border: 1px solid var(--line);
-
-    background: var(--panel);
-
-    color: #aaaab5;
 
-    border-radius: 5px;
-
-    padding: 8px 11px;
-
-    font-size: 10px;
-
-    font-weight: 800;
+.admin-badge{
+    color:var(--red);
+    font-size:10px;
+    margin-left:8px;
 }
 
-.logout-button:hover {
-    color: white;
+.layout{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:calc(100vh - 70px);
 }
-
-/* =========================================================
-   CONTENT
-========================================================= */
 
-.content {
-    padding: 30px;
+.sidebar{
+    background:#09090c;
+    border-right:1px solid var(--line);
+    padding:20px 12px;
 }
 
-.view {
-    display: none;
+.sidebar-title{
+    color:#666672;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:2px;
+    margin:15px 12px 8px;
 }
 
-.view.active {
-    display: block;
+.nav-item{
+    width:100%;
+    text-align:left;
+    background:none;
+    border:0;
+    color:#aaaab4;
+    padding:12px;
+    border-radius:5px;
+    margin-bottom:3px;
+    font-weight:700;
+    font-size:12px;
 }
 
-/* =========================================================
-   DASHBOARD CARDS
-========================================================= */
-
-.stats-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fit, minmax(180px, 1fr));
-
-    gap: 15px;
-
-    margin-bottom: 25px;
+.nav-item:hover,
+.nav-item.active{
+    background:#19191f;
+    color:white;
 }
-
-.stat-card {
-    padding: 20px;
 
-    background: var(--panel);
-
-    border: 1px solid var(--line);
-
-    border-radius: 7px;
+.nav-item.active{
+    border-left:3px solid var(--red);
 }
-
-.stat-label {
-    color: var(--muted);
-
-    font-size: 10px;
 
-    font-weight: 800;
-
-    text-transform: uppercase;
-
-    letter-spacing: 1px;
+main{
+    padding:30px;
+    max-width:1600px;
+    width:100%;
+    margin:auto;
 }
-
-.stat-number {
-    font-family: "Orbitron", sans-serif;
-
-    font-size: 30px;
-
-    font-weight: 900;
 
-    margin-top: 10px;
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:25px;
 }
 
-.stat-card.red .stat-number {
-    color: var(--red);
+h1{
+    font-family:Orbitron,sans-serif;
+    font-size:28px;
 }
 
-.stat-card.green .stat-number {
-    color: var(--green);
+.subtitle{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:6px;
 }
 
-.stat-card.purple .stat-number {
-    color: var(--purple);
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
 }
 
-.stat-card.blue .stat-number {
-    color: var(--blue);
+.stat{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:20px;
+    border-radius:7px;
 }
 
-.stat-card.yellow .stat-number {
-    color: var(--yellow);
+.stat-label{
+    color:var(--muted);
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:1px;
 }
 
-/* =========================================================
-   PANELS
-========================================================= */
-
-.panel {
-    background: var(--panel);
-
-    border: 1px solid var(--line);
-
-    border-radius: 7px;
-
-    overflow: hidden;
-
-    margin-bottom: 20px;
+.stat-value{
+    font-family:Orbitron,sans-serif;
+    font-size:25px;
+    margin-top:8px;
 }
-
-.panel-header {
-    padding: 18px 20px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
 
-    gap: 15px;
-
-    border-bottom: 1px solid var(--line);
+.toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:15px;
 }
-
-.panel-header h2 {
-    font-family: "Orbitron", sans-serif;
 
-    font-size: 15px;
+.search{
+    flex:1;
+    min-width:220px;
+    background:#0d0d11;
+    border:1px solid var(--line);
+    color:white;
+    padding:12px;
+    border-radius:5px;
 }
 
-.panel-header p {
-    color: var(--muted);
-
-    font-size: 10px;
-
-    margin-top: 4px;
+.btn{
+    border:0;
+    border-radius:5px;
+    padding:11px 16px;
+    font-size:11px;
+    font-weight:800;
 }
 
-.panel-body {
-    padding: 20px;
+.btn-primary{
+    background:var(--red);
+    color:white;
 }
-
-/* =========================================================
-   QUICK ACTIONS
-========================================================= */
 
-.quick-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fit, minmax(200px, 1fr));
-
-    gap: 12px;
+.btn-primary:hover{
+    background:#ff3764;
 }
-
-.quick-button {
-    padding: 18px;
-
-    background: #0c0c10;
-
-    border: 1px solid var(--line);
 
-    color: white;
-
-    border-radius: 6px;
-
-    text-align: left;
-
-    transition: .2s;
+.btn-secondary{
+    background:#24242b;
+    color:white;
+    border:1px solid #393943;
 }
-
-.quick-button:hover {
-    border-color: var(--red);
 
-    transform: translateY(-2px);
+.btn-danger{
+    background:#3a1018;
+    color:#ff5a78;
+    border:1px solid #651525;
 }
 
-.quick-button strong {
-    display: block;
-
-    font-size: 12px;
-
-    margin-bottom: 5px;
+.btn-edit{
+    background:#182b45;
+    color:#6daeff;
 }
 
-.quick-button span {
-    color: var(--muted);
-
-    font-size: 10px;
+.table-wrap{
+    overflow:auto;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:7px;
 }
-
-/* =========================================================
-   TABLES
-========================================================= */
-
-.table-wrap {
-    width: 100%;
 
-    overflow-x: auto;
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:800px;
 }
 
-table {
-    width: 100%;
-
-    border-collapse: collapse;
-
-    min-width: 650px;
+th{
+    text-align:left;
+    color:#888893;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    padding:14px;
+    background:#0d0d11;
+    border-bottom:1px solid var(--line);
 }
-
-th {
-    color: #777782;
-
-    font-size: 9px;
 
-    text-align: left;
-
-    text-transform: uppercase;
-
-    letter-spacing: 1px;
-
-    padding: 12px 15px;
-
-    border-bottom: 1px solid var(--line);
+td{
+    padding:14px;
+    border-bottom:1px solid #202027;
+    font-size:12px;
 }
-
-td {
-    padding: 13px 15px;
 
-    font-size: 11px;
-
-    border-bottom: 1px solid #1c1c22;
-
-    color: #dddde4;
+tr:hover td{
+    background:#141419;
 }
 
-tr:last-child td {
-    border-bottom: 0;
+.actions{
+    display:flex;
+    gap:6px;
 }
 
-tr:hover td {
-    background: rgba(255,255,255,.015);
+.action-btn{
+    border:0;
+    border-radius:4px;
+    padding:7px 9px;
+    font-size:10px;
+    font-weight:800;
 }
-
-.badge {
-    display: inline-block;
-
-    padding: 4px 7px;
 
-    border-radius: 3px;
-
-    font-size: 8px;
-
-    font-weight: 900;
-
-    text-transform: uppercase;
+.badge{
+    display:inline-block;
+    padding:4px 7px;
+    border-radius:3px;
+    font-size:9px;
+    font-weight:800;
 }
 
-.badge.green {
-    color: var(--green);
-
-    background: rgba(37,229,122,.1);
+.badge-green{
+    background:#0d3020;
+    color:var(--green);
 }
-
-.badge.red {
-    color: var(--red);
 
-    background: rgba(255,22,72,.1);
+.badge-red{
+    background:#35101a;
+    color:#ff5575;
 }
 
-.badge.yellow {
-    color: var(--yellow);
-
-    background: rgba(255,212,59,.1);
+.badge-yellow{
+    background:#352d0c;
+    color:var(--yellow);
 }
-
-.badge.blue {
-    color: var(--blue);
 
-    background: rgba(52,120,255,.1);
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(0,0,0,.75);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
 }
 
-.badge.purple {
-    color: #c49bff;
-
-    background: rgba(140,44,255,.1);
+.modal.open{
+    display:flex;
 }
-
-.action-button {
-    border: 1px solid var(--line);
-
-    background: #0d0d11;
 
-    color: #ccc;
-
-    border-radius: 4px;
-
-    padding: 6px 8px;
-
-    font-size: 9px;
-
-    font-weight: 800;
+.modal-box{
+    width:min(700px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:#101014;
+    border:1px solid #393943;
+    border-radius:8px;
+    padding:25px;
+    box-shadow:0 30px 100px #000;
 }
-
-.action-button:hover {
-    color: white;
 
-    border-color: #555560;
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:20px;
 }
 
-.action-button.danger:hover {
-    border-color: var(--red);
-
-    color: var(--red);
+.modal-header h2{
+    font-family:Orbitron,sans-serif;
+    font-size:19px;
 }
-
-/* =========================================================
-   FORMS
-========================================================= */
-
-.form-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
 
-    gap: 15px;
+.close{
+    background:none;
+    border:0;
+    color:#aaa;
+    font-size:22px;
 }
 
-.form-grid .full {
-    grid-column: 1 / -1;
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
 }
 
-.form-actions {
-    display: flex;
-
-    gap: 10px;
-
-    margin-top: 20px;
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
 }
-
-.primary-button {
-    background: var(--red);
-
-    color: white;
-
-    border: 0;
 
-    border-radius: 5px;
-
-    padding: 11px 17px;
-
-    font-size: 10px;
-
-    font-weight: 900;
+.field.full{
+    grid-column:1/-1;
 }
 
-.primary-button:hover {
-    background: #ff3b65;
+.field label{
+    font-size:10px;
+    color:#9999a5;
+    text-transform:uppercase;
+    font-weight:800;
 }
-
-.secondary-button {
-    background: #202027;
-
-    color: white;
-
-    border: 1px solid #373741;
-
-    border-radius: 5px;
-
-    padding: 11px 17px;
-
-    font-size: 10px;
 
-    font-weight: 800;
+.field input,
+.field textarea,
+.field select{
+    width:100%;
+    background:#09090c;
+    border:1px solid #303039;
+    color:white;
+    padding:11px;
+    border-radius:5px;
+    outline:none;
 }
 
-/* =========================================================
-   SECTION HEADER
-========================================================= */
-
-.section-heading {
-    margin-bottom: 22px;
+.field textarea{
+    min-height:110px;
+    resize:vertical;
 }
-
-.section-heading h1 {
-    font-family: "Orbitron", sans-serif;
 
-    font-size: 25px;
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+    border-color:var(--red);
 }
-
-.section-heading p {
-    color: var(--muted);
-
-    font-size: 12px;
 
-    margin-top: 7px;
+.modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:20px;
 }
-
-/* =========================================================
-   ALERTS
-========================================================= */
-
-.alert {
-    padding: 12px 15px;
-
-    border-radius: 5px;
-
-    margin-bottom: 15px;
-
-    font-size: 11px;
 
-    display: none;
+.toast{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    z-index:2000;
+    background:#17171d;
+    border:1px solid #393943;
+    padding:14px 18px;
+    border-radius:5px;
+    font-size:12px;
+    display:none;
 }
 
-.alert.show {
-    display: block;
+.toast.show{
+    display:block;
 }
 
-.alert.success {
-    color: var(--green);
-
-    background: rgba(37,229,122,.08);
-
-    border: 1px solid rgba(37,229,122,.2);
+.toast.success{
+    border-color:#1f9f60;
 }
 
-.alert.error {
-    color: var(--red);
-
-    background: rgba(255,22,72,.08);
-
-    border: 1px solid rgba(255,22,72,.2);
+.toast.error{
+    border-color:#b51c3c;
 }
-
-/* =========================================================
-   LOADING
-========================================================= */
 
-.loading {
-    color: var(--muted);
-
-    text-align: center;
-
-    padding: 30px;
-
-    font-size: 11px;
+.empty{
+    text-align:center;
+    padding:50px;
+    color:var(--muted);
 }
 
-/* =========================================================
-   MOBILE
-========================================================= */
-
-.mobile-menu {
-    display: none;
+.loading{
+    text-align:center;
+    padding:40px;
+    color:var(--muted);
 }
-
-@media(max-width: 900px) {
 
-    :root {
-        --sidebar: 0px;
+@media(max-width:900px){
+    .layout{
+        grid-template-columns:1fr;
     }
 
-    .sidebar {
-        transform: translateX(-270px);
-
-        transition: .25s;
-
-        width: 260px;
+    .sidebar{
+        display:flex;
+        overflow:auto;
+        border-right:0;
+        border-bottom:1px solid var(--line);
     }
 
-    .sidebar.open {
-        transform: translateX(0);
+    .sidebar-title{
+        display:none;
     }
 
-    .main {
-        grid-column: 1;
+    .nav-item{
+        min-width:max-content;
     }
 
-    .mobile-menu {
-        display: block;
-
-        border: 0;
-
-        background: transparent;
-
-        color: white;
-
-        font-size: 22px;
-
-        margin-right: 12px;
-    }
-
-    .topbar {
-        padding: 0 18px;
-    }
-
-    .content {
-        padding: 20px 15px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-grid .full {
-        grid-column: auto;
+    .stats{
+        grid-template-columns:1fr 1fr;
     }
 }
 
-@media(max-width: 600px) {
-
-    .topbar-right .status-pill {
-        display: none;
+@media(max-width:600px){
+    main{
+        padding:18px;
     }
 
-    .page-title {
-        font-size: 14px;
+    .stats{
+        grid-template-columns:1fr;
     }
 
-    .stats-grid {
-        grid-template-columns: 1fr 1fr;
+    .form-grid{
+        grid-template-columns:1fr;
     }
 
-    .stat-number {
-        font-size: 24px;
-    }
-
-    .panel-header {
-        align-items: flex-start;
-        flex-direction: column;
+    .field.full{
+        grid-column:auto;
     }
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- =========================================================
-     AUTH
-========================================================= -->
+<header>
+    <div class="logo">
+        CROW<span>RULES</span>
+        <span class="admin-badge">ADMIN</span>
+    </div>
 
-<div id="authScreen">
+    <button class="btn btn-secondary" onclick="signOut()">
+        SIGN OUT
+    </button>
+</header>
 
-    <div class="auth-box">
+<div class="layout">
 
-        <div class="auth-logo">
-            CROW<span>RULES</span>
+<aside class="sidebar">
+
+    <div class="sidebar-title">SPECTRUM AWARDS</div>
+
+    <button class="nav-item active"
+            data-table="spectrum_awards_seasons">
+        Awards Seasons
+    </button>
+
+    <button class="nav-item"
+            data-table="spectrum_awards_categories">
+        Categories
+    </button>
+
+    <button class="nav-item"
+            data-table="spectrum_awards_nominees">
+        Nominees
+    </button>
+
+    <button class="nav-item"
+            data-table="spectrum_awards_winners">
+        Winners
+    </button>
+
+    <div class="sidebar-title">CROWRULES TV</div>
+
+    <button class="nav-item" data-table="shows">
+        Shows
+    </button>
+
+    <button class="nav-item" data-table="episodes">
+        Episodes
+    </button>
+
+    <button class="nav-item" data-table="live_events">
+        Live Events
+    </button>
+
+    <button class="nav-item" data-table="schedule_items">
+        Schedule
+    </button>
+
+    <button class="nav-item" data-table="content_categories">
+        Content Categories
+    </button>
+
+    <button class="nav-item" data-table="content_items">
+        On Demand
+    </button>
+
+    <div class="sidebar-title">CROWRULES RECORDS</div>
+
+    <button class="nav-item" data-table="records_artists">
+        Artists
+    </button>
+
+    <button class="nav-item" data-table="records_releases">
+        Releases
+    </button>
+
+    <button class="nav-item" data-table="records_tracks">
+        Tracks
+    </button>
+
+    <button class="nav-item" data-table="records_playlists">
+        Playlists
+    </button>
+
+    <button class="nav-item" data-table="records_submissions">
+        Submissions
+    </button>
+
+    <div class="sidebar-title">MEMBERS</div>
+
+    <button class="nav-item" data-table="memberships">
+        Membership Plans
+    </button>
+
+    <button class="nav-item" data-table="user_memberships">
+        Member Accounts
+    </button>
+
+    <button class="nav-item" data-table="profiles">
+        Profiles
+    </button>
+
+    <div class="sidebar-title">COMMUNITY</div>
+
+    <button class="nav-item" data-table="polls">
+        Polls
+    </button>
+
+    <button class="nav-item" data-table="poll_options">
+        Poll Options
+    </button>
+
+    <button class="nav-item" data-table="newsletter_subscribers">
+        Newsletter
+    </button>
+
+</aside>
+
+<main>
+
+<div class="topbar">
+    <div>
+        <h1 id="pageTitle">Awards Seasons</h1>
+        <div class="subtitle" id="pageSubtitle">
+            Manage Spectrum Awards seasons.
+        </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="openAddModal()">
+        + ADD NEW
+    </button>
+</div>
+
+<div class="stats">
+
+    <div class="stat">
+        <div class="stat-label">Records</div>
+        <div class="stat-value" id="recordCount">0</div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-label">Section</div>
+        <div class="stat-value" id="sectionName">AWARDS</div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-label">Status</div>
+        <div class="stat-value" id="connectionStatus">●</div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-label">Admin</div>
+        <div class="stat-value">ON</div>
+    </div>
+
+</div>
+
+<div class="toolbar">
+
+    <input
+        class="search"
+        id="search"
+        placeholder="Search records..."
+        oninput="renderTable()"
+    >
+
+    <button class="btn btn-secondary"
+            onclick="loadData()">
+        ↻ REFRESH
+    </button>
+
+</div>
+
+<div class="table-wrap">
+
+    <div id="tableContainer"
+         class="loading">
+        Loading...
+    </div>
+
+</div>
+
+</main>
+</div>
+
+
+<!-- MODAL -->
+
+<div class="modal" id="recordModal">
+
+<div class="modal-box">
+
+    <div class="modal-header">
+
+        <h2 id="modalTitle">
+            Add Record
+        </h2>
+
+        <button class="close"
+                onclick="closeModal()">
+            ×
+        </button>
+
+    </div>
+
+    <form id="recordForm">
+
+        <div class="form-grid"
+             id="formFields">
         </div>
 
-        <div class="auth-subtitle">
-            ENTERTAINMENT ADMINISTRATION
-        </div>
+        <div class="modal-footer">
 
-        <form id="loginForm">
-
-            <div class="form-group">
-
-                <label>Email</label>
-
-                <input
-                    id="loginEmail"
-                    type="email"
-                    autocomplete="email"
-                    required
-                >
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Password</label>
-
-                <input
-                    id="loginPassword"
-                    type="password"
-                    autocomplete="current-password"
-                    required
-                >
-
-            </div>
-
-            <button
-                class="auth-button"
-                type="submit"
-            >
-                SIGN IN
+            <button type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal()">
+                CANCEL
             </button>
 
-            <div
-                id="authMessage"
-                class="auth-message"
-            ></div>
+            <button type="submit"
+                    class="btn btn-primary">
+                SAVE
+            </button>
 
-        </form>
+        </div>
 
-    </div>
+    </form>
 
+</div>
 </div>
 
 
-<!-- =========================================================
-     APP
-========================================================= -->
-
-<div id="app">
-
-    <div class="app-layout">
-
-        <!-- SIDEBAR -->
-
-        <aside
-            class="sidebar"
-            id="sidebar"
-        >
-
-            <div class="brand">
-
-                CROW<span>RULES</span>
-
-                <small>
-                    ADMIN CONTROL CENTER
-                </small>
-
-            </div>
-
-
-            <div class="sidebar-section">
-
-                <div class="sidebar-label">
-                    CONTROL
-                </div>
-
-                <button
-                    class="side-button active"
-                    data-view="dashboard"
-                >
-                    <span class="side-icon">▦</span>
-                    Dashboard
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="live"
-                >
-                    <span class="side-icon">●</span>
-                    Live TV
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="schedule"
-                >
-                    <span class="side-icon">◷</span>
-                    Schedule
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="shows"
-                >
-                    <span class="side-icon">▶</span>
-                    Shows
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="episodes"
-                >
-                    <span class="side-icon">▤</span>
-                    Episodes
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="content"
-                >
-                    <span class="side-icon">▣</span>
-                    Content
-                </button>
-
-            </div>
-
-
-            <div class="sidebar-section">
-
-                <div class="sidebar-label">
-                    CROWRULES RECORDS
-                </div>
-
-                <button
-                    class="side-button"
-                    data-view="artists"
-                >
-                    <span class="side-icon">♬</span>
-                    Artists
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="releases"
-                >
-                    <span class="side-icon">◉</span>
-                    Releases
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="tracks"
-                >
-                    <span class="side-icon">♪</span>
-                    Tracks
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="submissions"
-                >
-                    <span class="side-icon">↑</span>
-                    Submissions
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="playlists"
-                >
-                    <span class="side-icon">≡</span>
-                    Playlists
-                </button>
-
-            </div>
-
-
-            <div class="sidebar-section">
-
-                <div class="sidebar-label">
-                    SPECTRUM AWARDS
-                </div>
-
-                <button
-                    class="side-button"
-                    data-view="awards"
-                >
-                    <span class="side-icon">★</span>
-                    Awards
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="categories"
-                >
-                    <span class="side-icon">◇</span>
-                    Categories
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="nominees"
-                >
-                    <span class="side-icon">◆</span>
-                    Nominees
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="votes"
-                >
-                    <span class="side-icon">✓</span>
-                    Votes
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="winners"
-                >
-                    <span class="side-icon">♛</span>
-                    Winners
-                </button>
-
-            </div>
-
-
-            <div class="sidebar-section">
-
-                <div class="sidebar-label">
-                    COMMUNITY
-                </div>
-
-                <button
-                    class="side-button"
-                    data-view="members"
-                >
-                    <span class="side-icon">♟</span>
-                    Members
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="profiles"
-                >
-                    <span class="side-icon">◎</span>
-                    Profiles
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="channels"
-                >
-                    <span class="side-icon">▰</span>
-                    Creator Channels
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="polls"
-                >
-                    <span class="side-icon">?</span>
-                    Polls
-                </button>
-
-                <button
-                    class="side-button"
-                    data-view="newsletter"
-                >
-                    <span class="side-icon">✉</span>
-                    Newsletter
-                </button>
-
-            </div>
-
-
-            <div class="sidebar-section">
-
-                <div class="sidebar-label">
-                    SYSTEM
-                </div>
-
-                <button
-                    class="side-button"
-                    data-view="settings"
-                >
-                    <span class="side-icon">⚙</span>
-                    Site Settings
-                </button>
-
-            </div>
-
-
-            <div class="sidebar-bottom">
-
-                <div class="user-mini">
-
-                    <div
-                        class="user-mini-name"
-                        id="adminName"
-                    >
-                        Administrator
-                    </div>
-
-                    <div class="user-mini-role">
-                        ADMINISTRATOR
-                    </div>
-
-                </div>
-
-                <button
-                    class="side-button"
-                    id="sideLogout"
-                >
-                    <span class="side-icon">↪</span>
-                    Sign Out
-                </button>
-
-            </div>
-
-        </aside>
-
-
-        <!-- MAIN -->
-
-        <main class="main">
-
-            <div class="topbar">
-
-                <div style="display:flex;align-items:center;">
-
-                    <button
-                        class="mobile-menu"
-                        id="mobileMenu"
-                    >
-                        ☰
-                    </button>
-
-                    <div
-                        class="page-title"
-                        id="pageTitle"
-                    >
-                        DASHBOARD
-                    </div>
-
-                </div>
-
-                <div class="topbar-right">
-
-                    <div class="status-pill">
-
-                        <span class="status-dot"></span>
-
-                        SUPABASE CONNECTED
-
-                    </div>
-
-                    <button
-                        class="logout-button"
-                        id="topLogout"
-                    >
-                        SIGN OUT
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="content">
-
-                <div
-                    id="globalAlert"
-                    class="alert"
-                ></div>
-
-
-                <!-- =================================================
-                     DASHBOARD
-                ================================================== -->
-
-                <section
-                    class="view active"
-                    id="view-dashboard"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            ADMIN DASHBOARD
-                        </h1>
-
-                        <p>
-                            CrowRules Entertainment control center.
-                        </p>
-
-                    </div>
-
-
-                    <div class="stats-grid">
-
-                        <div class="stat-card red">
-
-                            <div class="stat-label">
-                                Shows
-                            </div>
-
-                            <div
-                                class="stat-number"
-                                id="statShows"
-                            >
-                                —
-                            </div>
-
-                        </div>
-
-
-                        <div class="stat-card green">
-
-                            <div class="stat-label">
-                                Live Events
-                            </div>
-
-                            <div
-                                class="stat-number"
-                                id="statLive"
-                            >
-                                —
-                            </div>
-
-                        </div>
-
-
-                        <div class="stat-card purple">
-
-                            <div class="stat-label">
-                                Artists
-                            </div>
-
-                            <div
-                                class="stat-number"
-                                id="statArtists"
-                            >
-                                —
-                            </div>
-
-                        </div>
-
-
-                        <div class="stat-card blue">
-
-                            <div class="stat-label">
-                                Releases
-                            </div>
-
-                            <div
-                                class="stat-number"
-                                id="statReleases"
-                            >
-                                —
-                            </div>
-
-                        </div>
-
-
-                        <div class="stat-card yellow">
-
-                            <div class="stat-label">
-                                Music Submissions
-                            </div>
-
-                            <div
-                                class="stat-number"
-                                id="statSubmissions"
-                            >
-                                —
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <h2>
-                                    QUICK ACTIONS
-                                </h2>
-
-                                <p>
-                                    Manage the major CrowRules systems.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="panel-body">
-
-                            <div class="quick-grid">
-
-                                <button
-                                    class="quick-button"
-                                    onclick="openView('live')"
-                                >
-                                    <strong>
-                                        ▶ Manage Live TV
-                                    </strong>
-
-                                    <span>
-                                        Create and manage live events.
-                                    </span>
-
-                                </button>
-
-
-                                <button
-                                    class="quick-button"
-                                    onclick="openView('schedule')"
-                                >
-                                    <strong>
-                                        ◷ Manage Schedule
-                                    </strong>
-
-                                    <span>
-                                        Control CrowRules programming.
-                                    </span>
-
-                                </button>
-
-
-                                <button
-                                    class="quick-button"
-                                    onclick="openView('submissions')"
-                                >
-                                    <strong>
-                                        ↑ Review Music
-                                    </strong>
-
-                                    <span>
-                                        Review artist and music submissions.
-                                    </span>
-
-                                </button>
-
-
-                                <button
-                                    class="quick-button"
-                                    onclick="openView('awards')"
-                                >
-                                    <strong>
-                                        ★ Spectrum Awards
-                                    </strong>
-
-                                    <span>
-                                        Manage the 2030 awards system.
-                                    </span>
-
-                                </button>
-
-
-                                <button
-                                    class="quick-button"
-                                    onclick="openView('shows')"
-                                >
-                                    <strong>
-                                        ▶ Manage Shows
-                                    </strong>
-
-                                    <span>
-                                        Edit CrowRules TV programming.
-                                    </span>
-
-                                </button>
-
-
-                                <button
-                                    class="quick-button"
-                                    onclick="openView('settings')"
-                                >
-                                    <strong>
-                                        ⚙ Site Settings
-                                    </strong>
-
-                                    <span>
-                                        Manage global website settings.
-                                    </span>
-
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <h2>
-                                    RECENT MUSIC SUBMISSIONS
-                                </h2>
-
-                                <p>
-                                    Latest CrowRules Records submissions.
-                                </p>
-
-                            </div>
-
-                            <button
-                                class="action-button"
-                                onclick="openView('submissions')"
-                            >
-                                VIEW ALL
-                            </button>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="recentSubmissions"
-                        >
-                            <div class="loading">
-                                Loading...
-                            </div>
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     LIVE TV
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-live"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            LIVE TV
-                        </h1>
-
-                        <p>
-                            Manage CrowRules TV live events.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <h2>
-                                    CREATE LIVE EVENT
-                                </h2>
-
-                                <p>
-                                    Add a YouTube, Twitch or Kick event.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="panel-body">
-
-                            <form id="liveForm">
-
-                                <div class="form-grid">
-
-                                    <div>
-
-                                        <label>
-                                            Title
-                                        </label>
-
-                                        <input
-                                            name="title"
-                                            required
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Status
-                                        </label>
-
-                                        <select name="status">
-
-                                            <option value="scheduled">
-                                                Scheduled
-                                            </option>
-
-                                            <option value="live">
-                                                Live
-                                            </option>
-
-                                            <option value="ended">
-                                                Ended
-                                            </option>
-
-                                        </select>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Scheduled Start
-                                        </label>
-
-                                        <input
-                                            name="scheduled_start"
-                                            type="datetime-local"
-                                            required
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Scheduled End
-                                        </label>
-
-                                        <input
-                                            name="scheduled_end"
-                                            type="datetime-local"
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            YouTube Video ID
-                                        </label>
-
-                                        <input
-                                            name="youtube_video_id"
-                                            placeholder="Example: dQw4w9WgXcQ"
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            YouTube URL
-                                        </label>
-
-                                        <input
-                                            name="youtube_url"
-                                            type="url"
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Twitch URL
-                                        </label>
-
-                                        <input
-                                            name="twitch_url"
-                                            type="url"
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Kick URL
-                                        </label>
-
-                                        <input
-                                            name="kick_url"
-                                            type="url"
-                                        >
-
-                                    </div>
-
-
-                                    <div class="full">
-
-                                        <label>
-                                            Description
-                                        </label>
-
-                                        <textarea
-                                            name="description"
-                                        ></textarea>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="form-actions">
-
-                                    <button
-                                        class="primary-button"
-                                        type="submit"
-                                    >
-                                        CREATE EVENT
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                LIVE EVENTS
-                            </h2>
-
-                            <button
-                                class="action-button"
-                                onclick="loadLiveEvents()"
-                            >
-                                REFRESH
-                            </button>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="liveTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     SCHEDULE
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-schedule"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            SCHEDULE
-                        </h1>
-
-                        <p>
-                            Manage CrowRules TV programming.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                PROGRAM SCHEDULE
-                            </h2>
-
-                            <button
-                                class="action-button"
-                                onclick="loadSchedule()"
-                            >
-                                REFRESH
-                            </button>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="scheduleTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     SHOWS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-shows"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            SHOWS
-                        </h1>
-
-                        <p>
-                            Manage CrowRules TV original programming.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                ADD SHOW
-                            </h2>
-
-                        </div>
-
-                        <div class="panel-body">
-
-                            <form id="showForm">
-
-                                <div class="form-grid">
-
-                                    <div>
-
-                                        <label>
-                                            Title
-                                        </label>
-
-                                        <input
-                                            name="title"
-                                            required
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Slug
-                                        </label>
-
-                                        <input
-                                            name="slug"
-                                            placeholder="tacoma-nights"
-                                            required
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Category
-                                        </label>
-
-                                        <input
-                                            name="category"
-                                            placeholder="Original"
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Status
-                                        </label>
-
-                                        <select name="status">
-
-                                            <option value="active">
-                                                Active
-                                            </option>
-
-                                            <option value="draft">
-                                                Draft
-                                            </option>
-
-                                            <option value="archived">
-                                                Archived
-                                            </option>
-
-                                        </select>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Thumbnail URL
-                                        </label>
-
-                                        <input
-                                            name="thumbnail_url"
-                                            type="url"
-                                        >
-
-                                    </div>
-
-
-                                    <div class="full">
-
-                                        <label>
-                                            Description
-                                        </label>
-
-                                        <textarea
-                                            name="description"
-                                        ></textarea>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="form-actions">
-
-                                    <button
-                                        class="primary-button"
-                                        type="submit"
-                                    >
-                                        ADD SHOW
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                EXISTING SHOWS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="showsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     EPISODES
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-episodes"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            EPISODES
-                        </h1>
-
-                        <p>
-                            Manage individual show episodes.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                EPISODE LIBRARY
-                            </h2>
-
-                            <button
-                                class="action-button"
-                                onclick="loadEpisodes()"
-                            >
-                                REFRESH
-                            </button>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="episodesTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     CONTENT
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-content"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            CONTENT
-                        </h1>
-
-                        <p>
-                            Manage the CrowRules content library.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                CONTENT ITEMS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="contentTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     RECORDS ARTISTS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-artists"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            RECORDS ARTISTS
-                        </h1>
-
-                        <p>
-                            Manage CrowRules Records artists.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                ARTISTS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="artistsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     RECORDS RELEASES
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-releases"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            RECORDS RELEASES
-                        </h1>
-
-                        <p>
-                            Manage albums, EPs and singles.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                RELEASES
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="releasesTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     TRACKS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-tracks"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            TRACKS
-                        </h1>
-
-                        <p>
-                            Manage CrowRules Records tracks.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                TRACK LIBRARY
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="tracksTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     SUBMISSIONS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-submissions"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            MUSIC SUBMISSIONS
-                        </h1>
-
-                        <p>
-                            Review applications and new music sent to CrowRules Records.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <h2>
-                                    SUBMISSIONS
-                                </h2>
-
-                                <p>
-                                    Approve, reject or mark submissions for review.
-                                </p>
-
-                            </div>
-
-                            <button
-                                class="action-button"
-                                onclick="loadSubmissions()"
-                            >
-                                REFRESH
-                            </button>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="submissionsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     PLAYLISTS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-playlists"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            PLAYLISTS
-                        </h1>
-
-                        <p>
-                            Manage CrowRules Records playlists.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                PLAYLISTS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="playlistsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     SPECTRUM AWARDS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-awards"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            SPECTRUM AWARDS
-                        </h1>
-
-                        <p>
-                            Manage Spectrum Awards seasons, including the 2030 awards.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                AWARDS SEASONS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="awardsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     CATEGORIES
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-categories"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            AWARD CATEGORIES
-                        </h1>
-
-                        <p>
-                            Sports, television, movies, YouTube, Twitch, Kick, music, writing and more.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                CATEGORIES
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="categoriesTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     NOMINEES
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-nominees"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            NOMINEES
-                        </h1>
-
-                        <p>
-                            Manage Spectrum Awards nominees.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                NOMINEES
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="nomineesTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     VOTES
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-votes"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            AWARDS VOTES
-                        </h1>
-
-                        <p>
-                            Review Spectrum Awards voting activity.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                VOTES
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="votesTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     WINNERS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-winners"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            AWARDS WINNERS
-                        </h1>
-
-                        <p>
-                            Manage and publish Spectrum Awards winners.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                WINNERS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="winnersTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     MEMBERS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-members"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            MEMBERS
-                        </h1>
-
-                        <p>
-                            Manage CrowRules membership subscriptions.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                MEMBERSHIP PLANS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="membersTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     PROFILES
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-profiles"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            PROFILES
-                        </h1>
-
-                        <p>
-                            Manage CrowRules user profiles.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                USER PROFILES
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="profilesTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     CHANNELS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-channels"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            CREATOR CHANNELS
-                        </h1>
-
-                        <p>
-                            Manage independent creator channels.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                CHANNELS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="channelsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     POLLS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-polls"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            POLLS
-                        </h1>
-
-                        <p>
-                            Manage CrowRules community polls.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                POLLS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="pollsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     NEWSLETTER
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-newsletter"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            NEWSLETTER
-                        </h1>
-
-                        <p>
-                            Manage CrowRules newsletter subscribers.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                SUBSCRIBERS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="newsletterTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
-                     SETTINGS
-                ================================================== -->
-
-                <section
-                    class="view"
-                    id="view-settings"
-                >
-
-                    <div class="section-heading">
-
-                        <h1>
-                            SITE SETTINGS
-                        </h1>
-
-                        <p>
-                            Manage global CrowRules website configuration.
-                        </p>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <div class="panel-header">
-
-                            <h2>
-                                SETTINGS
-                            </h2>
-
-                        </div>
-
-                        <div
-                            class="table-wrap"
-                            id="settingsTable"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-            </div>
-
-        </main>
-
-    </div>
-
-</div>
+<div class="toast" id="toast"></div>
 
 
 <script>
 
 /* =========================================================
-   SUPABASE CONFIG
+   SUPABASE
 ========================================================= */
 
 const SUPABASE_URL =
@@ -2924,73 +721,1095 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
     "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
 
-const supabaseClient =
-    window.supabase.createClient(
+const {
+    createClient
+} = supabase;
+
+const db =
+    createClient(
         SUPABASE_URL,
         SUPABASE_KEY
     );
 
 
 /* =========================================================
-   GLOBAL STATE
+   CONFIGURATION
 ========================================================= */
 
-let currentUser = null;
+const configs = {
+
+spectrum_awards_seasons:{
+    title:"Awards Seasons",
+    subtitle:"Manage Spectrum Awards seasons.",
+    columns:[
+        "name",
+        "year",
+        "description",
+        "status",
+        "ceremony_date",
+        "nominations_open_at",
+        "nominations_close_at",
+        "voting_open_at",
+        "voting_close_at",
+        "published"
+    ]
+},
+
+spectrum_awards_categories:{
+    title:"Award Categories",
+    subtitle:"Add, edit and delete Spectrum Awards categories.",
+    columns:[
+        "season_id",
+        "name",
+        "slug",
+        "description",
+        "sort_order",
+        "award_group",
+        "voting_enabled",
+        "published"
+    ]
+},
+
+spectrum_awards_nominees:{
+    title:"Award Nominees",
+    subtitle:"Manage Spectrum Awards nominees.",
+    columns:[
+        "category_id",
+        "nominee_name",
+        "nominee_type",
+        "description",
+        "image_url",
+        "website_url",
+        "youtube_url",
+        "published",
+        "winner",
+        "sort_order"
+    ]
+},
+
+spectrum_awards_winners:{
+    title:"Award Winners",
+    subtitle:"Manage Spectrum Awards winners.",
+    columns:[
+        "category_id",
+        "nominee_id",
+        "announced_at",
+        "published"
+    ]
+},
+
+shows:{
+    title:"Shows",
+    subtitle:"Manage CrowRules TV shows.",
+    columns:[
+        "title",
+        "slug",
+        "description",
+        "thumbnail_url",
+        "category",
+        "status"
+    ]
+},
+
+episodes:{
+    title:"Episodes",
+    subtitle:"Manage CrowRules TV episodes.",
+    columns:[
+        "show_id",
+        "episode_number",
+        "season_number",
+        "title",
+        "description",
+        "youtube_url",
+        "thumbnail_url",
+        "published_at",
+        "duration_seconds",
+        "status",
+        "featured",
+        "premiere_at"
+    ]
+},
+
+live_events:{
+    title:"Live Events",
+    subtitle:"Manage CrowRules live programming.",
+    columns:[
+        "show_id",
+        "title",
+        "description",
+        "youtube_url",
+        "youtube_video_id",
+        "twitch_url",
+        "kick_url",
+        "scheduled_start",
+        "scheduled_end",
+        "status",
+        "is_featured"
+    ]
+},
+
+schedule_items:{
+    title:"Schedule",
+    subtitle:"Manage CrowRules TV programming.",
+    columns:[
+        "show_id",
+        "episode_id",
+        "title",
+        "description",
+        "starts_at",
+        "ends_at",
+        "item_type",
+        "status"
+    ]
+},
+
+content_categories:{
+    title:"Content Categories",
+    subtitle:"Manage On Demand categories.",
+    columns:[
+        "name",
+        "slug",
+        "description"
+    ]
+},
+
+content_items:{
+    title:"On Demand",
+    subtitle:"Manage CrowRules On Demand content.",
+    columns:[
+        "show_id",
+        "category_id",
+        "title",
+        "slug",
+        "description",
+        "content_type",
+        "video_url",
+        "audio_url",
+        "thumbnail_url",
+        "access_level",
+        "status",
+        "published_at"
+    ]
+},
+
+records_artists:{
+    title:"Artists",
+    subtitle:"Manage CrowRules Records artists.",
+    columns:[
+        "name",
+        "slug",
+        "bio",
+        "image_url",
+        "website_url",
+        "social_links",
+        "published"
+    ]
+},
+
+records_releases:{
+    title:"Releases",
+    subtitle:"Manage albums, EPs and singles.",
+    columns:[
+        "title",
+        "slug",
+        "release_type",
+        "artist_id",
+        "description",
+        "cover_url",
+        "release_date",
+        "genre",
+        "label_name",
+        "spotify_url",
+        "apple_music_url",
+        "youtube_url",
+        "soundcloud_url",
+        "published"
+    ]
+},
+
+records_tracks:{
+    title:"Tracks",
+    subtitle:"Manage CrowRules Records tracks.",
+    columns:[
+        "release_id",
+        "title",
+        "track_number",
+        "duration_seconds",
+        "audio_url",
+        "youtube_url",
+        "published"
+    ]
+},
+
+records_playlists:{
+    title:"Playlists",
+    subtitle:"Manage CrowRules Records playlists.",
+    columns:[
+        "name",
+        "slug",
+        "description",
+        "image_url",
+        "published"
+    ]
+},
+
+records_submissions:{
+    title:"Music Submissions",
+    subtitle:"Review artist applications and music submissions.",
+    columns:[
+        "submission_type",
+        "artist_name",
+        "legal_name",
+        "email",
+        "phone",
+        "genre",
+        "bio",
+        "track_title",
+        "music_url",
+        "youtube_url",
+        "spotify_url",
+        "soundcloud_url",
+        "website_url",
+        "notes",
+        "rights_confirmed",
+        "status"
+    ]
+},
+
+memberships:{
+    title:"Membership Plans",
+    subtitle:"Manage CrowRules membership plans.",
+    columns:[
+        "name",
+        "slug",
+        "description",
+        "price_cents",
+        "billing_interval",
+        "active"
+    ]
+},
+
+user_memberships:{
+    title:"Member Accounts",
+    subtitle:"Manage member subscriptions.",
+    columns:[
+        "user_id",
+        "membership_id",
+        "status",
+        "started_at",
+        "expires_at"
+    ]
+},
+
+profiles:{
+    title:"Profiles",
+    subtitle:"Manage user profiles and roles.",
+    columns:[
+        "display_name",
+        "avatar_url",
+        "role",
+        "email",
+        "is_active"
+    ]
+},
+
+polls:{
+    title:"Polls",
+    subtitle:"Manage community polls.",
+    columns:[
+        "question",
+        "status",
+        "starts_at",
+        "ends_at"
+    ]
+},
+
+poll_options:{
+    title:"Poll Options",
+    subtitle:"Manage poll answers.",
+    columns:[
+        "poll_id",
+        "option_text",
+        "sort_order"
+    ]
+},
+
+newsletter_subscribers:{
+    title:"Newsletter",
+    subtitle:"Manage newsletter subscribers.",
+    columns:[
+        "email",
+        "status"
+    ]
+}
+
+};
 
 
 /* =========================================================
-   DOM HELPERS
+   STATE
 ========================================================= */
 
-const $ = id =>
-    document.getElementById(id);
+let currentTable =
+    "spectrum_awards_seasons";
+
+let records = [];
+
+let editingId = null;
 
 
-function escapeHTML(value) {
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
+document
+.querySelectorAll(".nav-item")
+.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            document
+            .querySelectorAll(".nav-item")
+            .forEach(item =>
+                item.classList.remove("active")
+            );
+
+            button.classList.add("active");
+
+            currentTable =
+                button.dataset.table;
+
+            const config =
+                configs[currentTable];
+
+            document.getElementById(
+                "pageTitle"
+            ).textContent =
+                config.title;
+
+            document.getElementById(
+                "pageSubtitle"
+            ).textContent =
+                config.subtitle;
+
+            loadData();
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   LOAD
+========================================================= */
+
+async function loadData(){
+
+    const container =
+        document.getElementById(
+            "tableContainer"
+        );
+
+    container.innerHTML =
+        `<div class="loading">Loading...</div>`;
+
+    const {
+        data,
+        error
+    } =
+        await db
+        .from(currentTable)
+        .select("*")
+        .order("created_at",{ascending:false});
+
+    if(error){
+
+        console.error(error);
+
+        container.innerHTML =
+            `<div class="empty">
+                Unable to load this section.<br><br>
+                ${escapeHTML(error.message)}
+            </div>`;
+
+        showToast(
+            "Database error",
+            true
+        );
+
+        return;
     }
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    records = data || [];
 
+    document.getElementById(
+        "recordCount"
+    ).textContent =
+        records.length;
+
+    document.getElementById(
+        "connectionStatus"
+    ).textContent =
+        "●";
+
+    renderTable();
 }
 
 
 /* =========================================================
-   ALERT
+   RENDER
 ========================================================= */
 
-function showAlert(
-    message,
-    type = "success"
-) {
+function renderTable(){
 
-    const alert =
-        $("globalAlert");
-
-    alert.textContent =
-        message;
-
-    alert.className =
-        "alert show " + type;
-
-    setTimeout(() => {
-
-        alert.classList.remove(
-            "show"
+    const container =
+        document.getElementById(
+            "tableContainer"
         );
 
-    }, 4500);
+    const search =
+        document.getElementById(
+            "search"
+        ).value
+        .toLowerCase();
 
+    const config =
+        configs[currentTable];
+
+    const filtered =
+        records.filter(record =>
+            JSON.stringify(record)
+            .toLowerCase()
+            .includes(search)
+        );
+
+    if(!filtered.length){
+
+        container.innerHTML =
+            `<div class="empty">
+                No records found.
+            </div>`;
+
+        return;
+    }
+
+    let html = "<table><thead><tr>";
+
+    config.columns
+    .slice(0,5)
+    .forEach(column => {
+
+        html +=
+            `<th>${formatLabel(column)}</th>`;
+
+    });
+
+    html += "<th>ACTIONS</th></tr></thead><tbody>";
+
+    filtered.forEach(record => {
+
+        html += "<tr>";
+
+        config.columns
+        .slice(0,5)
+        .forEach(column => {
+
+            html +=
+                `<td>${formatValue(
+                    record[column]
+                )}</td>`;
+
+        });
+
+        html += `
+            <td>
+                <div class="actions">
+
+                    <button
+                        class="action-btn btn-edit"
+                        onclick="editRecord('${record.id}')">
+                        EDIT
+                    </button>
+
+                    <button
+                        class="action-btn btn-danger"
+                        onclick="deleteRecord('${record.id}')">
+                        DELETE
+                    </button>
+
+                </div>
+            </td>
+        `;
+
+        html += "</tr>";
+
+    });
+
+    html += "</tbody></table>";
+
+    container.innerHTML = html;
+}
+
+
+/* =========================================================
+   ADD
+========================================================= */
+
+function openAddModal(){
+
+    editingId = null;
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent =
+        "Add " +
+        configs[currentTable].title;
+
+    buildForm({});
+
+    document.getElementById(
+        "recordModal"
+    ).classList.add("open");
+}
+
+
+/* =========================================================
+   EDIT
+========================================================= */
+
+function editRecord(id){
+
+    const record =
+        records.find(
+            item => item.id === id
+        );
+
+    if(!record) return;
+
+    editingId = id;
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent =
+        "Edit " +
+        configs[currentTable].title;
+
+    buildForm(record);
+
+    document.getElementById(
+        "recordModal"
+    ).classList.add("open");
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+function buildForm(record){
+
+    const container =
+        document.getElementById(
+            "formFields"
+        );
+
+    container.innerHTML = "";
+
+    configs[currentTable]
+    .columns
+    .forEach(column => {
+
+        const value =
+            record[column] ?? "";
+
+        const field =
+            document.createElement(
+                "div"
+            );
+
+        field.className =
+            "field";
+
+        if(
+            column === "description" ||
+            column === "bio" ||
+            column === "notes" ||
+            column === "social_links"
+        ){
+            field.classList.add("full");
+        }
+
+        const label =
+            document.createElement(
+                "label"
+            );
+
+        label.textContent =
+            formatLabel(column);
+
+        field.appendChild(label);
+
+        let input;
+
+        if(
+            column === "description" ||
+            column === "bio" ||
+            column === "notes"
+        ){
+
+            input =
+                document.createElement(
+                    "textarea"
+                );
+
+            input.value = value;
+
+        }
+        else if(
+            column === "published" ||
+            column === "active" ||
+            column === "featured" ||
+            column === "winner" ||
+            column === "voting_enabled" ||
+            column === "rights_confirmed" ||
+            column === "is_featured" ||
+            column === "is_active"
+        ){
+
+            input =
+                document.createElement(
+                    "select"
+                );
+
+            input.innerHTML = `
+                <option value="true"
+                    ${value === true ? "selected":""}>
+                    TRUE
+                </option>
+
+                <option value="false"
+                    ${value === false ? "selected":""}>
+                    FALSE
+                </option>
+            `;
+
+        }
+        else if(
+            column.includes("_at") ||
+            column === "release_date"
+        ){
+
+            input =
+                document.createElement(
+                    "input"
+                );
+
+            input.type =
+                column === "release_date"
+                ? "date"
+                : "datetime-local";
+
+            if(value){
+
+                input.value =
+                    column === "release_date"
+                    ? value
+                    : new Date(value)
+                    .toISOString()
+                    .slice(0,16);
+
+            }
+
+        }
+        else if(
+            column === "price_cents" ||
+            column === "year" ||
+            column === "sort_order" ||
+            column === "episode_number" ||
+            column === "season_number" ||
+            column === "season" ||
+            column === "track_number" ||
+            column === "duration_seconds"
+        ){
+
+            input =
+                document.createElement(
+                    "input"
+                );
+
+            input.type =
+                "number";
+
+            input.value =
+                value;
+
+        }
+        else{
+
+            input =
+                document.createElement(
+                    "input"
+                );
+
+            input.type =
+                "text";
+
+            if(
+                column === "social_links"
+            ){
+
+                input.value =
+                    typeof value === "object"
+                    ? JSON.stringify(value)
+                    : value;
+
+            }
+            else{
+
+                input.value =
+                    value;
+
+            }
+
+        }
+
+        input.name =
+            column;
+
+        field.appendChild(input);
+
+        container.appendChild(field);
+
+    });
+}
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+document
+.getElementById("recordForm")
+.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        const formData =
+            new FormData(event.target);
+
+        const payload = {};
+
+        configs[currentTable]
+        .columns
+        .forEach(column => {
+
+            let value =
+                formData.get(column);
+
+            if(value === ""){
+                value = null;
+            }
+
+            if([
+                "published",
+                "active",
+                "featured",
+                "winner",
+                "voting_enabled",
+                "rights_confirmed",
+                "is_featured",
+                "is_active"
+            ].includes(column)){
+
+                value =
+                    value === "true";
+
+            }
+
+            if([
+                "year",
+                "sort_order",
+                "episode_number",
+                "season_number",
+                "season",
+                "track_number",
+                "duration_seconds",
+                "price_cents"
+            ].includes(column)){
+
+                value =
+                    value === null
+                    ? null
+                    : Number(value);
+
+            }
+
+            if(column === "social_links"){
+
+                try{
+                    value =
+                        value
+                        ? JSON.parse(value)
+                        : {};
+                }
+                catch{
+                    showToast(
+                        "Invalid social links JSON",
+                        true
+                    );
+                    return;
+                }
+
+            }
+
+            if(
+                column.includes("_at") &&
+                value
+            ){
+
+                value =
+                    new Date(value)
+                    .toISOString();
+
+            }
+
+            payload[column] =
+                value;
+
+        });
+
+        let result;
+
+        if(editingId){
+
+            result =
+                await db
+                .from(currentTable)
+                .update(payload)
+                .eq("id",editingId);
+
+        }
+        else{
+
+            result =
+                await db
+                .from(currentTable)
+                .insert(payload);
+
+        }
+
+        if(result.error){
+
+            console.error(
+                result.error
+            );
+
+            showToast(
+                result.error.message,
+                true
+            );
+
+            return;
+        }
+
+        closeModal();
+
+        showToast(
+            editingId
+            ? "Record updated."
+            : "Record added."
+        );
+
+        await loadData();
+
+    }
+);
+
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+async function deleteRecord(id){
+
+    const record =
+        records.find(
+            item => item.id === id
+        );
+
+    if(!record) return;
+
+    const name =
+        record.name ||
+        record.title ||
+        record.nominee_name ||
+        record.artist_name ||
+        record.question ||
+        "this record";
+
+    if(
+        !confirm(
+            `Delete ${name}?\n\nThis cannot be undone.`
+        )
+    ){
+        return;
+    }
+
+    const {
+        error
+    } =
+        await db
+        .from(currentTable)
+        .delete()
+        .eq("id",id);
+
+    if(error){
+
+        console.error(error);
+
+        showToast(
+            "Delete failed: " +
+            error.message,
+            true
+        );
+
+        return;
+    }
+
+    showToast(
+        "Record deleted."
+    );
+
+    await loadData();
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function closeModal(){
+
+    document
+    .getElementById("recordModal")
+    .classList.remove("open");
+
+    document
+    .getElementById("recordForm")
+    .reset();
+
+    editingId = null;
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function formatLabel(value){
+
+    return value
+        .replaceAll("_"," ")
+        .replace(/\b\w/g,
+            char => char.toUpperCase()
+        );
+}
+
+
+function formatValue(value){
+
+    if(value === null ||
+       value === undefined){
+
+        return "—";
+    }
+
+    if(typeof value === "boolean"){
+
+        return value
+            ? `<span class="badge badge-green">YES</span>`
+            : `<span class="badge badge-red">NO</span>`;
+    }
+
+    if(typeof value === "object"){
+
+        return escapeHTML(
+            JSON.stringify(value)
+        );
+    }
+
+    const stringValue =
+        String(value);
+
+    if(
+        stringValue === "published" ||
+        stringValue === "active" ||
+        stringValue === "accepted"
+    ){
+
+        return `
+            <span class="badge badge-green">
+                ${escapeHTML(stringValue)}
+            </span>
+        `;
+    }
+
+    return escapeHTML(
+        stringValue.length > 90
+        ? stringValue.slice(0,90)+"..."
+        : stringValue
+    );
+}
+
+
+function escapeHTML(value){
+
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(
+    message,
+    error=false
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+    toast.textContent =
+        message;
+
+    toast.className =
+        "toast show " +
+        (error
+            ? "error"
+            : "success"
+        );
+
+    setTimeout(
+        () => {
+            toast.classList.remove(
+                "show"
+            );
+        },
+        3500
+    );
 }
 
 
@@ -2998,2928 +1817,41 @@ function showAlert(
    AUTH
 ========================================================= */
 
-async function login(email, password) {
+async function signOut(){
 
-    $("authMessage").textContent =
-        "Signing in...";
+    await db.auth.signOut();
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-        });
-
-    if (error) {
-
-        $("authMessage").textContent =
-            error.message;
-
-        return false;
-
-    }
-
-    currentUser =
-        data.user;
-
-    const {
-        data: isAdmin,
-        error: adminError
-    } =
-        await supabaseClient.rpc(
-            "is_crowrules_admin"
-        );
-
-    if (
-        adminError ||
-        !isAdmin
-    ) {
-
-        await supabaseClient.auth.signOut();
-
-        $("authMessage").textContent =
-            "This account does not have CrowRules administrator access.";
-
-        return false;
-
-    }
-
-    await showApp();
-
-    return true;
-
+    window.location.href =
+        "login.html";
 }
-
-
-async function showApp() {
-
-    $("authScreen").style.display =
-        "none";
-
-    $("app").style.display =
-        "block";
-
-    if (currentUser) {
-
-        $("adminName").textContent =
-            currentUser.email || "Administrator";
-
-    }
-
-    await loadDashboard();
-
-}
-
-
-async function logout() {
-
-    await supabaseClient.auth.signOut();
-
-    currentUser = null;
-
-    $("app").style.display =
-        "none";
-
-    $("authScreen").style.display =
-        "flex";
-
-    $("loginPassword").value =
-        "";
-
-}
-
-
-$("loginForm").addEventListener(
-    "submit",
-    async event => {
-
-        event.preventDefault();
-
-        await login(
-            $("loginEmail").value.trim(),
-            $("loginPassword").value
-        );
-
-    }
-);
-
-
-$("sideLogout").addEventListener(
-    "click",
-    logout
-);
-
-
-$("topLogout").addEventListener(
-    "click",
-    logout
-);
 
 
 /* =========================================================
-   SESSION CHECK
+   START
 ========================================================= */
 
-async function checkSession() {
+async function startDashboard(){
 
     const {
-        data
-    } =
-        await supabaseClient.auth.getSession();
-
-    if (!data.session) {
-        return;
-    }
-
-    currentUser =
-        data.session.user;
-
-    const {
-        data: isAdmin
-    } =
-        await supabaseClient.rpc(
-            "is_crowrules_admin"
-        );
-
-    if (isAdmin) {
-
-        await showApp();
-
-    }
-
-}
-
-
-supabaseClient.auth.onAuthStateChange(
-    async (event, session) => {
-
-        if (
-            event === "SIGNED_OUT"
-        ) {
-
-            $("app").style.display =
-                "none";
-
-            $("authScreen").style.display =
-                "flex";
-
+        data:{
+            session
         }
-
-    }
-);
-
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-const viewTitles = {
-
-    dashboard:
-        "DASHBOARD",
-
-    live:
-        "LIVE TV",
-
-    schedule:
-        "SCHEDULE",
-
-    shows:
-        "SHOWS",
-
-    episodes:
-        "EPISODES",
-
-    content:
-        "CONTENT",
-
-    artists:
-        "RECORDS — ARTISTS",
-
-    releases:
-        "RECORDS — RELEASES",
-
-    tracks:
-        "RECORDS — TRACKS",
-
-    submissions:
-        "RECORDS — SUBMISSIONS",
-
-    playlists:
-        "RECORDS — PLAYLISTS",
-
-    awards:
-        "SPECTRUM AWARDS",
-
-    categories:
-        "AWARD CATEGORIES",
-
-    nominees:
-        "AWARD NOMINEES",
-
-    votes:
-        "AWARD VOTES",
-
-    winners:
-        "AWARD WINNERS",
-
-    members:
-        "MEMBERS",
-
-    profiles:
-        "PROFILES",
-
-    channels:
-        "CREATOR CHANNELS",
-
-    polls:
-        "POLLS",
-
-    newsletter:
-        "NEWSLETTER",
-
-    settings:
-        "SITE SETTINGS"
-
-};
-
-
-document
-    .querySelectorAll(".side-button[data-view]")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                openView(
-                    button.dataset.view
-                );
-
-                $("sidebar")
-                    .classList
-                    .remove("open");
-
-            }
-        );
-
-    });
-
-
-function openView(view) {
-
-    document
-        .querySelectorAll(".view")
-        .forEach(item => {
-
-            item.classList.remove(
-                "active"
-            );
-
-        });
-
-
-    const target =
-        $("view-" + view);
-
-    if (!target) return;
-
-    target.classList.add(
-        "active"
-    );
-
-
-    document
-        .querySelectorAll(
-            ".side-button[data-view]"
-        )
-        .forEach(button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.view === view
-            );
-
-        });
-
-
-    $("pageTitle").textContent =
-        viewTitles[view] || view.toUpperCase();
-
-
-    switch(view) {
-
-        case "dashboard":
-            loadDashboard();
-            break;
-
-        case "live":
-            loadLiveEvents();
-            break;
-
-        case "schedule":
-            loadSchedule();
-            break;
-
-        case "shows":
-            loadShows();
-            break;
-
-        case "episodes":
-            loadEpisodes();
-            break;
-
-        case "content":
-            loadContent();
-            break;
-
-        case "artists":
-            loadArtists();
-            break;
-
-        case "releases":
-            loadReleases();
-            break;
-
-        case "tracks":
-            loadTracks();
-            break;
-
-        case "submissions":
-            loadSubmissions();
-            break;
-
-        case "playlists":
-            loadPlaylists();
-            break;
-
-        case "awards":
-            loadAwards();
-            break;
-
-        case "categories":
-            loadCategories();
-            break;
-
-        case "nominees":
-            loadNominees();
-            break;
-
-        case "votes":
-            loadVotes();
-            break;
-
-        case "winners":
-            loadWinners();
-            break;
-
-        case "members":
-            loadMembers();
-            break;
-
-        case "profiles":
-            loadProfiles();
-            break;
-
-        case "channels":
-            loadChannels();
-            break;
-
-        case "polls":
-            loadPolls();
-            break;
-
-        case "newsletter":
-            loadNewsletter();
-            break;
-
-        case "settings":
-            loadSettings();
-            break;
-
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
-$("mobileMenu").addEventListener(
-    "click",
-    () => {
-
-        $("sidebar")
-            .classList
-            .toggle("open");
-
-    }
-);
-
-
-/* =========================================================
-   GENERIC QUERY
-========================================================= */
-
-async function queryTable(
-    table,
-    options = {}
-) {
-
-    let query =
-        supabaseClient
-            .from(table)
-            .select(
-                options.select || "*"
-            );
-
-
-    if (options.order) {
-
-        query =
-            query.order(
-                options.order.column,
-                {
-                    ascending:
-                        options.order.ascending ?? false
-                }
-            );
-
-    }
-
-
-    if (options.limit) {
-
-        query =
-            query.limit(
-                options.limit
-            );
-
-    }
-
-
-    if (options.eq) {
-
-        for (
-            const [column, value]
-            of Object.entries(options.eq)
-        ) {
-
-            query =
-                query.eq(
-                    column,
-                    value
-                );
-
-        }
-
-    }
-
-
-    return await query;
-
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-async function countTable(table) {
-
-    const {
-        count,
-        error
     } =
-        await supabaseClient
-            .from(table)
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            );
+        await db.auth.getSession();
 
-    return error
-        ? 0
-        : (count || 0);
+    if(!session){
 
-}
-
-
-async function loadDashboard() {
-
-    const [
-        shows,
-        live,
-        artists,
-        releases,
-        submissions
-    ] =
-        await Promise.all([
-
-            countTable("shows"),
-
-            countTable("live_events"),
-
-            countTable("records_artists"),
-
-            countTable("records_releases"),
-
-            countTable("records_submissions")
-
-        ]);
-
-
-    $("statShows").textContent =
-        shows;
-
-    $("statLive").textContent =
-        live;
-
-    $("statArtists").textContent =
-        artists;
-
-    $("statReleases").textContent =
-        releases;
-
-    $("statSubmissions").textContent =
-        submissions;
-
-
-    await loadRecentSubmissions();
-
-}
-
-
-async function loadRecentSubmissions() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("records_submissions")
-            .select(`
-                id,
-                artist_name,
-                track_title,
-                submission_type,
-                genre,
-                status,
-                created_at
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(8);
-
-
-    if (error) {
-
-        $("recentSubmissions").innerHTML =
-            `<div class="loading">
-                Unable to load submissions.
-            </div>`;
+        window.location.href =
+            "login.html";
 
         return;
-
     }
 
-
-    $("recentSubmissions").innerHTML =
-        buildSubmissionTable(
-            data || []
-        );
-
+    await loadData();
 }
 
 
-/* =========================================================
-   LIVE EVENTS
-========================================================= */
-
-async function loadLiveEvents() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("live_events")
-            .select(`
-                id,
-                title,
-                status,
-                scheduled_start,
-                scheduled_end,
-                youtube_video_id,
-                twitch_url,
-                kick_url,
-                is_featured
-            `)
-            .order(
-                "scheduled_start",
-                {
-                    ascending: false
-                }
-            )
-            .limit(100);
-
-
-    if (error) {
-
-        $("liveTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("liveTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Start</th>
-                    <th>YouTube</th>
-                    <th>Featured</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(event => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(event.title)}
-                        </td>
-
-                        <td>
-                            ${statusBadge(event.status)}
-                        </td>
-
-                        <td>
-                            ${formatDate(event.scheduled_start)}
-                        </td>
-
-                        <td>
-                            ${
-                                event.youtube_video_id
-                                ? `<span class="badge red">VIDEO</span>`
-                                : "—"
-                            }
-                        </td>
-
-                        <td>
-                            ${
-                                event.is_featured
-                                ? `<span class="badge green">YES</span>`
-                                : "NO"
-                            }
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-$("liveForm").addEventListener(
-    "submit",
-    async event => {
-
-        event.preventDefault();
-
-        const form =
-            new FormData(
-                event.target
-            );
-
-        const row = {
-
-            title:
-                form.get("title"),
-
-            status:
-                form.get("status"),
-
-            scheduled_start:
-                new Date(
-                    form.get("scheduled_start")
-                ).toISOString(),
-
-            scheduled_end:
-                form.get("scheduled_end")
-                    ? new Date(
-                        form.get("scheduled_end")
-                    ).toISOString()
-                    : null,
-
-            youtube_video_id:
-                form.get("youtube_video_id")
-                || null,
-
-            youtube_url:
-                form.get("youtube_url")
-                || null,
-
-            twitch_url:
-                form.get("twitch_url")
-                || null,
-
-            kick_url:
-                form.get("kick_url")
-                || null,
-
-            description:
-                form.get("description")
-                || null
-
-        };
-
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .from("live_events")
-                .insert(row);
-
-
-        if (error) {
-
-            showAlert(
-                error.message,
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        showAlert(
-            "Live event created."
-        );
-
-        event.target.reset();
-
-        loadLiveEvents();
-
-    }
-);
-
-
-/* =========================================================
-   SCHEDULE
-========================================================= */
-
-async function loadSchedule() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("schedule_items")
-            .select(`
-                id,
-                title,
-                item_type,
-                starts_at,
-                ends_at,
-                status,
-                shows (
-                    title
-                )
-            `)
-            .order(
-                "starts_at",
-                {
-                    ascending: true
-                }
-            )
-            .limit(100);
-
-
-    if (error) {
-
-        $("scheduleTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("scheduleTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Title</th>
-                    <th>Type</th>
-                    <th>Show</th>
-                    <th>Start</th>
-                    <th>Status</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.title)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.item_type)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.shows?.title || "—")}
-                        </td>
-
-                        <td>
-                            ${formatDate(item.starts_at)}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   SHOWS
-========================================================= */
-
-async function loadShows() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("shows")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("showsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("showsTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Title</th>
-                    <th>Slug</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(show => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(show.title)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(show.slug)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(show.category || "—")}
-                        </td>
-
-                        <td>
-                            ${statusBadge(show.status)}
-                        </td>
-
-                        <td>
-                            ${formatDate(show.created_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-$("showForm").addEventListener(
-    "submit",
-    async event => {
-
-        event.preventDefault();
-
-        const form =
-            new FormData(
-                event.target
-            );
-
-        const row = {
-
-            title:
-                form.get("title"),
-
-            slug:
-                form.get("slug"),
-
-            category:
-                form.get("category")
-                || null,
-
-            status:
-                form.get("status"),
-
-            thumbnail_url:
-                form.get("thumbnail_url")
-                || null,
-
-            description:
-                form.get("description")
-                || null
-
-        };
-
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .from("shows")
-                .insert(row);
-
-
-        if (error) {
-
-            showAlert(
-                error.message,
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        showAlert(
-            "Show created."
-        );
-
-        event.target.reset();
-
-        loadShows();
-
-    }
-);
-
-
-/* =========================================================
-   EPISODES
-========================================================= */
-
-async function loadEpisodes() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("episodes")
-            .select(`
-                id,
-                title,
-                episode_number,
-                season,
-                status,
-                featured,
-                published_at,
-                shows (
-                    title
-                )
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("episodesTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("episodesTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Episode</th>
-                    <th>Show</th>
-                    <th>Season</th>
-                    <th>Status</th>
-                    <th>Featured</th>
-                    <th>Published</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.title)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.shows?.title || "—")}
-                        </td>
-
-                        <td>
-                            ${item.season ?? "—"}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.featured
-                                ? `<span class="badge green">YES</span>`
-                                : "NO"
-                            }
-                        </td>
-
-                        <td>
-                            ${formatDate(item.published_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
-async function loadContent() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("content_items")
-            .select(`
-                id,
-                title,
-                slug,
-                content_type,
-                status,
-                access_level,
-                published_at,
-                content_categories (
-                    name
-                )
-            `)
-            .order(
-                "updated_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("contentTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("contentTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Title</th>
-                    <th>Type</th>
-                    <th>Category</th>
-                    <th>Access</th>
-                    <th>Status</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.title)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.content_type)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.content_categories?.name || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.access_level)}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   RECORDS
-========================================================= */
-
-async function loadArtists() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("records_artists")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("artistsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("artistsTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Artist</th>
-                    <th>Slug</th>
-                    <th>Published</th>
-                    <th>Website</th>
-                    <th>Created</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.name)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.slug)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">YES</span>`
-                                : `<span class="badge yellow">DRAFT</span>`
-                            }
-                        </td>
-
-                        <td>
-                            ${
-                                item.website_url
-                                ? `<span class="badge blue">LINK</span>`
-                                : "—"
-                            }
-                        </td>
-
-                        <td>
-                            ${formatDate(item.created_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadReleases() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("records_releases")
-            .select(`
-                id,
-                title,
-                release_type,
-                genre,
-                label_name,
-                release_date,
-                published,
-                records_artists (
-                    name
-                )
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("releasesTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("releasesTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Title</th>
-                    <th>Artist</th>
-                    <th>Type</th>
-                    <th>Genre</th>
-                    <th>Label</th>
-                    <th>Published</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.title)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.records_artists?.name || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.release_type)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.genre || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.label_name)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">YES</span>`
-                                : `<span class="badge yellow">DRAFT</span>`
-                            }
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadTracks() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("records_tracks")
-            .select(`
-                id,
-                title,
-                track_number,
-                published,
-                duration_seconds,
-                records_releases (
-                    title
-                )
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("tracksTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("tracksTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Track</th>
-                    <th>Release</th>
-                    <th>#</th>
-                    <th>Duration</th>
-                    <th>Published</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.title)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.records_releases?.title || "—")}
-                        </td>
-
-                        <td>
-                            ${item.track_number}
-                        </td>
-
-                        <td>
-                            ${formatDuration(item.duration_seconds)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">YES</span>`
-                                : `<span class="badge yellow">DRAFT</span>`
-                            }
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   SUBMISSIONS
-========================================================= */
-
-async function loadSubmissions() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("records_submissions")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(200);
-
-
-    if (error) {
-
-        $("submissionsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("submissionsTable").innerHTML =
-        buildSubmissionTable(
-            data || [],
-            true
-        );
-
-}
-
-
-function buildSubmissionTable(
-    data,
-    actions = false
-) {
-
-    return `
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>Artist</th>
-                    <th>Track</th>
-                    <th>Type</th>
-                    <th>Genre</th>
-                    <th>Status</th>
-                    <th>Date</th>
-
-                    ${
-                        actions
-                        ? "<th>Actions</th>"
-                        : ""
-                    }
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${data.map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.artist_name)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.track_title || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.submission_type)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.genre || "—")}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                        <td>
-                            ${formatDate(item.created_at)}
-                        </td>
-
-                        ${
-                            actions
-                            ? `
-
-                                <td>
-
-                                    <button
-                                        class="action-button"
-                                        onclick="updateSubmission('${item.id}','approved')"
-                                    >
-                                        APPROVE
-                                    </button>
-
-                                    <button
-                                        class="action-button"
-                                        onclick="updateSubmission('${item.id}','review')"
-                                    >
-                                        REVIEW
-                                    </button>
-
-                                    <button
-                                        class="action-button danger"
-                                        onclick="updateSubmission('${item.id}','rejected')"
-                                    >
-                                        REJECT
-                                    </button>
-
-                                </td>
-
-                            `
-                            : ""
-                        }
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function updateSubmission(
-    id,
-    status
-) {
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("records_submissions")
-            .update({
-                status
-            })
-            .eq(
-                "id",
-                id
-            );
-
-
-    if (error) {
-
-        showAlert(
-            error.message,
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    showAlert(
-        `Submission marked ${status}.`
-    );
-
-    loadSubmissions();
-
-}
-
-
-/* =========================================================
-   PLAYLISTS
-========================================================= */
-
-async function loadPlaylists() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("records_playlists")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("playlistsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("playlistsTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Name</th>
-                    <th>Slug</th>
-                    <th>Published</th>
-                    <th>Created</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.name)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.slug)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">YES</span>`
-                                : `<span class="badge yellow">DRAFT</span>`
-                            }
-                        </td>
-
-                        <td>
-                            ${formatDate(item.created_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   SPECTRUM AWARDS
-========================================================= */
-
-async function loadAwards() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("spectrum_awards_seasons")
-            .select("*")
-            .order(
-                "year",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("awardsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("awardsTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Year</th>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Published</th>
-                    <th>Ceremony</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${item.year}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.name)}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">YES</span>`
-                                : "NO"
-                            }
-                        </td>
-
-                        <td>
-                            ${formatDate(item.ceremony_date)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadCategories() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("spectrum_awards_categories")
-            .select(`
-                id,
-                name,
-                award_group,
-                slug,
-                sort_order,
-                published,
-                voting_enabled,
-                spectrum_awards_seasons (
-                    year
-                )
-            `)
-            .order(
-                "sort_order",
-                {
-                    ascending: true
-                }
-            );
-
-
-    if (error) {
-
-        $("categoriesTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("categoriesTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Category</th>
-                    <th>Group</th>
-                    <th>Year</th>
-                    <th>Published</th>
-                    <th>Voting</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.name)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.award_group)}
-                        </td>
-
-                        <td>
-                            ${item.spectrum_awards_seasons?.year || "—"}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">YES</span>`
-                                : "NO"
-                            }
-                        </td>
-
-                        <td>
-                            ${
-                                item.voting_enabled
-                                ? `<span class="badge blue">OPEN</span>`
-                                : `<span class="badge yellow">OFF</span>`
-                            }
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadNominees() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("spectrum_awards_nominees")
-            .select(`
-                id,
-                nominee_name,
-                nominee_type,
-                published,
-                winner,
-                spectrum_awards_categories (
-                    name
-                )
-            `)
-            .order(
-                "sort_order",
-                {
-                    ascending: true
-                }
-            );
-
-
-    if (error) {
-
-        $("nomineesTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("nomineesTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Nominee</th>
-                    <th>Category</th>
-                    <th>Type</th>
-                    <th>Published</th>
-                    <th>Winner</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.nominee_name)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.spectrum_awards_categories?.name || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.nominee_type)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">YES</span>`
-                                : "NO"
-                            }
-                        </td>
-
-                        <td>
-                            ${
-                                item.winner
-                                ? `<span class="badge yellow">WINNER</span>`
-                                : "—"
-                            }
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadVotes() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("spectrum_awards_votes")
-            .select(`
-                id,
-                created_at,
-                voter_email,
-                nominee_id,
-                spectrum_awards_nominees (
-                    nominee_name
-                )
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(500);
-
-
-    if (error) {
-
-        $("votesTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("votesTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Nominee</th>
-                    <th>Voter</th>
-                    <th>Date</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.spectrum_awards_nominees?.nominee_name || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.voter_email || "Anonymous")}
-                        </td>
-
-                        <td>
-                            ${formatDate(item.created_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadWinners() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("spectrum_awards_winners")
-            .select(`
-                id,
-                published,
-                announced_at,
-                spectrum_awards_categories (
-                    name
-                ),
-                spectrum_awards_nominees (
-                    nominee_name
-                )
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("winnersTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("winnersTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Category</th>
-                    <th>Winner</th>
-                    <th>Published</th>
-                    <th>Announced</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.spectrum_awards_categories?.name || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.spectrum_awards_nominees?.nominee_name || "—")}
-                        </td>
-
-                        <td>
-                            ${
-                                item.published
-                                ? `<span class="badge green">PUBLISHED</span>`
-                                : `<span class="badge yellow">DRAFT</span>`
-                            }
-                        </td>
-
-                        <td>
-                            ${formatDate(item.announced_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   COMMUNITY
-========================================================= */
-
-async function loadMembers() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("memberships")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("membersTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("membersTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Name</th>
-                    <th>Slug</th>
-                    <th>Price</th>
-                    <th>Interval</th>
-                    <th>Active</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.name)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.slug)}
-                        </td>
-
-                        <td>
-                            $${((item.price_cents || 0) / 100).toFixed(2)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.billing_interval)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.active
-                                ? `<span class="badge green">ACTIVE</span>`
-                                : `<span class="badge red">INACTIVE</span>`
-                            }
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadProfiles() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("profiles")
-            .select(`
-                id,
-                display_name,
-                email,
-                role,
-                is_active,
-                created_at
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(300);
-
-
-    if (error) {
-
-        $("profilesTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("profilesTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Active</th>
-                    <th>Created</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.display_name || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.email || "—")}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.role)}
-                        </td>
-
-                        <td>
-                            ${
-                                item.is_active
-                                ? `<span class="badge green">YES</span>`
-                                : `<span class="badge red">NO</span>`
-                            }
-                        </td>
-
-                        <td>
-                            ${formatDate(item.created_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadChannels() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("creator_channels")
-            .select(`
-                id,
-                name,
-                slug,
-                status,
-                created_at
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("channelsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("channelsTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Name</th>
-                    <th>Slug</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.name)}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(item.slug)}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                        <td>
-                            ${formatDate(item.created_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadPolls() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("polls")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        $("pollsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("pollsTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Question</th>
-                    <th>Status</th>
-                    <th>Starts</th>
-                    <th>Ends</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.question)}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                        <td>
-                            ${formatDate(item.starts_at)}
-                        </td>
-
-                        <td>
-                            ${formatDate(item.ends_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-async function loadNewsletter() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("newsletter_subscribers")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(500);
-
-
-    if (error) {
-
-        $("newsletterTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("newsletterTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Joined</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHTML(item.email)}
-                        </td>
-
-                        <td>
-                            ${statusBadge(item.status)}
-                        </td>
-
-                        <td>
-                            ${formatDate(item.created_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-async function loadSettings() {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("site_settings")
-            .select("*")
-            .order(
-                "key",
-                {
-                    ascending: true
-                }
-            );
-
-
-    if (error) {
-
-        $("settingsTable").innerHTML =
-            errorTable(error);
-
-        return;
-
-    }
-
-
-    $("settingsTable").innerHTML = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Key</th>
-                    <th>Value</th>
-                    <th>Updated</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${(data || []).map(item => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${escapeHTML(item.key)}
-                            </strong>
-                        </td>
-
-                        <td>
-                            <code>
-                                ${escapeHTML(
-                                    JSON.stringify(item.value)
-                                )}
-                            </code>
-                        </td>
-
-                        <td>
-                            ${formatDate(item.updated_at)}
-                        </td>
-
-                    </tr>
-
-                `).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   UTILITIES
-========================================================= */
-
-function statusBadge(status) {
-
-    const value =
-        String(
-            status || "unknown"
-        ).toLowerCase();
-
-
-    let color =
-        "blue";
-
-
-    if (
-        value.includes("live") ||
-        value.includes("active") ||
-        value.includes("published") ||
-        value.includes("approved")
-    ) {
-
-        color =
-            "green";
-
-    }
-
-    else if (
-        value.includes("draft") ||
-        value.includes("pending") ||
-        value.includes("review") ||
-        value.includes("scheduled")
-    ) {
-
-        color =
-            "yellow";
-
-    }
-
-    else if (
-        value.includes("reject") ||
-        value.includes("inactive") ||
-        value.includes("ended") ||
-        value.includes("archived")
-    ) {
-
-        color =
-            "red";
-
-    }
-
-
-    return `
-        <span class="badge ${color}">
-            ${escapeHTML(value)}
-        </span>
-    `;
-
-}
-
-
-function formatDate(value) {
-
-    if (!value) {
-        return "—";
-    }
-
-    const date =
-        new Date(value);
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return escapeHTML(value);
-
-    }
-
-    return date.toLocaleString(
-        undefined,
-        {
-            dateStyle: "medium",
-            timeStyle: "short"
-        }
-    );
-
-}
-
-
-function formatDuration(seconds) {
-
-    if (
-        seconds === null ||
-        seconds === undefined
-    ) {
-
-        return "—";
-
-    }
-
-
-    const minutes =
-        Math.floor(
-            seconds / 60
-        );
-
-    const remaining =
-        seconds % 60;
-
-
-    return (
-        minutes +
-        ":" +
-        String(
-            remaining
-        ).padStart(
-            2,
-            "0"
-        )
-    );
-
-}
-
-
-function errorTable(error) {
-
-    return `
-        <div class="loading">
-            ${escapeHTML(
-                error?.message ||
-                "Unable to load data."
-            )}
-        </div>
-    `;
-
-}
-
-
-/* =========================================================
-   STARTUP
-========================================================= */
-
-checkSession();
+startDashboard();
 
 </script>
 
