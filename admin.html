@@ -4,64 +4,84 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CrowRules Admin v1.1</title>
+<title>CrowRules Entertainment — Admin v1.1</title>
 
-<meta name="theme-color" content="#050509">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta
+    name="description"
+    content="CrowRules Entertainment Administration Dashboard v1.1"
+>
 
 <style>
+
 /* =========================================================
-   CROWRULES ADMIN v1.1
-   SINGLE-FILE ADMIN APPLICATION
+   CROW RULES ENTERTAINMENT
+   ADMIN v1.1
+   COMPLETE SINGLE-FILE APPLICATION
 ========================================================= */
 
 :root {
-    --bg: #050509;
-    --bg2: #090912;
-    --panel: #0d0d18;
-    --panel2: #121221;
-    --border: #25253a;
-    --text: #f4f4f8;
-    --muted: #9292a8;
+    --bg: #07080c;
+    --bg2: #0d1017;
+    --panel: #11151d;
+    --panel2: #151a23;
+    --border: #252c38;
+
+    --text: #f3f5f7;
+    --muted: #8993a3;
+
     --accent: #8b5cf6;
-    --accent2: #a855f7;
+    --accent2: #a78bfa;
+
     --success: #22c55e;
     --warning: #f59e0b;
     --danger: #ef4444;
     --info: #38bdf8;
-    --shadow: 0 15px 50px rgba(0,0,0,.35);
+
+    --radius: 14px;
+    --sidebar-width: 250px;
+
+    --shadow:
+        0 15px 45px rgba(0,0,0,.35);
 }
 
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html,
 body {
-    margin: 0;
-    padding: 0;
     width: 100%;
     min-height: 100%;
+}
+
+body {
     background:
         radial-gradient(
-            circle at top right,
+            circle at 20% 10%,
             rgba(139,92,246,.10),
-            transparent 35%
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 80% 90%,
+            rgba(56,189,248,.06),
+            transparent 30%
         ),
         var(--bg);
+
     color: var(--text);
+
     font-family:
         Inter,
+        ui-sans-serif,
         system-ui,
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
-}
 
-body {
-    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 button,
@@ -80,60 +100,117 @@ button {
 }
 
 /* =========================================================
+   LOADER
+========================================================= */
+
+#bootScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #050609;
+}
+
+.boot-inner {
+    width: min(420px, 90%);
+    text-align: center;
+}
+
+.boot-logo {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 4px;
+
+    color: white;
+
+    text-shadow:
+        0 0 10px rgba(139,92,246,.8),
+        0 0 30px rgba(139,92,246,.4);
+}
+
+.boot-version {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.boot-spinner {
+    width: 42px;
+    height: 42px;
+
+    margin: 30px auto 15px;
+
+    border:
+        3px solid rgba(255,255,255,.10);
+
+    border-top-color: var(--accent);
+
+    border-radius: 50%;
+
+    animation:
+        spin .8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =========================================================
    LOGIN
 ========================================================= */
 
 #loginScreen {
     min-height: 100vh;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     padding: 25px;
 }
 
 .login-card {
     width: min(440px, 100%);
-    background: rgba(13,13,24,.95);
-    border: 1px solid var(--border);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.055),
+            rgba(255,255,255,.015)
+        );
+
+    border:
+        1px solid var(--border);
+
     border-radius: 20px;
-    padding: 35px;
+
+    padding: 38px;
+
     box-shadow: var(--shadow);
-    backdrop-filter: blur(15px);
+
+    backdrop-filter: blur(20px);
 }
 
-.logo {
+.login-brand {
     text-align: center;
     margin-bottom: 30px;
 }
 
-.logo-mark {
-    width: 70px;
-    height: 70px;
-    margin: 0 auto 15px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-        linear-gradient(
-            135deg,
-            var(--accent),
-            #181828
-        );
-    box-shadow:
-        0 0 35px rgba(139,92,246,.3);
-    font-size: 34px;
+.login-brand h1 {
+    font-size: 26px;
+    letter-spacing: 3px;
 }
 
-.logo h1 {
-    margin: 0;
-    font-size: 27px;
-    letter-spacing: 2px;
-}
-
-.logo p {
+.login-brand p {
+    margin-top: 8px;
     color: var(--muted);
-    margin: 8px 0 0;
+    font-size: 13px;
 }
 
 .form-group {
@@ -142,79 +219,148 @@ button {
 
 .form-group label {
     display: block;
-    margin-bottom: 7px;
-    color: #c8c8d8;
+
+    margin-bottom: 8px;
+
     font-size: 13px;
-    font-weight: 700;
+    color: #b7beca;
 }
 
-input,
-textarea,
-select {
+.form-control {
     width: 100%;
-    background: #080810;
+
+    padding: 13px 14px;
+
     color: var(--text);
-    border: 1px solid var(--border);
+
+    background: #080b10;
+
+    border:
+        1px solid var(--border);
+
     border-radius: 10px;
-    padding: 12px 13px;
+
     outline: none;
-    transition: .2s ease;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
+.form-control:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(139,92,246,.12);
+
+    box-shadow:
+        0 0 0 3px rgba(139,92,246,.12);
 }
 
-textarea {
-    min-height: 120px;
-    resize: vertical;
+.password-wrap {
+    position: relative;
 }
 
-.primary-btn {
+.password-wrap .form-control {
+    padding-right: 48px;
+}
+
+.password-toggle {
+    position: absolute;
+
+    right: 12px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border: 0;
+    background: transparent;
+
+    color: var(--muted);
+}
+
+.login-button {
     width: 100%;
+
+    padding: 14px;
+
     border: 0;
     border-radius: 10px;
-    padding: 13px 16px;
-    color: white;
-    font-weight: 800;
+
     background:
         linear-gradient(
             135deg,
             var(--accent),
-            var(--accent2)
+            #6d28d9
         );
-    transition: .2s ease;
+
+    color: white;
+
+    font-weight: 800;
+
+    transition:
+        transform .2s,
+        opacity .2s;
 }
 
-.primary-btn:hover {
+.login-button:hover {
     transform: translateY(-1px);
-    box-shadow:
-        0 8px 25px rgba(139,92,246,.25);
 }
 
-.status-box {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 10px;
-    font-size: 13px;
-    display: none;
+.login-button:disabled {
+    opacity: .55;
+    cursor: wait;
 }
 
-.status-box.error {
-    display: block;
-    background: rgba(239,68,68,.1);
-    border: 1px solid rgba(239,68,68,.3);
+.login-links {
+    margin-top: 18px;
+
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 12px;
+}
+
+.login-links button {
+    background: transparent;
+    border: 0;
+
+    color: var(--accent2);
+}
+
+.auth-error {
+    margin-bottom: 18px;
+
+    padding: 12px 14px;
+
+    border:
+        1px solid rgba(239,68,68,.35);
+
+    background:
+        rgba(239,68,68,.08);
+
     color: #fca5a5;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+
+    line-height: 1.5;
 }
 
-.status-box.success {
-    display: block;
-    background: rgba(34,197,94,.1);
-    border: 1px solid rgba(34,197,94,.3);
+.auth-success {
+    margin-bottom: 18px;
+
+    padding: 12px 14px;
+
+    border:
+        1px solid rgba(34,197,94,.35);
+
+    background:
+        rgba(34,197,94,.08);
+
     color: #86efac;
+
+    border-radius: 10px;
+
+    font-size: 13px;
 }
 
 /* =========================================================
@@ -225,101 +371,192 @@ textarea {
     min-height: 100vh;
 }
 
-.layout {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    min-height: 100vh;
-}
-
 /* =========================================================
    SIDEBAR
 ========================================================= */
 
 .sidebar {
-    position: sticky;
+    position: fixed;
+
     top: 0;
-    height: 100vh;
-    background: rgba(7,7,14,.97);
-    border-right: 1px solid var(--border);
-    padding: 20px 14px;
-    overflow-y: auto;
+    bottom: 0;
+    left: 0;
+
+    width: var(--sidebar-width);
+
+    padding: 22px 15px;
+
+    background:
+        rgba(9,11,16,.96);
+
+    border-right:
+        1px solid var(--border);
+
+    z-index: 100;
 }
 
 .sidebar-brand {
-    padding: 10px 12px 25px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 15px;
+    padding: 8px 10px 25px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    margin-bottom: 20px;
 }
 
 .sidebar-brand strong {
     display: block;
+
     font-size: 17px;
-    letter-spacing: 1px;
+
+    letter-spacing: 2px;
 }
 
 .sidebar-brand span {
     display: block;
-    color: var(--muted);
-    margin-top: 4px;
+
+    margin-top: 5px;
+
     font-size: 11px;
+
+    color: var(--muted);
 }
 
 .nav-section {
-    margin-top: 20px;
+    margin-bottom: 22px;
 }
 
-.nav-section-title {
-    padding: 0 12px 7px;
-    color: #62627a;
+.nav-label {
+    padding:
+        0 10px 8px;
+
     font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 1.5px;
+
     text-transform: uppercase;
+
+    letter-spacing: 1.5px;
+
+    color: #5f6877;
 }
 
-.nav-btn {
+.nav-button {
     width: 100%;
+
     display: flex;
+
     align-items: center;
-    gap: 10px;
-    border: 1px solid transparent;
+
+    gap: 11px;
+
+    padding: 11px 12px;
+
+    margin-bottom: 4px;
+
     background: transparent;
-    color: #a8a8ba;
+
+    border: 1px solid transparent;
+
     border-radius: 9px;
-    padding: 10px 12px;
-    margin-bottom: 3px;
+
+    color: #aeb6c2;
+
     text-align: left;
+
+    transition:
+        background .2s,
+        color .2s,
+        border-color .2s;
 }
 
-.nav-btn:hover {
-    background: #11111d;
+.nav-button:hover {
+    background: rgba(255,255,255,.04);
+
     color: white;
 }
 
-.nav-btn.active {
+.nav-button.active {
     background:
-        linear-gradient(
-            90deg,
-            rgba(139,92,246,.18),
-            transparent
-        );
+        rgba(139,92,246,.13);
+
+    border-color:
+        rgba(139,92,246,.20);
+
     color: white;
-    border-color: rgba(139,92,246,.25);
+}
+
+.nav-icon {
+    width: 20px;
+
+    text-align: center;
+
+    opacity: .9;
 }
 
 .sidebar-bottom {
-    margin-top: 25px;
+    position: absolute;
+
+    left: 15px;
+    right: 15px;
+    bottom: 18px;
+
     padding-top: 15px;
-    border-top: 1px solid var(--border);
+
+    border-top:
+        1px solid var(--border);
 }
 
-.logout-btn {
-    width: 100%;
-    background: rgba(239,68,68,.08);
-    color: #fca5a5;
-    border: 1px solid rgba(239,68,68,.2);
-    border-radius: 9px;
-    padding: 10px;
+.user-mini {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 8px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            #2563eb
+        );
+
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.user-info {
+    min-width: 0;
+}
+
+.user-email {
+    font-size: 11px;
+
+    color: #d5dae2;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    margin-top: 2px;
+
+    font-size: 10px;
+
+    color: var(--muted);
 }
 
 /* =========================================================
@@ -327,52 +564,42 @@ textarea {
 ========================================================= */
 
 .main {
-    min-width: 0;
+    margin-left: var(--sidebar-width);
+
+    min-height: 100vh;
+
+    padding: 25px 28px 50px;
 }
 
 .topbar {
-    height: 70px;
     display: flex;
-    align-items: center;
+
     justify-content: space-between;
-    padding: 0 25px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(5,5,9,.75);
-    backdrop-filter: blur(12px);
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-
-.topbar-left h2 {
-    margin: 0;
-    font-size: 19px;
-}
-
-.topbar-left p {
-    margin: 3px 0 0;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.topbar-right {
-    display: flex;
     align-items: center;
-    gap: 10px;
+
+    gap: 20px;
+
+    margin-bottom: 28px;
 }
 
-.user-chip {
-    border: 1px solid var(--border);
-    background: #0c0c15;
-    padding: 8px 11px;
-    border-radius: 9px;
-    font-size: 12px;
+.page-title h1 {
+    font-size: 25px;
 }
 
-.content {
-    padding: 25px;
-    max-width: 1600px;
-    margin: auto;
+.page-title p {
+    margin-top: 5px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+.topbar-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
 }
 
 /* =========================================================
@@ -381,135 +608,251 @@ textarea {
 
 .btn {
     border: 1px solid var(--border);
-    background: #11111b;
-    color: #ddd;
-    border-radius: 8px;
+
+    background: var(--panel);
+
+    color: var(--text);
+
+    border-radius: 9px;
+
     padding: 9px 13px;
+
     font-size: 12px;
-    font-weight: 700;
+
+    transition:
+        background .2s,
+        border-color .2s,
+        transform .2s;
 }
 
 .btn:hover {
-    border-color: #3c3c59;
-    background: #171724;
+    background: var(--panel2);
+
+    border-color: #384252;
+
+    transform: translateY(-1px);
 }
 
 .btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-}
+    border-color: transparent;
 
-.btn-success {
-    color: #86efac;
-    border-color: rgba(34,197,94,.3);
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            #6d28d9
+        );
 }
 
 .btn-danger {
+    border-color:
+        rgba(239,68,68,.3);
+
     color: #fca5a5;
-    border-color: rgba(239,68,68,.3);
 }
 
-.btn-warning {
-    color: #fcd34d;
-    border-color: rgba(245,158,11,.3);
+.btn-success {
+    border-color:
+        rgba(34,197,94,.3);
+
+    color: #86efac;
+}
+
+.btn-small {
+    padding: 7px 10px;
+    font-size: 11px;
 }
 
 /* =========================================================
-   DASHBOARD
+   CARDS
 ========================================================= */
 
-.page-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    gap: 15px;
-}
-
-.page-title h1 {
-    margin: 0;
-    font-size: 25px;
-}
-
-.page-title p {
-    margin: 5px 0 0;
-    color: var(--muted);
-    font-size: 13px;
-}
-
-.action-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns:
-        repeat(4, minmax(0,1fr));
-    gap: 15px;
-    margin-bottom: 22px;
-}
-
-.stat-card {
+.card {
     background:
         linear-gradient(
             145deg,
-            rgba(18,18,33,.98),
-            rgba(10,10,18,.98)
+            rgba(255,255,255,.045),
+            rgba(255,255,255,.015)
         );
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.12);
+}
+
+.card-header {
+    padding: 18px 20px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.card-header h2 {
+    font-size: 14px;
+}
+
+.card-header p {
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0,1fr));
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    padding: 19px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.045),
+            rgba(255,255,255,.015)
+        );
 }
 
 .stat-label {
-    color: var(--muted);
     font-size: 11px;
+
+    color: var(--muted);
+
     text-transform: uppercase;
+
     letter-spacing: .8px;
 }
 
 .stat-value {
     margin-top: 8px;
-    font-size: 30px;
-    font-weight: 900;
+
+    font-size: 28px;
+
+    font-weight: 800;
 }
 
-.stat-icon {
-    float: right;
-    opacity: .55;
-    font-size: 20px;
+.stat-sub {
+    margin-top: 5px;
+
+    color: #687283;
+
+    font-size: 10px;
 }
 
-.dashboard-grid {
+/* =========================================================
+   GRID
+========================================================= */
+
+.two-column {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 18px;
+
+    grid-template-columns:
+        1.3fr .7fr;
+
+    gap: 20px;
 }
 
-.panel {
-    background: rgba(13,13,24,.96);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
+.three-column {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+    gap: 15px;
 }
 
-.panel-header {
-    padding: 15px 17px;
-    border-bottom: 1px solid var(--border);
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-row {
     display: flex;
-    justify-content: space-between;
+
     align-items: center;
+
+    justify-content: space-between;
+
+    padding: 13px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.05);
 }
 
-.panel-header strong {
-    font-size: 14px;
+.status-row:last-child {
+    border-bottom: 0;
 }
 
-.panel-body {
-    padding: 17px;
+.status-name {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    font-size: 12px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--muted);
+}
+
+.status-dot.online {
+    background: var(--success);
+
+    box-shadow:
+        0 0 10px rgba(34,197,94,.6);
+}
+
+.status-dot.warning {
+    background: var(--warning);
+}
+
+.status-dot.error {
+    background: var(--danger);
+}
+
+.status-text {
+    font-size: 11px;
+
+    color: var(--muted);
 }
 
 /* =========================================================
@@ -517,42 +860,49 @@ textarea {
 ========================================================= */
 
 .table-wrap {
-    width: 100%;
     overflow-x: auto;
 }
 
 table {
     width: 100%;
+
     border-collapse: collapse;
 }
 
 th,
 td {
-    padding: 12px 13px;
-    border-bottom: 1px solid #1c1c2b;
+    padding: 13px 14px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.05);
+
     text-align: left;
-    white-space: nowrap;
+
+    font-size: 12px;
 }
 
 th {
-    color: #77778f;
+    color: #8993a3;
+
     font-size: 10px;
+
     text-transform: uppercase;
+
     letter-spacing: .8px;
 }
 
 td {
-    color: #d7d7e2;
+    color: #d6dae0;
+}
+
+.empty-state {
+    padding: 40px 20px;
+
+    text-align: center;
+
+    color: var(--muted);
+
     font-size: 12px;
-}
-
-tr:hover td {
-    background: rgba(255,255,255,.015);
-}
-
-.actions {
-    display: flex;
-    gap: 5px;
 }
 
 /* =========================================================
@@ -561,130 +911,168 @@ tr:hover td {
 
 .badge {
     display: inline-flex;
+
     align-items: center;
+
     padding: 4px 8px;
-    border-radius: 99px;
+
+    border-radius: 999px;
+
     font-size: 10px;
-    font-weight: 800;
+
+    border: 1px solid var(--border);
 }
 
 .badge-success {
-    background: rgba(34,197,94,.1);
     color: #86efac;
-}
 
-.badge-danger {
-    background: rgba(239,68,68,.1);
-    color: #fca5a5;
+    background:
+        rgba(34,197,94,.08);
+
+    border-color:
+        rgba(34,197,94,.2);
 }
 
 .badge-warning {
-    background: rgba(245,158,11,.1);
     color: #fcd34d;
+
+    background:
+        rgba(245,158,11,.08);
+
+    border-color:
+        rgba(245,158,11,.2);
+}
+
+.badge-danger {
+    color: #fca5a5;
+
+    background:
+        rgba(239,68,68,.08);
+
+    border-color:
+        rgba(239,68,68,.2);
 }
 
 .badge-info {
-    background: rgba(56,189,248,.1);
     color: #7dd3fc;
-}
 
-.badge-purple {
-    background: rgba(139,92,246,.1);
-    color: #c4b5fd;
-}
+    background:
+        rgba(56,189,248,.08);
 
-/* =========================================================
-   TOOLBAR
-========================================================= */
-
-.toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.search-box {
-    max-width: 350px;
-}
-
-.empty {
-    text-align: center;
-    color: var(--muted);
-    padding: 45px 20px;
+    border-color:
+        rgba(56,189,248,.2);
 }
 
 /* =========================================================
-   MODAL
+   SETTINGS
 ========================================================= */
 
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.72);
-    backdrop-filter: blur(7px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 100;
-}
-
-.modal {
-    width: min(700px, 100%);
-    max-height: 90vh;
-    overflow-y: auto;
-    background: #0d0d18;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 30px 100px rgba(0,0,0,.6);
-}
-
-.modal-header {
-    padding: 17px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h3 {
-    margin: 0;
-}
-
-.modal-close {
-    border: 0;
-    background: transparent;
-    color: #88889d;
-    font-size: 22px;
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.modal-footer {
-    padding: 15px 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
-/* =========================================================
-   FORM GRID
-========================================================= */
-
-.form-grid {
+.settings-grid {
     display: grid;
-    grid-template-columns: repeat(2,minmax(0,1fr));
-    gap: 15px;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap: 20px;
 }
 
-.full {
-    grid-column: 1 / -1;
+.setting-item {
+    margin-bottom: 18px;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 11px;
+
+    color: #aeb6c2;
+}
+
+.setting-help {
+    margin-top: 6px;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
+    color: #687283;
+}
+
+.connection-status {
+    padding: 13px;
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,.025);
+
+    border: 1px solid var(--border);
+
+    margin-top: 15px;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+/* =========================================================
+   ACTIVITY
+========================================================= */
+
+.activity-item {
+    display: flex;
+
+    gap: 12px;
+
+    padding: 13px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.05);
+}
+
+.activity-item:last-child {
+    border-bottom: 0;
+}
+
+.activity-icon {
+    width: 30px;
+    height: 30px;
+
+    flex-shrink: 0;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 8px;
+
+    background:
+        rgba(139,92,246,.10);
+
+    color: var(--accent2);
+
+    font-size: 12px;
+}
+
+.activity-content {
+    min-width: 0;
+}
+
+.activity-title {
+    font-size: 11px;
+}
+
+.activity-time {
+    margin-top: 4px;
+
+    color: #687283;
+
+    font-size: 10px;
 }
 
 /* =========================================================
@@ -693,56 +1081,64 @@ tr:hover td {
 
 #toastContainer {
     position: fixed;
+
     right: 20px;
     bottom: 20px;
-    z-index: 200;
+
+    z-index: 99999;
+
     display: flex;
+
     flex-direction: column;
-    gap: 8px;
+
+    gap: 9px;
 }
 
 .toast {
-    min-width: 260px;
-    max-width: 380px;
-    background: #11111c;
-    border: 1px solid var(--border);
+    width: min(380px, calc(100vw - 40px));
+
+    padding: 13px 15px;
+
+    border:
+        1px solid var(--border);
+
     border-radius: 10px;
-    padding: 12px 14px;
+
+    background:
+        rgba(15,18,25,.96);
+
     box-shadow: var(--shadow);
+
     font-size: 12px;
+
+    animation:
+        toastIn .25s ease;
 }
 
 .toast.success {
-    border-color: rgba(34,197,94,.35);
+    border-color:
+        rgba(34,197,94,.35);
 }
 
 .toast.error {
-    border-color: rgba(239,68,68,.35);
+    border-color:
+        rgba(239,68,68,.35);
 }
 
-/* =========================================================
-   LOADING
-========================================================= */
-
-.loading {
-    padding: 45px;
-    text-align: center;
-    color: var(--muted);
+.toast.warning {
+    border-color:
+        rgba(245,158,11,.35);
 }
 
-.spinner {
-    width: 25px;
-    height: 25px;
-    margin: 0 auto 10px;
-    border: 2px solid #29293d;
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin .8s linear infinite;
-}
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 
-@keyframes spin {
     to {
-        transform: rotate(360deg);
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -754,414 +1150,1444 @@ tr:hover td {
     display: none;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1050px) {
 
-    .layout {
+    .stats-grid {
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .two-column {
         grid-template-columns: 1fr;
     }
 
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 750px) {
+
     .sidebar {
-        position: fixed;
-        left: -270px;
-        width: 250px;
-        z-index: 80;
-        transition: .25s ease;
+        transform:
+            translateX(-100%);
+
+        transition:
+            transform .25s ease;
     }
 
     .sidebar.open {
-        left: 0;
+        transform:
+            translateX(0);
+    }
+
+    .main {
+        margin-left: 0;
+
+        padding:
+            18px 15px 35px;
     }
 
     .mobile-menu {
-        display: block;
-        border: 1px solid var(--border);
-        background: #11111b;
-        color: white;
-        border-radius: 8px;
-        padding: 8px 10px;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2,1fr);
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 650px) {
-
-    .content {
-        padding: 15px;
+        display: inline-flex;
     }
 
     .topbar {
-        padding: 0 15px;
+        align-items: flex-start;
+    }
+
+    .topbar-actions {
+        flex-wrap: wrap;
+
+        justify-content: flex-end;
     }
 
     .stats-grid {
         grid-template-columns: 1fr;
     }
 
-    .form-grid {
+    .three-column {
         grid-template-columns: 1fr;
     }
 
-    .full {
-        grid-column: auto;
-    }
-
-    .user-chip {
-        display: none;
-    }
-
-    .page-title {
-        align-items: flex-start;
-        flex-direction: column;
+    .login-card {
+        padding: 27px 22px;
     }
 }
+
 </style>
 </head>
 
 <body>
 
-<!-- =========================================================
-     LOGIN SCREEN
-========================================================= -->
+<!-- =======================================================
+     BOOT SCREEN
+======================================================= -->
 
-<section id="loginScreen">
+<div id="bootScreen">
+
+    <div class="boot-inner">
+
+        <div class="boot-logo">
+            CROW RULES
+        </div>
+
+        <div class="boot-version">
+            ENTERTAINMENT ADMIN v1.1
+        </div>
+
+        <div class="boot-spinner"></div>
+
+        <div
+            id="bootMessage"
+            style="
+                color:#737d8c;
+                font-size:11px;
+            "
+        >
+            Initializing administration system...
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     LOGIN SCREEN
+======================================================= -->
+
+<section id="loginScreen" class="hidden">
 
     <div class="login-card">
 
-        <div class="logo">
+        <div class="login-brand">
 
-            <div class="logo-mark">
-                🐦‍⬛
-            </div>
+            <h1>
+                CROW RULES
+            </h1>
 
-            <h1>CROWRULES ADMIN</h1>
-
-            <p>Entertainment Network Control Center</p>
+            <p>
+                Entertainment Administration
+            </p>
 
         </div>
+
+        <div
+            id="authError"
+            class="auth-error hidden"
+        ></div>
+
+        <div
+            id="authSuccess"
+            class="auth-success hidden"
+        ></div>
+
 
         <form id="loginForm">
 
             <div class="form-group">
 
-                <label>Email</label>
+                <label for="loginEmail">
+                    Email Address
+                </label>
 
                 <input
-                    type="email"
                     id="loginEmail"
-                    autocomplete="email"
+                    class="form-control"
+                    type="email"
+                    autocomplete="username"
+                    placeholder="admin@example.com"
                     required
                 >
 
             </div>
+
 
             <div class="form-group">
 
-                <label>Password</label>
+                <label for="loginPassword">
+                    Password
+                </label>
 
-                <input
-                    type="password"
-                    id="loginPassword"
-                    autocomplete="current-password"
-                    required
-                >
+                <div class="password-wrap">
 
-            </div>
+                    <input
+                        id="loginPassword"
+                        class="form-control"
+                        type="password"
+                        autocomplete="current-password"
+                        placeholder="Enter your password"
+                        required
+                    >
 
-            <button
-                type="submit"
-                class="primary-btn"
-                id="loginButton"
-            >
-                SIGN IN
-            </button>
-
-        </form>
-
-        <div id="loginStatus" class="status-box"></div>
-
-    </div>
-
-</section>
-
-
-<!-- =========================================================
-     APPLICATION
-========================================================= -->
-
-<section id="app" class="hidden">
-
-<div class="layout">
-
-<!-- SIDEBAR -->
-
-<aside class="sidebar" id="sidebar">
-
-    <div class="sidebar-brand">
-
-        <strong>🐦‍⬛ CROWRULES</strong>
-
-        <span>ADMIN v1.1</span>
-
-    </div>
-
-    <div class="nav-section">
-
-        <div class="nav-section-title">
-            Control Center
-        </div>
-
-        <button
-            class="nav-btn active"
-            data-page="dashboard"
-        >
-            📊 Dashboard
-        </button>
-
-    </div>
-
-    <div class="nav-section">
-
-        <div class="nav-section-title">
-            Programming
-        </div>
-
-        <button class="nav-btn" data-page="shows">
-            📺 Shows
-        </button>
-
-        <button class="nav-btn" data-page="episodes">
-            🎬 Episodes
-        </button>
-
-        <button class="nav-btn" data-page="live_events">
-            🔴 Live Events
-        </button>
-
-        <button class="nav-btn" data-page="schedule_items">
-            🗓️ Schedule
-        </button>
-
-    </div>
-
-    <div class="nav-section">
-
-        <div class="nav-section-title">
-            Content
-        </div>
-
-        <button class="nav-btn" data-page="content_items">
-            📁 Content Library
-        </button>
-
-        <button class="nav-btn" data-page="creator_channels">
-            🎙️ Creator Channels
-        </button>
-
-        <button class="nav-btn" data-page="polls">
-            📊 Polls
-        </button>
-
-    </div>
-
-    <div class="nav-section">
-
-        <div class="nav-section-title">
-            Audience
-        </div>
-
-        <button class="nav-btn" data-page="memberships">
-            ⭐ Memberships
-        </button>
-
-        <button class="nav-btn" data-page="newsletter_subscribers">
-            ✉️ Newsletter
-        </button>
-
-        <button class="nav-btn" data-page="profiles">
-            👤 Profiles
-        </button>
-
-    </div>
-
-    <div class="nav-section">
-
-        <div class="nav-section-title">
-            System
-        </div>
-
-        <button class="nav-btn" data-page="site_settings">
-            ⚙️ Site Settings
-        </button>
-
-    </div>
-
-    <div class="sidebar-bottom">
-
-        <button
-            class="logout-btn"
-            id="logoutButton"
-        >
-            🚪 Sign Out
-        </button>
-
-    </div>
-
-</aside>
-
-
-<!-- MAIN -->
-
-<main class="main">
-
-    <header class="topbar">
-
-        <div class="topbar-left">
-
-            <div style="display:flex;gap:10px;align-items:center;">
-
-                <button
-                    class="mobile-menu"
-                    id="mobileMenu"
-                >
-                    ☰
-                </button>
-
-                <div>
-
-                    <h2 id="topbarTitle">
-                        Dashboard
-                    </h2>
-
-                    <p>
-                        CrowRules Entertainment Network
-                    </p>
+                    <button
+                        type="button"
+                        id="togglePassword"
+                        class="password-toggle"
+                        aria-label="Show password"
+                    >
+                        👁
+                    </button>
 
                 </div>
 
             </div>
 
-        </div>
-
-        <div class="topbar-right">
 
             <button
-                class="btn"
-                id="refreshButton"
+                id="loginButton"
+                class="login-button"
+                type="submit"
             >
-                ↻ Refresh
+                Sign In
             </button>
 
-            <div
-                class="user-chip"
-                id="userChip"
-            >
-                Admin
-            </div>
-
-        </div>
-
-    </header>
-
-    <div class="content" id="pageContent"></div>
-
-</main>
-
-</div>
-
-</section>
+        </form>
 
 
-<!-- =========================================================
-     MODAL
-========================================================= -->
-
-<div
-    id="modalOverlay"
-    class="modal-overlay hidden"
->
-
-    <div class="modal">
-
-        <div class="modal-header">
-
-            <h3 id="modalTitle">
-                Edit
-            </h3>
+        <div class="login-links">
 
             <button
-                class="modal-close"
-                id="modalClose"
+                type="button"
+                id="forgotPassword"
             >
-                ×
-            </button>
-
-        </div>
-
-        <div
-            class="modal-body"
-            id="modalBody"
-        ></div>
-
-        <div class="modal-footer">
-
-            <button
-                class="btn"
-                id="modalCancel"
-            >
-                Cancel
+                Forgot password?
             </button>
 
             <button
-                class="btn btn-primary"
-                id="modalSave"
+                type="button"
+                id="testConnectionLogin"
             >
-                Save
+                Test connection
             </button>
 
         </div>
 
     </div>
 
+</section>
+
+
+<!-- =======================================================
+     APPLICATION
+======================================================= -->
+
+<div
+    id="app"
+    class="hidden"
+>
+
+    <!-- SIDEBAR -->
+
+    <aside
+        id="sidebar"
+        class="sidebar"
+    >
+
+        <div class="sidebar-brand">
+
+            <strong>
+                CROW RULES
+            </strong>
+
+            <span>
+                ENTERTAINMENT ADMIN v1.1
+            </span>
+
+        </div>
+
+
+        <div class="nav-section">
+
+            <div class="nav-label">
+                Main
+            </div>
+
+            <button
+                class="nav-button active"
+                data-page="dashboard"
+            >
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="live"
+            >
+                <span class="nav-icon">●</span>
+                Live Events
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="shows"
+            >
+                <span class="nav-icon">▣</span>
+                Shows
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="episodes"
+            >
+                <span class="nav-icon">▶</span>
+                Episodes
+            </button>
+
+        </div>
+
+
+        <div class="nav-section">
+
+            <div class="nav-label">
+                Management
+            </div>
+
+            <button
+                class="nav-button"
+                data-page="members"
+            >
+                <span class="nav-icon">♙</span>
+                Members
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="content"
+            >
+                <span class="nav-icon">✦</span>
+                Website Content
+            </button>
+
+        </div>
+
+
+        <div class="nav-section">
+
+            <div class="nav-label">
+                System
+            </div>
+
+            <button
+                class="nav-button"
+                data-page="connection"
+            >
+                <span class="nav-icon">⚙</span>
+                Supabase
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="settings"
+            >
+                <span class="nav-icon">◆</span>
+                Settings
+            </button>
+
+        </div>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="user-mini">
+
+                <div
+                    id="userAvatar"
+                    class="user-avatar"
+                >
+                    C
+                </div>
+
+                <div class="user-info">
+
+                    <div
+                        id="userEmail"
+                        class="user-email"
+                    >
+                        —
+                    </div>
+
+                    <div class="user-role">
+                        Authenticated Admin
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button
+                id="logoutButton"
+                class="nav-button"
+            >
+                <span class="nav-icon">↪</span>
+                Sign Out
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <div class="page-title">
+
+                <h1 id="pageTitle">
+                    Dashboard
+                </h1>
+
+                <p id="pageSubtitle">
+                    CrowRules Entertainment administration
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button
+                    id="mobileMenuButton"
+                    class="btn mobile-menu"
+                >
+                    ☰
+                </button>
+
+                <button
+                    id="refreshButton"
+                    class="btn"
+                >
+                    ↻ Refresh
+                </button>
+
+                <button
+                    id="quickLogout"
+                    class="btn btn-danger"
+                >
+                    Sign Out
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================= -->
+
+        <section
+            id="page-dashboard"
+            class="page"
+        >
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Live Events
+                    </div>
+
+                    <div
+                        id="statLive"
+                        class="stat-value"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-sub">
+                        Current database records
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Shows
+                    </div>
+
+                    <div
+                        id="statShows"
+                        class="stat-value"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-sub">
+                        Shows in database
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Episodes
+                    </div>
+
+                    <div
+                        id="statEpisodes"
+                        class="stat-value"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-sub">
+                        Published and stored
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Session
+                    </div>
+
+                    <div
+                        id="statSession"
+                        class="stat-value"
+                    >
+                        ✓
+                    </div>
+
+                    <div class="stat-sub">
+                        Supabase authenticated
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="two-column">
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>
+                                System Status
+                            </h2>
+
+                            <p>
+                                Current application connection state
+                            </p>
+
+                        </div>
+
+                        <button
+                            id="dashboardTest"
+                            class="btn btn-small"
+                        >
+                            Test
+                        </button>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="status-row">
+
+                            <div class="status-name">
+
+                                <span
+                                    id="statusSupabaseDot"
+                                    class="status-dot"
+                                ></span>
+
+                                Supabase
+
+                            </div>
+
+                            <div
+                                id="statusSupabase"
+                                class="status-text"
+                            >
+                                Checking...
+                            </div>
+
+                        </div>
+
+
+                        <div class="status-row">
+
+                            <div class="status-name">
+
+                                <span
+                                    id="statusAuthDot"
+                                    class="status-dot"
+                                ></span>
+
+                                Authentication
+
+                            </div>
+
+                            <div
+                                id="statusAuth"
+                                class="status-text"
+                            >
+                                Checking...
+                            </div>
+
+                        </div>
+
+
+                        <div class="status-row">
+
+                            <div class="status-name">
+
+                                <span
+                                    id="statusDatabaseDot"
+                                    class="status-dot"
+                                ></span>
+
+                                Database
+
+                            </div>
+
+                            <div
+                                id="statusDatabase"
+                                class="status-text"
+                            >
+                                Checking...
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>
+                                Admin Session
+                            </h2>
+
+                            <p>
+                                Current authenticated account
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div
+                            id="sessionDetails"
+                            style="
+                                color:#8993a3;
+                                font-size:12px;
+                                line-height:1.8;
+                            "
+                        >
+                            Loading session...
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="card"
+                style="margin-top:20px"
+            >
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Recent Activity
+                        </h2>
+
+                        <p>
+                            Local administration activity
+                        </p>
+
+                    </div>
+
+                    <button
+                        id="clearActivity"
+                        class="btn btn-small"
+                    >
+                        Clear
+                    </button>
+
+                </div>
+
+                <div
+                    id="activityList"
+                    class="card-body"
+                >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LIVE EVENTS
+        ================================================= -->
+
+        <section
+            id="page-live"
+            class="page hidden"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Live Events
+                        </h2>
+
+                        <p>
+                            Manage live event records
+                        </p>
+
+                    </div>
+
+                    <button
+                        id="reloadLive"
+                        class="btn btn-primary btn-small"
+                    >
+                        Reload
+                    </button>
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Show</th>
+                                <th>Start</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="liveTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SHOWS
+        ================================================= -->
+
+        <section
+            id="page-shows"
+            class="page hidden"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Shows
+                        </h2>
+
+                        <p>
+                            Shows available in the database
+                        </p>
+
+                    </div>
+
+                    <button
+                        id="reloadShows"
+                        class="btn btn-primary btn-small"
+                    >
+                        Reload
+                    </button>
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="showsTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             EPISODES
+        ================================================= -->
+
+        <section
+            id="page-episodes"
+            class="page hidden"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Episodes
+                        </h2>
+
+                        <p>
+                            Episode records stored in Supabase
+                        </p>
+
+                    </div>
+
+                    <button
+                        id="reloadEpisodes"
+                        class="btn btn-primary btn-small"
+                    >
+                        Reload
+                    </button>
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Show</th>
+                                <th>Published</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="episodesTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MEMBERS
+        ================================================= -->
+
+        <section
+            id="page-members"
+            class="page hidden"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Members
+                        </h2>
+
+                        <p>
+                            Member administration
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="empty-state">
+
+                        Member management is intentionally
+                        protected from client-side privileged
+                        operations.
+
+                        <br><br>
+
+                        Use Supabase Auth / server-side
+                        administration for privileged user
+                        management.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONTENT
+        ================================================= -->
+
+        <section
+            id="page-content"
+            class="page hidden"
+        >
+
+            <div class="three-column">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2>
+                            Website Exclusives
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <p
+                            style="
+                                color:#8993a3;
+                                font-size:12px;
+                                line-height:1.7;
+                            "
+                        >
+                            Website-only stories and material
+                            not appearing on YouTube.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2>
+                            Early Access
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <p
+                            style="
+                                color:#8993a3;
+                                font-size:12px;
+                                line-height:1.7;
+                            "
+                        >
+                            Previews and upcoming CrowRules
+                            projects.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2>
+                            Crow's Notebook
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <p
+                            style="
+                                color:#8993a3;
+                                font-size:12px;
+                                line-height:1.7;
+                            "
+                        >
+                            Development notes and thoughts
+                            from CrowRules Entertainment.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SUPABASE CONNECTION
+        ================================================= -->
+
+        <section
+            id="page-connection"
+            class="page hidden"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Supabase Connection
+                        </h2>
+
+                        <p>
+                            Configure the browser-safe Supabase
+                            connection.
+                        </p>
+
+                    </div>
+
+                    <span
+                        id="connectionBadge"
+                        class="badge"
+                    >
+                        NOT TESTED
+                    </span>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="setting-item">
+
+                        <label>
+                            Supabase Project URL
+                        </label>
+
+                        <input
+                            id="configUrl"
+                            class="form-control"
+                            type="url"
+                            placeholder="https://your-project.supabase.co"
+                        >
+
+                        <div class="setting-help">
+
+                            Example:
+                            https://abcdefghijkl.supabase.co
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="setting-item">
+
+                        <label>
+                            Supabase Publishable Key
+                        </label>
+
+                        <input
+                            id="configKey"
+                            class="form-control"
+                            type="password"
+                            placeholder="sb_publishable_..."
+                        >
+
+                        <div class="setting-help">
+
+                            Use the current Supabase Publishable
+                            key. Never put a service_role or secret
+                            key in this HTML file.
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        style="
+                            display:flex;
+                            gap:9px;
+                            flex-wrap:wrap;
+                        "
+                    >
+
+                        <button
+                            id="saveConnection"
+                            class="btn btn-primary"
+                        >
+                            Save Connection
+                        </button>
+
+                        <button
+                            id="testConnection"
+                            class="btn"
+                        >
+                            Test Connection
+                        </button>
+
+                        <button
+                            id="clearConnection"
+                            class="btn btn-danger"
+                        >
+                            Clear Saved Connection
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="connectionStatus"
+                        class="connection-status"
+                    >
+                        Connection has not been tested.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="card"
+                style="margin-top:20px"
+            >
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Configuration Diagnostics
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="status-row">
+
+                        <div class="status-name">
+                            Project URL
+                        </div>
+
+                        <div
+                            id="diagUrl"
+                            class="status-text"
+                        >
+                            Not configured
+                        </div>
+
+                    </div>
+
+
+                    <div class="status-row">
+
+                        <div class="status-name">
+                            Key Type
+                        </div>
+
+                        <div
+                            id="diagKey"
+                            class="status-text"
+                        >
+                            Not configured
+                        </div>
+
+                    </div>
+
+
+                    <div class="status-row">
+
+                        <div class="status-name">
+                            Auth Client
+                        </div>
+
+                        <div
+                            id="diagClient"
+                            class="status-text"
+                        >
+                            Not initialized
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SETTINGS
+        ================================================= -->
+
+        <section
+            id="page-settings"
+            class="page hidden"
+        >
+
+            <div class="settings-grid">
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>
+                                Application
+                            </h2>
+
+                            <p>
+                                Admin application settings
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="setting-item">
+
+                            <label>
+                                Application Name
+                            </label>
+
+                            <input
+                                id="settingAppName"
+                                class="form-control"
+                                value="CrowRules Entertainment"
+                            >
+
+                        </div>
+
+
+                        <div class="setting-item">
+
+                            <label>
+                                Version
+                            </label>
+
+                            <input
+                                class="form-control"
+                                value="Admin v1.1"
+                                readonly
+                            >
+
+                        </div>
+
+
+                        <div class="setting-item">
+
+                            <label>
+                                Default Login Email
+                            </label>
+
+                            <input
+                                id="settingEmail"
+                                class="form-control"
+                                type="email"
+                                placeholder="member@crowrulesentertainment.com"
+                            >
+
+                        </div>
+
+
+                        <button
+                            id="saveSettings"
+                            class="btn btn-primary"
+                        >
+                            Save Settings
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>
+                                Security
+                            </h2>
+
+                            <p>
+                                Browser authentication status
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="status-row">
+
+                            <div class="status-name">
+                                Supabase Auth
+                            </div>
+
+                            <span
+                                id="securityAuth"
+                                class="badge badge-warning"
+                            >
+                                CHECKING
+                            </span>
+
+                        </div>
+
+
+                        <div class="status-row">
+
+                            <div class="status-name">
+                                Client Key
+                            </div>
+
+                            <span
+                                id="securityKey"
+                                class="badge badge-warning"
+                            >
+                                CHECKING
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            style="
+                                margin-top:18px;
+                                color:#687283;
+                                font-size:11px;
+                                line-height:1.7;
+                            "
+                        >
+
+                            The dashboard never stores or embeds
+                            an administrator password. Authentication
+                            is handled by Supabase Auth.
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
 
 
-<!-- =========================================================
-     TOAST
-========================================================= -->
+<!-- =======================================================
+     TOASTS
+======================================================= -->
 
 <div id="toastContainer"></div>
 
 
+<!-- =======================================================
+     SUPABASE
+======================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
 <script>
+
 /* =========================================================
-   CROWRULES ADMIN v1.1
-   SUPABASE CONFIGURATION
+   CROW RULES ENTERTAINMENT
+   ADMIN v1.1
+   JAVASCRIPT
 ========================================================= */
 
-/*
+
+/* =========================================================
+   SUPABASE CONFIGURATION
+=========================================================
+
    IMPORTANT:
 
-   Put your Supabase PROJECT URL here.
+   Replace these two values.
 
-   Example:
-   https://xxxxxxxxxxxxxxxx.supabase.co
+   SUPABASE_CONFIG.url
+   SUPABASE_CONFIG.publishableKey
 
-   Then put your PUBLIC/PUBLISHABLE key here.
+   DO NOT put a service_role / secret key here.
 
-   DO NOT use:
-   - service_role
-   - secret key
-   - database password
-
-   Browser applications must use the public/publishable key.
-*/
+========================================================= */
 
 const SUPABASE_CONFIG = {
 
@@ -1169,324 +2595,47 @@ const SUPABASE_CONFIG = {
         "https://zauxdqyssratvzmomozf.supabase.co",
 
     publishableKey:
-        "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9"
+        "sb_publishable_-Z6wecSOxwOk6IBut2zLn_8DfRxnE9"
 
 };
 
 
 /* =========================================================
-   SUPABASE INITIALIZATION
+   APPLICATION STATE
 ========================================================= */
 
 let supabaseClient = null;
 
-function initializeSupabase() {
+let currentUser = null;
 
-    if (
-        !SUPABASE_CONFIG.url ||
-        !SUPABASE_CONFIG.publishableKey ||
-        SUPABASE_CONFIG.publishableKey.includes(
-            "PASTE_YOUR"
-        )
-    ) {
+let currentSession = null;
 
-        showLoginError(
-            "Supabase is not configured. Add your Project URL and Publishable Key in SUPABASE_CONFIG."
-        );
+let currentPage = "dashboard";
 
-        return false;
+
+/* =========================================================
+   DOM HELPERS
+========================================================= */
+
+const $ = (id) =>
+    document.getElementById(id);
+
+
+function show(element) {
+
+    if (element) {
+        element.classList.remove("hidden");
     }
 
-    try {
-
-        supabaseClient =
-            window.supabase.createClient(
-                SUPABASE_CONFIG.url,
-                SUPABASE_CONFIG.publishableKey,
-                {
-                    auth: {
-                        persistSession: true,
-                        autoRefreshToken: true,
-                        detectSessionInUrl: true
-                    }
-                }
-            );
-
-        return true;
-
-    } catch (error) {
-
-        console.error(error);
-
-        showLoginError(
-            "Could not initialize Supabase: " +
-            error.message
-        );
-
-        return false;
-    }
 }
 
 
-/* =========================================================
-   STATE
-========================================================= */
+function hide(element) {
 
-const state = {
-
-    currentPage: "dashboard",
-
-    currentTable: null,
-
-    currentId: null,
-
-    currentRows: [],
-
-    currentColumns: [],
-
-    currentUser: null,
-
-    currentProfile: null
-
-};
-
-
-/* =========================================================
-   TABLE CONFIGURATION
-========================================================= */
-
-const TABLES = {
-
-    shows: {
-
-        label: "Shows",
-
-        icon: "📺",
-
-        titleColumn: "title",
-
-        columns: [
-            "id",
-            "title",
-            "description",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    episodes: {
-
-        label: "Episodes",
-
-        icon: "🎬",
-
-        titleColumn: "title",
-
-        columns: [
-            "id",
-            "title",
-            "description",
-            "episode_number",
-            "season_number",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    live_events: {
-
-        label: "Live Events",
-
-        icon: "🔴",
-
-        titleColumn: "title",
-
-        columns: [
-            "id",
-            "title",
-            "description",
-            "scheduled_start",
-            "status",
-            "youtube_url",
-            "created_at"
-        ]
-
-    },
-
-    schedule_items: {
-
-        label: "Schedule",
-
-        icon: "🗓️",
-
-        titleColumn: "title",
-
-        columns: [
-            "id",
-            "title",
-            "start_time",
-            "end_time",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    content_items: {
-
-        label: "Content Library",
-
-        icon: "📁",
-
-        titleColumn: "title",
-
-        columns: [
-            "id",
-            "title",
-            "description",
-            "content_type",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    creator_channels: {
-
-        label: "Creator Channels",
-
-        icon: "🎙️",
-
-        titleColumn: "name",
-
-        columns: [
-            "id",
-            "name",
-            "description",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    polls: {
-
-        label: "Polls",
-
-        icon: "📊",
-
-        titleColumn: "question",
-
-        columns: [
-            "id",
-            "question",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    memberships: {
-
-        label: "Memberships",
-
-        icon: "⭐",
-
-        titleColumn: "name",
-
-        columns: [
-            "id",
-            "name",
-            "description",
-            "price",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    newsletter_subscribers: {
-
-        label: "Newsletter",
-
-        icon: "✉️",
-
-        titleColumn: "email",
-
-        columns: [
-            "id",
-            "email",
-            "status",
-            "created_at"
-        ]
-
-    },
-
-    profiles: {
-
-        label: "Profiles",
-
-        icon: "👤",
-
-        titleColumn: "email",
-
-        columns: [
-            "id",
-            "email",
-            "role",
-            "created_at"
-        ]
-
-    },
-
-    site_settings: {
-
-        label: "Site Settings",
-
-        icon: "⚙️",
-
-        titleColumn: "key",
-
-        columns: [
-            "id",
-            "key",
-            "value",
-            "created_at"
-        ]
-
+    if (element) {
+        element.classList.add("hidden");
     }
 
-};
-
-
-/* =========================================================
-   DOM
-========================================================= */
-
-const $ = selector =>
-    document.querySelector(selector);
-
-const $$ = selector =>
-    document.querySelectorAll(selector);
-
-
-/* =========================================================
-   LOGIN ERROR
-========================================================= */
-
-function showLoginError(message) {
-
-    const box =
-        $("#loginStatus");
-
-    if (!box) return;
-
-    box.textContent = message;
-
-    box.className =
-        "status-box error";
 }
 
 
@@ -1496,11 +2645,12 @@ function showLoginError(message) {
 
 function toast(
     message,
-    type = "success"
+    type = "success",
+    duration = 3500
 ) {
 
     const container =
-        $("#toastContainer");
+        $("toastContainer");
 
     const item =
         document.createElement("div");
@@ -1513,15 +2663,873 @@ function toast(
 
     container.appendChild(item);
 
-    setTimeout(
-        () => item.remove(),
-        4000
-    );
+    setTimeout(() => {
+
+        item.remove();
+
+    }, duration);
+
 }
 
 
 /* =========================================================
-   AUTH
+   ACTIVITY LOG
+========================================================= */
+
+function getActivity() {
+
+    try {
+
+        return JSON.parse(
+            localStorage.getItem(
+                "crowrules_admin_activity"
+            ) || "[]"
+        );
+
+    } catch {
+
+        return [];
+
+    }
+
+}
+
+
+function saveActivity(activity) {
+
+    localStorage.setItem(
+        "crowrules_admin_activity",
+        JSON.stringify(activity.slice(0,30))
+    );
+
+}
+
+
+function logActivity(
+    title,
+    icon = "•"
+) {
+
+    const activity =
+        getActivity();
+
+    activity.unshift({
+
+        title,
+
+        icon,
+
+        time:
+            new Date().toISOString()
+
+    });
+
+    saveActivity(activity);
+
+    renderActivity();
+
+}
+
+
+function renderActivity() {
+
+    const container =
+        $("activityList");
+
+    if (!container) {
+        return;
+    }
+
+    const activity =
+        getActivity();
+
+    if (!activity.length) {
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                No administration activity yet.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        activity
+            .slice(0,10)
+            .map(item => `
+
+                <div class="activity-item">
+
+                    <div class="activity-icon">
+                        ${escapeHtml(item.icon)}
+                    </div>
+
+                    <div class="activity-content">
+
+                        <div class="activity-title">
+                            ${escapeHtml(item.title)}
+                        </div>
+
+                        <div class="activity-time">
+                            ${formatDateTime(item.time)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `)
+            .join("");
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(value)
+
+        .replaceAll("&", "&amp;")
+
+        .replaceAll("<", "&lt;")
+
+        .replaceAll(">", "&gt;")
+
+        .replaceAll('"', "&quot;")
+
+        .replaceAll("'", "&#039;");
+
+}
+
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function formatDateTime(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    try {
+
+        return new Intl.DateTimeFormat(
+            undefined,
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
+        ).format(
+            new Date(value)
+        );
+
+    } catch {
+
+        return value;
+
+    }
+
+}
+
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+function getStoredConfig() {
+
+    let stored = null;
+
+    try {
+
+        stored =
+            JSON.parse(
+                localStorage.getItem(
+                    "crowrules_supabase_config"
+                ) || "null"
+            );
+
+    } catch {
+
+        stored = null;
+
+    }
+
+    return {
+
+        url:
+            stored?.url ||
+            SUPABASE_CONFIG.url ||
+            "",
+
+        publishableKey:
+            stored?.publishableKey ||
+            SUPABASE_CONFIG.publishableKey ||
+            ""
+
+    };
+
+}
+
+
+function saveStoredConfig(
+    url,
+    publishableKey
+) {
+
+    localStorage.setItem(
+
+        "crowrules_supabase_config",
+
+        JSON.stringify({
+
+            url:
+                url.trim(),
+
+            publishableKey:
+                publishableKey.trim()
+
+        })
+
+    );
+
+}
+
+
+function clearStoredConfig() {
+
+    localStorage.removeItem(
+        "crowrules_supabase_config"
+    );
+
+}
+
+
+/* =========================================================
+   CONFIG VALIDATION
+========================================================= */
+
+function validateConfig(
+    url,
+    key
+) {
+
+    url =
+        String(url || "").trim();
+
+    key =
+        String(key || "").trim();
+
+
+    if (!url) {
+
+        return {
+            valid:false,
+            message:
+                "Supabase Project URL is missing."
+        };
+
+    }
+
+
+    if (
+        !/^https:\/\/[a-z0-9-]+\.supabase\.co/i
+            .test(url)
+    ) {
+
+        return {
+            valid:false,
+            message:
+                "Supabase Project URL does not look valid. It should look like https://your-project.supabase.co"
+        };
+
+    }
+
+
+    if (!key) {
+
+        return {
+            valid:false,
+            message:
+                "Supabase Publishable key is missing."
+        };
+
+    }
+
+
+    const looksPublishable =
+        key.startsWith("sb_publishable_");
+
+    const looksLegacyAnon =
+        key.startsWith("eyJ");
+
+
+    if (
+        !looksPublishable &&
+        !looksLegacyAnon
+    ) {
+
+        return {
+
+            valid:false,
+
+            message:
+                "The key does not look like a current Supabase Publishable key or legacy anon key. Do not use a service_role or secret key in the browser."
+
+        };
+
+    }
+
+
+    return {
+        valid:true,
+        message:"Configuration looks valid."
+    };
+
+}
+
+
+/* =========================================================
+   INITIALIZE SUPABASE
+========================================================= */
+
+function initializeSupabase() {
+
+    const config =
+        getStoredConfig();
+
+    const validation =
+        validateConfig(
+            config.url,
+            config.publishableKey
+        );
+
+
+    if (!validation.valid) {
+
+        updateDiagnostics(
+            config,
+            null
+        );
+
+        return {
+
+            success:false,
+
+            message:
+                validation.message
+
+        };
+
+    }
+
+
+    try {
+
+        supabaseClient =
+            window.supabase.createClient(
+
+                config.url,
+
+                config.publishableKey,
+
+                {
+
+                    auth: {
+
+                        persistSession:true,
+
+                        autoRefreshToken:true,
+
+                        detectSessionInUrl:true
+
+                    }
+
+                }
+
+            );
+
+
+        updateDiagnostics(
+            config,
+            supabaseClient
+        );
+
+
+        return {
+            success:true
+        };
+
+    } catch(error) {
+
+        supabaseClient =
+            null;
+
+        return {
+
+            success:false,
+
+            message:
+                error?.message ||
+                "Could not initialize Supabase."
+
+        };
+
+    }
+
+}
+
+
+/* =========================================================
+   DIAGNOSTICS
+========================================================= */
+
+function updateDiagnostics(
+    config,
+    client
+) {
+
+    $("diagUrl").textContent =
+        config.url
+            ? maskUrl(config.url)
+            : "Not configured";
+
+
+    if (!config.publishableKey) {
+
+        $("diagKey").textContent =
+            "Not configured";
+
+    } else if (
+        config.publishableKey
+            .startsWith("sb_publishable_")
+    ) {
+
+        $("diagKey").textContent =
+            "Current Publishable key";
+
+    } else if (
+        config.publishableKey
+            .startsWith("eyJ")
+    ) {
+
+        $("diagKey").textContent =
+            "Legacy anon key";
+
+    } else {
+
+        $("diagKey").textContent =
+            "Unknown / invalid key format";
+
+    }
+
+
+    $("diagClient").textContent =
+        client
+            ? "Initialized"
+            : "Not initialized";
+
+}
+
+
+function maskUrl(url) {
+
+    try {
+
+        const parsed =
+            new URL(url);
+
+        return parsed.origin;
+
+    } catch {
+
+        return "Invalid URL";
+
+    }
+
+}
+
+
+/* =========================================================
+   CONNECTION TEST
+========================================================= */
+
+async function testSupabaseConnection() {
+
+    const config =
+        getStoredConfig();
+
+
+    const validation =
+        validateConfig(
+            config.url,
+            config.publishableKey
+        );
+
+
+    if (!validation.valid) {
+
+        setConnectionStatus(
+            validation.message,
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    const initialized =
+        initializeSupabase();
+
+
+    if (!initialized.success) {
+
+        setConnectionStatus(
+            initialized.message,
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    setConnectionStatus(
+        "Testing Supabase connection...",
+        "warning"
+    );
+
+
+    try {
+
+        /*
+         * We intentionally test Auth instead of querying an
+         * assumed database table. This means Admin v1.1 can
+         * verify the Supabase project even if the user's tables
+         * have different names.
+         */
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .getSession();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        setConnectionStatus(
+
+            data?.session
+
+                ? "Supabase connection successful. An authenticated session is active."
+
+                : "Supabase connection successful. No authenticated session is currently active.",
+
+            "success"
+
+        );
+
+
+        updateConnectionBadge(
+            "CONNECTED",
+            "success"
+        );
+
+
+        $("statusSupabaseDot")
+            .className =
+            "status-dot online";
+
+        $("statusSupabase")
+            .textContent =
+            "Connected";
+
+
+        $("statusAuthDot")
+            .className =
+            data?.session
+                ? "status-dot online"
+                : "status-dot warning";
+
+        $("statusAuth")
+            .textContent =
+            data?.session
+                ? "Authenticated"
+                : "Not authenticated";
+
+
+        return true;
+
+    } catch(error) {
+
+        const message =
+            explainSupabaseError(error);
+
+
+        setConnectionStatus(
+            message,
+            "error"
+        );
+
+
+        updateConnectionBadge(
+            "ERROR",
+            "danger"
+        );
+
+
+        $("statusSupabaseDot")
+            .className =
+            "status-dot error";
+
+        $("statusSupabase")
+            .textContent =
+            "Connection failed";
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   CONNECTION UI
+========================================================= */
+
+function setConnectionStatus(
+    message,
+    type = "success"
+) {
+
+    const element =
+        $("connectionStatus");
+
+    element.textContent =
+        message;
+
+
+    if (type === "success") {
+
+        element.style.borderColor =
+            "rgba(34,197,94,.30)";
+
+        element.style.color =
+            "#86efac";
+
+    } else if (type === "error") {
+
+        element.style.borderColor =
+            "rgba(239,68,68,.30)";
+
+        element.style.color =
+            "#fca5a5";
+
+    } else {
+
+        element.style.borderColor =
+            "rgba(245,158,11,.30)";
+
+        element.style.color =
+            "#fcd34d";
+
+    }
+
+}
+
+
+function updateConnectionBadge(
+    text,
+    type
+) {
+
+    const badge =
+        $("connectionBadge");
+
+    badge.textContent =
+        text;
+
+    badge.className =
+        "badge";
+
+
+    if (type === "success") {
+
+        badge.classList.add(
+            "badge-success"
+        );
+
+    } else if (type === "danger") {
+
+        badge.classList.add(
+            "badge-danger"
+        );
+
+    } else {
+
+        badge.classList.add(
+            "badge-warning"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ERROR EXPLANATION
+========================================================= */
+
+function explainSupabaseError(
+    error
+) {
+
+    const message =
+        error?.message ||
+        error?.error_description ||
+        String(error || "Unknown error");
+
+
+    const lower =
+        message.toLowerCase();
+
+
+    if (
+        lower.includes("invalid api key") ||
+        lower.includes("apikey")
+    ) {
+
+        return (
+            "Invalid Supabase API key. Verify that you are using the current Supabase Publishable key for this project, not a revoked, old, service_role, or secret key."
+        );
+
+    }
+
+
+    if (
+        lower.includes("invalid login credentials")
+    ) {
+
+        return (
+            "Supabase rejected the login credentials. Verify that the email exists as a Supabase Auth user and that its password is correct."
+        );
+
+    }
+
+
+    if (
+        lower.includes("email not confirmed")
+    ) {
+
+        return (
+            "This Supabase Auth account exists, but its email has not been confirmed."
+        );
+
+    }
+
+
+    if (
+        lower.includes("failed to fetch") ||
+        lower.includes("network")
+    ) {
+
+        return (
+            "Could not reach Supabase. Check the Project URL, internet connection, browser extensions, and Supabase project status."
+        );
+
+    }
+
+
+    return message;
+
+}
+
+
+/* =========================================================
+   AUTH SESSION
+========================================================= */
+
+async function checkSession() {
+
+    if (!supabaseClient) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .getSession();
+
+
+        if (error) {
+
+            console.error(
+                "Session error:",
+                error
+            );
+
+            return null;
+
+        }
+
+
+        currentSession =
+            data?.session || null;
+
+        currentUser =
+            data?.session?.user || null;
+
+
+        return currentSession;
+
+    } catch(error) {
+
+        console.error(error);
+
+        return null;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN
 ========================================================= */
 
 async function login(
@@ -1531,71 +3539,30 @@ async function login(
 
     if (!supabaseClient) {
 
-        toast(
-            "Supabase is not initialized.",
-            "error"
+        showAuthError(
+            "Supabase is not initialized. Open the Supabase section and configure the Project URL and Publishable key."
         );
-
-        return;
-    }
-
-    const button =
-        $("#loginButton");
-
-    button.disabled = true;
-
-    button.textContent =
-        "SIGNING IN...";
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth.signInWithPassword({
-                email,
-                password
-            });
-
-        if (error)
-            throw error;
-
-        state.currentUser =
-            data.user;
-
-        await verifyAdmin();
-
-    } catch (error) {
-
-        console.error(error);
-
-        showLoginError(
-            formatSupabaseError(error)
-        );
-
-    } finally {
-
-        button.disabled = false;
-
-        button.textContent =
-            "SIGN IN";
-    }
-}
-
-
-/* =========================================================
-   ADMIN VERIFICATION
-========================================================= */
-
-async function verifyAdmin() {
-
-    if (!state.currentUser) {
-
-        showLogin();
 
         return false;
+
     }
+
+
+    const button =
+        $("loginButton");
+
+
+    button.disabled =
+        true;
+
+    button.textContent =
+        "Signing in...";
+
+
+    hide($("authError"));
+
+    hide($("authSuccess"));
+
 
     try {
 
@@ -1603,156 +3570,81 @@ async function verifyAdmin() {
             data,
             error
         } =
-            await supabaseClient
-                .from("profiles")
-                .select("*")
-                .eq(
-                    "id",
-                    state.currentUser.id
-                )
-                .maybeSingle();
+            await supabaseClient.auth
+                .signInWithPassword({
 
-        if (error)
+                    email:
+                        email.trim(),
+
+                    password
+
+                });
+
+
+        if (error) {
+
             throw error;
 
-        state.currentProfile =
-            data;
+        }
 
-        /*
-           If your profiles table uses a role
-           field, enforce administrator access.
 
-           Accepted administrator values:
-           admin
-           administrator
-           owner
-           super_admin
-        */
+        currentSession =
+            data.session;
 
-        if (
-            data &&
-            data.role &&
-            ![
-                "admin",
-                "administrator",
-                "owner",
-                "super_admin"
-            ].includes(
-                String(data.role).toLowerCase()
-            )
-        ) {
+        currentUser =
+            data.user;
 
-            await supabaseClient.auth.signOut();
 
-            showLoginError(
-                "Your account is authenticated, but it does not have administrator access."
+        if (!currentUser) {
+
+            throw new Error(
+                "Supabase returned no authenticated user."
             );
 
-            return false;
         }
+
+
+        logActivity(
+            `Signed in as ${currentUser.email}`,
+            "✓"
+        );
+
 
         showApp();
 
-        return true;
-
-    } catch (error) {
-
-        console.error(error);
-
-        /*
-           If the profiles table is protected by RLS,
-           don't incorrectly call the API key invalid.
-        */
-
         toast(
-            "Authentication succeeded, but admin profile verification failed: " +
-            formatSupabaseError(error),
-            "error"
+            "Admin login successful.",
+            "success"
         );
 
+
+        return true;
+
+    } catch(error) {
+
+        console.error(
+            "Login error:",
+            error
+        );
+
+
+        showAuthError(
+            explainSupabaseError(error)
+        );
+
+
         return false;
+
+    } finally {
+
+        button.disabled =
+            false;
+
+        button.textContent =
+            "Sign In";
+
     }
-}
 
-
-/* =========================================================
-   SESSION CHECK
-========================================================= */
-
-async function checkSession() {
-
-    if (!supabaseClient)
-        return;
-
-    try {
-
-        const {
-            data
-        } =
-            await supabaseClient.auth.getSession();
-
-        if (
-            data &&
-            data.session &&
-            data.session.user
-        ) {
-
-            state.currentUser =
-                data.session.user;
-
-            await verifyAdmin();
-
-        } else {
-
-            showLogin();
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-        showLogin();
-    }
-}
-
-
-/* =========================================================
-   SHOW / HIDE LOGIN
-========================================================= */
-
-function showLogin() {
-
-    $("#loginScreen")
-        .classList.remove("hidden");
-
-    $("#app")
-        .classList.add("hidden");
-}
-
-
-function showApp() {
-
-    $("#loginScreen")
-        .classList.add("hidden");
-
-    $("#app")
-        .classList.remove("hidden");
-
-    updateUserChip();
-
-    navigate("dashboard");
-}
-
-
-function updateUserChip() {
-
-    const email =
-        state.currentUser?.email ||
-        "Admin";
-
-    $("#userChip")
-        .textContent =
-        email;
 }
 
 
@@ -1762,65 +3654,464 @@ function updateUserChip() {
 
 async function logout() {
 
-    try {
+    if (!supabaseClient) {
 
-        await supabaseClient.auth.signOut();
+        showLogin();
 
-    } catch (error) {
+        return;
 
-        console.error(error);
     }
 
-    state.currentUser = null;
 
-    state.currentProfile = null;
+    try {
 
-    showLogin();
+        const {
+            error
+        } =
+            await supabaseClient.auth
+                .signOut();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        currentUser =
+            null;
+
+        currentSession =
+            null;
+
+
+        logActivity(
+            "Administrator signed out",
+            "↪"
+        );
+
+
+        showLogin();
+
+
+        toast(
+            "Signed out.",
+            "success"
+        );
+
+    } catch(error) {
+
+        toast(
+            explainSupabaseError(error),
+            "error"
+        );
+
+    }
+
 }
 
 
 /* =========================================================
-   NAVIGATION
+   PASSWORD RESET
 ========================================================= */
 
-function navigate(page) {
+async function resetPassword() {
 
-    state.currentPage =
+    if (!supabaseClient) {
+
+        showAuthError(
+            "Configure Supabase before requesting a password reset."
+        );
+
+        return;
+
+    }
+
+
+    const email =
+        $("loginEmail")
+            .value
+            .trim();
+
+
+    if (!email) {
+
+        showAuthError(
+            "Enter your email address first."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient.auth
+                .resetPasswordForEmail(
+                    email,
+                    {
+
+                        redirectTo:
+                            window.location.href
+
+                    }
+                );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        showAuthSuccess(
+            "Password reset instructions were requested. Check the email inbox associated with this Supabase Auth account."
+        );
+
+    } catch(error) {
+
+        showAuthError(
+            explainSupabaseError(error)
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN UI
+========================================================= */
+
+function showAuthError(
+    message
+) {
+
+    const element =
+        $("authError");
+
+    element.textContent =
+        message;
+
+    show(element);
+
+}
+
+
+function showAuthSuccess(
+    message
+) {
+
+    const element =
+        $("authSuccess");
+
+    element.textContent =
+        message;
+
+    show(element);
+
+}
+
+
+function showLogin() {
+
+    hide($("bootScreen"));
+
+    hide($("app"));
+
+    show($("loginScreen"));
+
+
+    const settingsEmail =
+        localStorage.getItem(
+            "crowrules_admin_email"
+        );
+
+
+    if (
+        settingsEmail &&
+        !$("loginEmail").value
+    ) {
+
+        $("loginEmail").value =
+            settingsEmail;
+
+    }
+
+}
+
+
+function showApp() {
+
+    hide($("bootScreen"));
+
+    hide($("loginScreen"));
+
+    show($("app"));
+
+
+    updateUserUI();
+
+    renderActivity();
+
+    showPage(
+        "dashboard"
+    );
+
+    refreshDashboard();
+
+}
+
+
+/* =========================================================
+   USER UI
+========================================================= */
+
+function updateUserUI() {
+
+    const email =
+        currentUser?.email ||
+        "Authenticated user";
+
+
+    $("userEmail")
+        .textContent =
+        email;
+
+
+    $("userAvatar")
+        .textContent =
+        email
+            .charAt(0)
+            .toUpperCase();
+
+
+    $("sessionDetails").innerHTML = `
+
+        <strong style="color:#d9dee6">
+            ${escapeHtml(email)}
+        </strong>
+
+        <br>
+
+        User ID:
+        ${escapeHtml(currentUser?.id || "—")}
+
+        <br>
+
+        Last sign-in:
+        ${formatDateTime(
+            currentUser?.last_sign_in_at
+        )}
+
+        <br>
+
+        Session:
+        Active
+
+    `;
+
+
+    $("statSession")
+        .textContent =
+        "✓";
+
+
+    $("statusAuthDot")
+        .className =
+        "status-dot online";
+
+
+    $("statusAuth")
+        .textContent =
+        "Authenticated";
+
+
+    $("securityAuth")
+        .textContent =
+        "ACTIVE";
+
+    $("securityAuth")
+        .className =
+        "badge badge-success";
+
+
+    const config =
+        getStoredConfig();
+
+
+    $("securityKey")
+        .textContent =
+        config.publishableKey
+            ? "CONFIGURED"
+            : "MISSING";
+
+    $("securityKey")
+        .className =
+        config.publishableKey
+            ? "badge badge-success"
+            : "badge badge-danger";
+
+}
+
+
+/* =========================================================
+   PAGE NAVIGATION
+========================================================= */
+
+function showPage(
+    page
+) {
+
+    currentPage =
         page;
 
-    $$(".nav-btn")
-        .forEach(button => {
 
-            button.classList.toggle(
-                "active",
-                button.dataset.page === page
+    document
+        .querySelectorAll(".page")
+        .forEach(section => {
+
+            section.classList.add(
+                "hidden"
             );
 
         });
 
-    const config =
-        TABLES[page];
 
-    $("#topbarTitle")
-        .textContent =
-        page === "dashboard"
-            ? "Dashboard"
-            : config
-                ? config.label
-                : page;
+    const selected =
+        $(`page-${page}`);
 
-    $("#sidebar")
-        .classList.remove("open");
 
-    if (page === "dashboard") {
+    if (selected) {
 
-        renderDashboard();
-
-    } else if (TABLES[page]) {
-
-        renderTablePage(page);
+        selected.classList.remove(
+            "hidden"
+        );
 
     }
+
+
+    document
+        .querySelectorAll(".nav-button[data-page]")
+        .forEach(button => {
+
+            button.classList.toggle(
+
+                "active",
+
+                button.dataset.page === page
+
+            );
+
+        });
+
+
+    const titles = {
+
+        dashboard: [
+            "Dashboard",
+            "CrowRules Entertainment administration"
+        ],
+
+        live: [
+            "Live Events",
+            "Manage CrowRules live programming"
+        ],
+
+        shows: [
+            "Shows",
+            "Manage television and streaming shows"
+        ],
+
+        episodes: [
+            "Episodes",
+            "Manage episode records"
+        ],
+
+        members: [
+            "Members",
+            "Member administration"
+        ],
+
+        content: [
+            "Website Content",
+            "Manage CrowRules website sections"
+        ],
+
+        connection: [
+            "Supabase",
+            "Database and authentication connection"
+        ],
+
+        settings: [
+            "Settings",
+            "Administration system settings"
+        ]
+
+    };
+
+
+    const info =
+        titles[page] ||
+        titles.dashboard;
+
+
+    $("pageTitle")
+        .textContent =
+        info[0];
+
+
+    $("pageSubtitle")
+        .textContent =
+        info[1];
+
+
+    if (page === "connection") {
+
+        loadConnectionFields();
+
+    }
+
+
+    if (page === "live") {
+
+        loadLiveEvents();
+
+    }
+
+
+    if (page === "shows") {
+
+        loadShows();
+
+    }
+
+
+    if (page === "episodes") {
+
+        loadEpisodes();
+
+    }
+
+
+    if (page === "settings") {
+
+        loadSettings();
+
+    }
+
+
+    $("sidebar")
+        .classList.remove(
+            "open"
+        );
+
 }
 
 
@@ -1828,278 +4119,425 @@ function navigate(page) {
    DASHBOARD
 ========================================================= */
 
-async function renderDashboard() {
+async function refreshDashboard() {
 
-    $("#pageContent").innerHTML = `
-        <div class="page-title">
+    if (!supabaseClient) {
 
-            <div>
-                <h1>Control Center</h1>
-                <p>
-                    CrowRules Entertainment Network administration.
-                </p>
-            </div>
+        $("statLive").textContent =
+            "—";
 
-            <div class="action-row">
+        $("statShows").textContent =
+            "—";
 
-                <button
-                    class="btn btn-primary"
-                    onclick="navigate('live_events')"
-                >
-                    🔴 Manage Live Events
-                </button>
+        $("statEpisodes").textContent =
+            "—";
 
-                <button
-                    class="btn"
-                    onclick="navigate('schedule_items')"
-                >
-                    🗓️ Programming Schedule
-                </button>
-
-            </div>
-
-        </div>
-
-        <div
-            id="dashboardStats"
-            class="stats-grid"
-        >
-
-            ${statLoading("Shows")}
-            ${statLoading("Episodes")}
-            ${statLoading("Live Events")}
-            ${statLoading("Profiles")}
-
-        </div>
-
-        <div class="dashboard-grid">
-
-            <div class="panel">
-
-                <div class="panel-header">
-                    <strong>Recent Episodes</strong>
-
-                    <button
-                        class="btn"
-                        onclick="navigate('episodes')"
-                    >
-                        View All
-                    </button>
-                </div>
-
-                <div
-                    class="panel-body"
-                    id="recentEpisodes"
-                >
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        Loading...
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="panel">
-
-                <div class="panel-header">
-                    <strong>System</strong>
-                </div>
-
-                <div class="panel-body">
-
-                    <div style="display:grid;gap:12px;">
-
-                        <div>
-                            <small style="color:#77778f">
-                                SUPABASE
-                            </small>
-
-                            <div>
-                                <span class="badge badge-success">
-                                    Connected
-                                </span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <small style="color:#77778f">
-                                ADMIN VERSION
-                            </small>
-
-                            <div>
-                                v1.1
-                            </div>
-                        </div>
-
-                        <div>
-                            <small style="color:#77778f">
-                                USER
-                            </small>
-
-                            <div>
-                                ${escapeHtml(
-                                    state.currentUser?.email || "Unknown"
-                                )}
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-    `;
-
-    await loadDashboardStats();
-
-    await loadRecentEpisodes();
-}
-
-
-function statLoading(label) {
-
-    return `
-        <div class="stat-card">
-
-            <div class="stat-label">
-                ${label}
-            </div>
-
-            <div
-                class="stat-value"
-                style="opacity:.3"
-            >
-                —
-            </div>
-
-        </div>
-    `;
-}
-
-
-async function loadDashboardStats() {
-
-    const tables = [
-        "shows",
-        "episodes",
-        "live_events",
-        "profiles"
-    ];
-
-    const results = {};
-
-    await Promise.all(
-        tables.map(async table => {
-
-            try {
-
-                const {
-                    count
-                } =
-                    await supabaseClient
-                        .from(table)
-                        .select(
-                            "*",
-                            {
-                                count:
-                                    "exact",
-                                head:
-                                    true
-                            }
-                        );
-
-                results[table] =
-                    count ?? 0;
-
-            } catch {
-
-                results[table] =
-                    "—";
-            }
-
-        })
-    );
-
-    $("#dashboardStats")
-        .innerHTML = `
-
-        <div class="stat-card">
-
-            <span class="stat-icon">
-                📺
-            </span>
-
-            <div class="stat-label">
-                Shows
-            </div>
-
-            <div class="stat-value">
-                ${results.shows}
-            </div>
-
-        </div>
-
-        <div class="stat-card">
-
-            <span class="stat-icon">
-                🎬
-            </span>
-
-            <div class="stat-label">
-                Episodes
-            </div>
-
-            <div class="stat-value">
-                ${results.episodes}
-            </div>
-
-        </div>
-
-        <div class="stat-card">
-
-            <span class="stat-icon">
-                🔴
-            </span>
-
-            <div class="stat-label">
-                Live Events
-            </div>
-
-            <div class="stat-value">
-                ${results.live_events}
-            </div>
-
-        </div>
-
-        <div class="stat-card">
-
-            <span class="stat-icon">
-                👤
-            </span>
-
-            <div class="stat-label">
-                Profiles
-            </div>
-
-            <div class="stat-value">
-                ${results.profiles}
-            </div>
-
-        </div>
-    `;
-}
-
-
-async function loadRecentEpisodes() {
-
-    const container =
-        $("#recentEpisodes");
-
-    if (!container)
         return;
+
+    }
+
+
+    await Promise.all([
+
+        countTable(
+            "live_events",
+            "statLive"
+        ),
+
+        countTable(
+            "shows",
+            "statShows"
+        ),
+
+        countTable(
+            "episodes",
+            "statEpisodes"
+        )
+
+    ]);
+
+}
+
+
+/* =========================================================
+   COUNT TABLE
+========================================================= */
+
+async function countTable(
+    table,
+    elementId
+) {
+
+    try {
+
+        const {
+            count,
+            error
+        } =
+            await supabaseClient
+                .from(table)
+                .select(
+                    "*",
+                    {
+                        count:
+                            "exact",
+                        head:
+                            true
+                    }
+                );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        $(elementId)
+            .textContent =
+            count ?? 0;
+
+
+        $("statusDatabaseDot")
+            .className =
+            "status-dot online";
+
+        $("statusDatabase")
+            .textContent =
+            "Connected";
+
+
+        return count ?? 0;
+
+    } catch(error) {
+
+        console.warn(
+            `Could not count ${table}:`,
+            error
+        );
+
+
+        $(elementId)
+            .textContent =
+            "—";
+
+
+        /*
+         * A missing table or RLS policy should not make the
+         * authentication system appear broken.
+         */
+
+        return null;
+
+    }
+
+}
+
+
+/* =========================================================
+   LIVE EVENTS
+========================================================= */
+
+async function loadLiveEvents() {
+
+    const body =
+        $("liveTableBody");
+
+
+    if (!supabaseClient) {
+
+        renderTableMessage(
+            body,
+            "Supabase is not connected."
+        );
+
+        return;
+
+    }
+
+
+    body.innerHTML = `
+
+        <tr>
+            <td colspan="5"
+                class="empty-state">
+                Loading...
+            </td>
+        </tr>
+
+    `;
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("live_events")
+                .select(`
+                    *,
+                    shows (
+                        title
+                    )
+                `)
+                .order(
+                    "start_time",
+                    {
+                        ascending:false
+                    }
+                )
+                .limit(100);
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (!data?.length) {
+
+            renderTableMessage(
+                body,
+                "No live events found."
+            );
+
+            return;
+
+        }
+
+
+        body.innerHTML =
+            data.map(event => `
+
+                <tr>
+
+                    <td>
+                        ${escapeHtml(
+                            event.id
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            event.title ||
+                            event.name ||
+                            "Untitled"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            event.shows?.title ||
+                            "—"
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatDateTime(
+                            event.start_time ||
+                            event.scheduled_at ||
+                            event.created_at
+                        )}
+                    </td>
+
+                    <td>
+
+                        <span class="badge ${
+                            String(
+                                event.status ||
+                                ""
+                            ).toLowerCase()
+                            === "live"
+
+                                ? "badge-danger"
+
+                                : "badge-info"
+                        }">
+
+                            ${escapeHtml(
+                                event.status ||
+                                "scheduled"
+                            )}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            `).join("");
+
+
+    } catch(error) {
+
+        renderTableMessage(
+            body,
+            explainSupabaseError(error)
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOWS
+========================================================= */
+
+async function loadShows() {
+
+    const body =
+        $("showsTableBody");
+
+
+    if (!supabaseClient) {
+
+        renderTableMessage(
+            body,
+            "Supabase is not connected."
+        );
+
+        return;
+
+    }
+
+
+    body.innerHTML = `
+
+        <tr>
+            <td colspan="4"
+                class="empty-state">
+                Loading...
+            </td>
+        </tr>
+
+    `;
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("shows")
+                .select("*")
+                .order(
+                    "created_at",
+                    {
+                        ascending:false
+                    }
+                )
+                .limit(100);
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (!data?.length) {
+
+            renderTableMessage(
+                body,
+                "No shows found."
+            );
+
+            return;
+
+        }
+
+
+        body.innerHTML =
+            data.map(show => `
+
+                <tr>
+
+                    <td>
+                        ${escapeHtml(
+                            show.id
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            show.title ||
+                            show.name ||
+                            "Untitled"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            show.description ||
+                            "—"
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatDateTime(
+                            show.created_at
+                        )}
+                    </td>
+
+                </tr>
+
+            `).join("");
+
+
+    } catch(error) {
+
+        renderTableMessage(
+            body,
+            explainSupabaseError(error)
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   EPISODES
+========================================================= */
+
+async function loadEpisodes() {
+
+    const body =
+        $("episodesTableBody");
+
+
+    if (!supabaseClient) {
+
+        renderTableMessage(
+            body,
+            "Supabase is not connected."
+        );
+
+        return;
+
+    }
+
+
+    body.innerHTML = `
+
+        <tr>
+            <td colspan="4"
+                class="empty-state">
+                Loading...
+            </td>
+        </tr>
+
+    `;
+
 
     try {
 
@@ -2109,1420 +4547,643 @@ async function loadRecentEpisodes() {
         } =
             await supabaseClient
                 .from("episodes")
-                .select("*")
+                .select(`
+                    *,
+                    shows (
+                        title
+                    )
+                `)
                 .order(
                     "created_at",
                     {
-                        ascending: false
+                        ascending:false
                     }
                 )
-                .limit(8);
+                .limit(100);
 
-        if (error)
+
+        if (error) {
+
             throw error;
 
-        if (!data || !data.length) {
-
-            container.innerHTML =
-                `<div class="empty">
-                    No episodes found.
-                </div>`;
-
-            return;
         }
 
-        container.innerHTML = `
 
-            <div class="table-wrap">
+        if (!data?.length) {
 
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        ${data.map(row => `
-
-                            <tr>
-
-                                <td>
-                                    ${escapeHtml(
-                                        row.title || "Untitled"
-                                    )}
-                                </td>
-
-                                <td>
-                                    ${statusBadge(
-                                        row.status
-                                    )}
-                                </td>
-
-                                <td>
-                                    ${formatDate(
-                                        row.created_at
-                                    )}
-                                </td>
-
-                            </tr>
-
-                        `).join("")}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-        `;
-
-    } catch (error) {
-
-        container.innerHTML =
-            `<div class="empty">
-                ${escapeHtml(
-                    formatSupabaseError(error)
-                )}
-            </div>`;
-    }
-}
-
-
-/* =========================================================
-   TABLE PAGE
-========================================================= */
-
-async function renderTablePage(
-    table
-) {
-
-    const config =
-        TABLES[table];
-
-    state.currentTable =
-        table;
-
-    $("#pageContent").innerHTML = `
-
-        <div class="page-title">
-
-            <div>
-
-                <h1>
-                    ${config.icon}
-                    ${config.label}
-                </h1>
-
-                <p>
-                    Manage ${config.label.toLowerCase()}.
-                </p>
-
-            </div>
-
-            <div class="action-row">
-
-                <button
-                    class="btn"
-                    onclick="loadTable('${table}')"
-                >
-                    ↻ Refresh
-                </button>
-
-                <button
-                    class="btn btn-primary"
-                    onclick="openCreateModal('${table}')"
-                >
-                    + Add ${config.label.replace(
-                        /s$/,
-                        ""
-                    )}
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div class="toolbar">
-
-            <input
-                id="tableSearch"
-                class="search-box"
-                placeholder="Search..."
-                type="search"
-            >
-
-            <div>
-                <span
-                    id="rowCount"
-                    class="badge badge-purple"
-                >
-                    Loading...
-                </span>
-            </div>
-
-        </div>
-
-
-        <div class="panel">
-
-            <div
-                id="tableContainer"
-                class="panel-body"
-            >
-
-                <div class="loading">
-
-                    <div class="spinner"></div>
-
-                    Loading ${config.label}...
-
-                </div>
-
-            </div>
-
-        </div>
-    `;
-
-    $("#tableSearch")
-        .addEventListener(
-            "input",
-            filterCurrentTable
-        );
-
-    await loadTable(table);
-}
-
-
-/* =========================================================
-   LOAD TABLE
-========================================================= */
-
-async function loadTable(
-    table
-) {
-
-    const config =
-        TABLES[table];
-
-    const container =
-        $("#tableContainer");
-
-    if (!container)
-        return;
-
-    container.innerHTML = `
-        <div class="loading">
-
-            <div class="spinner"></div>
-
-            Loading...
-
-        </div>
-    `;
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from(table)
-                .select("*")
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
-                )
-                .limit(500);
-
-        if (error)
-            throw error;
-
-        state.currentRows =
-            data || [];
-
-        state.currentColumns =
-            getDisplayColumns(
-                table,
-                data || []
+            renderTableMessage(
+                body,
+                "No episodes found."
             );
 
-        renderTableRows();
+            return;
 
-    } catch (error) {
+        }
 
-        console.error(error);
 
-        container.innerHTML = `
-            <div class="empty">
+        body.innerHTML =
+            data.map(episode => `
 
-                <strong>
-                    Unable to load ${escapeHtml(
-                        config.label
-                    )}
-                </strong>
+                <tr>
 
-                <p>
-                    ${escapeHtml(
-                        formatSupabaseError(error)
-                    )}
-                </p>
+                    <td>
+                        ${escapeHtml(
+                            episode.id
+                        )}
+                    </td>
 
-            </div>
-        `;
+                    <td>
+                        ${escapeHtml(
+                            episode.title ||
+                            episode.name ||
+                            "Untitled"
+                        )}
+                    </td>
 
-        toast(
-            formatSupabaseError(error),
-            "error"
+                    <td>
+                        ${escapeHtml(
+                            episode.shows?.title ||
+                            "—"
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatDateTime(
+                            episode.published_at ||
+                            episode.created_at
+                        )}
+                    </td>
+
+                </tr>
+
+            `).join("");
+
+
+    } catch(error) {
+
+        renderTableMessage(
+            body,
+            explainSupabaseError(error)
         );
+
     }
+
 }
 
 
 /* =========================================================
-   DISPLAY COLUMNS
+   TABLE MESSAGE
 ========================================================= */
 
-function getDisplayColumns(
-    table,
-    rows
+function renderTableMessage(
+    body,
+    message
 ) {
 
-    const config =
-        TABLES[table];
-
-    const available =
-        rows.length
-            ? Object.keys(rows[0])
-            : config.columns;
-
-    const wanted =
-        config.columns.filter(
-            col =>
-                available.includes(col)
-        );
-
-    return wanted.slice(0, 7);
-}
+    const colspan =
+        body === $("liveTableBody")
+            ? 5
+            : 4;
 
 
-/* =========================================================
-   RENDER TABLE
-========================================================= */
+    body.innerHTML = `
 
-function renderTableRows(
-    rows = state.currentRows
-) {
+        <tr>
 
-    const container =
-        $("#tableContainer");
+            <td
+                colspan="${colspan}"
+                class="empty-state"
+            >
 
-    if (!container)
-        return;
+                ${escapeHtml(message)}
 
-    const table =
-        state.currentTable;
+            </td>
 
-    const config =
-        TABLES[table];
+        </tr>
 
-    $("#rowCount")
-        .textContent =
-        `${rows.length} records`;
-
-    if (!rows.length) {
-
-        container.innerHTML =
-            `<div class="empty">
-                No records found.
-            </div>`;
-
-        return;
-    }
-
-    container.innerHTML = `
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        ${state.currentColumns.map(
-                            column => `
-                                <th>
-                                    ${formatColumnName(
-                                        column
-                                    )}
-                                </th>
-                            `
-                        ).join("")}
-
-                        <th>
-                            Actions
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    ${rows.map(row => `
-
-                        <tr>
-
-                            ${state.currentColumns.map(
-                                column => `
-                                    <td>
-                                        ${formatCell(
-                                            row[column],
-                                            column
-                                        )}
-                                    </td>
-                                `
-                            ).join("")}
-
-                            <td>
-
-                                <div class="actions">
-
-                                    <button
-                                        class="btn"
-                                        onclick="openEditModal(
-                                            '${table}',
-                                            '${escapeAttribute(
-                                                row.id
-                                            )}'
-                                        )"
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        class="btn btn-danger"
-                                        onclick="deleteRecord(
-                                            '${table}',
-                                            '${escapeAttribute(
-                                                row.id
-                                            )}'
-                                        )"
-                                    >
-                                        Delete
-                                    </button>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    `).join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
     `;
+
 }
 
 
 /* =========================================================
-   SEARCH
+   CONNECTION PAGE
 ========================================================= */
 
-function filterCurrentTable() {
+function loadConnectionFields() {
 
-    const search =
-        ($("#tableSearch")?.value || "")
-            .trim()
-            .toLowerCase();
+    const config =
+        getStoredConfig();
 
-    if (!search) {
 
-        renderTableRows();
+    $("configUrl").value =
+        config.url;
 
-        return;
+
+    $("configKey").value =
+        config.publishableKey;
+
+
+    updateDiagnostics(
+        config,
+        supabaseClient
+    );
+
+
+    if (
+        config.url &&
+        config.publishableKey
+    ) {
+
+        setConnectionStatus(
+            "Saved Supabase configuration is loaded. Click Test Connection to verify it.",
+            "warning"
+        );
+
     }
 
-    const filtered =
-        state.currentRows.filter(
-            row =>
-                Object.values(row)
-                    .some(value =>
-                        String(
-                            value ?? ""
-                        )
-                        .toLowerCase()
-                        .includes(search)
-                    )
-        );
-
-    renderTableRows(
-        filtered
-    );
 }
 
 
 /* =========================================================
-   CREATE MODAL
+   SAVE CONNECTION
 ========================================================= */
 
-function openCreateModal(
-    table
-) {
+async function saveConnection() {
 
-    state.currentTable =
-        table;
-
-    state.currentId =
-        null;
-
-    const config =
-        TABLES[table];
-
-    $("#modalTitle")
-        .textContent =
-        `Add ${config.label.replace(
-            /s$/,
-            ""
-        )}`;
-
-    $("#modalBody")
-        .innerHTML =
-        generateForm(
-            table,
-            {}
-        );
-
-    $("#modalOverlay")
-        .classList.remove(
-            "hidden"
-        );
-}
+    const url =
+        $("configUrl")
+            .value
+            .trim();
 
 
-/* =========================================================
-   EDIT MODAL
-========================================================= */
-
-function openEditModal(
-    table,
-    id
-) {
-
-    const row =
-        state.currentRows.find(
-            item =>
-                String(item.id) ===
-                String(id)
-        );
-
-    if (!row) {
-
-        toast(
-            "Record not found.",
-            "error"
-        );
-
-        return;
-    }
-
-    state.currentTable =
-        table;
-
-    state.currentId =
-        id;
-
-    const config =
-        TABLES[table];
-
-    $("#modalTitle")
-        .textContent =
-        `Edit ${config.label.replace(
-            /s$/,
-            ""
-        )}`;
-
-    $("#modalBody")
-        .innerHTML =
-        generateForm(
-            table,
-            row
-        );
-
-    $("#modalOverlay")
-        .classList.remove(
-            "hidden"
-        );
-}
+    const key =
+        $("configKey")
+            .value
+            .trim();
 
 
-/* =========================================================
-   FORM GENERATION
-========================================================= */
-
-function generateForm(
-    table,
-    row
-) {
-
-    const config =
-        TABLES[table];
-
-    const keys =
-        getFormKeys(
-            table,
-            row
-        );
-
-    return `
-
-        <div class="form-grid">
-
-            ${keys.map(
-                key =>
-                    formField(
-                        key,
-                        row[key]
-                    )
-            ).join("")}
-
-        </div>
-
-        <p style="
-            color:#66667b;
-            font-size:11px;
-            margin-top:18px;
-        ">
-            Fields are generated from the existing
-            database record. ID and timestamps are
-            handled automatically where possible.
-        </p>
-    `;
-}
-
-
-function getFormKeys(
-    table,
-    row
-) {
-
-    const config =
-        TABLES[table];
-
-    const keys =
-        Object.keys(row || {});
-
-    let columns =
-        keys.length
-            ? keys
-            : config.columns;
-
-    return columns.filter(
-        key =>
-            key !== "id" &&
-            key !== "created_at" &&
-            key !== "updated_at"
-    );
-}
-
-
-/* =========================================================
-   FORM FIELD
-========================================================= */
-
-function formField(
-    key,
-    value
-) {
-
-    const fullFields = [
-        "description",
-        "content",
-        "body",
-        "value"
-    ];
-
-    const type =
-        detectInputType(
-            key,
-            value
-        );
-
-    const label =
-        formatColumnName(
+    const validation =
+        validateConfig(
+            url,
             key
         );
 
-    const safeValue =
-        value == null
-            ? ""
-            : value;
 
-    if (
-        fullFields.includes(
-            key.toLowerCase()
-        )
-    ) {
+    if (!validation.valid) {
 
-        return `
-
-            <div class="form-group full">
-
-                <label>
-                    ${label}
-                </label>
-
-                <textarea
-                    data-field="${escapeAttribute(
-                        key
-                    )}"
-                >${escapeHtml(
-                    safeValue
-                )}</textarea>
-
-            </div>
-        `;
-    }
-
-    return `
-
-        <div class="form-group">
-
-            <label>
-                ${label}
-            </label>
-
-            <input
-                type="${type}"
-                data-field="${escapeAttribute(
-                    key
-                )}"
-                value="${escapeAttribute(
-                    safeValue
-                )}"
-            >
-
-        </div>
-    `;
-}
-
-
-function detectInputType(
-    key,
-    value
-) {
-
-    const lower =
-        key.toLowerCase();
-
-    if (
-        lower.includes("email")
-    )
-        return "email";
-
-    if (
-        lower.includes("url") ||
-        lower.includes("link")
-    )
-        return "url";
-
-    if (
-        lower.includes("price") ||
-        lower.includes("amount") ||
-        lower.includes("number")
-    )
-        return "number";
-
-    if (
-        lower.includes("date") ||
-        lower.includes("time") ||
-        lower.includes("scheduled")
-    )
-        return "datetime-local";
-
-    if (
-        typeof value === "boolean"
-    )
-        return "checkbox";
-
-    return "text";
-}
-
-
-/* =========================================================
-   SAVE MODAL
-========================================================= */
-
-async function saveModal() {
-
-    const table =
-        state.currentTable;
-
-    const fields =
-        $("#modalBody")
-            .querySelectorAll(
-                "[data-field]"
-            );
-
-    const payload = {};
-
-    fields.forEach(
-        field => {
-
-            const key =
-                field.dataset.field;
-
-            if (
-                field.type ===
-                "checkbox"
-            ) {
-
-                payload[key] =
-                    field.checked;
-
-            } else {
-
-                let value =
-                    field.value;
-
-                if (
-                    field.type ===
-                    "number"
-                ) {
-
-                    value =
-                        value === ""
-                            ? null
-                            : Number(value);
-                }
-
-                if (
-                    field.type ===
-                    "datetime-local"
-                ) {
-
-                    value =
-                        value
-                            ? new Date(
-                                value
-                              ).toISOString()
-                            : null;
-                }
-
-                payload[key] =
-                    value === ""
-                        ? null
-                        : value;
-            }
-        }
-    );
-
-    const saveButton =
-        $("#modalSave");
-
-    saveButton.disabled =
-        true;
-
-    saveButton.textContent =
-        "Saving...";
-
-    try {
-
-        let result;
-
-        if (state.currentId) {
-
-            result =
-                await supabaseClient
-                    .from(table)
-                    .update(payload)
-                    .eq(
-                        "id",
-                        state.currentId
-                    );
-
-        } else {
-
-            result =
-                await supabaseClient
-                    .from(table)
-                    .insert(
-                        payload
-                    );
-        }
-
-        if (result.error)
-            throw result.error;
-
-        closeModal();
-
-        toast(
-            state.currentId
-                ? "Record updated successfully."
-                : "Record created successfully."
-        );
-
-        await loadTable(
-            table
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-        toast(
-            formatSupabaseError(error),
+        setConnectionStatus(
+            validation.message,
             "error"
         );
 
-    } finally {
-
-        saveButton.disabled =
-            false;
-
-        saveButton.textContent =
-            "Save";
-    }
-}
-
-
-/* =========================================================
-   DELETE
-========================================================= */
-
-async function deleteRecord(
-    table,
-    id
-) {
-
-    if (
-        !confirm(
-            "Delete this record? This action cannot be undone."
-        )
-    )
         return;
 
-    try {
+    }
 
-        const {
-            error
-        } =
-            await supabaseClient
-                .from(table)
-                .delete()
-                .eq(
-                    "id",
-                    id
-                );
 
-        if (error)
-            throw error;
+    saveStoredConfig(
+        url,
+        key
+    );
 
-        toast(
-            "Record deleted successfully."
-        );
 
-        await loadTable(
-            table
-        );
+    const result =
+        initializeSupabase();
 
-    } catch (error) {
 
-        console.error(error);
+    if (!result.success) {
 
-        toast(
-            formatSupabaseError(error),
+        setConnectionStatus(
+            result.message,
             "error"
         );
+
+        return;
+
     }
+
+
+    setConnectionStatus(
+        "Configuration saved. Testing connection...",
+        "warning"
+    );
+
+
+    const success =
+        await testSupabaseConnection();
+
+
+    if (success) {
+
+        logActivity(
+            "Supabase connection configuration updated",
+            "⚙"
+        );
+
+
+        toast(
+            "Supabase connection saved and verified.",
+            "success"
+        );
+
+    }
+
 }
 
 
 /* =========================================================
-   MODAL CONTROLS
+   CLEAR CONNECTION
 ========================================================= */
 
-function closeModal() {
+function clearConnection() {
 
-    $("#modalOverlay")
-        .classList.add(
-            "hidden"
+    const confirmed =
+        confirm(
+            "Clear the saved Supabase connection from this browser?"
         );
 
-    $("#modalBody")
-        .innerHTML = "";
 
-    state.currentId =
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    clearStoredConfig();
+
+
+    supabaseClient =
         null;
-}
 
 
-/* =========================================================
-   FORMAT HELPERS
-========================================================= */
+    $("configUrl").value =
+        "";
 
-function formatColumnName(
-    column
-) {
-
-    return String(column)
-        .replace(
-            /_/g,
-            " "
-        )
-        .replace(
-            /\b\w/g,
-            char =>
-                char.toUpperCase()
-        );
-}
+    $("configKey").value =
+        "";
 
 
-function formatCell(
-    value,
-    column
-) {
-
-    if (
-        value === null ||
-        value === undefined
-    )
-        return "—";
-
-    if (
-        column === "created_at" ||
-        column === "updated_at" ||
-        column.includes("time") ||
-        column.includes("date")
-    ) {
-
-        return formatDate(
-            value
-        );
-    }
-
-    if (
-        column === "status"
-    ) {
-
-        return statusBadge(
-            value
-        );
-    }
-
-    if (
-        column.includes("url") ||
-        column.includes("link")
-    ) {
-
-        const url =
-            String(value);
-
-        if (
-            /^https?:\/\//i.test(
-                url
-            )
-        ) {
-
-            return `
-                <a
-                    href="${escapeAttribute(
-                        url
-                    )}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style="color:#a78bfa"
-                >
-                    Open
-                </a>
-            `;
-        }
-    }
-
-    const text =
-        String(value);
-
-    return escapeHtml(
-        text.length > 90
-            ? text.slice(0,90) + "..."
-            : text
+    setConnectionStatus(
+        "Saved Supabase configuration has been cleared.",
+        "warning"
     );
-}
 
 
-function statusBadge(
-    status
-) {
-
-    if (
-        status === null ||
-        status === undefined
-    )
-        return "—";
-
-    const value =
-        String(status);
-
-    const lower =
-        value.toLowerCase();
-
-    let cls =
-        "badge-purple";
-
-    if (
-        [
-            "active",
-            "published",
-            "live",
-            "enabled",
-            "approved"
-        ].includes(lower)
-    )
-        cls = "badge-success";
-
-    else if (
-        [
-            "inactive",
-            "disabled",
-            "draft",
-            "cancelled",
-            "deleted"
-        ].includes(lower)
-    )
-        cls = "badge-danger";
-
-    else if (
-        [
-            "scheduled",
-            "pending",
-            "upcoming"
-        ].includes(lower)
-    )
-        cls = "badge-warning";
-
-    else if (
-        [
-            "processing",
-            "starting"
-        ].includes(lower)
-    )
-        cls = "badge-info";
-
-    return `
-        <span class="badge ${cls}">
-            ${escapeHtml(value)}
-        </span>
-    `;
-}
+    updateConnectionBadge(
+        "NOT CONFIGURED",
+        "warning"
+    );
 
 
-function formatDate(
-    value
-) {
-
-    if (!value)
-        return "—";
-
-    const date =
-        new Date(value);
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    )
-        return escapeHtml(
-            String(value)
-        );
-
-    return date.toLocaleString(
-        undefined,
+    updateDiagnostics(
         {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit"
-        }
+            url:"",
+            publishableKey:""
+        },
+        null
     );
+
+
+    toast(
+        "Supabase configuration cleared.",
+        "success"
+    );
+
 }
 
 
 /* =========================================================
-   ERROR HANDLING
+   SETTINGS
 ========================================================= */
 
-function formatSupabaseError(
-    error
-) {
+function loadSettings() {
 
-    if (!error)
-        return "Unknown error.";
+    $("settingEmail")
+        .value =
+        localStorage.getItem(
+            "crowrules_admin_email"
+        ) || "";
 
-    const message =
-        error.message ||
-        error.error_description ||
-        String(error);
-
-    const lower =
-        message.toLowerCase();
-
-    if (
-        lower.includes(
-            "invalid api key"
-        )
-    ) {
-
-        return `
-            Invalid Supabase API key.
-            Verify that SUPABASE_CONFIG.publishableKey
-            contains the current Supabase Publishable key
-            and not a revoked/old key.
-        `;
-    }
-
-    if (
-        lower.includes(
-            "jwt"
-        ) &&
-        lower.includes(
-            "expired"
-        )
-    ) {
-
-        return `
-            Authentication token expired.
-            Sign out and sign in again.
-        `;
-    }
-
-    if (
-        lower.includes(
-            "permission denied"
-        ) ||
-        lower.includes(
-            "row-level security"
-        )
-    ) {
-
-        return `
-            Supabase Row Level Security blocked this operation.
-            Check the table's RLS policies for the authenticated
-            admin user.
-        `;
-    }
-
-    if (
-        lower.includes(
-            "relation"
-        ) &&
-        lower.includes(
-            "does not exist"
-        )
-    ) {
-
-        return `
-            The requested database table does not exist
-            or is not exposed through the Supabase API.
-        `;
-    }
-
-    if (
-        lower.includes(
-            "column"
-        ) &&
-        lower.includes(
-            "does not exist"
-        )
-    ) {
-
-        return `
-            A requested database column does not exist.
-            The Admin UI may need to be synchronized with
-            your current schema.
-        `;
-    }
-
-    return message;
 }
 
 
-/* =========================================================
-   SECURITY / HTML ESCAPING
-========================================================= */
+function saveSettings() {
 
-function escapeHtml(
-    value
-) {
+    const email =
+        $("settingEmail")
+            .value
+            .trim();
 
-    return String(value ?? "")
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
+
+    if (email) {
+
+        localStorage.setItem(
+            "crowrules_admin_email",
+            email
         );
-}
+
+    } else {
+
+        localStorage.removeItem(
+            "crowrules_admin_email"
+        );
+
+    }
 
 
-function escapeAttribute(
-    value
-) {
-
-    return escapeHtml(
-        value
+    toast(
+        "Settings saved.",
+        "success"
     );
+
+
+    logActivity(
+        "Administration settings updated",
+        "◆"
+    );
+
 }
 
 
 /* =========================================================
-   EVENTS
+   EVENT LISTENERS
 ========================================================= */
 
-$("#loginForm")
-    .addEventListener(
-        "submit",
-        event => {
-
-            event.preventDefault();
-
-            login(
-                $("#loginEmail").value.trim(),
-                $("#loginPassword").value
-            );
-
-        }
-    );
+function bindEvents() {
 
 
-$("#logoutButton")
-    .addEventListener(
-        "click",
-        logout
-    );
+    /* LOGIN */
 
+    $("loginForm")
+        .addEventListener(
+            "submit",
+            async event => {
 
-$("#refreshButton")
-    .addEventListener(
-        "click",
-        () => {
+                event.preventDefault();
 
-            navigate(
-                state.currentPage
-            );
+                const email =
+                    $("loginEmail")
+                        .value
+                        .trim();
 
-        }
-    );
+                const password =
+                    $("loginPassword")
+                        .value;
 
-
-$("#mobileMenu")
-    .addEventListener(
-        "click",
-        () => {
-
-            $("#sidebar")
-                .classList.toggle(
-                    "open"
+                await login(
+                    email,
+                    password
                 );
 
-        }
-    );
+            }
+        );
 
 
-$("#modalClose")
-    .addEventListener(
-        "click",
-        closeModal
-    );
+    $("togglePassword")
+        .addEventListener(
+            "click",
+            () => {
 
+                const input =
+                    $("loginPassword");
 
-$("#modalCancel")
-    .addEventListener(
-        "click",
-        closeModal
-    );
-
-
-$("#modalSave")
-    .addEventListener(
-        "click",
-        saveModal
-    );
-
-
-$("#modalOverlay")
-    .addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target ===
-                $("#modalOverlay")
-            ) {
-
-                closeModal();
+                input.type =
+                    input.type === "password"
+                        ? "text"
+                        : "password";
 
             }
-
-        }
-    );
+        );
 
 
-$$(".nav-btn")
-    .forEach(
-        button => {
+    $("forgotPassword")
+        .addEventListener(
+            "click",
+            resetPassword
+        );
+
+
+    $("testConnectionLogin")
+        .addEventListener(
+            "click",
+            async () => {
+
+                const result =
+                    initializeSupabase();
+
+
+                if (!result.success) {
+
+                    showAuthError(
+                        result.message
+                    );
+
+                    return;
+
+                }
+
+
+                const success =
+                    await testSupabaseConnection();
+
+
+                if (success) {
+
+                    showAuthSuccess(
+                        "Supabase connection is working."
+                    );
+
+                }
+
+            }
+        );
+
+
+    /* LOGOUT */
+
+    $("logoutButton")
+        .addEventListener(
+            "click",
+            logout
+        );
+
+
+    $("quickLogout")
+        .addEventListener(
+            "click",
+            logout
+        );
+
+
+    /* NAVIGATION */
+
+    document
+        .querySelectorAll(
+            ".nav-button[data-page]"
+        )
+        .forEach(button => {
 
             button.addEventListener(
                 "click",
                 () => {
 
-                    navigate(
+                    showPage(
                         button.dataset.page
                     );
 
                 }
             );
 
-        }
-    );
+        });
+
+
+    /* REFRESH */
+
+    $("refreshButton")
+        .addEventListener(
+            "click",
+            async () => {
+
+                if (
+                    currentPage ===
+                    "dashboard"
+                ) {
+
+                    await refreshDashboard();
+
+                } else {
+
+                    showPage(
+                        currentPage
+                    );
+
+                }
+
+                toast(
+                    "Page refreshed.",
+                    "success"
+                );
+
+            }
+        );
+
+
+    /* MOBILE */
+
+    $("mobileMenuButton")
+        .addEventListener(
+            "click",
+            () => {
+
+                $("sidebar")
+                    .classList.toggle(
+                        "open"
+                    );
+
+            }
+        );
+
+
+    /* CONNECTION */
+
+    $("saveConnection")
+        .addEventListener(
+            "click",
+            saveConnection
+        );
+
+
+    $("testConnection")
+        .addEventListener(
+            "click",
+            testSupabaseConnection
+        );
+
+
+    $("clearConnection")
+        .addEventListener(
+            "click",
+            clearConnection
+        );
+
+
+    $("dashboardTest")
+        .addEventListener(
+            "click",
+            testSupabaseConnection
+        );
+
+
+    /* TABLE RELOADS */
+
+    $("reloadLive")
+        .addEventListener(
+            "click",
+            loadLiveEvents
+        );
+
+
+    $("reloadShows")
+        .addEventListener(
+            "click",
+            loadShows
+        );
+
+
+    $("reloadEpisodes")
+        .addEventListener(
+            "click",
+            loadEpisodes
+        );
+
+
+    /* ACTIVITY */
+
+    $("clearActivity")
+        .addEventListener(
+            "click",
+            () => {
+
+                localStorage.removeItem(
+                    "crowrules_admin_activity"
+                );
+
+                renderActivity();
+
+                toast(
+                    "Activity log cleared.",
+                    "success"
+                );
+
+            }
+        );
+
+
+    /* SETTINGS */
+
+    $("saveSettings")
+        .addEventListener(
+            "click",
+            saveSettings
+        );
+
+}
 
 
 /* =========================================================
    AUTH STATE LISTENER
 ========================================================= */
 
-function setupAuthListener() {
+function registerAuthListener() {
 
-    if (!supabaseClient)
+    if (!supabaseClient) {
+
         return;
+
+    }
+
 
     supabaseClient.auth
         .onAuthStateChange(
@@ -3530,6 +5191,19 @@ function setupAuthListener() {
                 event,
                 session
             ) => {
+
+                console.log(
+                    "Supabase Auth:",
+                    event
+                );
+
+
+                currentSession =
+                    session || null;
+
+                currentUser =
+                    session?.user || null;
+
 
                 if (
                     event ===
@@ -3539,51 +5213,118 @@ function setupAuthListener() {
                     showLogin();
 
                     return;
+
                 }
+
 
                 if (
                     session &&
-                    session.user
+                    currentUser
                 ) {
 
-                    state.currentUser =
-                        session.user;
-
-                    if (
-                        event ===
-                        "SIGNED_IN"
-                    ) {
-
-                        await verifyAdmin();
-
-                    }
+                    updateUserUI();
 
                 }
 
             }
         );
+
 }
 
 
 /* =========================================================
-   START APPLICATION
+   BOOT
 ========================================================= */
 
 async function boot() {
 
-    const initialized =
+    $("bootMessage")
+        .textContent =
+        "Loading Supabase client...";
+
+
+    const result =
         initializeSupabase();
 
-    if (!initialized)
+
+    if (!result.success) {
+
+        $("bootMessage")
+            .textContent =
+            "Supabase configuration required.";
+
+        setTimeout(
+            showLogin,
+            400
+        );
+
         return;
 
-    setupAuthListener();
+    }
 
-    await checkSession();
+
+    $("bootMessage")
+        .textContent =
+        "Checking authentication session...";
+
+
+    registerAuthListener();
+
+
+    const session =
+        await checkSession();
+
+
+    if (
+        session &&
+        currentUser
+    ) {
+
+        $("bootMessage")
+            .textContent =
+            "Restoring administrator session...";
+
+
+        setTimeout(
+            showApp,
+            250
+        );
+
+        return;
+
+    }
+
+
+    $("bootMessage")
+        .textContent =
+        "Ready.";
+
+    setTimeout(
+        showLogin,
+        350
+    );
+
 }
 
 
-boot();
+/* =========================================================
+   START
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        bindEvents();
+
+        renderActivity();
+
+        loadSettings();
+
+        boot();
+
+    }
+);
 
 </script>
 
