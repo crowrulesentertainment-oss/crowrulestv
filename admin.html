@@ -121,32 +121,104 @@ function showLoginError(e){
 }
 async function enter(session){
   S.user=session.user;
-  const {data,error}=await sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle();
-  if(error){ showLoginError(error); await sb.auth.signOut(); return; }
-  if(!data){ showLoginError({message:'No profile record exists for this user.'}); await sb.auth.signOut(); return; }
-  if(!ADMIN_ROLES.includes(String(data.role||'').toLowerCase())){
-    showLoginError({message:'Your account does not have an authorized CrowRules admin role.'});
-    await sb.auth.signOut(); return;
+
+  // First establish the Auth session. Do NOT sign the user out just
+  // because the optional profile lookup is unavailable; doing that
+  // caused the old dashboard to appear to simply "not sign in".
+  const metadataRole = String(
+    session.user?.app_metadata?.role ||
+    session.user?.user_metadata?.role ||
+    ''
+  ).toLowerCase();
+
+  let profile = null;
+  let profileError = null;
+
+  try {
+    const result = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    profile = result.data || null;
+    profileError = result.error || null;
+  } catch(e) {
+    profileError = e;
   }
-  S.profile=data;
+
+  const profileRole = String(profile?.role || '').toLowerCase();
+  const role = profileRole || metadataRole;
+
+  // Keep the existing admin-role model, but don't destroy a valid Auth
+  // session when profiles is protected by RLS or temporarily unavailable.
+  // Supabase RLS remains the final protection for database writes.
+  if (!profile && profileError && !metadataRole) {
+    console.warn('profiles lookup unavailable:', profileError.message || profileError);
+  }
+
+  if (profile && !ADMIN_ROLES.includes(profileRole) &&
+      !ADMIN_ROLES.includes(metadataRole)) {
+    showLoginError({message:'This Supabase account is authenticated, but it does not have an authorized CrowRules admin role in profiles.'});
+    return;
+  }
+
+  if (!profile && !metadataRole) {
+    // Authenticated fallback: keep the session alive so the user can see
+    // the dashboard and receive the actual RLS error for any operation.
+    // This avoids the silent sign-out loop of v4.0.
+    S.profile={
+      id:session.user.id,
+      display_name:session.user.email,
+      role:'authenticated'
+    };
+  } else {
+    S.profile=profile || {
+      id:session.user.id,
+      display_name:session.user.email,
+      role:metadataRole
+    };
+  }
+
   $('#loginView').classList.add('hidden');
   $('#app').classList.remove('hidden');
-  $('#userRole').textContent=`${data.display_name||session.user.email} • ${data.role}`;
-  await loadAll();
-  renderView('dashboard');
+  $('#userRole').textContent=
+    `${S.profile.display_name || session.user.email} • ${S.profile.role}`;
+
+  try {
+    await loadAll();
+    renderView('dashboard');
+  } catch(e) {
+    console.error('Admin data load:',e);
+    toast('Signed in. Some database tables are unavailable or protected by RLS.');
+    renderView('dashboard');
+  }
 }
 $('#loginBtn').onclick=async()=>{
-  const email=$('#loginEmail').value.trim(),password=$('#loginPassword').value;
+  const btn=$('#loginBtn');
+  const email=$('#loginEmail').value.trim();
+  const password=$('#loginPassword').value;
   $('#loginMsg').classList.add('hidden');
   if(!email||!password){showLoginError({message:'Enter your email and password.'});return;}
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error){showLoginError(error);return;}
-  await enter(data.session);
+  btn.disabled=true;
+  btn.textContent='SIGNING IN...';
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    if(!data?.session) throw new Error('Supabase authenticated the request but returned no session. Check Supabase Auth settings and email/password login.');
+    await enter(data.session);
+  }catch(e){
+    console.error('CrowRules sign-in:',e);
+    showLoginError(e);
+  }finally{
+    btn.disabled=false;
+    btn.textContent='SIGN IN';
+  }
 };
+$('#loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter') $('#loginBtn').click();});
 $('#logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
 $('#hamb').onclick=()=>$('#sidebar').classList.toggle('open');
 $('#refreshBtn').onclick=async()=>{await loadAll();renderView(S.view)};
-sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')location.reload()});
+sb.auth.onAuthStateChange((event,session)=>{ if(event==='SIGNED_OUT'){ $('#app').classList.add('hidden'); $('#loginView').classList.remove('hidden'); $('#loginMsg').classList.add('hidden'); } });
 
 /* Safe table reads: one missing/denied optional table no longer kills the entire admin. */
 async function q(table,opts={}){
