@@ -19,7 +19,7 @@
   <div class="field"><label>Email</label><input id="loginEmail" type="email" autocomplete="username"></div>
   <div class="field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
   <div id="loginMsg" class="notice hidden"></div><button id="loginBtn" class="btn primary" style="width:100%">SIGN IN</button>
-  <div style="margin-top:12px;color:#555;font-size:10px">Admin roles: admin, super_admin, owner, manager, producer, editor.</div>
+  <div style="margin-top:12px;color:#555;font-size:10px">Admin roles: admin, super_admin, owner, manager, producer, editor.</div><details style="margin-top:16px;color:#777;font-size:11px"><summary>Supabase connection</summary><div style="margin-top:10px"><input id="apiKeyOverride" type="password" placeholder="Current publishable key" style="width:100%;padding:10px;background:#080808;color:#fff;border:1px solid #292929;border-radius:6px"><button id="saveApiKey" class="btn small" style="margin-top:8px;width:100%">SAVE KEY & RELOAD</button><div style="margin-top:7px;color:#555">Use the publishable/anon key only. Never put service_role here.</div></div></details>
  </div>
 </div>
 <div id="app" class="app hidden">
@@ -76,7 +76,9 @@
 <script>
 const SUPABASE_URL='https://zauxdqyssratvzmomozf.supabase.co';
 const SUPABASE_KEY='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const SAVED_KEY=localStorage.getItem('crowrules_admin_supabase_key');
+const ACTIVE_SUPABASE_KEY=SAVED_KEY||SUPABASE_KEY;
+const sb=window.supabase.createClient(SUPABASE_URL,ACTIVE_SUPABASE_KEY);
 const ADMIN_ROLES=['admin','super_admin','owner','manager','producer','editor'];
 const S={user:null,profile:null,view:'dashboard',cache:{},editing:null,modalTable:null,modalMode:null,search:'',selectedChannel:null};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -91,16 +93,122 @@ const ta=(label,id,val='')=>`<div class="field"><label>${label}</label><textarea
 const select=(label,id,val,opts)=>`<div class="field"><label>${label}</label><select id="f_${id}">${opts.map(o=>`<option value="${esc(o[0])}" ${String(o[0])===String(val)?'selected':''}>${esc(o[1])}</option>`).join('')}</select></div>`;
 const check=(label,id,val)=>`<label class="check"><input id="f_${id}" type="checkbox" ${val?'checked':''}> ${label}</label>`;
 function showNotice(msg,cls=''){return `<div class="notice ${cls}">${esc(msg)}</div>`}
-async function currentSession(){const {data}=await sb.auth.getSession();return data.session}
-async function boot(){const session=await currentSession();if(session) await enter(session);else $('#loginView').classList.remove('hidden')}
-async function enter(session){S.user=session.user;const {data,error}=await sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle();if(error||!data||!ADMIN_ROLES.includes(data.role)){await sb.auth.signOut();$('#loginMsg').textContent='Your account does not have an authorized admin role.';$('#loginMsg').classList.remove('hidden');return}S.profile=data;$('#loginView').classList.add('hidden');$('#app').classList.remove('hidden');$('#userRole').textContent=`${data.display_name||session.user.email} • ${data.role}`;await loadAll();renderView('dashboard')}
-$('#loginBtn').onclick=async()=>{const email=$('#loginEmail').value.trim(),password=$('#loginPassword').value;$('#loginMsg').classList.add('hidden');const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){$('#loginMsg').textContent=error.message;$('#loginMsg').classList.remove('hidden');return}await enter(data.session)};
-$('#logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};$('#hamb').onclick=()=>$('#sidebar').classList.toggle('open');$('#refreshBtn').onclick=()=>loadAll().then(()=>renderView(S.view));
+document.addEventListener('click',e=>{if(e.target.id==='saveApiKey'){const k=$('#apiKeyOverride').value.trim();if(!k)return;localStorage.setItem('crowrules_admin_supabase_key',k);location.reload();}});
+
+async function currentSession(){
+  const {data,error}=await sb.auth.getSession();
+  if(error) throw error;
+  return data.session;
+}
+async function boot(){
+  try{
+    const session=await currentSession();
+    if(session) await enter(session);
+    else $('#loginView').classList.remove('hidden');
+  }catch(e){
+    console.error(e);
+    $('#loginView').classList.remove('hidden');
+    showLoginError(e);
+  }
+}
+function showLoginError(e){
+  const msg=String(e?.message||e||'Unknown error');
+  const keyProblem=/invalid api key|api key/i.test(msg);
+  $('#loginMsg').innerHTML=keyProblem
+    ? '<strong>Supabase API key rejected.</strong><br>Open this file and replace <code>SUPABASE_KEY</code> with the current publishable key from Supabase → Project Settings → API. Do not use a service_role key in browser code.'
+    : esc(msg);
+  $('#loginMsg').classList.remove('hidden');
+}
+async function enter(session){
+  S.user=session.user;
+  const {data,error}=await sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle();
+  if(error){ showLoginError(error); await sb.auth.signOut(); return; }
+  if(!data){ showLoginError({message:'No profile record exists for this user.'}); await sb.auth.signOut(); return; }
+  if(!ADMIN_ROLES.includes(String(data.role||'').toLowerCase())){
+    showLoginError({message:'Your account does not have an authorized CrowRules admin role.'});
+    await sb.auth.signOut(); return;
+  }
+  S.profile=data;
+  $('#loginView').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  $('#userRole').textContent=`${data.display_name||session.user.email} • ${data.role}`;
+  await loadAll();
+  renderView('dashboard');
+}
+$('#loginBtn').onclick=async()=>{
+  const email=$('#loginEmail').value.trim(),password=$('#loginPassword').value;
+  $('#loginMsg').classList.add('hidden');
+  if(!email||!password){showLoginError({message:'Enter your email and password.'});return;}
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){showLoginError(error);return;}
+  await enter(data.session);
+};
+$('#logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('#hamb').onclick=()=>$('#sidebar').classList.toggle('open');
+$('#refreshBtn').onclick=async()=>{await loadAll();renderView(S.view)};
 sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')location.reload()});
-async function q(table,opts={}){let x=sb.from(table).select(opts.select||'*');if(opts.order)x=x.order(opts.order[0],{ascending:opts.order[1]??false});if(opts.limit)x=x.limit(opts.limit);if(opts.eq)for(const [k,v] of Object.entries(opts.eq))x=x.eq(k,v);const {data,error}=await x;if(error)throw error;return data||[]}
-async function loadAll(){try{const [shows,seasons,episodes,channels,playlist,schedule,live,content,cats,memberships,members,analytics,audit,polls,pollopts]=await Promise.all([
-q('shows',{order:['created_at',false]}),q('seasons',{order:['season_number',true]}),q('episodes',{order:['created_at',false],limit:1000}),q('tv_channels',{order:['sort_order',true]}),q('tv_channel_playlist',{order:['playlist_position',true]}),q('schedule_items',{order:['starts_at',true],limit:1500}),q('live_events',{order:['scheduled_start',true]}),q('content_items',{order:['created_at',false]}),q('content_categories',{order:['sort_order',true]}),q('memberships',{order:['created_at',false]}),q('member_profiles',{order:['created_at',false]}),q('analytics_events',{order:['created_at',false],limit:500}),q('admin_audit_log',{order:['created_at',false],limit:100}),q('polls',{order:['created_at',false]}),q('poll_options',{order:['sort_order',true]})]);S.cache={shows,seasons,episodes,channels,playlist,schedule,live,content,cats,memberships,members,analytics,audit,polls,pollopts};updateStats()}catch(e){toast(e.message||'Database load failed');console.error(e)}}
-function updateStats(){const c=S.cache;$('#stats').innerHTML=[['SHOWS',c.shows?.length||0,'published '+(c.shows?.filter(x=>x.is_published).length||0)],['EPISODES',c.episodes?.length||0,'published '+(c.episodes?.filter(x=>x.is_published).length||0)],['CHANNELS',c.channels?.filter(x=>x.is_active).length||0,'active TV channels'],['SCHEDULE',c.schedule?.filter(x=>new Date(x.ends_at||0)>new Date()).length||0,'future/current items']].map(x=>`<div class="stat"><div class="label">${x[0]}</div><div class="num">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('')}
+
+/* Safe table reads: one missing/denied optional table no longer kills the entire admin. */
+async function q(table,opts={}){
+  let x=sb.from(table).select(opts.select||'*');
+  if(opts.limit)x=x.limit(opts.limit);
+  if(opts.eq)for(const [k,v] of Object.entries(opts.eq))x=x.eq(k,v);
+  const {data,error}=await x;
+  if(error) throw error;
+  let rows=data||[];
+  if(opts.order&&opts.order[0]){
+    const key=opts.order[0],asc=opts.order[1]??false;
+    rows.sort((a,b)=>{
+      const av=a?.[key],bv=b?.[key];
+      if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return -1;
+      const an=Number(av),bn=Number(bv);
+      const cmp=(Number.isFinite(an)&&Number.isFinite(bn))?an-bn:String(av).localeCompare(String(bv));
+      return asc?cmp:-cmp;
+    });
+  }
+  return rows;
+}
+async function safeQ(name,table,opts={}){
+  try{return await q(table,opts)}catch(e){
+    console.warn(`CrowRules: ${table} unavailable`,e.message);
+    S.errors=S.errors||{}; S.errors[name]=e.message;
+    return [];
+  }
+}
+async function loadAll(){
+  S.errors={};
+  const [shows,seasons,episodes,channels,playlist,schedule,live,content,cats,memberships,members,analytics,audit,polls,pollopts]=await Promise.all([
+    safeQ('shows','shows',{order:['created_at',false]}),
+    safeQ('seasons','seasons',{order:['season_number',true]}),
+    safeQ('episodes','episodes',{order:['created_at',false],limit:1000}),
+    safeQ('channels','tv_channels',{order:['sort_order',true]}),
+    safeQ('playlist','tv_channel_playlist',{order:['playlist_position',true]}),
+    safeQ('schedule','schedule_items',{order:['starts_at',true],limit:1500}),
+    safeQ('live','live_events',{order:['scheduled_start',true]}),
+    safeQ('content','content_items',{order:['created_at',false]}),
+    safeQ('cats','content_categories',{order:['sort_order',true]}),
+    safeQ('memberships','memberships',{order:['created_at',false]}),
+    safeQ('members','member_profiles',{order:['created_at',false]}),
+    safeQ('analytics','analytics_events',{order:['created_at',false],limit:500}),
+    safeQ('audit','admin_audit_log',{order:['created_at',false],limit:100}),
+    safeQ('polls','polls',{order:['created_at',false]}),
+    safeQ('pollopts','poll_options',{order:['sort_order',true]})
+  ]);
+  S.cache={shows,seasons,episodes,channels,playlist,schedule,live,content,cats,memberships,members,analytics,audit,polls,pollopts};
+  updateStats();
+  const failed=Object.keys(S.errors);
+  if(failed.length) toast(`Loaded with ${failed.length} table warning(s). Check console.`);
+}
+
+function updateStats(){
+ const c=S.cache||{};
+ $('#stats').innerHTML=[
+  ['SHOWS',c.shows?.length||0,'published '+(c.shows?.filter(x=>x.is_published).length||0)],
+  ['EPISODES',c.episodes?.length||0,'published '+(c.episodes?.filter(x=>x.is_published).length||0)],
+  ['CHANNELS',c.channels?.filter(x=>x.is_active!==false).length||0,'active TV channels'],
+  ['SCHEDULE',c.schedule?.filter(x=>x.ends_at && new Date(x.ends_at)>new Date()).length||0,'future/current items']
+ ].map(x=>`<div class="stat"><div class="label">${x[0]}</div><div class="num">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');
+}
 const navMap={dashboard:'Dashboard',shows:'Shows',seasons:'Seasons',episodes:'Episodes',channels:'TV Channels',playlist:'Channel Playlist',schedule:'Schedule Items',live:'Live Events',content:'Content',categories:'Categories',polls:'Polls',memberships:'Memberships',members:'Members',analytics:'Analytics',audit:'Audit Log',settings:'Settings'};
 $$('.navbtn').forEach(b=>b.onclick=()=>{renderView(b.dataset.view);$('#sidebar').classList.remove('open')});$$('[data-viewgo]').forEach(b=>b.onclick=()=>renderView(b.dataset.viewgo));
 function renderView(v){S.view=v;$$('.view').forEach(x=>x.classList.remove('active'));$(`#view-${v}`).classList.add('active');$$('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').firstChild.textContent=navMap[v]+' ';if(v==='dashboard')renderDashboard();else if(v==='settings')renderSettings();else if(v==='analytics')renderAnalytics();else if(v==='audit')renderAudit();else if(v==='members')renderGeneric('members','Members','member_profiles');else if(v==='memberships')renderGeneric('memberships','Memberships','memberships');else if(v==='shows')renderShows();else if(v==='seasons')renderSeasons();else if(v==='episodes')renderEpisodes();else if(v==='channels')renderChannels();else if(v==='playlist')renderPlaylist();else if(v==='schedule')renderSchedule();else if(v==='live')renderLive();else if(v==='content')renderContent();else if(v==='categories')renderCategories();else if(v==='polls')renderPolls()}
@@ -150,7 +258,7 @@ function fieldHTML(f,row){const [id,label,type]=f,v=valueFor(row,id);if(type==='
 function wireFormExtras(table){if(table==='episodes'){$('#f_title')?.addEventListener('input',()=>{if(!$('#f_slug').value)$('#f_slug').value=slug($('#f_title').value)});$('#f_youtube_url')?.addEventListener('blur',()=>{if(!$('#f_youtube_thumbnail_url').value){const id=ytid($('#f_youtube_url').value);if(id)$('#f_youtube_thumbnail_url').value=`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}})}if(table==='shows'){$('#f_title')?.addEventListener('input',()=>{if(!$('#f_slug').value)$('#f_slug').value=slug($('#f_title').value)})}if(table==='content_categories'){$('#f_name')?.addEventListener('input',()=>{if(!$('#f_slug').value)$('#f_slug').value=slug($('#f_name').value)})}if(table==='content_items'){$('#f_title')?.addEventListener('input',()=>{if(!$('#f_slug').value)$('#f_slug').value=slug($('#f_title').value)})}}
 $('#modalClose').onclick=$('#modalCancel').onclick=()=>$('#modal').classList.remove('open');$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').classList.remove('open')});
 function ytid(url){try{const u=new URL(url);if(u.hostname.includes('youtu.be'))return u.pathname.slice(1).split('/')[0];if(u.searchParams.get('v'))return u.searchParams.get('v');if(u.pathname.includes('/embed/'))return u.pathname.split('/embed/')[1].split('/')[0];if(u.pathname.includes('/shorts/'))return u.pathname.split('/shorts/')[1].split('/')[0]}catch(_){}return null}
-async function saveForm(){const table=S.modalTable,schema=schemas[table];const row={};for(const [id,label,type] of schema.fields){const el=$('#f_'+id);if(!el)continue;let v=type==='bool'?el.checked:el.value;if(type==='number')v=v===''?null:Number(v);if(type==='datetime')v=v?new Date(v).toISOString():null;if(type==='json'){try{v=JSON.parse(v||'{}')}catch(e){return toast(`Invalid JSON in ${label}`)}}if(v===''&&['text','textarea'].includes(type))v=null;row[id]=v}if(table==='episodes'){if(!row.duration_seconds&&row.video_url){row.duration_seconds=null}if(row.show_id&&!row.season_number){const s=S.cache.seasons.find(x=>x.id===row.season_id);if(s)row.season_number=s.season_number}}if(table==='schedule_items'){if(!row.title&&row.episode_id){const e=S.cache.episodes.find(x=>x.id===row.episode_id);if(e)row.title=e.title}if(!row.description&&row.episode_id){const e=S.cache.episodes.find(x=>x.id===row.episode_id);if(e)row.description=e.description}if(!row.duration_seconds&&row.episode_id){const e=S.cache.episodes.find(x=>x.id===row.episode_id);if(e?.duration_seconds)row.duration_seconds=e.duration_seconds}if(row.starts_at&&row.duration_seconds&&!row.ends_at)row.ends_at=new Date(new Date(row.starts_at).getTime()+row.duration_seconds*1000).toISOString();if(!row.duration_seconds&&row.starts_at&&row.ends_at)row.duration_seconds=Math.round((new Date(row.ends_at)-new Date(row.starts_at))/1000)}}
+async function saveForm(){const table=S.modalTable,schema=schemas[table];const row={};for(const [id,label,type] of schema.fields){const el=$('#f_'+id);if(!el)continue;let v=type==='bool'?el.checked:el.value;if(type==='number')v=v===''?null:Number(v);if(type==='datetime')v=v?new Date(v).toISOString():null;if(type==='json'){try{v=JSON.parse(v||'{}')}catch(e){return toast(`Invalid JSON in ${label}`)}}if(v===''&&['text','textarea'].includes(type))v=null;row[id]=v}if(table==='episodes'){if(!row.duration_seconds&&row.video_url){row.duration_seconds=null}if(row.show_id&&!row.season_number){const s=S.cache.seasons.find(x=>x.id===row.season_id);if(s)row.season_number=s.season_number}}if(table==='schedule_items'){if(!row.title&&row.episode_id){const e=S.cache.episodes.find(x=>x.id===row.episode_id);if(e)row.title=e.title}if(!row.description&&row.episode_id){const e=S.cache.episodes.find(x=>x.id===row.episode_id);if(e)row.description=e.description}if(!row.duration_seconds&&row.episode_id){const e=S.cache.episodes.find(x=>x.id===row.episode_id);if(e?.duration_seconds)row.duration_seconds=e.duration_seconds}if(row.starts_at&&row.duration_seconds&&!row.ends_at)row.ends_at=new Date(new Date(row.starts_at).getTime()+row.duration_seconds*1000).toISOString();if(!row.duration_seconds&&row.starts_at&&row.ends_at)row.duration_seconds=Math.round((new Date(row.ends_at)-new Date(row.starts_at))/1000)}
 try{let old=null;if(S.modalMode==='edit'){const source=sourceFor(table);old=table==='site_settings'?(S.cache.settings||[]).find(x=>x.key===S.editing):(S.cache[source]||[]).find(x=>String(x.id)===String(S.editing));const key=table==='site_settings'?'key':'id';const {data,error}=await sb.from(table).update(row).eq(key,S.editing).select().single();if(error)throw error;await audit('UPDATE',table,data.id||S.editing,old,data)}else{const {data,error}=await sb.from(table).insert(row).select().single();if(error)throw error;await audit('INSERT',table,data.id||null,null,data)}$('#modal').classList.remove('open');toast('Saved successfully');await loadAll();renderView(S.view)}catch(e){toast(e.message||'Save failed');console.error(e)}}
 $('#modalSave').onclick=saveForm;
 async function removeRow(table,id){if(!confirm('Delete this record? This cannot be undone.'))return;try{let source=sourceFor(table),old=table==='site_settings'?(S.cache.settings||[]).find(x=>x.key===id):(S.cache[source]||[]).find(x=>String(x.id)===String(id));const key=table==='site_settings'?'key':'id';const {error}=await sb.from(table).delete().eq(key,id);if(error)throw error;await audit('DELETE',table,id,old,null);toast('Deleted');await loadAll();renderView(S.view)}catch(e){toast(e.message||'Delete failed')}}
