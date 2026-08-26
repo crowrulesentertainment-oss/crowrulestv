@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>CrowRules Entertainment Admin Pro v3.0</title>
+<title>CrowRules Entertainment Admin Pro v3.1</title>
 
 <meta name="theme-color" content="#080808">
 <meta name="description"
@@ -1070,6 +1070,11 @@ pre{
                 Analytics
             </button>
 
+            <button data-page="watchtime">
+                <span class="nav-icon">◴</span>
+                Watch Time
+            </button>
+
             <div class="nav-section">
                 CrowRules Entertainment
             </div>
@@ -1159,6 +1164,15 @@ pre{
             <button data-page="points">
                 <span class="nav-icon">★</span>
                 Points
+            </button>
+
+            <div class="nav-section">
+                Memorial Monitoring
+            </div>
+
+            <button data-page="celebrityMemorials">
+                <span class="nav-icon">✦</span>
+                Celebrity Memorial Monitor
             </button>
 
             <div class="nav-section">
@@ -2616,6 +2630,29 @@ pre{
 </div>
 
 
+<!-- WATCH TIME -->
+<div id="page-watchtime" class="page">
+  <div class="section-header"><div><h2 class="section-title">Watch Time Analytics</h2><div class="section-description">Dedicated watch-time reporting backed by Supabase analytics views.</div></div><div class="actions"><button class="btn btn-small" onclick="loadWatchTime()">↻ Refresh</button></div></div>
+  <div class="grid grid-4">
+    <div class="card"><div class="card-title">Total Watch Time</div><div id="wtHours" class="metric purple">0h</div><div id="wtSeconds" class="metric-sub">0 seconds</div></div>
+    <div class="card"><div class="card-title">Total Views</div><div id="wtViews" class="metric">0</div><div class="metric-sub">content sessions</div></div>
+    <div class="card"><div class="card-title">Average Watch</div><div id="wtAverage" class="metric blue">0s</div><div class="metric-sub">per session</div></div>
+    <div class="card"><div class="card-title">Engaged Sessions</div><div id="wtEngaged" class="metric good">0</div><div class="metric-sub">30+ seconds</div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-title">Daily Watch Time</div><div id="wtDaily" class="table-wrap" style="margin-top:12px"></div></div>
+</div>
+
+<!-- CELEBRITY MEMORIAL MONITOR -->
+<div id="page-celebrityMemorials" class="page">
+  <div class="section-header"><div><h2 class="section-title">Celebrity Memorial Monitor</h2><div class="section-description">Review automatically discovered celebrity-death candidates before publication.</div></div><div class="actions"><button class="btn btn-primary" onclick="runCelebrityDiscovery()">Run Monitor</button><button class="btn btn-small" onclick="loadCelebrityMemorials()">↻ Refresh</button></div></div>
+  <div class="grid grid-3">
+    <div class="card"><div class="card-title">Pending Verification</div><div id="cmPending" class="metric warn">0</div></div>
+    <div class="card"><div class="card-title">Published</div><div id="cmPublished" class="metric good">0</div></div>
+    <div class="card"><div class="card-title">Discovery Runs</div><div id="cmRuns" class="metric blue">0</div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-title">Recent Candidates</div><div id="cmCandidates" class="table-wrap" style="margin-top:12px"></div></div>
+</div>
+
 <script>
 /* ============================================================
    CROW RULES TV ADMIN PRO v2.2
@@ -2994,6 +3031,8 @@ const pageNames = {
     dashboard:"Dashboard",
     monitor:"Live Monitor",
     analytics:"Analytics",
+    watchtime:"Watch Time",
+    celebrityMemorials:"Celebrity Memorial Monitor",
     entertainment:"CrowRules Entertainment",
     celebrityDeaths:"Celebrity Memorials",
     branches:"Entertainment Branches",
@@ -3088,6 +3127,14 @@ function openPage(page){
 
         case "analytics":
             loadAnalytics();
+            break;
+
+        case "watchtime":
+            loadWatchTime();
+            break;
+
+        case "celebrityMemorials":
+            loadCelebrityMemorials();
             break;
 
         case "entertainment":
@@ -3266,6 +3313,14 @@ $("refreshBtn")
 
                 case "analytics":
                     loadAnalytics();
+                    break;
+
+                case "watchtime":
+                    loadWatchTime();
+                    break;
+
+                case "celebrityMemorials":
+                    loadCelebrityMemorials();
                     break;
 
                 case "members":
@@ -4037,6 +4092,44 @@ function selectMonitorChannel(c,silent=false){
    ANALYTICS
 ============================================================ */
 
+async function loadWatchTime(){
+  try{
+    const {data,error}=await sb.from("admin_watch_time_summary").select("*").single();
+    if(error) throw error;
+    $("wtHours").textContent=fmtNumber(Number(data.total_watch_hours||0))+"h";
+    $("wtSeconds").textContent=fmtNumber(Number(data.total_watch_seconds||0))+" seconds";
+    $("wtViews").textContent=fmtNumber(Number(data.total_views||0));
+    $("wtAverage").textContent=fmtDuration(Number(data.average_watch_seconds||0));
+    $("wtEngaged").textContent=fmtNumber(Number(data.engaged_sessions||0));
+    const r=await sb.from("admin_watch_time_daily").select("*").order("watch_date",{ascending:false}).limit(30);
+    if(r.error) throw r.error;
+    $("wtDaily").innerHTML=r.data?.length?`<table><thead><tr><th>Date</th><th>Views</th><th>Minutes</th><th>Hours</th></tr></thead><tbody>${r.data.map(x=>`<tr><td>${escapeHtml(x.watch_date||"")}</td><td>${fmtNumber(x.views)}</td><td>${fmtNumber(x.watch_minutes)}</td><td>${fmtNumber(x.watch_hours)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">No watch-time data yet.</div>`;
+  }catch(e){ toast("Watch time failed: "+e.message,"error"); }
+}
+
+async function loadCelebrityMemorials(){
+  try{
+    const [p,pub,runs,c]=await Promise.all([
+      sb.from("celebrity_deaths").select("id",{count:"exact",head:true}).eq("verification_status","pending"),
+      sb.from("celebrity_deaths").select("id",{count:"exact",head:true}).eq("verification_status","verified").eq("publication_status","published"),
+      sb.from("celebrity_death_discovery_runs").select("id",{count:"exact",head:true}),
+      sb.from("celebrity_deaths").select("id,person_name,date_of_death,verification_status,publication_status,auto_discovered,created_at").order("created_at",{ascending:false}).limit(50)
+    ]);
+    for(const x of [p,pub,runs,c]) if(x.error) throw x.error;
+    $("cmPending").textContent=fmtNumber(p.count||0); $("cmPublished").textContent=fmtNumber(pub.count||0); $("cmRuns").textContent=fmtNumber(runs.count||0);
+    $("cmCandidates").innerHTML=c.data?.length?`<table><thead><tr><th>Name</th><th>Date of Death</th><th>Verification</th><th>Publication</th><th>Auto</th></tr></thead><tbody>${c.data.map(x=>`<tr><td>${escapeHtml(x.person_name||"")}</td><td>${fmtDate(x.date_of_death)}</td><td>${escapeHtml(x.verification_status||"")}</td><td>${escapeHtml(x.publication_status||"")}</td><td>${x.auto_discovered?'<span class="badge blue">YES</span>':'<span class="badge">NO</span>'}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">No memorial candidates.</div>`;
+  }catch(e){ toast("Celebrity memorial monitor failed: "+e.message,"error"); }
+}
+
+async function runCelebrityDiscovery(){
+  try{
+    const {data,error}=await sb.functions.invoke("celebrity-death-discovery",{body:{}});
+    if(error) throw error;
+    toast("Celebrity memorial monitor completed.","success");
+    loadCelebrityMemorials();
+  }catch(e){ toast("Celebrity memorial monitor failed: "+e.message,"error"); }
+}
+
 async function loadAnalytics(){
 
     try{
@@ -4073,8 +4166,13 @@ async function loadAnalytics(){
         $("aVisitors").textContent =
             fmtNumber(data.unique_visitors);
 
-        $("aWatch").textContent =
-            fmtDuration(data.watch_seconds);
+        if(data && data.watch_seconds != null){
+            $("aWatch").textContent = fmtDuration(data.watch_seconds);
+        }else{
+            const wt = await sb.from("admin_watch_time_summary").select("total_watch_seconds").single();
+            if(wt.error) throw wt.error;
+            $("aWatch").textContent = fmtDuration(wt.data?.total_watch_seconds || 0);
+        }
 
 
         renderAnalyticsChart(
@@ -4304,6 +4402,8 @@ const tableConfig = {
             "end_time",
             "starts_at",
             "ends_at",
+            "start_time",
+            "end_time",
             "duration_seconds",
             "item_type",
             "status",
