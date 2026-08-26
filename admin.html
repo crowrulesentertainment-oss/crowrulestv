@@ -4,2317 +4,6085 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>CrowRules TV Admin Pro v1.3</title>
+<title>CrowRules TV Admin Pro v1.5</title>
 
-<meta
-  name="description"
-  content="CrowRules TV Admin Pro — Streaming Network Control Center"
-/>
+<meta name="theme-color" content="#080808">
+<meta name="description"
+      content="CrowRules TV Admin Pro — Streaming Network CMS, Programming, Playback, Analytics, Members and Control Center">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap"
-  rel="stylesheet"
->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+      rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
-  --bg:#050608;
-  --bg2:#0a0d12;
-  --panel:#0d1118;
-  --panel2:#111722;
-  --line:#1d2633;
-  --text:#f4f7fb;
-  --muted:#8995a5;
-  --accent:#7c3cff;
-  --accent2:#00d9ff;
-  --green:#22c55e;
-  --yellow:#f59e0b;
-  --red:#ef4444;
-  --shadow:0 20px 70px rgba(0,0,0,.45);
-  --radius:16px;
+    --bg:#070707;
+    --bg2:#0d0d0f;
+    --panel:#111114;
+    --panel2:#16161a;
+    --panel3:#1b1b20;
+    --line:#292930;
+    --text:#f5f5f7;
+    --muted:#8e8e99;
+    --accent:#9b59ff;
+    --accent2:#6d35d9;
+    --green:#22c55e;
+    --yellow:#f59e0b;
+    --red:#ef4444;
+    --blue:#3b82f6;
+    --cyan:#06b6d4;
+    --shadow:0 15px 45px rgba(0,0,0,.35);
+    --radius:16px;
+    --sidebar:260px;
 }
 
 *{
-  box-sizing:border-box;
+    box-sizing:border-box;
 }
 
 html,
 body{
-  margin:0;
-  min-height:100%;
-  background:
-    radial-gradient(circle at 15% 0%,rgba(124,60,255,.13),transparent 28%),
-    radial-gradient(circle at 90% 10%,rgba(0,217,255,.08),transparent 25%),
-    var(--bg);
-  color:var(--text);
-  font-family:Montserrat,Arial,sans-serif;
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background:
+        radial-gradient(circle at top right,rgba(116,54,217,.12),transparent 30%),
+        radial-gradient(circle at bottom left,rgba(0,210,255,.06),transparent 30%),
+        var(--bg);
+    color:var(--text);
+    font-family:Montserrat,Arial,sans-serif;
 }
 
 button,
 input,
-select{
-  font:inherit;
+select,
+textarea{
+    font:inherit;
 }
 
 button{
-  cursor:pointer;
+    cursor:pointer;
 }
 
-.app{
-  display:flex;
-  min-height:100vh;
+a{
+    color:inherit;
+    text-decoration:none;
 }
 
-.sidebar{
-  width:270px;
-  min-width:270px;
-  background:rgba(6,8,12,.94);
-  border-right:1px solid var(--line);
-  position:fixed;
-  inset:0 auto 0 0;
-  z-index:50;
-  display:flex;
-  flex-direction:column;
+/* =========================
+   LOGIN
+========================= */
+
+.login-screen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        linear-gradient(rgba(0,0,0,.8),rgba(0,0,0,.96)),
+        radial-gradient(circle at center,#3a1675 0,#080808 60%);
+}
+
+.login-box{
+    width:min(460px,92vw);
+    padding:34px;
+    background:rgba(15,15,18,.95);
+    border:1px solid var(--line);
+    border-radius:24px;
+    box-shadow:var(--shadow);
 }
 
 .brand{
-  padding:24px 20px;
-  border-bottom:1px solid var(--line);
+    font-family:Orbitron,sans-serif;
+    font-weight:900;
+    letter-spacing:2px;
 }
 
-.brand-title{
-  font-family:Orbitron,sans-serif;
-  font-weight:800;
-  letter-spacing:1px;
-  font-size:20px;
+.brand span{
+    color:var(--accent);
 }
 
-.brand-sub{
-  margin-top:6px;
-  font-size:10px;
-  color:var(--muted);
-  letter-spacing:2px;
+.login-title{
+    margin:8px 0 4px;
+    font-size:28px;
 }
 
-.nav{
-  padding:15px 12px;
-  overflow:auto;
+.login-sub{
+    color:var(--muted);
+    margin-bottom:28px;
 }
 
-.nav button{
-  width:100%;
-  border:0;
-  background:transparent;
-  color:var(--muted);
-  padding:12px 14px;
-  margin:3px 0;
-  border-radius:10px;
-  text-align:left;
-  font-weight:700;
-  transition:.2s;
+.form-group{
+    margin-bottom:16px;
 }
 
-.nav button:hover,
-.nav button.active{
-  background:linear-gradient(
-    90deg,
-    rgba(124,60,255,.18),
-    rgba(0,217,255,.05)
-  );
-  color:white;
+.form-group label{
+    display:block;
+    margin-bottom:7px;
+    color:#bcbcc6;
+    font-size:13px;
+    font-weight:700;
 }
 
-.nav-icon{
-  display:inline-block;
-  width:25px;
+input,
+select,
+textarea{
+    width:100%;
+    background:#0a0a0d;
+    color:var(--text);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 13px;
+    outline:none;
 }
 
-.sidebar-bottom{
-  margin-top:auto;
-  padding:15px;
-  border-top:1px solid var(--line);
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(155,89,255,.12);
 }
 
-.status-pill{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 12px var(--green);
-}
-
-.main{
-  margin-left:270px;
-  width:calc(100% - 270px);
-}
-
-.topbar{
-  height:72px;
-  position:sticky;
-  top:0;
-  z-index:40;
-  backdrop-filter:blur(18px);
-  background:rgba(5,6,8,.8);
-  border-bottom:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 25px;
-}
-
-.top-title{
-  font-family:Orbitron,sans-serif;
-  font-size:15px;
-  font-weight:700;
-}
-
-.top-right{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.admin-badge{
-  padding:8px 12px;
-  border:1px solid rgba(124,60,255,.35);
-  background:rgba(124,60,255,.12);
-  border-radius:999px;
-  font-size:11px;
-  font-weight:800;
-}
-
-.container{
-  padding:25px;
-  max-width:1800px;
-  margin:auto;
-}
-
-.view{
-  display:none;
-}
-
-.view.active{
-  display:block;
-}
-
-.section-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.section-head h1,
-.section-head h2{
-  margin:0;
-  font-family:Orbitron,sans-serif;
-}
-
-.section-head p{
-  color:var(--muted);
-  margin:7px 0 0;
-  font-size:13px;
-}
-
-.controls{
-  display:flex;
-  gap:9px;
-  flex-wrap:wrap;
+textarea{
+    min-height:120px;
+    resize:vertical;
 }
 
 .btn{
-  border:1px solid var(--line);
-  background:#10151e;
-  color:white;
-  padding:10px 14px;
-  border-radius:10px;
-  font-weight:700;
+    border:0;
+    border-radius:10px;
+    padding:10px 15px;
+    color:white;
+    background:var(--panel3);
+    border:1px solid var(--line);
+    font-weight:700;
 }
 
 .btn:hover{
-  border-color:#39475a;
+    filter:brightness(1.15);
 }
 
-.btn.primary{
-  background:linear-gradient(135deg,#7c3cff,#5120ba);
-  border-color:#7c3cff;
+.btn-primary{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-color:transparent;
 }
 
-.btn.green{
-  background:rgba(34,197,94,.13);
-  border-color:rgba(34,197,94,.35);
+.btn-success{
+    background:#145c31;
+    border-color:#1d7d43;
 }
 
-.btn.danger{
-  background:rgba(239,68,68,.12);
-  border-color:rgba(239,68,68,.3);
+.btn-danger{
+    background:#5d1d25;
+    border-color:#8d2835;
 }
 
-select,
-input{
-  background:#0d1219;
-  border:1px solid var(--line);
-  color:white;
-  border-radius:9px;
-  padding:10px 12px;
-  outline:none;
+.btn-blue{
+    background:#143e68;
+    border-color:#205d95;
+}
+
+.btn-small{
+    padding:7px 10px;
+    font-size:12px;
+}
+
+.login-error{
+    color:#ff8181;
+    margin-top:12px;
+    min-height:18px;
+    font-size:13px;
+}
+
+/* =========================
+   APP
+========================= */
+
+.app{
+    display:none;
+    min-height:100vh;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:var(--sidebar);
+    background:
+        linear-gradient(180deg,#0d0d10,#080809);
+    border-right:1px solid var(--line);
+    z-index:100;
+    overflow:auto;
+}
+
+.sidebar-header{
+    padding:23px 20px;
+    border-bottom:1px solid var(--line);
+}
+
+.sidebar-brand{
+    font-family:Orbitron,sans-serif;
+    font-size:17px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.sidebar-version{
+    margin-top:5px;
+    font-size:10px;
+    color:var(--accent);
+    letter-spacing:1px;
+}
+
+.nav{
+    padding:12px;
+}
+
+.nav-section{
+    margin:18px 9px 7px;
+    color:#55555f;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.nav button{
+    display:flex;
+    width:100%;
+    align-items:center;
+    gap:11px;
+    margin:3px 0;
+    padding:11px 12px;
+    border:0;
+    background:transparent;
+    color:#9c9ca7;
+    border-radius:10px;
+    text-align:left;
+    font-weight:600;
+    font-size:13px;
+}
+
+.nav button:hover{
+    background:#15151a;
+    color:white;
+}
+
+.nav button.active{
+    background:linear-gradient(
+        90deg,
+        rgba(155,89,255,.23),
+        rgba(155,89,255,.05)
+    );
+    color:white;
+    border-left:3px solid var(--accent);
+}
+
+.nav-icon{
+    width:20px;
+    text-align:center;
+}
+
+.main{
+    margin-left:var(--sidebar);
+    min-height:100vh;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:90;
+    height:68px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    background:rgba(8,8,10,.88);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid var(--line);
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.page-title{
+    font-family:Orbitron,sans-serif;
+    font-size:18px;
+    font-weight:800;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 10px var(--green);
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.admin-user{
+    color:#aaaab4;
+    font-size:12px;
+}
+
+.content{
+    padding:25px;
+}
+
+/* =========================
+   PANELS
+========================= */
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+.section-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.section-title{
+    font-family:Orbitron,sans-serif;
+    font-size:21px;
+    margin:0;
+}
+
+.section-description{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:7px;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
 }
 
 .grid{
-  display:grid;
-  gap:15px;
+    display:grid;
+    gap:15px;
 }
 
-.metrics{
-  grid-template-columns:repeat(5,minmax(0,1fr));
+.grid-2{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.grid-3{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.grid-4{
+    grid-template-columns:repeat(4,minmax(0,1fr));
 }
 
 .card{
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.025),
-      rgba(255,255,255,.008)
-    ),
-    var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
+    background:linear-gradient(180deg,#111115,#0e0e11);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,.18);
+}
+
+.card-title{
+    font-size:12px;
+    font-weight:800;
+    color:#a4a4ae;
+    text-transform:uppercase;
+    letter-spacing:1px;
 }
 
 .metric{
-  padding:18px;
-  min-height:125px;
-}
-
-.metric-label{
-  color:var(--muted);
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-.metric-value{
-  margin-top:13px;
-  font-family:Orbitron,sans-serif;
-  font-size:27px;
-  font-weight:800;
+    margin-top:8px;
+    font-family:Orbitron,sans-serif;
+    font-size:27px;
+    font-weight:800;
 }
 
 .metric-sub{
-  margin-top:8px;
-  color:var(--muted);
-  font-size:11px;
+    margin-top:5px;
+    color:#777781;
+    font-size:11px;
 }
 
-.metric.accent{
-  border-color:rgba(124,60,255,.35);
+.metric.good{
+    color:var(--green);
 }
 
-.metric.cyan{
-  border-color:rgba(0,217,255,.25);
+.metric.warn{
+    color:var(--yellow);
 }
 
-.metric.green{
-  border-color:rgba(34,197,94,.25);
+.metric.bad{
+    color:var(--red);
 }
 
-.analytics-layout{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:15px;
-  margin-top:15px;
+.metric.blue{
+    color:var(--blue);
 }
 
-.panel{
-  padding:20px;
+.metric.purple{
+    color:#c59cff;
 }
 
-.panel-title{
-  font-family:Orbitron,sans-serif;
-  font-size:13px;
-  font-weight:800;
-  margin-bottom:16px;
+.badge{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 8px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:800;
+    background:#202027;
+    color:#bbb;
 }
 
-.chart{
-  width:100%;
-  height:280px;
-  display:flex;
-  align-items:flex-end;
-  gap:7px;
-  padding-top:20px;
-  overflow:hidden;
+.badge.green{
+    background:#123b24;
+    color:#67e39a;
 }
 
-.bar-wrap{
-  flex:1;
-  min-width:5px;
-  height:100%;
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
+.badge.red{
+    background:#42181e;
+    color:#ff929b;
 }
 
-.bar{
-  width:100%;
-  max-width:26px;
-  min-height:2px;
-  border-radius:5px 5px 0 0;
-  background:linear-gradient(180deg,var(--accent2),var(--accent));
-  box-shadow:0 0 15px rgba(124,60,255,.15);
+.badge.yellow{
+    background:#493516;
+    color:#ffc66b;
 }
 
-.bar-label{
-  margin-top:6px;
-  font-size:8px;
-  color:var(--muted);
-  text-align:center;
+.badge.blue{
+    background:#142e4a;
+    color:#75b9ff;
 }
 
-.list{
-  display:flex;
-  flex-direction:column;
-  gap:9px;
+.badge.purple{
+    background:#301b49;
+    color:#d3a7ff;
 }
 
-.list-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:11px 12px;
-  border:1px solid var(--line);
-  background:#0a0e14;
-  border-radius:10px;
-}
-
-.list-main{
-  min-width:0;
-}
-
-.list-name{
-  font-weight:700;
-  font-size:12px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.list-sub{
-  color:var(--muted);
-  font-size:10px;
-  margin-top:4px;
-}
-
-.list-value{
-  font-family:Orbitron,sans-serif;
-  font-size:12px;
-  white-space:nowrap;
-}
-
-.monitor{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:15px;
-}
-
-.video-card{
-  overflow:hidden;
-}
-
-.video-wrap{
-  background:#000;
-  aspect-ratio:16/9;
-  position:relative;
-}
-
-.video-wrap iframe,
-.video-wrap video{
-  width:100%;
-  height:100%;
-  border:0;
-  display:block;
-}
-
-.monitor-info{
-  padding:18px;
-}
-
-.live-status{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:7px 10px;
-  border-radius:999px;
-  background:rgba(239,68,68,.12);
-  border:1px solid rgba(239,68,68,.25);
-  color:#ff7777;
-  font-size:10px;
-  font-weight:800;
-}
+/* =========================
+   TABLES
+========================= */
 
 .table-wrap{
-  overflow:auto;
+    width:100%;
+    overflow:auto;
+    border:1px solid var(--line);
+    border-radius:14px;
 }
 
 table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,
-td{
-  padding:12px 10px;
-  border-bottom:1px solid var(--line);
-  text-align:left;
-  font-size:11px;
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
 }
 
 th{
-  color:var(--muted);
-  text-transform:uppercase;
-  letter-spacing:.7px;
-  font-size:9px;
+    background:#15151a;
+    color:#777781;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    padding:12px;
+    text-align:left;
+    white-space:nowrap;
 }
 
 td{
-  color:#e7ebf0;
+    border-top:1px solid #202026;
+    padding:11px 12px;
+    font-size:12px;
+    color:#d0d0d6;
+    vertical-align:middle;
 }
 
+tr:hover td{
+    background:#121216;
+}
+
+.row-actions{
+    display:flex;
+    gap:5px;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.hero{
+    padding:25px;
+    border-radius:20px;
+    margin-bottom:18px;
+    background:
+        radial-gradient(circle at right top,rgba(155,89,255,.24),transparent 35%),
+        linear-gradient(135deg,#111117,#0c0c0f);
+    border:1px solid var(--line);
+}
+
+.hero h1{
+    margin:0;
+    font-family:Orbitron,sans-serif;
+    font-size:28px;
+}
+
+.hero p{
+    color:var(--muted);
+    max-width:850px;
+    line-height:1.7;
+    font-size:13px;
+}
+
+.health-list{
+    display:grid;
+    gap:9px;
+}
+
+.health-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 12px;
+    border-radius:10px;
+    background:#0b0b0e;
+    border:1px solid #1c1c22;
+}
+
+.health-left{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.health-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+}
+
+.health-dot.good{
+    background:var(--green);
+    box-shadow:0 0 10px rgba(34,197,94,.5);
+}
+
+.health-dot.warn{
+    background:var(--yellow);
+}
+
+.health-dot.bad{
+    background:var(--red);
+}
+
+/* =========================
+   LIVE MONITOR
+========================= */
+
+.monitor{
+    display:grid;
+    grid-template-columns:minmax(0,2fr) minmax(280px,1fr);
+    gap:16px;
+}
+
+.player-box{
+    background:#000;
+    border:1px solid var(--line);
+    border-radius:15px;
+    overflow:hidden;
+    min-height:350px;
+    position:relative;
+}
+
+.player-box video,
+.player-box iframe{
+    width:100%;
+    height:100%;
+    min-height:400px;
+    display:block;
+    border:0;
+}
+
+.player-empty{
+    min-height:400px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#666;
+    text-align:center;
+    padding:30px;
+}
+
+.monitor-info{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.now-card{
+    background:#0d0d10;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:15px;
+}
+
+.now-title{
+    font-family:Orbitron,sans-serif;
+    font-size:16px;
+    margin:7px 0;
+}
+
+.now-meta{
+    color:#888892;
+    font-size:11px;
+    line-height:1.7;
+}
+
+/* =========================
+   LEADERBOARD
+========================= */
+
 .rank{
-  font-family:Orbitron,sans-serif;
-  font-weight:800;
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#19191f;
+    font-family:Orbitron,sans-serif;
+    font-weight:800;
+}
+
+.member{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.avatar{
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#222;
+    border:1px solid var(--line);
+}
+
+.member-name{
+    font-weight:700;
+    font-size:12px;
+}
+
+.member-sub{
+    color:#70707a;
+    font-size:10px;
+    margin-top:2px;
 }
 
 .points{
-  color:#facc15;
-  font-family:Orbitron,sans-serif;
-  font-weight:800;
+    font-family:Orbitron,sans-serif;
+    color:#c59cff;
+    font-weight:800;
 }
 
-.status{
-  display:inline-flex;
-  padding:5px 8px;
-  border-radius:999px;
-  font-size:9px;
-  font-weight:800;
+/* =========================
+   CHART
+========================= */
+
+.chart{
+    width:100%;
+    height:240px;
+    display:flex;
+    align-items:flex-end;
+    gap:5px;
+    padding-top:20px;
 }
 
-.status.live{
-  color:#65f28a;
-  background:rgba(34,197,94,.1);
+.bar{
+    flex:1;
+    min-width:4px;
+    border-radius:5px 5px 0 0;
+    background:linear-gradient(180deg,#b77dff,#5525a3);
+    position:relative;
 }
 
-.status.off{
-  color:#ff8a8a;
-  background:rgba(239,68,68,.1);
+.bar:hover{
+    filter:brightness(1.3);
 }
 
-.empty{
-  color:var(--muted);
-  text-align:center;
-  padding:30px;
+.bar span{
+    position:absolute;
+    bottom:100%;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:8px;
+    color:#777;
+    white-space:nowrap;
 }
 
-.loading{
-  color:var(--muted);
-  padding:25px;
-  text-align:center;
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:500;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(8px);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-box{
+    width:min(900px,96vw);
+    max-height:90vh;
+    overflow:auto;
+    background:#111115;
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+}
+
+.modal-header{
+    padding:17px 20px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.modal-header h3{
+    margin:0;
+    font-family:Orbitron,sans-serif;
+    font-size:16px;
+}
+
+.modal-body{
+    padding:20px;
+}
+
+.modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    padding:15px 20px;
+    border-top:1px solid var(--line);
+}
+
+/* =========================
+   TOAST
+========================= */
+
+.toast-container{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    z-index:10000;
+    display:grid;
+    gap:8px;
 }
 
 .toast{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  background:#111823;
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:14px 16px;
-  z-index:100;
-  box-shadow:var(--shadow);
-  display:none;
-  max-width:380px;
-  font-size:12px;
+    min-width:280px;
+    max-width:420px;
+    padding:13px 15px;
+    background:#15151a;
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    font-size:12px;
 }
 
-.toast.show{
-  display:block;
+.toast.success{
+    border-left-color:var(--green);
 }
 
-.error{
-  color:#ff8888;
+.toast.error{
+    border-left-color:var(--red);
 }
 
-.good{
-  color:#6ef28e;
+.toast.warn{
+    border-left-color:var(--yellow);
 }
 
-@media(max-width:1200px){
-  .metrics{
-    grid-template-columns:repeat(3,1fr);
-  }
+/* =========================
+   MOBILE
+========================= */
 
-  .analytics-layout,
-  .monitor{
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width:800px){
-  .sidebar{
-    width:70px;
-    min-width:70px;
-  }
-
-  .brand-title,
-  .brand-sub,
-  .nav button span,
-  .sidebar-bottom{
+.mobile-toggle{
     display:none;
-  }
-
-  .nav button{
-    text-align:center;
-  }
-
-  .main{
-    margin-left:70px;
-    width:calc(100% - 70px);
-  }
-
-  .container{
-    padding:15px;
-  }
-
-  .metrics{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .topbar{
-    padding:0 14px;
-  }
 }
 
-@media(max-width:500px){
-  .metrics{
-    grid-template-columns:1fr;
-  }
+@media(max-width:1000px){
 
-  .section-head{
-    align-items:flex-start;
-    flex-direction:column;
-  }
+    :root{
+        --sidebar:0px;
+    }
+
+    .sidebar{
+        width:270px;
+        transform:translateX(-100%);
+        transition:.25s;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .mobile-toggle{
+        display:block;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .grid-4{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .monitor{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:650px){
+
+    .content{
+        padding:14px;
+    }
+
+    .topbar{
+        padding:0 14px;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4{
+        grid-template-columns:1fr;
+    }
+
+    .admin-user{
+        display:none;
+    }
+
+    .section-header{
+        flex-direction:column;
+    }
+}
+
+/* =========================
+   UTILITY
+========================= */
+
+.hidden{
+    display:none!important;
+}
+
+.muted{
+    color:var(--muted);
+}
+
+.text-green{
+    color:var(--green);
+}
+
+.text-red{
+    color:var(--red);
+}
+
+.text-yellow{
+    color:var(--yellow);
+}
+
+.text-purple{
+    color:#c59cff;
+}
+
+.loading{
+    padding:30px;
+    text-align:center;
+    color:#666;
+}
+
+.empty{
+    padding:30px;
+    text-align:center;
+    color:#666;
+}
+
+.code{
+    font-family:monospace;
+    color:#b8b8c2;
+}
+
+.search-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+}
+
+.search-row input{
+    max-width:400px;
+}
+
+pre{
+    white-space:pre-wrap;
+    word-break:break-word;
+    background:#08080b;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:15px;
+    color:#bdbdc7;
+    font-size:11px;
+    max-height:500px;
+    overflow:auto;
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<!-- =========================
+     LOGIN
+========================= -->
 
-  <aside class="sidebar">
+<div id="loginScreen" class="login-screen">
 
-    <div class="brand">
-      <div class="brand-title">CROWRULES TV</div>
-      <div class="brand-sub">ADMIN PRO v1.3</div>
-    </div>
+    <div class="login-box">
 
-    <nav class="nav">
-
-      <button class="active" data-view="dashboard">
-        <span class="nav-icon">▣</span>
-        <span>Dashboard</span>
-      </button>
-
-      <button data-view="analytics">
-        <span class="nav-icon">◒</span>
-        <span>Analytics</span>
-      </button>
-
-      <button data-view="monitor">
-        <span class="nav-icon">●</span>
-        <span>Live Monitor</span>
-      </button>
-
-      <button data-view="members">
-        <span class="nav-icon">♟</span>
-        <span>Members</span>
-      </button>
-
-      <button data-view="playback">
-        <span class="nav-icon">▶</span>
-        <span>Playback</span>
-      </button>
-
-    </nav>
-
-    <div class="sidebar-bottom">
-      <div class="status-pill">
-        <span class="dot"></span>
-        <span>Supabase Connected</span>
-      </div>
-    </div>
-
-  </aside>
-
-  <main class="main">
-
-    <header class="topbar">
-
-      <div class="top-title">
-        CROW RULES TV / CONTROL CENTER
-      </div>
-
-      <div class="top-right">
-        <div class="admin-badge">
-          ADMIN PRO
+        <div class="brand">
+            CROW<span>RULES</span> TV
         </div>
 
-        <button class="btn" id="refreshBtn">
-          Refresh
-        </button>
-      </div>
+        <h1 class="login-title">
+            Admin Pro
+        </h1>
 
-    </header>
-
-    <div class="container">
-
-      <!-- DASHBOARD -->
-
-      <section id="view-dashboard" class="view active">
-
-        <div class="section-head">
-
-          <div>
-            <h1>Dashboard</h1>
-            <p>
-              CrowRules TV network health and real-time statistics.
-            </p>
-          </div>
-
-          <div class="controls">
-            <select id="dashboardPeriod">
-              <option value="1">24 Hours</option>
-              <option value="7">7 Days</option>
-              <option value="30" selected>30 Days</option>
-              <option value="90">90 Days</option>
-            </select>
-          </div>
-
+        <div class="login-sub">
+            v1.5 Streaming Network Control Center
         </div>
 
-        <div class="grid metrics">
+        <form id="loginForm">
 
-          <div class="card metric accent">
-            <div class="metric-label">Active Shows</div>
-            <div class="metric-value" id="mShows">—</div>
-            <div class="metric-sub">Currently active shows</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Published Episodes</div>
-            <div class="metric-value" id="mEpisodes">—</div>
-            <div class="metric-sub">Available programming</div>
-          </div>
-
-          <div class="card metric cyan">
-            <div class="metric-label">Views</div>
-            <div class="metric-value" id="mViews">—</div>
-            <div class="metric-sub" id="mViewsSub">Selected period</div>
-          </div>
-
-          <div class="card metric green">
-            <div class="metric-label">Watch Time</div>
-            <div class="metric-value" id="mWatch">—</div>
-            <div class="metric-sub">Total watch time</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Members</div>
-            <div class="metric-value" id="mMembers">—</div>
-            <div class="metric-sub">Active members</div>
-          </div>
-
-        </div>
-
-        <div class="analytics-layout">
-
-          <div class="card panel">
-
-            <div class="panel-title">
-              VIEW ACTIVITY
+            <div class="form-group">
+                <label>Email</label>
+                <input
+                    id="loginEmail"
+                    type="email"
+                    autocomplete="username"
+                    required>
             </div>
 
-            <div id="dashboardChart" class="chart">
-              <div class="loading">Loading analytics…</div>
+            <div class="form-group">
+                <label>Password</label>
+                <input
+                    id="loginPassword"
+                    type="password"
+                    autocomplete="current-password"
+                    required>
             </div>
 
-          </div>
-
-          <div class="card panel">
-
-            <div class="panel-title">
-              TOP CONTENT
-            </div>
-
-            <div id="dashboardTopContent" class="list">
-              <div class="loading">Loading…</div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      <!-- ANALYTICS -->
-
-      <section id="view-analytics" class="view">
-
-        <div class="section-head">
-
-          <div>
-            <h1>Analytics</h1>
-            <p>
-              Corrected analytics using analytics_events and content_views.
-            </p>
-          </div>
-
-          <div class="controls">
-            <select id="analyticsPeriod">
-              <option value="1">24 Hours</option>
-              <option value="7">7 Days</option>
-              <option value="30" selected>30 Days</option>
-              <option value="90">90 Days</option>
-              <option value="365">1 Year</option>
-            </select>
-
-            <button class="btn primary" id="analyticsRefresh">
-              Refresh Analytics
+            <button
+                class="btn btn-primary"
+                style="width:100%"
+                type="submit">
+                SIGN IN
             </button>
-          </div>
 
-        </div>
+            <div id="loginError" class="login-error"></div>
 
-        <div class="grid metrics">
-
-          <div class="card metric">
-            <div class="metric-label">Page Views</div>
-            <div class="metric-value" id="aPageViews">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">All Events</div>
-            <div class="metric-value" id="aEvents">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Unique Visitors</div>
-            <div class="metric-value" id="aVisitors">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Unique Sessions</div>
-            <div class="metric-value" id="aSessions">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Content Views</div>
-            <div class="metric-value" id="aContentViews">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Watch Time</div>
-            <div class="metric-value" id="aWatch">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Avg Watch</div>
-            <div class="metric-value" id="aAvgWatch">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Completion</div>
-            <div class="metric-value" id="aCompletion">—</div>
-          </div>
-
-        </div>
-
-        <div class="analytics-layout">
-
-          <div class="card panel">
-
-            <div class="panel-title">
-              DAILY ACTIVITY
-            </div>
-
-            <div id="analyticsChart" class="chart">
-              <div class="loading">Loading…</div>
-            </div>
-
-          </div>
-
-          <div class="card panel">
-
-            <div class="panel-title">
-              EVENT BREAKDOWN
-            </div>
-
-            <div id="eventBreakdown" class="list">
-              <div class="loading">Loading…</div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="analytics-layout">
-
-          <div class="card panel">
-
-            <div class="panel-title">
-              TOP CONTENT
-            </div>
-
-            <div id="topContent" class="list">
-              <div class="loading">Loading…</div>
-            </div>
-
-          </div>
-
-          <div class="card panel">
-
-            <div class="panel-title">
-              TOP PATHS
-            </div>
-
-            <div id="topPaths" class="list">
-              <div class="loading">Loading…</div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      <!-- LIVE MONITOR -->
-
-      <section id="view-monitor" class="view">
-
-        <div class="section-head">
-
-          <div>
-            <h1>Live Monitor</h1>
-            <p>
-              Monitor the current CrowRules TV channel playback source.
-            </p>
-          </div>
-
-          <button class="btn primary" id="monitorRefresh">
-            Refresh Monitor
-          </button>
-
-        </div>
-
-        <div class="monitor">
-
-          <div class="card video-card">
-
-            <div class="video-wrap">
-
-              <iframe
-                id="monitorFrame"
-                src=""
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowfullscreen>
-              </iframe>
-
-            </div>
-
-            <div class="monitor-info">
-
-              <span class="live-status">
-                <span class="dot"></span>
-                NETWORK MONITOR
-              </span>
-
-              <h2 id="monitorTitle">
-                Loading…
-              </h2>
-
-              <p
-                id="monitorDescription"
-                style="color:var(--muted);font-size:12px;"
-              >
-                Loading current program…
-              </p>
-
-            </div>
-
-          </div>
-
-          <div class="card panel">
-
-            <div class="panel-title">
-              CURRENT PLAYBACK
-            </div>
-
-            <div id="monitorData" class="list">
-              <div class="loading">Loading…</div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      <!-- MEMBERS -->
-
-      <section id="view-members" class="view">
-
-        <div class="section-head">
-
-          <div>
-            <h1>Member Leaderboard</h1>
-            <p>
-              Points, levels, activity and watch engagement.
-            </p>
-          </div>
-
-          <button class="btn primary" id="membersRefresh">
-            Refresh Members
-          </button>
-
-        </div>
-
-        <div class="grid metrics">
-
-          <div class="card metric">
-            <div class="metric-label">Active Members</div>
-            <div class="metric-value" id="memberCount">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Total Points</div>
-            <div class="metric-value" id="totalPoints">—</div>
-          </div>
-
-          <div class="card metric">
-            <div class="metric-label">Top Member</div>
-            <div class="metric-value" id="topMember">—</div>
-          </div>
-
-        </div>
-
-        <div class="card panel" style="margin-top:15px;">
-
-          <div class="panel-title">
-            LEADERBOARD
-          </div>
-
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Member</th>
-                  <th>Tier</th>
-                  <th>Points</th>
-                  <th>Level</th>
-                  <th>Lifetime</th>
-                </tr>
-              </thead>
-
-              <tbody id="memberTable">
-                <tr>
-                  <td colspan="6" class="empty">
-                    Loading…
-                  </td>
-                </tr>
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      <!-- PLAYBACK -->
-
-      <section id="view-playback" class="view">
-
-        <div class="section-head">
-
-          <div>
-            <h1>Playback</h1>
-            <p>
-              Current channel playback records.
-            </p>
-          </div>
-
-          <button class="btn primary" id="playbackRefresh">
-            Refresh Playback
-          </button>
-
-        </div>
-
-        <div class="card panel">
-
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>Channel</th>
-                  <th>Program</th>
-                  <th>Type</th>
-                  <th>Start</th>
-                  <th>End</th>
-                  <th>Status</th>
-                  <th>Playback</th>
-                </tr>
-              </thead>
-
-              <tbody id="playbackTable">
-                <tr>
-                  <td colspan="7" class="empty">
-                    Loading…
-                  </td>
-                </tr>
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </section>
+        </form>
 
     </div>
-
-  </main>
 
 </div>
 
-<div id="toast" class="toast"></div>
+
+<!-- =========================
+     APPLICATION
+========================= -->
+
+<div id="app" class="app">
+
+    <aside id="sidebar" class="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="sidebar-brand">
+                CROW<span style="color:#9b59ff">RULES</span> TV
+            </div>
+
+            <div class="sidebar-version">
+                ADMIN PRO v1.5
+            </div>
+
+        </div>
+
+        <nav class="nav">
+
+            <div class="nav-section">
+                Control Center
+            </div>
+
+            <button data-page="dashboard" class="active">
+                <span class="nav-icon">◈</span>
+                Dashboard
+            </button>
+
+            <button data-page="monitor">
+                <span class="nav-icon">▶</span>
+                Live Monitor
+            </button>
+
+            <button data-page="analytics">
+                <span class="nav-icon">◒</span>
+                Analytics
+            </button>
+
+            <div class="nav-section">
+                Programming
+            </div>
+
+            <button data-page="shows">
+                <span class="nav-icon">▣</span>
+                Shows
+            </button>
+
+            <button data-page="seasons">
+                <span class="nav-icon">▤</span>
+                Seasons
+            </button>
+
+            <button data-page="episodes">
+                <span class="nav-icon">▶</span>
+                Episodes
+            </button>
+
+            <button data-page="channels">
+                <span class="nav-icon">▥</span>
+                TV Channels
+            </button>
+
+            <button data-page="playlists">
+                <span class="nav-icon">☷</span>
+                Channel Playlists
+            </button>
+
+            <button data-page="schedule">
+                <span class="nav-icon">◷</span>
+                Schedule
+            </button>
+
+            <button data-page="live">
+                <span class="nav-icon">●</span>
+                Live Events
+            </button>
+
+            <div class="nav-section">
+                Library
+            </div>
+
+            <button data-page="content">
+                <span class="nav-icon">▦</span>
+                Content Library
+            </button>
+
+            <button data-page="categories">
+                <span class="nav-icon">#</span>
+                Categories
+            </button>
+
+            <button data-page="polls">
+                <span class="nav-icon">?</span>
+                Polls
+            </button>
+
+            <button data-page="newsletter">
+                <span class="nav-icon">✉</span>
+                Newsletter
+            </button>
+
+            <div class="nav-section">
+                Community
+            </div>
+
+            <button data-page="members">
+                <span class="nav-icon">♟</span>
+                Members
+            </button>
+
+            <button data-page="leaderboard">
+                <span class="nav-icon">🏆</span>
+                Leaderboard
+            </button>
+
+            <button data-page="points">
+                <span class="nav-icon">★</span>
+                Points
+            </button>
+
+            <div class="nav-section">
+                System
+            </div>
+
+            <button data-page="audit">
+                <span class="nav-icon">⌁</span>
+                Audit Log
+            </button>
+
+            <button data-page="db">
+                <span class="nav-icon">▤</span>
+                Database Explorer
+            </button>
+
+            <button data-page="settings">
+                <span class="nav-icon">⚙</span>
+                Settings
+            </button>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button
+                    id="mobileToggle"
+                    class="btn mobile-toggle">
+                    ☰
+                </button>
+
+                <div id="pageTitle" class="page-title">
+                    Dashboard
+                </div>
+
+                <div
+                    id="connectionDot"
+                    class="status-dot">
+                </div>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div
+                    id="adminUser"
+                    class="admin-user">
+                    Checking session...
+                </div>
+
+                <button
+                    id="refreshBtn"
+                    class="btn btn-small">
+                    ↻ Refresh
+                </button>
+
+                <button
+                    id="logoutBtn"
+                    class="btn btn-small btn-danger">
+                    Logout
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+
+<!-- =========================================================
+     DASHBOARD
+========================================================= -->
+
+<div id="page-dashboard" class="page active">
+
+    <div class="hero">
+
+        <h1>
+            CrowRules TV Control Center
+        </h1>
+
+        <p>
+            Manage your streaming network from one place:
+            programming, shows, episodes, channels, playlists,
+            schedules, playback, members, points, analytics,
+            live events and system health.
+        </p>
+
+        <div class="actions">
+
+            <button
+                class="btn btn-primary"
+                onclick="loadDashboard()">
+                Refresh Control Center
+            </button>
+
+            <button
+                class="btn btn-blue"
+                onclick="openPage('monitor')">
+                Open Live Monitor
+            </button>
+
+            <button
+                class="btn"
+                onclick="openPage('schedule')">
+                Manage Schedule
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div id="dashboardMetrics"
+         class="grid grid-4">
+
+        <div class="card">
+            <div class="card-title">Shows</div>
+            <div id="mShows" class="metric purple">—</div>
+            <div id="mShowsSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Episodes</div>
+            <div id="mEpisodes" class="metric blue">—</div>
+            <div id="mEpisodesSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">TV Channels</div>
+            <div id="mChannels" class="metric">—</div>
+            <div id="mChannelsSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Members</div>
+            <div id="mMembers" class="metric good">—</div>
+            <div id="mMembersSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Schedule Items</div>
+            <div id="mSchedule" class="metric">—</div>
+            <div id="mScheduleSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Playlist Items</div>
+            <div id="mPlaylists" class="metric">—</div>
+            <div id="mPlaylistsSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Live Events</div>
+            <div id="mLive" class="metric red">—</div>
+            <div id="mLiveSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Lifetime Points</div>
+            <div id="mPoints" class="metric purple">—</div>
+            <div id="mPointsSub" class="metric-sub">
+                Loading...
+            </div>
+        </div>
+
+    </div>
+
+
+    <div style="height:15px"></div>
+
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <div class="section-header"
+                 style="margin-bottom:12px">
+
+                <div>
+                    <div class="card-title">
+                        Playback Health
+                    </div>
+
+                    <div class="metric-sub">
+                        Problems that can prevent TV programming
+                        from actually playing.
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="playbackHealth"
+                 class="health-list">
+                <div class="loading">
+                    Loading playback health...
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="section-header"
+                 style="margin-bottom:12px">
+
+                <div>
+                    <div class="card-title">
+                        Schedule Health
+                    </div>
+
+                    <div class="metric-sub">
+                        24/7 programming status.
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="scheduleHealth"
+                 class="health-list">
+                <div class="loading">
+                    Loading schedule health...
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div style="height:15px"></div>
+
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <div class="section-header">
+                <div>
+                    <div class="card-title">
+                        Top Members
+                    </div>
+                    <div class="metric-sub">
+                        Lifetime member points.
+                    </div>
+                </div>
+
+                <button
+                    class="btn btn-small"
+                    onclick="openPage('leaderboard')">
+                    Full Leaderboard
+                </button>
+            </div>
+
+            <div id="dashboardLeaderboard">
+                <div class="loading">
+                    Loading...
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="section-header">
+                <div>
+                    <div class="card-title">
+                        Recent Activity
+                    </div>
+                    <div class="metric-sub">
+                        Latest member activity.
+                    </div>
+                </div>
+
+                <button
+                    class="btn btn-small"
+                    onclick="openPage('points')">
+                    Points
+                </button>
+            </div>
+
+            <div id="dashboardActivity">
+                <div class="loading">
+                    Loading...
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     LIVE MONITOR
+========================================================= -->
+
+<div id="page-monitor" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Live Monitor
+            </h2>
+
+            <div class="section-description">
+                Monitor the actual CrowRules TV playback source.
+            </div>
+        </div>
+
+        <div class="actions">
+
+            <button
+                class="btn"
+                onclick="loadMonitor()">
+                ↻ Refresh
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="monitor">
+
+        <div>
+
+            <div id="monitorPlayer"
+                 class="player-box">
+
+                <div class="player-empty">
+                    Select a channel.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="monitor-info">
+
+            <div class="card">
+
+                <div class="card-title">
+                    Channels
+                </div>
+
+                <div id="monitorChannels"
+                     style="margin-top:12px">
+
+                    <div class="loading">
+                        Loading channels...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div id="monitorNow"
+                 class="now-card">
+
+                <div class="card-title">
+                    NOW PLAYING
+                </div>
+
+                <div class="now-title">
+                    —
+                </div>
+
+                <div class="now-meta">
+                    Select a channel to inspect playback.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ANALYTICS
+========================================================= -->
+
+<div id="page-analytics" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Analytics
+            </h2>
+
+            <div class="section-description">
+                CrowRules TV traffic, viewing and engagement.
+            </div>
+        </div>
+
+        <div class="actions">
+
+            <select
+                id="analyticsDays"
+                style="width:130px"
+                onchange="loadAnalytics()">
+
+                <option value="7">7 Days</option>
+                <option value="30" selected>30 Days</option>
+                <option value="90">90 Days</option>
+                <option value="365">365 Days</option>
+
+            </select>
+
+            <button
+                class="btn"
+                onclick="loadAnalytics()">
+                Refresh
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div id="analyticsMetrics"
+         class="grid grid-4">
+
+        <div class="card">
+            <div class="card-title">Page Views</div>
+            <div id="aPageViews" class="metric">—</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Events</div>
+            <div id="aEvents" class="metric">—</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Unique Visitors</div>
+            <div id="aVisitors" class="metric blue">—</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Watch Time</div>
+            <div id="aWatch" class="metric purple">—</div>
+        </div>
+
+    </div>
+
+
+    <div style="height:15px"></div>
+
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <div class="card-title">
+                Daily Activity
+            </div>
+
+            <div id="analyticsChart"
+                 class="chart">
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Top Content
+            </div>
+
+            <div id="topContent"
+                 style="margin-top:15px">
+                <div class="loading">
+                    Loading...
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     GENERIC TABLE PAGES
+========================================================= -->
+
+<div id="page-shows" class="page">
+    <div id="tablePageShows"></div>
+</div>
+
+<div id="page-seasons" class="page">
+    <div id="tablePageSeasons"></div>
+</div>
+
+<div id="page-episodes" class="page">
+    <div id="tablePageEpisodes"></div>
+</div>
+
+<div id="page-channels" class="page">
+    <div id="tablePageChannels"></div>
+</div>
+
+<div id="page-playlists" class="page">
+    <div id="tablePagePlaylists"></div>
+</div>
+
+<div id="page-schedule" class="page">
+    <div id="tablePageSchedule"></div>
+</div>
+
+<div id="page-live" class="page">
+    <div id="tablePageLive"></div>
+</div>
+
+<div id="page-content" class="page">
+    <div id="tablePageContent"></div>
+</div>
+
+<div id="page-categories" class="page">
+    <div id="tablePageCategories"></div>
+</div>
+
+<div id="page-polls" class="page">
+    <div id="tablePagePolls"></div>
+</div>
+
+<div id="page-newsletter" class="page">
+    <div id="tablePageNewsletter"></div>
+</div>
+
+
+<!-- =========================================================
+     MEMBERS
+========================================================= -->
+
+<div id="page-members" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Members
+            </h2>
+
+            <div class="section-description">
+                Member profiles, membership tiers and activity.
+            </div>
+        </div>
+
+        <button
+            class="btn"
+            onclick="loadMembers()">
+            ↻ Refresh
+        </button>
+
+    </div>
+
+    <div class="search-row">
+
+        <input
+            id="memberSearch"
+            placeholder="Search members..."
+            oninput="filterMembers()">
+
+    </div>
+
+    <div class="card">
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Member</th>
+                        <th>Tier</th>
+                        <th>Active</th>
+                        <th>Points</th>
+                        <th>Level</th>
+                        <th>Watch</th>
+                        <th>Actions</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="membersBody">
+
+                    <tr>
+                        <td colspan="7">
+                            <div class="loading">
+                                Loading members...
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     LEADERBOARD
+========================================================= -->
+
+<div id="page-leaderboard" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Member Leaderboard
+            </h2>
+
+            <div class="section-description">
+                Ranked by lifetime CrowRules TV points.
+            </div>
+        </div>
+
+        <button
+            class="btn"
+            onclick="loadLeaderboard()">
+            ↻ Refresh
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Rank</th>
+                        <th>Member</th>
+                        <th>Tier</th>
+                        <th>Points</th>
+                        <th>Level</th>
+                        <th>Watch Minutes</th>
+                        <th>Episodes</th>
+                        <th>Last Active</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="leaderboardBody">
+
+                    <tr>
+                        <td colspan="8">
+                            <div class="loading">
+                                Loading leaderboard...
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     POINTS
+========================================================= -->
+
+<div id="page-points" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Member Points
+            </h2>
+
+            <div class="section-description">
+                Monitor and administer the CrowRules TV points system.
+            </div>
+
+        </div>
+
+        <button
+            class="btn"
+            onclick="loadPointsPage()">
+            ↻ Refresh
+        </button>
+
+    </div>
+
+
+    <div class="grid grid-3">
+
+        <div class="card">
+            <div class="card-title">
+                Total Lifetime Points
+            </div>
+
+            <div id="pointsTotal"
+                 class="metric purple">
+                —
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                Point Transactions
+            </div>
+
+            <div id="pointsTransactions"
+                 class="metric blue">
+                —
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                Top Member
+            </div>
+
+            <div id="pointsTopMember"
+                 class="metric"
+                 style="font-size:18px">
+                —
+            </div>
+        </div>
+
+    </div>
+
+
+    <div style="height:15px"></div>
+
+
+    <div class="card">
+
+        <div class="section-header">
+
+            <div>
+                <div class="card-title">
+                    Manual Adjustment
+                </div>
+
+                <div class="metric-sub">
+                    Use positive or negative points.
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="grid grid-3">
+
+            <div>
+                <label class="card-title">
+                    User ID
+                </label>
+
+                <input
+                    id="adjustUserId"
+                    placeholder="UUID">
+            </div>
+
+            <div>
+                <label class="card-title">
+                    Delta
+                </label>
+
+                <input
+                    id="adjustDelta"
+                    type="number"
+                    placeholder="100 / -100">
+            </div>
+
+            <div>
+                <label class="card-title">
+                    Reason
+                </label>
+
+                <input
+                    id="adjustReason"
+                    placeholder="Admin adjustment">
+            </div>
+
+        </div>
+
+        <div style="height:12px"></div>
+
+        <button
+            class="btn btn-primary"
+            onclick="adjustPoints()">
+            Apply Point Adjustment
+        </button>
+
+    </div>
+
+
+    <div style="height:15px"></div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Recent Member Activity
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Member</th>
+                        <th>Activity</th>
+                        <th>Minutes</th>
+                        <th>Points</th>
+                        <th>Time</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="pointsActivityBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     AUDIT
+========================================================= -->
+
+<div id="page-audit" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Admin Audit Log
+            </h2>
+
+            <div class="section-description">
+                Administrative changes made through CrowRules TV Admin.
+            </div>
+        </div>
+
+        <button
+            class="btn"
+            onclick="loadAudit()">
+            ↻ Refresh
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Time</th>
+                        <th>Admin</th>
+                        <th>Action</th>
+                        <th>Table</th>
+                        <th>Record</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="auditBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     DATABASE EXPLORER
+========================================================= -->
+
+<div id="page-db" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Database Explorer
+            </h2>
+
+            <div class="section-description">
+                Secure administrator access to public tables using the
+                existing Admin Pro RPC layer.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="grid grid-2">
+
+            <div>
+
+                <label class="card-title">
+                    Table
+                </label>
+
+                <select
+                    id="dbTable"
+                    onchange="loadDbTable()">
+                </select>
+
+            </div>
+
+            <div>
+
+                <label class="card-title">
+                    Search
+                </label>
+
+                <input
+                    id="dbSearch"
+                    placeholder="Search rows..."
+                    onkeydown="if(event.key==='Enter')loadDbTable()">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div style="height:15px"></div>
+
+
+    <div class="card">
+
+        <div id="dbTableOutput">
+            <div class="empty">
+                Select a table.
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SETTINGS
+========================================================= -->
+
+<div id="page-settings" class="page">
+
+    <div class="section-header">
+
+        <div>
+            <h2 class="section-title">
+                Admin Settings
+            </h2>
+
+            <div class="section-description">
+                CrowRules TV administration and connection information.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <div class="card-title">
+                Supabase Connection
+            </div>
+
+            <div style="height:12px"></div>
+
+            <div class="form-group">
+
+                <label>
+                    Project
+                </label>
+
+                <input
+                    value="zauxdqyssratvzmomozf.supabase.co"
+                    readonly>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Authentication
+                </label>
+
+                <input
+                    id="settingsAuthStatus"
+                    value="Checking..."
+                    readonly>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Current User
+                </label>
+
+                <input
+                    id="settingsUser"
+                    value="—"
+                    readonly>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Admin Pro Features
+            </div>
+
+            <div style="height:12px"></div>
+
+            <div class="health-list">
+
+                <div class="health-item">
+                    <span>Shows CMS</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Episodes CMS</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Channel Management</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Playlist Management</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>24/7 Scheduling</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Playback Health</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Member Points</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Leaderboard</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Analytics</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+                <div class="health-item">
+                    <span>Audit Log</span>
+                    <span class="badge green">READY</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================
+     MODAL
+========================= -->
+
+<div id="modal"
+     class="modal">
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <h3 id="modalTitle">
+                Editor
+            </h3>
+
+            <button
+                class="btn btn-small"
+                onclick="closeModal()">
+                ✕
+            </button>
+
+        </div>
+
+        <div id="modalBody"
+             class="modal-body">
+        </div>
+
+        <div class="modal-footer">
+
+            <button
+                class="btn"
+                onclick="closeModal()">
+                Cancel
+            </button>
+
+            <button
+                id="modalSave"
+                class="btn btn-primary">
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="toastContainer"
+     class="toast-container">
+</div>
+
 
 <script>
-/* =========================================================
-   CROW RULES TV ADMIN PRO v1.3
-   Supabase Analytics / Playback / Members
-   ========================================================= */
+/* ============================================================
+   CROW RULES TV ADMIN PRO v1.5
+   ============================================================
+
+   Supabase project:
+   zauxdqyssratvzmomozf
+
+   SECURITY:
+   - Browser uses publishable/anon key only.
+   - NEVER put a service_role/secret key here.
+   - All privileged database actions go through existing
+     administrator RPC functions.
+============================================================ */
+
+
+/* ============================================================
+   CONFIG
+============================================================ */
 
 const SUPABASE_URL =
-  "https://zauxdqyssratvzmomozf.supabase.co";
+    "https://zauxdqyssratvzmomozf.supabase.co";
 
 /*
-  IMPORTANT:
-  Replace this with your Supabase publishable/anon key.
+   Replace this value with your existing Supabase
+   publishable/anon key.
 
-  Never put a service_role key into this browser file.
+   Alternatively define:
+
+   window.CROWRULES_SUPABASE_PUBLISHABLE_KEY = "...";
+
+   before this script.
 */
-const SUPABASE_ANON_KEY =
-  "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+const SUPABASE_KEY =
+    window.CROWRULES_SUPABASE_PUBLISHABLE_KEY ||
+    "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
 
-/* =========================================================
+const sb =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+/* ============================================================
+   STATE
+============================================================ */
+
+const state = {
+
+    user:null,
+
+    dashboard:null,
+
+    members:[],
+
+    leaderboard:[],
+
+    tables:[],
+
+    schema:[],
+
+    currentTable:null,
+
+    currentPage:"dashboard",
+
+    monitorChannel:null,
+
+    tableCache:{},
+
+    currentEditor:null
+
+};
+
+
+/* ============================================================
    HELPERS
-   ========================================================= */
+============================================================ */
 
-const $ = id => document.getElementById(id);
-
-function number(value){
-  return Number(value || 0).toLocaleString();
-}
-
-function secondsToTime(seconds){
-
-  seconds = Number(seconds || 0);
-
-  const hours = Math.floor(seconds / 3600);
-
-  const minutes =
-    Math.floor((seconds % 3600) / 60);
-
-  if(hours){
-    return `${hours}h ${minutes}m`;
-  }
-
-  return `${minutes}m`;
-}
-
-function secondsToClock(seconds){
-
-  seconds = Number(seconds || 0);
-
-  const h = Math.floor(seconds / 3600);
-
-  const m =
-    Math.floor((seconds % 3600) / 60);
-
-  const s = Math.floor(seconds % 60);
-
-  return [
-    h ? String(h).padStart(2,"0") : null,
-    String(m).padStart(2,"0"),
-    String(s).padStart(2,"0")
-  ].filter(Boolean).join(":");
-}
-
-function escapeHTML(value){
-
-  return String(value ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function toast(message){
-
-  const el = $("toast");
-
-  el.textContent = message;
-
-  el.classList.add("show");
-
-  setTimeout(() => {
-    el.classList.remove("show");
-  },3500);
-}
-
-function youtubeId(url){
-
-  if(!url) return null;
-
-  try{
-
-    const u = new URL(url);
-
-    if(u.hostname.includes("youtu.be")){
-      return u.pathname.slice(1);
-    }
-
-    if(u.searchParams.get("v")){
-      return u.searchParams.get("v");
-    }
-
-    const parts =
-      u.pathname.split("/");
-
-    const index =
-      parts.indexOf("embed");
-
-    if(index >= 0){
-      return parts[index + 1];
-    }
-
-  }catch(e){}
-
-  return null;
+function $(id){
+    return document.getElementById(id);
 }
 
 
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
+function escapeHtml(value){
 
-document.querySelectorAll(".nav button")
-.forEach(button => {
+    if(value === null ||
+       value === undefined){
 
-  button.addEventListener("click",() => {
-
-    document
-      .querySelectorAll(".nav button")
-      .forEach(x =>
-        x.classList.remove("active")
-      );
-
-    button.classList.add("active");
-
-    const view =
-      button.dataset.view;
-
-    document
-      .querySelectorAll(".view")
-      .forEach(x =>
-        x.classList.remove("active")
-      );
-
-    $("view-" + view)
-      .classList.add("active");
-
-    if(view === "dashboard"){
-      loadDashboard();
+        return "";
     }
 
-    if(view === "analytics"){
-      loadAnalytics();
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+function fmtNumber(value){
+
+    const n =
+        Number(value || 0);
+
+    return n.toLocaleString();
+}
+
+
+function fmtDate(value){
+
+    if(!value){
+        return "—";
     }
 
-    if(view === "monitor"){
-      loadMonitor();
+    const d =
+        new Date(value);
+
+    if(Number.isNaN(d.getTime())){
+        return "—";
     }
 
-    if(view === "members"){
-      loadMembers();
+    return d.toLocaleString();
+}
+
+
+function fmtDuration(seconds){
+
+    seconds =
+        Math.max(0,Number(seconds || 0));
+
+    const h =
+        Math.floor(seconds / 3600);
+
+    const m =
+        Math.floor((seconds % 3600) / 60);
+
+    const s =
+        Math.floor(seconds % 60);
+
+    if(h){
+        return `${h}h ${m}m`;
     }
 
-    if(view === "playback"){
-      loadPlayback();
+    if(m){
+        return `${m}m ${s}s`;
     }
 
-  });
+    return `${s}s`;
+}
 
-});
+
+function toast(message,type=""){
+
+    const el =
+        document.createElement("div");
+
+    el.className =
+        "toast " + type;
+
+    el.textContent =
+        message;
+
+    $("toastContainer")
+        .appendChild(el);
+
+    setTimeout(()=>{
+        el.remove();
+    },5000);
+}
 
 
-/* =========================================================
+function setLoading(id,text="Loading..."){
+
+    if($(id)){
+
+        $(id).innerHTML =
+            `<div class="loading">${escapeHtml(text)}</div>`;
+    }
+}
+
+
+/* ============================================================
    AUTH
-   ========================================================= */
+============================================================ */
 
-async function requireSession(){
+async function init(){
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.auth.getSession();
+    if(
+        !SUPABASE_KEY ||
+        SUPABASE_KEY ===
+        "YOUR_SUPABASE_PUBLISHABLE_KEY"
+    ){
 
-  if(error){
-    throw error;
-  }
+        $("loginError").textContent =
+            "Add your Supabase publishable/anon key to SUPABASE_KEY.";
 
-  if(!data.session){
-
-    throw new Error(
-      "You must be signed in to use Admin Pro."
-    );
-  }
-
-  return data.session;
-}
-
-
-/* =========================================================
-   ANALYTICS RPC
-   ========================================================= */
-
-async function getAnalytics(days){
-
-  await requireSession();
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.rpc(
-      "admin_analytics_summary",
-      {
-        p_days:Number(days)
-      }
-    );
-
-  if(error){
-    throw error;
-  }
-
-  return data || {};
-}
-
-
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
-
-async function loadDashboard(){
-
-  try{
-
-    const days =
-      Number($("dashboardPeriod").value);
-
-    const [
-      overviewResult,
-      analytics
-    ] =
-      await Promise.all([
-
-        supabaseClient
-          .from("admin_dashboard_overview")
-          .select("*")
-          .limit(1)
-          .maybeSingle(),
-
-        getAnalytics(days)
-
-      ]);
-
-    if(overviewResult.error){
-      throw overviewResult.error;
+        return;
     }
 
-    const overview =
-      overviewResult.data || {};
-
-    $("mShows").textContent =
-      number(overview.active_shows);
-
-    $("mEpisodes").textContent =
-      number(overview.published_episodes);
-
-    $("mViews").textContent =
-      number(analytics.content_views);
-
-    $("mViewsSub").textContent =
-      `${days} day period`;
-
-    $("mWatch").textContent =
-      secondsToTime(
-        analytics.watch_seconds
-      );
-
-    $("mMembers").textContent =
-      number(overview.active_members);
-
-    renderChart(
-      $("dashboardChart"),
-      analytics.daily || [],
-      "content_views"
-    );
-
-    renderTopContent(
-      $("dashboardTopContent"),
-      analytics.top_content || []
-    );
-
-  }catch(error){
-
-    console.error(error);
-
-    toast(
-      "Dashboard analytics error: " +
-      error.message
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   ANALYTICS
-   ========================================================= */
-
-async function loadAnalytics(){
-
-  try{
-
-    const days =
-      Number($("analyticsPeriod").value);
-
-    const analytics =
-      await getAnalytics(days);
-
-    $("aPageViews").textContent =
-      number(analytics.page_views);
-
-    $("aEvents").textContent =
-      number(analytics.events);
-
-    $("aVisitors").textContent =
-      number(analytics.unique_visitors);
-
-    $("aSessions").textContent =
-      number(analytics.unique_sessions);
-
-    $("aContentViews").textContent =
-      number(analytics.content_views);
-
-    $("aWatch").textContent =
-      secondsToTime(
-        analytics.watch_seconds
-      );
-
-    $("aAvgWatch").textContent =
-      secondsToClock(
-        analytics.avg_watch_seconds
-      );
-
-    $("aCompletion").textContent =
-      `${Number(
-        analytics.completion_rate || 0
-      ).toFixed(1)}%`;
-
-    renderChart(
-      $("analyticsChart"),
-      analytics.daily || [],
-      "content_views"
-    );
-
-    renderEvents(
-      analytics.event_breakdown || []
-    );
-
-    renderTopContent(
-      $("topContent"),
-      analytics.top_content || []
-    );
-
-    renderPaths(
-      analytics.top_paths || []
-    );
-
-  }catch(error){
-
-    console.error(error);
-
-    toast(
-      "Analytics error: " +
-      error.message
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   CHART
-   ========================================================= */
-
-function renderChart(container,data,field){
-
-  if(!data.length){
-
-    container.innerHTML =
-      `<div class="empty">No analytics data.</div>`;
-
-    return;
-  }
-
-  const values =
-    data.map(x =>
-      Number(x[field] || 0)
-    );
-
-  const max =
-    Math.max(...values,1);
-
-  container.innerHTML =
-    data.map((item,index) => {
-
-      const value =
-        Number(item[field] || 0);
-
-      const height =
-        Math.max(
-          2,
-          Math.round(
-            value / max * 100
-          )
-        );
-
-      const label =
-        String(item.day_key || "")
-          .slice(5);
-
-      return `
-        <div class="bar-wrap"
-             title="${escapeHTML(
-               item.day_key
-             )}: ${number(value)}">
-
-          <div
-            class="bar"
-            style="height:${height}%"
-          ></div>
-
-          <div class="bar-label">
-            ${escapeHTML(label)}
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
-
-}
-
-
-/* =========================================================
-   TOP CONTENT
-   ========================================================= */
-
-function renderTopContent(container,data){
-
-  if(!data.length){
-
-    container.innerHTML =
-      `<div class="empty">No content views yet.</div>`;
-
-    return;
-  }
-
-  container.innerHTML =
-    data.map(item => {
-
-      return `
-        <div class="list-row">
-
-          <div class="list-main">
-
-            <div class="list-name">
-              ${escapeHTML(
-                item.title ||
-                "Untitled"
-              )}
-            </div>
-
-            <div class="list-sub">
-              ${escapeHTML(
-                item.content_type ||
-                "content"
-              )}
-              ·
-              ${number(
-                item.unique_viewers
-              )}
-              unique
-            </div>
-
-          </div>
-
-          <div class="list-value">
-            ${number(item.view_count)}
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
-
-}
-
-
-/* =========================================================
-   EVENTS
-   ========================================================= */
-
-function renderEvents(data){
-
-  if(!data.length){
-
-    $("eventBreakdown").innerHTML =
-      `<div class="empty">No events recorded.</div>`;
-
-    return;
-  }
-
-  $("eventBreakdown").innerHTML =
-    data.map(item => {
-
-      return `
-        <div class="list-row">
-
-          <div class="list-main">
-            <div class="list-name">
-              ${escapeHTML(
-                item.event_type
-              )}
-            </div>
-
-            <div class="list-sub">
-              Analytics event
-            </div>
-          </div>
-
-          <div class="list-value">
-            ${number(
-              item.event_count
-            )}
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
-
-}
-
-
-/* =========================================================
-   PATHS
-   ========================================================= */
-
-function renderPaths(data){
-
-  if(!data.length){
-
-    $("topPaths").innerHTML =
-      `<div class="empty">No page views recorded.</div>`;
-
-    return;
-  }
-
-  $("topPaths").innerHTML =
-    data.map(item => {
-
-      return `
-        <div class="list-row">
-
-          <div class="list-main">
-            <div class="list-name">
-              ${escapeHTML(
-                item.path
-              )}
-            </div>
-          </div>
-
-          <div class="list-value">
-            ${number(item.views)}
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
-
-}
-
-
-/* =========================================================
-   MEMBERS
-   ========================================================= */
-
-async function loadMembers(){
-
-  try{
-
-    const [
-      membersResult,
-      pointsResult,
-      leaderboardResult
-    ] =
-      await Promise.all([
-
-        supabaseClient
-          .from("member_profiles")
-          .select("id",{
-            count:"exact",
-            head:true
-          })
-          .eq("is_active",true),
-
-        supabaseClient
-          .from("member_points")
-          .select("points")
-          .limit(10000),
-
-        supabaseClient
-          .from("top_members")
-          .select("*")
-          .order(
-            "lifetime_points",
-            {ascending:false}
-          )
-          .limit(100)
-
-      ]);
-
-    if(membersResult.error)
-      throw membersResult.error;
-
-    if(pointsResult.error)
-      throw pointsResult.error;
-
-    if(leaderboardResult.error)
-      throw leaderboardResult.error;
-
-    const totalPoints =
-      (pointsResult.data || [])
-        .reduce(
-          (sum,row) =>
-            sum + Number(row.points || 0),
-          0
-        );
-
-    $("memberCount").textContent =
-      number(membersResult.count);
-
-    $("totalPoints").textContent =
-      number(totalPoints);
-
-    $("topMember").textContent =
-      leaderboardResult.data?.[0]
-        ?.display_name ||
-      "—";
-
-    renderMembers(
-      leaderboardResult.data || []
-    );
-
-  }catch(error){
-
-    console.error(error);
-
-    toast(
-      "Member analytics error: " +
-      error.message
-    );
-
-  }
-
-}
-
-
-function renderMembers(data){
-
-  const tbody =
-    $("memberTable");
-
-  if(!data.length){
-
-    tbody.innerHTML =
-      `<tr>
-        <td colspan="6" class="empty">
-          No members found.
-        </td>
-      </tr>`;
-
-    return;
-  }
-
-  tbody.innerHTML =
-    data.map(member => {
-
-      return `
-        <tr>
-
-          <td class="rank">
-            #${number(member.rank)}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              member.display_name ||
-              "Member"
-            )}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              member.membership_tier ||
-              "Free"
-            )}
-          </td>
-
-          <td class="points">
-            ${number(member.points)}
-          </td>
-
-          <td>
-            Level ${number(member.level)}
-          </td>
-
-          <td>
-            ${number(
-              member.lifetime_points
-            )}
-          </td>
-
-        </tr>
-      `;
-
-    }).join("");
-
-}
-
-
-/* =========================================================
-   LIVE MONITOR
-   ========================================================= */
-
-async function loadMonitor(){
-
-  try{
 
     const {
-      data,
-      error
+        data
     } =
-      await supabaseClient
-        .from("tv_channel_playback")
-        .select("*")
-        .eq("channel_active",true)
-        .order(
-          "starts_at",
-          {ascending:false}
-        )
-        .limit(1)
-        .maybeSingle();
+        await sb.auth.getSession();
 
-    if(error)
-      throw error;
 
-    if(!data){
+    if(data.session){
 
-      $("monitorTitle").textContent =
-        "No active playback";
-
-      $("monitorDescription").textContent =
-        "There is currently no active channel playback record.";
-
-      $("monitorFrame").src = "";
-
-      $("monitorData").innerHTML =
-        `<div class="empty">
-          No active channel.
-        </div>`;
-
-      return;
-    }
-
-    const url =
-      data.playback_url ||
-      data.video_url ||
-      data.youtube_url;
-
-    const id =
-      youtubeId(url);
-
-    if(id){
-
-      $("monitorFrame").src =
-        `https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=0&rel=0`;
+        await enterAdmin(data.session.user);
 
     }else{
 
-      $("monitorFrame").src =
-        url || "";
+        showLogin();
 
     }
 
-    $("monitorTitle").textContent =
-      data.episode_title ||
-      data.program_title ||
-      data.channel_name ||
-      "CrowRules TV";
 
-    $("monitorDescription").textContent =
-      data.program_description ||
-      "Current CrowRules TV programming.";
+    sb.auth.onAuthStateChange(
+        async(event,session)=>{
 
-    $("monitorData").innerHTML = `
+            if(session &&
+               event !== "SIGNED_OUT"){
 
-      <div class="list-row">
-        <div class="list-main">
-          <div class="list-name">Channel</div>
-        </div>
-        <div class="list-value">
-          ${escapeHTML(
-            data.channel_name || "—"
-          )}
-        </div>
-      </div>
+                await enterAdmin(session.user);
 
-      <div class="list-row">
-        <div class="list-main">
-          <div class="list-name">Program</div>
-        </div>
-        <div class="list-value">
-          ${escapeHTML(
-            data.episode_title ||
-            data.program_title ||
-            "—"
-          )}
-        </div>
-      </div>
+            }
 
-      <div class="list-row">
-        <div class="list-main">
-          <div class="list-name">Type</div>
-        </div>
-        <div class="list-value">
-          ${escapeHTML(
-            data.video_type || "—"
-          )}
-        </div>
-      </div>
+            if(event === "SIGNED_OUT"){
 
-      <div class="list-row">
-        <div class="list-main">
-          <div class="list-name">Schedule</div>
-        </div>
-        <div class="list-value">
-          ${escapeHTML(
-            data.schedule_status || "—"
-          )}
-        </div>
-      </div>
+                showLogin();
 
-    `;
+            }
 
-  }catch(error){
-
-    console.error(error);
-
-    toast(
-      "Monitor error: " +
-      error.message
+        }
     );
-
-  }
 
 }
 
 
-/* =========================================================
-   PLAYBACK
-   ========================================================= */
+function showLogin(){
 
-async function loadPlayback(){
+    $("loginScreen").style.display =
+        "flex";
 
-  try{
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("tv_channel_playback")
-        .select("*")
-        .order(
-          "starts_at",
-          {ascending:false}
-        )
-        .limit(100);
-
-    if(error)
-      throw error;
-
-    const tbody =
-      $("playbackTable");
-
-    if(!data?.length){
-
-      tbody.innerHTML =
-        `<tr>
-          <td colspan="7" class="empty">
-            No playback records found.
-          </td>
-        </tr>`;
-
-      return;
-    }
-
-    tbody.innerHTML =
-      data.map(item => {
-
-        const url =
-          item.playback_url ||
-          item.video_url ||
-          item.youtube_url;
-
-        return `
-          <tr>
-
-            <td>
-              ${escapeHTML(
-                item.channel_name || "—"
-              )}
-            </td>
-
-            <td>
-              ${escapeHTML(
-                item.episode_title ||
-                item.program_title ||
-                "—"
-              )}
-            </td>
-
-            <td>
-              ${escapeHTML(
-                item.video_type || "—"
-              )}
-            </td>
-
-            <td>
-              ${item.starts_at
-                ? new Date(
-                    item.starts_at
-                  ).toLocaleString()
-                : "—"}
-            </td>
-
-            <td>
-              ${item.ends_at
-                ? new Date(
-                    item.ends_at
-                  ).toLocaleString()
-                : "—"}
-            </td>
-
-            <td>
-
-              <span class="status ${
-                item.schedule_status === "live"
-                  ? "live"
-                  : "off"
-              }">
-
-                ${escapeHTML(
-                  item.schedule_status ||
-                  "unknown"
-                )}
-
-              </span>
-
-            </td>
-
-            <td>
-
-              ${
-                url
-                  ? `<button
-                       class="btn"
-                       onclick='openPlayback(${JSON.stringify(url)})'>
-                       Open
-                     </button>`
-                  : `<span class="error">
-                       Missing
-                     </span>`
-              }
-
-            </td>
-
-          </tr>
-        `;
-
-      }).join("");
-
-  }catch(error){
-
-    console.error(error);
-
-    toast(
-      "Playback error: " +
-      error.message
-    );
-
-  }
+    $("app").style.display =
+        "none";
 
 }
 
 
-function openPlayback(url){
+async function enterAdmin(user){
 
-  const id =
-    youtubeId(url);
-
-  document
-    .querySelectorAll(".nav button")
-    .forEach(x =>
-      x.classList.remove("active")
-    );
-
-  document
-    .querySelector(
-      '[data-view="monitor"]'
-    )
-    .classList.add("active");
-
-  document
-    .querySelectorAll(".view")
-    .forEach(x =>
-      x.classList.remove("active")
-    );
-
-  $("view-monitor")
-    .classList.add("active");
-
-  if(id){
-
-    $("monitorFrame").src =
-      `https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
-
-  }else{
-
-    $("monitorFrame").src =
-      url;
-
-  }
-
-  $("monitorTitle").textContent =
-    "Selected Playback";
-
-  $("monitorDescription").textContent =
-    url;
-
-}
-
-
-/* =========================================================
-   EVENT LISTENERS
-   ========================================================= */
-
-$("dashboardPeriod")
-.addEventListener(
-  "change",
-  loadDashboard
-);
-
-$("analyticsPeriod")
-.addEventListener(
-  "change",
-  loadAnalytics
-);
-
-$("analyticsRefresh")
-.addEventListener(
-  "click",
-  loadAnalytics
-);
-
-$("monitorRefresh")
-.addEventListener(
-  "click",
-  loadMonitor
-);
-
-$("membersRefresh")
-.addEventListener(
-  "click",
-  loadMembers
-);
-
-$("playbackRefresh")
-.addEventListener(
-  "click",
-  loadPlayback
-);
-
-$("refreshBtn")
-.addEventListener(
-  "click",
-  async () => {
+    state.user =
+        user;
 
     try{
 
-      await Promise.all([
-        loadDashboard(),
-        loadAnalytics(),
-        loadMonitor(),
-        loadMembers(),
-        loadPlayback()
-      ]);
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "crowrules_admin_check"
+            );
 
-      toast(
-        "CrowRules TV Admin Pro refreshed."
-      );
+
+        if(error){
+            throw error;
+        }
+
+
+        if(!data){
+
+            throw new Error(
+                "This account does not have CrowRules TV administrator access."
+            );
+
+        }
+
+
+        $("loginScreen").style.display =
+            "none";
+
+        $("app").style.display =
+            "block";
+
+        $("adminUser").textContent =
+            user.email || user.id;
+
+        $("settingsAuthStatus").value =
+            "Authenticated administrator";
+
+        $("settingsUser").value =
+            user.email || user.id;
+
+        $("connectionDot").style.background =
+            "#22c55e";
+
+        await bootAdmin();
 
     }catch(error){
 
-      console.error(error);
+        console.error(error);
+
+        $("loginError").textContent =
+            error.message ||
+            "Administrator authentication failed.";
+
+        await sb.auth.signOut();
+
+        showLogin();
 
     }
 
-  }
-);
+}
 
 
-/* =========================================================
-   AUTOMATIC REFRESH
-   ========================================================= */
+$("loginForm")
+    .addEventListener(
+        "submit",
+        async event=>{
 
-setInterval(
-  () => {
+            event.preventDefault();
 
-    const active =
-      document
-        .querySelector(".view.active")
-        ?.id;
+            $("loginError").textContent =
+                "Signing in...";
 
-    if(active === "view-dashboard"){
-      loadDashboard();
-    }
+            const email =
+                $("loginEmail").value.trim();
 
-    if(active === "view-analytics"){
-      loadAnalytics();
-    }
-
-    if(active === "view-monitor"){
-      loadMonitor();
-    }
-
-    if(active === "view-members"){
-      loadMembers();
-    }
-
-    if(active === "view-playback"){
-      loadPlayback();
-    }
-
-  },
-  60000
-);
+            const password =
+                $("loginPassword").value;
 
 
-/* =========================================================
-   INITIALIZATION
-   ========================================================= */
+            const {
+                error
+            } =
+                await sb.auth.signInWithPassword({
+                    email,
+                    password
+                });
 
-(async function init(){
 
-  try{
+            if(error){
 
-    await requireSession();
+                $("loginError").textContent =
+                    error.message;
 
-    await loadDashboard();
+            }
 
-  }catch(error){
-
-    console.error(error);
-
-    toast(
-      error.message ||
-      "Unable to initialize Admin Pro."
+        }
     );
 
-  }
 
-})();
+$("logoutBtn")
+    .addEventListener(
+        "click",
+        async()=>{
+
+            await sb.auth.signOut();
+
+        }
+    );
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+const pageNames = {
+
+    dashboard:"Dashboard",
+    monitor:"Live Monitor",
+    analytics:"Analytics",
+    shows:"Shows",
+    seasons:"Seasons",
+    episodes:"Episodes",
+    channels:"TV Channels",
+    playlists:"Channel Playlists",
+    schedule:"Schedule",
+    live:"Live Events",
+    content:"Content Library",
+    categories:"Categories",
+    polls:"Polls",
+    newsletter:"Newsletter",
+    members:"Members",
+    leaderboard:"Leaderboard",
+    points:"Member Points",
+    audit:"Audit Log",
+    db:"Database Explorer",
+    settings:"Settings"
+
+};
+
+
+document.querySelectorAll(".nav button")
+    .forEach(button=>{
+
+        button.addEventListener(
+            "click",
+            ()=>{
+
+                openPage(
+                    button.dataset.page
+                );
+
+            }
+        );
+
+    });
+
+
+function openPage(page){
+
+    state.currentPage =
+        page;
+
+
+    document.querySelectorAll(".page")
+        .forEach(el=>{
+            el.classList.remove("active");
+        });
+
+
+    const target =
+        $("page-" + page);
+
+    if(target){
+        target.classList.add("active");
+    }
+
+
+    document.querySelectorAll(".nav button")
+        .forEach(el=>{
+
+            el.classList.toggle(
+                "active",
+                el.dataset.page === page
+            );
+
+        });
+
+
+    $("pageTitle").textContent =
+        pageNames[page] || page;
+
+
+    $("sidebar").classList.remove("open");
+
+
+    switch(page){
+
+        case "dashboard":
+            loadDashboard();
+            break;
+
+        case "monitor":
+            loadMonitor();
+            break;
+
+        case "analytics":
+            loadAnalytics();
+            break;
+
+        case "shows":
+            renderTablePage(
+                "shows",
+                "Shows",
+                "Manage CrowRules TV shows."
+            );
+            break;
+
+        case "seasons":
+            renderTablePage(
+                "seasons",
+                "Seasons",
+                "Manage seasons."
+            );
+            break;
+
+        case "episodes":
+            renderTablePage(
+                "episodes",
+                "Episodes",
+                "Manage episodes and playback."
+            );
+            break;
+
+        case "channels":
+            renderTablePage(
+                "tv_channels",
+                "TV Channels",
+                "Manage 24/7 CrowRules TV channels."
+            );
+            break;
+
+        case "playlists":
+            renderTablePage(
+                "tv_channel_playlist",
+                "Channel Playlists",
+                "Manage channel episode rotation."
+            );
+            break;
+
+        case "schedule":
+            renderTablePage(
+                "schedule_items",
+                "Schedule",
+                "Manage 24/7 programming."
+            );
+            break;
+
+        case "live":
+            renderTablePage(
+                "live_events",
+                "Live Events",
+                "Manage live programming."
+            );
+            break;
+
+        case "content":
+            renderTablePage(
+                "content_items",
+                "Content Library",
+                "Manage content items."
+            );
+            break;
+
+        case "categories":
+            renderTablePage(
+                "content_categories",
+                "Categories",
+                "Manage content categories."
+            );
+            break;
+
+        case "polls":
+            renderTablePage(
+                "polls",
+                "Polls",
+                "Manage audience polls."
+            );
+            break;
+
+        case "newsletter":
+            renderTablePage(
+                "newsletter_subscribers",
+                "Newsletter",
+                "Manage newsletter subscribers."
+            );
+            break;
+
+        case "members":
+            loadMembers();
+            break;
+
+        case "leaderboard":
+            loadLeaderboard();
+            break;
+
+        case "points":
+            loadPointsPage();
+            break;
+
+        case "audit":
+            loadAudit();
+            break;
+
+        case "db":
+            loadDatabaseExplorer();
+            break;
+
+        case "settings":
+            break;
+
+    }
+
+}
+
+
+/* ============================================================
+   BOOT
+============================================================ */
+
+async function bootAdmin(){
+
+    await Promise.allSettled([
+
+        loadDashboard(),
+
+        loadMembers(),
+
+        loadLeaderboard(),
+
+        loadSchema(),
+
+        loadAudit()
+
+    ]);
+
+}
+
+
+$("refreshBtn")
+    .addEventListener(
+        "click",
+        ()=>{
+
+            switch(state.currentPage){
+
+                case "dashboard":
+                    loadDashboard();
+                    break;
+
+                case "monitor":
+                    loadMonitor();
+                    break;
+
+                case "analytics":
+                    loadAnalytics();
+                    break;
+
+                case "members":
+                    loadMembers();
+                    break;
+
+                case "leaderboard":
+                    loadLeaderboard();
+                    break;
+
+                case "points":
+                    loadPointsPage();
+                    break;
+
+                case "audit":
+                    loadAudit();
+                    break;
+
+                default:
+                    openPage(
+                        state.currentPage
+                    );
+
+            }
+
+        }
+    );
+
+
+$("mobileToggle")
+    .addEventListener(
+        "click",
+        ()=>{
+
+            $("sidebar")
+                .classList.toggle("open");
+
+        }
+    );
+
+
+/* ============================================================
+   ADMIN DASHBOARD
+============================================================ */
+
+async function loadDashboard(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "crowrules_admin_pro_dashboard"
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        state.dashboard =
+            data;
+
+
+        renderDashboard(data);
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            "Dashboard failed: " + error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+function renderDashboard(d){
+
+    if(!d){
+        return;
+    }
+
+
+    const o =
+        d.overview || {};
+
+    const p =
+        d.playback_health || {};
+
+    const s =
+        d.schedule_health || {};
+
+
+    $("mShows").textContent =
+        fmtNumber(o.shows);
+
+    $("mShowsSub").textContent =
+        `${fmtNumber(o.published_shows)} published`;
+
+
+    $("mEpisodes").textContent =
+        fmtNumber(o.episodes);
+
+    $("mEpisodesSub").textContent =
+        `${fmtNumber(o.published_episodes)} published`;
+
+
+    $("mChannels").textContent =
+        fmtNumber(o.channels);
+
+    $("mChannelsSub").textContent =
+        `${fmtNumber(o.active_channels)} active`;
+
+
+    $("mMembers").textContent =
+        fmtNumber(o.members);
+
+    $("mMembersSub").textContent =
+        `${fmtNumber(o.active_members)} active`;
+
+
+    $("mSchedule").textContent =
+        fmtNumber(o.schedule_items);
+
+    $("mScheduleSub").textContent =
+        `${fmtNumber(o.active_schedule_items)} active`;
+
+
+    $("mPlaylists").textContent =
+        fmtNumber(o.playlists);
+
+    $("mPlaylistsSub").textContent =
+        "channel playlist entries";
+
+
+    $("mLive").textContent =
+        fmtNumber(o.live_events);
+
+    $("mLiveSub").textContent =
+        `${fmtNumber(o.active_live_events)} active/live`;
+
+
+    $("mPoints").textContent =
+        fmtNumber(o.total_points);
+
+    $("mPointsSub").textContent =
+        "lifetime points";
+
+
+    const playbackProblems =
+        Number(p.missing_episode_playback || 0) +
+        Number(p.missing_playlist_playback || 0) +
+        Number(p.schedule_missing_playback || 0);
+
+
+    $("playbackHealth").innerHTML = [
+
+        healthRow(
+            "Episode playback missing",
+            p.missing_episode_playback,
+            "bad"
+        ),
+
+        healthRow(
+            "Playlist playback missing",
+            p.missing_playlist_playback,
+            "bad"
+        ),
+
+        healthRow(
+            "Schedule playback missing",
+            p.schedule_missing_playback,
+            "bad"
+        ),
+
+        healthRow(
+            "Invalid durations",
+            p.invalid_duration,
+            "warn"
+        )
+
+    ].join("");
+
+
+    $("scheduleHealth").innerHTML = [
+
+        healthRow(
+            "Currently active",
+            s.active_now,
+            "good"
+        ),
+
+        healthRow(
+            "Upcoming 24 hours",
+            s.upcoming_24h,
+            "good"
+        ),
+
+        healthRow(
+            "Next 7 days",
+            s.next_7_days,
+            "good"
+        ),
+
+        healthRow(
+            "Missing end times",
+            s.missing_end_time,
+            s.missing_end_time ? "warn" : "good"
+        ),
+
+        healthRow(
+            "Completed",
+            s.completed,
+            "good"
+        )
+
+    ].join("");
+
+
+    renderDashboardLeaderboard(
+        d.members_top || []
+    );
+
+
+    renderDashboardActivity(
+        d.recent_activity || []
+    );
+
+
+    if(playbackProblems > 0){
+
+        toast(
+            `${playbackProblems} playback issue(s) detected.`,
+            "warn"
+        );
+
+    }
+
+}
+
+
+function healthRow(label,value,type){
+
+    const n =
+        Number(value || 0);
+
+    return `
+        <div class="health-item">
+            <div class="health-left">
+                <div class="health-dot ${type}"></div>
+                <span>${escapeHtml(label)}</span>
+            </div>
+            <strong>${fmtNumber(n)}</strong>
+        </div>
+    `;
+
+}
+
+
+function renderDashboardLeaderboard(rows){
+
+    if(!rows.length){
+
+        $("dashboardLeaderboard").innerHTML =
+            `<div class="empty">No member points yet.</div>`;
+
+        return;
+
+    }
+
+
+    $("dashboardLeaderboard").innerHTML =
+        rows.slice(0,8).map(
+            (m,i)=>`
+
+            <div class="health-item">
+
+                <div class="member">
+
+                    <div class="rank">
+                        ${i+1}
+                    </div>
+
+                    <div>
+
+                        <div class="member-name">
+                            ${escapeHtml(m.display_name)}
+                        </div>
+
+                        <div class="member-sub">
+                            Level ${fmtNumber(m.level || 0)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="points">
+                    ${fmtNumber(m.lifetime_points)}
+                </div>
+
+            </div>
+
+        `
+        ).join("");
+
+}
+
+
+function renderDashboardActivity(rows){
+
+    if(!rows.length){
+
+        $("dashboardActivity").innerHTML =
+            `<div class="empty">No member activity.</div>`;
+
+        return;
+
+    }
+
+
+    $("dashboardActivity").innerHTML =
+        rows.slice(0,8).map(
+            a=>`
+
+            <div class="health-item">
+
+                <div>
+
+                    <div class="member-name">
+                        ${escapeHtml(a.display_name)}
+                    </div>
+
+                    <div class="member-sub">
+                        ${escapeHtml(a.activity_type)}
+                        · ${fmtDate(a.created_at)}
+                    </div>
+
+                </div>
+
+                <div class="points">
+                    +${fmtNumber(a.points)}
+                </div>
+
+            </div>
+
+        `
+        ).join("");
+
+}
+
+
+/* ============================================================
+   LIVE MONITOR
+============================================================ */
+
+async function loadMonitor(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb
+                .from("tv_channel_now")
+                .select("*")
+                .order(
+                    "channel_number",
+                    {ascending:true}
+                );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        renderMonitorChannels(
+            data || []
+        );
+
+
+        if(
+            !state.monitorChannel &&
+            data &&
+            data.length
+        ){
+
+            selectMonitorChannel(
+                data[0]
+            );
+
+        }else if(
+            state.monitorChannel
+        ){
+
+            const found =
+                data.find(
+                    x=>
+                        x.channel_id ===
+                        state.monitorChannel.channel_id
+                );
+
+            if(found){
+                selectMonitorChannel(
+                    found,
+                    true
+                );
+            }
+
+        }
+
+    }catch(error){
+
+        toast(
+            "Monitor failed: " + error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+function renderMonitorChannels(rows){
+
+    if(!rows.length){
+
+        $("monitorChannels").innerHTML =
+            `<div class="empty">No channels found.</div>`;
+
+        return;
+
+    }
+
+
+    $("monitorChannels").innerHTML =
+        rows.map(
+            c=>`
+
+            <button
+                class="btn"
+                style="width:100%;margin-bottom:7px;text-align:left"
+                onclick='selectMonitorChannel(${JSON.stringify(c).replaceAll("'","&#039;")})'>
+
+                <strong>
+                    ${escapeHtml(c.channel_number ?? "")}
+                </strong>
+
+                &nbsp;
+
+                ${escapeHtml(c.channel_name || "Channel")}
+
+                <span style="float:right">
+
+                    ${
+                        c.schedule_active
+                        ? '<span class="badge green">LIVE</span>'
+                        : '<span class="badge">OFF</span>'
+                    }
+
+                </span>
+
+            </button>
+
+        `
+        ).join("");
+
+}
+
+
+function extractYouTubeId(url){
+
+    if(!url){
+        return null;
+    }
+
+
+    try{
+
+        const u =
+            new URL(url);
+
+
+        if(
+            u.hostname.includes("youtu.be")
+        ){
+
+            return u.pathname
+                .replace("/","");
+
+        }
+
+
+        if(
+            u.hostname.includes("youtube.com")
+        ){
+
+            if(
+                u.searchParams.get("v")
+            ){
+
+                return u.searchParams.get("v");
+
+            }
+
+
+            const parts =
+                u.pathname.split("/");
+
+            const index =
+                parts.indexOf("embed");
+
+            if(
+                index >= 0 &&
+                parts[index+1]
+            ){
+
+                return parts[index+1];
+
+            }
+
+        }
+
+    }catch{
+
+        const match =
+            String(url).match(
+                /(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/
+            );
+
+        return match
+            ? match[1]
+            : null;
+
+    }
+
+    return null;
+
+}
+
+
+function selectMonitorChannel(c,silent=false){
+
+    state.monitorChannel =
+        c;
+
+
+    const playback =
+        c.playback_url ||
+        c.video_url ||
+        c.youtube_url ||
+        c.stream_url;
+
+
+    const type =
+        String(
+            c.playback_type ||
+            c.video_type ||
+            c.stream_type ||
+            ""
+        ).toLowerCase();
+
+
+    const player =
+        $("monitorPlayer");
+
+
+    if(!playback){
+
+        player.innerHTML = `
+            <div class="player-empty">
+                <div>
+                    <strong>No playback source</strong>
+                    <br><br>
+                    This channel currently has no playable source.
+                </div>
+            </div>
+        `;
+
+    }else{
+
+        const yt =
+            extractYouTubeId(
+                playback
+            );
+
+
+        if(
+            yt ||
+            type.includes("youtube") ||
+            playback.includes("youtube.com")
+        ){
+
+            const id =
+                yt ||
+                extractYouTubeId(playback);
+
+
+            player.innerHTML = `
+                <iframe
+                    src="https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            `;
+
+        }else{
+
+            player.innerHTML = `
+                <video
+                    id="monitorVideo"
+                    controls
+                    autoplay
+                    playsinline
+                    preload="metadata">
+                    <source
+                        src="${escapeHtml(playback)}">
+                </video>
+            `;
+
+        }
+
+    }
+
+
+    $("monitorNow").innerHTML = `
+
+        <div class="card-title">
+            NOW PLAYING
+        </div>
+
+        <div class="now-title">
+            ${escapeHtml(
+                c.episode_title ||
+                c.program_title ||
+                c.schedule_title ||
+                c.channel_name ||
+                "Unknown"
+            )}
+        </div>
+
+        <div class="now-meta">
+
+            Channel:
+            ${escapeHtml(c.channel_name || "—")}
+
+            <br>
+
+            Schedule:
+            ${escapeHtml(c.schedule_status || "—")}
+
+            <br>
+
+            Start:
+            ${fmtDate(c.starts_at)}
+
+            <br>
+
+            End:
+            ${fmtDate(c.ends_at)}
+
+            <br>
+
+            Playback:
+            ${escapeHtml(
+                type ||
+                "auto"
+            )}
+
+        </div>
+    `;
+
+
+    if(!silent){
+
+        toast(
+            "Monitoring " +
+            (c.channel_name || "channel"),
+            "success"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   ANALYTICS
+============================================================ */
+
+async function loadAnalytics(){
+
+    try{
+
+        const days =
+            Number(
+                $("analyticsDays").value
+            );
+
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "admin_analytics_summary",
+                {
+                    p_days:days
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        $("aPageViews").textContent =
+            fmtNumber(data.page_views);
+
+        $("aEvents").textContent =
+            fmtNumber(data.events);
+
+        $("aVisitors").textContent =
+            fmtNumber(data.unique_visitors);
+
+        $("aWatch").textContent =
+            fmtDuration(data.watch_seconds);
+
+
+        renderAnalyticsChart(
+            data.daily || []
+        );
+
+
+        renderTopContent(
+            data.top_content || []
+        );
+
+
+    }catch(error){
+
+        toast(
+            "Analytics failed: " + error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+function renderAnalyticsChart(rows){
+
+    const chart =
+        $("analyticsChart");
+
+
+    if(!rows.length){
+
+        chart.innerHTML =
+            `<div class="empty">No analytics data.</div>`;
+
+        return;
+
+    }
+
+
+    const values =
+        rows.map(
+            x=>Number(
+                x.content_views ||
+                x.page_views ||
+                0
+            )
+        );
+
+
+    const max =
+        Math.max(
+            1,
+            ...values
+        );
+
+
+    chart.innerHTML =
+        rows.map(
+            (x,i)=>{
+
+                const v =
+                    values[i];
+
+                const h =
+                    Math.max(
+                        3,
+                        (v/max)*200
+                    );
+
+
+                return `
+                    <div
+                        class="bar"
+                        style="height:${h}px"
+                        title="${escapeHtml(x.day_key)}: ${fmtNumber(v)}">
+
+                        <span>
+                            ${fmtNumber(v)}
+                        </span>
+
+                    </div>
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+function renderTopContent(rows){
+
+    if(!rows.length){
+
+        $("topContent").innerHTML =
+            `<div class="empty">No viewing data.</div>`;
+
+        return;
+
+    }
+
+
+    $("topContent").innerHTML =
+        rows.map(
+            x=>`
+
+            <div class="health-item">
+
+                <div>
+
+                    <div class="member-name">
+                        ${escapeHtml(x.title)}
+                    </div>
+
+                    <div class="member-sub">
+                        ${escapeHtml(x.content_type)}
+                        · ${fmtNumber(x.unique_viewers)} viewers
+                    </div>
+
+                </div>
+
+                <strong>
+                    ${fmtNumber(x.view_count)}
+                </strong>
+
+            </div>
+
+        `
+        ).join("");
+
+}
+
+
+/* ============================================================
+   GENERIC ADMIN CMS
+============================================================ */
+
+const tableConfig = {
+
+    shows:{
+        title:"Shows",
+        columns:[
+            "title",
+            "slug",
+            "category",
+            "status",
+            "is_active",
+            "is_published",
+            "views"
+        ]
+    },
+
+    seasons:{
+        title:"Seasons",
+        columns:[
+            "show_id",
+            "season_number",
+            "title",
+            "status",
+            "is_active"
+        ]
+    },
+
+    episodes:{
+        title:"Episodes",
+        columns:[
+            "title",
+            "show_id",
+            "season_number",
+            "episode_number",
+            "duration_seconds",
+            "video_url",
+            "youtube_url",
+            "status",
+            "is_active",
+            "is_published"
+        ]
+    },
+
+    tv_channels:{
+        title:"TV Channels",
+        columns:[
+            "name",
+            "slug",
+            "channel_number",
+            "is_active",
+            "stream_type",
+            "playback_mode",
+            "loop_playlist",
+            "autoplay"
+        ]
+    },
+
+    tv_channel_playlist:{
+        title:"Channel Playlists",
+        columns:[
+            "channel_id",
+            "episode_id",
+            "playlist_position",
+            "enabled"
+        ]
+    },
+
+    schedule_items:{
+        title:"Schedule",
+        columns:[
+            "title",
+            "channel_id",
+            "episode_id",
+            "starts_at",
+            "ends_at",
+            "duration_seconds",
+            "item_type",
+            "status",
+            "is_active",
+            "video_url",
+            "youtube_url"
+        ]
+    },
+
+    live_events:{
+        title:"Live Events",
+        columns:[
+            "title",
+            "scheduled_start",
+            "scheduled_end",
+            "status",
+            "youtube_video_id",
+            "youtube_url",
+            "twitch_url",
+            "kick_url",
+            "is_featured",
+            "is_active"
+        ]
+    },
+
+    content_items:{
+        title:"Content Library",
+        columns:[
+            "title",
+            "slug",
+            "content_type",
+            "status",
+            "access_level",
+            "is_member_only",
+            "is_featured",
+            "is_active"
+        ]
+    },
+
+    content_categories:{
+        title:"Categories",
+        columns:[
+            "name",
+            "slug",
+            "is_active",
+            "sort_order"
+        ]
+    },
+
+    polls:{
+        title:"Polls",
+        columns:[
+            "question",
+            "status",
+            "starts_at",
+            "ends_at"
+        ]
+    },
+
+    newsletter_subscribers:{
+        title:"Newsletter Subscribers",
+        columns:[
+            "email",
+            "status",
+            "created_at"
+        ]
+    }
+
+};
+
+
+async function renderTablePage(
+    table,
+    title,
+    description
+){
+
+    const target =
+        Object.keys(tableConfig)
+            .includes(table)
+            ? tableConfig[table]
+            : {
+                title,
+                columns:[]
+            };
+
+
+    const containerId =
+        "tablePage" +
+        table
+            .replaceAll("_"," ")
+            .replace(
+                /\b\w/g,
+                c=>c.toUpperCase()
+            )
+            .replaceAll(" ","");
+
+
+    /*
+       Some IDs above are static and don't perfectly map
+       because of camel casing. Find page container by
+       current page.
+    */
+
+    const page =
+        $("page-" + state.currentPage);
+
+    if(!page){
+        return;
+    }
+
+
+    page.innerHTML = `
+
+        <div class="section-header">
+
+            <div>
+
+                <h2 class="section-title">
+                    ${escapeHtml(title)}
+                </h2>
+
+                <div class="section-description">
+                    ${escapeHtml(description)}
+                </div>
+
+            </div>
+
+            <div class="actions">
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openCreateModal('${table}')">
+                    + New
+                </button>
+
+                <button
+                    class="btn"
+                    onclick="renderTablePage('${table}','${title}','${description}')">
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="search-row">
+
+                <input
+                    id="search-${table}"
+                    placeholder="Search ${escapeHtml(title)}..."
+                    onkeydown="if(event.key==='Enter')loadAdminTable('${table}')">
+
+                <button
+                    class="btn"
+                    onclick="loadAdminTable('${table}')">
+                    Search
+                </button>
+
+            </div>
+
+            <div id="output-${table}">
+                <div class="loading">
+                    Loading...
+                </div>
+            </div>
+
+        </div>
+    `;
+
+
+    await loadAdminTable(table);
+
+}
+
+
+async function loadAdminTable(table){
+
+    const output =
+        $("output-" + table);
+
+    if(!output){
+        return;
+    }
+
+
+    output.innerHTML =
+        `<div class="loading">Loading ${table}...</div>`;
+
+
+    const searchEl =
+        $("search-" + table);
+
+    const search =
+        searchEl
+            ? searchEl.value.trim()
+            : "";
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "admin_table_rows",
+                {
+                    p_table:table,
+                    p_limit:100,
+                    p_offset:0,
+                    p_search:search
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        state.tableCache[table] =
+            data.rows || [];
+
+
+        renderAdminRows(
+            table,
+            data.rows || [],
+            data.count || 0
+        );
+
+
+    }catch(error){
+
+        output.innerHTML =
+            `<div class="empty">
+                ${escapeHtml(error.message)}
+             </div>`;
+
+    }
+
+}
+
+
+function renderAdminRows(
+    table,
+    rows,
+    total
+){
+
+    const output =
+        $("output-" + table);
+
+
+    if(!rows.length){
+
+        output.innerHTML =
+            `<div class="empty">No records found.</div>`;
+
+        return;
+
+    }
+
+
+    const config =
+        tableConfig[table];
+
+
+    let columns =
+        config &&
+        config.columns &&
+        config.columns.length
+        ? config.columns
+        : Object.keys(rows[0])
+            .slice(0,12);
+
+
+    const headers =
+        columns.map(
+            c=>`
+                <th>
+                    ${escapeHtml(c)}
+                </th>
+            `
+        ).join("");
+
+
+    const body =
+        rows.map(
+            row=>{
+
+                const pk =
+                    primaryKeyFor(
+                        table,
+                        row
+                    );
+
+
+                const cells =
+                    columns.map(
+                        c=>{
+
+                            let value =
+                                row[c];
+
+
+                            if(
+                                typeof value ===
+                                "boolean"
+                            ){
+
+                                return `
+                                    <td>
+                                        ${
+                                            value
+                                            ? '<span class="badge green">YES</span>'
+                                            : '<span class="badge">NO</span>'
+                                        }
+                                    </td>
+                                `;
+
+                            }
+
+
+                            if(
+                                c.includes("_at")
+                            ){
+
+                                return `
+                                    <td>
+                                        ${escapeHtml(fmtDate(value))}
+                                    </td>
+                                `;
+
+                            }
+
+
+                            if(
+                                c === "video_url" ||
+                                c === "youtube_url" ||
+                                c === "thumbnail_url"
+                            ){
+
+                                const text =
+                                    value
+                                    ? String(value).slice(0,45)
+                                    : "—";
+
+                                return `
+                                    <td title="${escapeHtml(value || "")}">
+                                        ${escapeHtml(text)}
+                                    </td>
+                                `;
+
+                            }
+
+
+                            if(
+                                typeof value ===
+                                "object"
+                            ){
+
+                                return `
+                                    <td>
+                                        <span class="code">
+                                            ${escapeHtml(JSON.stringify(value))}
+                                        </span>
+                                    </td>
+                                `;
+
+                            }
+
+
+                            return `
+                                <td>
+                                    ${escapeHtml(
+                                        String(
+                                            value ??
+                                            "—"
+                                        ).slice(0,120)
+                                    )}
+                                </td>
+                            `;
+
+                        }
+                    ).join("");
+
+
+                return `
+
+                    <tr>
+
+                        ${cells}
+
+                        <td>
+
+                            <div class="row-actions">
+
+                                <button
+                                    class="btn btn-small"
+                                    onclick='openEditModal("${table}",${JSON.stringify(row).replaceAll("'","&#039;")})'>
+                                    Edit
+                                </button>
+
+                                <button
+                                    class="btn btn-small btn-danger"
+                                    onclick='deleteAdminRow("${table}",${JSON.stringify(pk).replaceAll("'","&#039;")})'>
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        ).join("");
+
+
+    output.innerHTML = `
+
+        <div style="margin-bottom:10px"
+             class="muted">
+            ${fmtNumber(total)} record(s)
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        ${headers}
+                        <th>Actions</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+                    ${body}
+                </tbody>
+
+            </table>
+
+        </div>
+    `;
+
+}
+
+
+function primaryKeyFor(
+    table,
+    row
+){
+
+    const known = {
+
+        shows:["id"],
+        seasons:["id"],
+        episodes:["id"],
+        tv_channels:["id"],
+        tv_channel_playlist:["id"],
+        schedule_items:["id"],
+        live_events:["id"],
+        content_items:["id"],
+        content_categories:["id"],
+        polls:["id"],
+        newsletter_subscribers:["id"]
+
+    };
+
+
+    const keys =
+        known[table] ||
+        ["id"];
+
+
+    const pk = {};
+
+    keys.forEach(
+        key=>{
+
+            if(
+                row[key] !== undefined
+            ){
+
+                pk[key] =
+                    row[key];
+
+            }
+
+        }
+    );
+
+
+    return pk;
+
+}
+
+
+/* ============================================================
+   EDITOR
+============================================================ */
+
+async function openCreateModal(table){
+
+    const config =
+        tableConfig[table];
+
+
+    let schema =
+        state.schema.find(
+            x=>
+                x.table === table ||
+                x.table_name === table
+        );
+
+
+    if(!schema){
+
+        await loadSchema();
+
+        schema =
+            state.schema.find(
+                x=>
+                    x.table === table ||
+                    x.table_name === table
+            );
+
+    }
+
+
+    const columns =
+        schema?.columns ||
+        [];
+
+
+    const fields =
+        columns.filter(
+            c=>
+                !c.generated &&
+                !String(
+                    c.default || ""
+                ).includes("nextval")
+        );
+
+
+    $("modalTitle").textContent =
+        "Create " +
+        (config?.title || table);
+
+
+    $("modalBody").innerHTML =
+        buildEditorFields(
+            table,
+            fields,
+            {}
+        );
+
+
+    $("modalSave").onclick =
+        ()=>saveCreate(
+            table
+        );
+
+
+    $("modal").classList.add("show");
+
+}
+
+
+async function openEditModal(
+    table,
+    row
+){
+
+    let schema =
+        state.schema.find(
+            x=>
+                x.table === table ||
+                x.table_name === table
+        );
+
+
+    if(!schema){
+
+        await loadSchema();
+
+        schema =
+            state.schema.find(
+                x=>
+                    x.table === table ||
+                    x.table_name === table
+            );
+
+    }
+
+
+    const columns =
+        schema?.columns ||
+        Object.keys(row)
+            .map(
+                name=>({
+                    name,
+                    type:typeof row[name],
+                    nullable:true
+                })
+            );
+
+
+    $("modalTitle").textContent =
+        "Edit " +
+        (tableConfig[table]?.title || table);
+
+
+    $("modalBody").innerHTML =
+        buildEditorFields(
+            table,
+            columns,
+            row,
+            true
+        );
+
+
+    $("modalSave").onclick =
+        ()=>saveEdit(
+            table,
+            row
+        );
+
+
+    $("modal").classList.add("show");
+
+}
+
+
+function buildEditorFields(
+    table,
+    columns,
+    row,
+    editing=false
+){
+
+    return `
+
+        <div class="grid grid-2">
+
+            ${
+                columns.map(
+                    c=>{
+
+                        const name =
+                            c.name;
+
+                        const value =
+                            row[name];
+
+                        const type =
+                            String(
+                                c.type ||
+                                c.data_type ||
+                                ""
+                            ).toLowerCase();
+
+
+                        const disabled =
+                            editing &&
+                            (
+                                name === "id" ||
+                                name === "created_at"
+                            );
+
+
+                        if(
+                            type === "boolean"
+                        ){
+
+                            return `
+
+                                <div class="form-group">
+
+                                    <label>
+                                        ${escapeHtml(name)}
+                                    </label>
+
+                                    <select
+                                        data-field="${escapeHtml(name)}"
+                                        ${disabled ? "disabled":""}>
+
+                                        <option
+                                            value="">
+                                            NULL
+                                        </option>
+
+                                        <option
+                                            value="true"
+                                            ${
+                                                value === true
+                                                ? "selected"
+                                                : ""
+                                            }>
+                                            TRUE
+                                        </option>
+
+                                        <option
+                                            value="false"
+                                            ${
+                                                value === false
+                                                ? "selected"
+                                                : ""
+                                            }>
+                                            FALSE
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            `;
+
+                        }
+
+
+                        if(
+                            type.includes("json")
+                        ){
+
+                            return `
+
+                                <div class="form-group"
+                                     style="grid-column:1/-1">
+
+                                    <label>
+                                        ${escapeHtml(name)}
+                                    </label>
+
+                                    <textarea
+                                        data-field="${escapeHtml(name)}"
+                                        ${disabled ? "disabled":""}>${escapeHtml(
+                                            value
+                                            ? JSON.stringify(
+                                                value,
+                                                null,
+                                                2
+                                            )
+                                            : ""
+                                        )}</textarea>
+
+                                </div>
+
+                            `;
+
+                        }
+
+
+                        const isLong =
+                            name === "description" ||
+                            name === "bio" ||
+                            name.includes("metadata");
+
+
+                        return `
+
+                            <div
+                                class="form-group"
+                                ${
+                                    isLong
+                                    ? 'style="grid-column:1/-1"'
+                                    : ''
+                                }>
+
+                                <label>
+                                    ${escapeHtml(name)}
+                                </label>
+
+                                ${
+                                    isLong
+                                    ? `
+                                        <textarea
+                                            data-field="${escapeHtml(name)}"
+                                            ${disabled ? "disabled":""}>${escapeHtml(
+                                                value ?? ""
+                                            )}</textarea>
+                                    `
+                                    :
+                                    `
+                                        <input
+                                            data-field="${escapeHtml(name)}"
+                                            value="${escapeHtml(
+                                                value ?? ""
+                                            )}"
+                                            ${disabled ? "disabled":""}>
+                                    `
+                                }
+
+                            </div>
+
+                        `;
+
+                    }
+                ).join("")
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+function collectModalPayload(){
+
+    const payload = {};
+
+
+    document.querySelectorAll(
+        "#modalBody [data-field]"
+    ).forEach(
+        el=>{
+
+            if(el.disabled){
+                return;
+            }
+
+
+            const name =
+                el.dataset.field;
+
+
+            let value =
+                el.value;
+
+
+            if(value === ""){
+                value = null;
+            }
+
+
+            if(
+                el.tagName ===
+                "SELECT" &&
+                (
+                    value ===
+                    "true" ||
+                    value ===
+                    "false"
+                )
+            ){
+
+                value =
+                    value === "true";
+
+            }
+
+
+            const lower =
+                name.toLowerCase();
+
+
+            if(
+                value !== null &&
+                (
+                    lower.includes("seconds") ||
+                    lower.includes("number") ||
+                    lower.includes("order") ||
+                    lower === "views" ||
+                    lower.includes("minutes") ||
+                    lower === "sort_order" ||
+                    lower === "channel_number"
+                ) &&
+                value !== ""
+            ){
+
+                const number =
+                    Number(value);
+
+                if(!Number.isNaN(number)){
+                    value = number;
+                }
+
+            }
+
+
+            if(
+                value !== null &&
+                (
+                    lower.includes("metadata") ||
+                    lower.includes("social_links") ||
+                    lower.includes("config")
+                )
+            ){
+
+                try{
+
+                    value =
+                        JSON.parse(value);
+
+                }catch{
+
+                    throw new Error(
+                        `${name} must contain valid JSON.`
+                    );
+
+                }
+
+            }
+
+
+            payload[name] =
+                value;
+
+        }
+    );
+
+
+    return payload;
+
+}
+
+
+async function saveCreate(table){
+
+    try{
+
+        const payload =
+            collectModalPayload();
+
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "admin_insert",
+                {
+                    p_table:table,
+                    p_payload:payload
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        closeModal();
+
+        toast(
+            "Created successfully.",
+            "success"
+        );
+
+
+        await loadAdminTable(
+            table
+        );
+
+        await loadDashboard();
+
+
+    }catch(error){
+
+        toast(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+async function saveEdit(
+    table,
+    oldRow
+){
+
+    try{
+
+        const payload =
+            collectModalPayload();
+
+
+        const pk =
+            primaryKeyFor(
+                table,
+                oldRow
+            );
+
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "admin_update",
+                {
+                    p_table:table,
+                    p_pk:pk,
+                    p_payload:payload
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        closeModal();
+
+        toast(
+            "Updated successfully.",
+            "success"
+        );
+
+
+        await loadAdminTable(
+            table
+        );
+
+        await loadDashboard();
+
+
+    }catch(error){
+
+        toast(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+async function deleteAdminRow(
+    table,
+    pk
+){
+
+    if(
+        !confirm(
+            `Delete this ${table} record? This cannot be undone.`
+        )
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        const {
+            error
+        } =
+            await sb.rpc(
+                "admin_delete",
+                {
+                    p_table:table,
+                    p_pk:pk
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        toast(
+            "Deleted successfully.",
+            "success"
+        );
+
+
+        await loadAdminTable(
+            table
+        );
+
+        await loadDashboard();
+
+
+    }catch(error){
+
+        toast(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+function closeModal(){
+
+    $("modal")
+        .classList.remove("show");
+
+}
+
+
+/* ============================================================
+   MEMBERS
+============================================================ */
+
+async function loadMembers(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "crowrules_admin_members"
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        state.members =
+            data || [];
+
+
+        renderMembers();
+
+    }catch(error){
+
+        toast(
+            "Members failed: " + error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+function filterMembers(){
+
+    renderMembers();
+
+}
+
+
+function renderMembers(){
+
+    const body =
+        $("membersBody");
+
+
+    if(!body){
+        return;
+    }
+
+
+    const search =
+        (
+            $("memberSearch")?.value ||
+            ""
+        ).toLowerCase();
+
+
+    const rows =
+        state.members.filter(
+            m=>
+                !search ||
+                String(
+                    m.username ||
+                    ""
+                ).toLowerCase().includes(search) ||
+                String(
+                    m.display_name ||
+                    ""
+                ).toLowerCase().includes(search) ||
+                String(
+                    m.membership_tier ||
+                    ""
+                ).toLowerCase().includes(search)
+        );
+
+
+    if(!rows.length){
+
+        body.innerHTML =
+            `<tr>
+                <td colspan="7">
+                    <div class="empty">
+                        No members found.
+                    </div>
+                </td>
+             </tr>`;
+
+        return;
+
+    }
+
+
+    body.innerHTML =
+        rows.map(
+            m=>{
+
+                const stats =
+                    state.leaderboard.find(
+                        x=>
+                            x.user_id ===
+                            m.id
+                    );
+
+
+                return `
+
+                    <tr>
+
+                        <td>
+
+                            <div class="member">
+
+                                ${
+                                    m.avatar_url
+                                    ?
+                                    `<img
+                                        class="avatar"
+                                        src="${escapeHtml(m.avatar_url)}">`
+                                    :
+                                    `<div class="avatar"></div>`
+                                }
+
+                                <div>
+
+                                    <div class="member-name">
+                                        ${escapeHtml(
+                                            m.display_name ||
+                                            m.username ||
+                                            m.id
+                                        )}
+                                    </div>
+
+                                    <div class="member-sub">
+                                        ${escapeHtml(
+                                            m.username ||
+                                            ""
+                                        )}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <td>
+                            <span class="badge purple">
+                                ${escapeHtml(
+                                    m.membership_tier ||
+                                    "member"
+                                )}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${
+                                m.is_active
+                                ? '<span class="badge green">ACTIVE</span>'
+                                : '<span class="badge red">INACTIVE</span>'
+                            }
+                        </td>
+
+                        <td class="points">
+                            ${fmtNumber(
+                                stats?.lifetime_points || 0
+                            )}
+                        </td>
+
+                        <td>
+                            ${fmtNumber(
+                                stats?.level || 0
+                            )}
+                        </td>
+
+                        <td>
+                            ${fmtNumber(
+                                stats?.watch_minutes || 0
+                            )} min
+                        </td>
+
+                        <td>
+
+                            <button
+                                class="btn btn-small"
+                                onclick='focusPointUser("${m.id}")'>
+                                Points
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+function focusPointUser(id){
+
+    $("adjustUserId").value =
+        id;
+
+    openPage("points");
+
+}
+
+
+/* ============================================================
+   LEADERBOARD
+============================================================ */
+
+async function loadLeaderboard(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb
+                .from("top_members")
+                .select("*")
+                .order(
+                    "rank",
+                    {ascending:true}
+                )
+                .limit(100);
+
+
+        if(error){
+            throw error;
+        }
+
+
+        state.leaderboard =
+            data || [];
+
+
+        renderLeaderboard();
+
+        renderMembers();
+
+
+    }catch(error){
+
+        toast(
+            "Leaderboard failed: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+function renderLeaderboard(){
+
+    const body =
+        $("leaderboardBody");
+
+
+    if(!body){
+        return;
+    }
+
+
+    if(!state.leaderboard.length){
+
+        body.innerHTML =
+            `<tr>
+                <td colspan="8">
+                    <div class="empty">
+                        No leaderboard data.
+                    </div>
+                </td>
+             </tr>`;
+
+        return;
+
+    }
+
+
+    body.innerHTML =
+        state.leaderboard.map(
+            (m,i)=>`
+
+            <tr>
+
+                <td>
+
+                    <div class="rank">
+                        ${m.rank || i+1}
+                    </div>
+
+                </td>
+
+                <td>
+
+                    <div class="member">
+
+                        ${
+                            m.avatar_url
+                            ?
+                            `<img
+                                class="avatar"
+                                src="${escapeHtml(m.avatar_url)}">`
+                            :
+                            `<div class="avatar"></div>`
+                        }
+
+                        <div>
+
+                            <div class="member-name">
+                                ${escapeHtml(
+                                    m.display_name ||
+                                    m.user_id
+                                )}
+                            </div>
+
+                            <div class="member-sub">
+                                ${escapeHtml(
+                                    m.user_id || ""
+                                )}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </td>
+
+                <td>
+                    <span class="badge purple">
+                        ${escapeHtml(
+                            m.membership_tier ||
+                            "member"
+                        )}
+                    </span>
+                </td>
+
+                <td class="points">
+                    ${fmtNumber(m.points)}
+                </td>
+
+                <td>
+                    ${fmtNumber(m.level)}
+                </td>
+
+                <td>
+                    ${fmtNumber(
+                        Math.floor(
+                            Number(
+                                m.watch_seconds ||
+                                0
+                            ) / 60
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ${fmtNumber(
+                        m.completed_episodes
+                    )}
+                </td>
+
+                <td>
+                    ${fmtDate(
+                        m.last_active_at
+                    )}
+                </td>
+
+            </tr>
+
+        `
+        ).join("");
+
+}
+
+
+/* ============================================================
+   POINTS PAGE
+============================================================ */
+
+async function loadPointsPage(){
+
+    await loadLeaderboard();
+
+
+    try{
+
+        const [
+            pointsResult,
+            activityResult
+        ] =
+        await Promise.all([
+
+            sb
+                .from("member_points")
+                .select(
+                    "points,lifetime_points",
+                    {count:"exact"}
+                ),
+
+            sb
+                .from("member_activity")
+                .select("*")
+                .order(
+                    "created_at",
+                    {ascending:false}
+                )
+                .limit(50)
+
+        ]);
+
+
+        if(pointsResult.error){
+            throw pointsResult.error;
+        }
+
+
+        if(activityResult.error){
+            throw activityResult.error;
+        }
+
+
+        const rows =
+            pointsResult.data || [];
+
+
+        const total =
+            rows.reduce(
+                (sum,x)=>
+                    sum +
+                    Number(
+                        x.lifetime_points ||
+                        0
+                    ),
+                0
+            );
+
+
+        $("pointsTotal").textContent =
+            fmtNumber(total);
+
+
+        $("pointsTransactions").textContent =
+            fmtNumber(
+                activityResult.data.length
+            );
+
+
+        $("pointsTopMember").textContent =
+            state.leaderboard[0]
+            ? (
+                state.leaderboard[0].display_name ||
+                state.leaderboard[0].user_id
+            )
+            : "—";
+
+
+        const activity =
+            activityResult.data || [];
+
+
+        $("pointsActivityBody").innerHTML =
+            activity.map(
+                a=>{
+
+                    const member =
+                        state.members.find(
+                            m=>
+                                m.id ===
+                                a.user_id
+                        );
+
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                ${escapeHtml(
+                                    member?.display_name ||
+                                    a.user_id
+                                )}
+                            </td>
+
+                            <td>
+                                <span class="badge">
+                                    ${escapeHtml(
+                                        a.activity_type
+                                    )}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${fmtNumber(
+                                    a.minutes_watched
+                                )}
+                            </td>
+
+                            <td class="points">
+                                +${fmtNumber(
+                                    a.points
+                                )}
+                            </td>
+
+                            <td>
+                                ${fmtDate(
+                                    a.created_at
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            ).join("");
+
+    }catch(error){
+
+        toast(
+            "Points page failed: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+async function adjustPoints(){
+
+    const userId =
+        $("adjustUserId")
+            .value
+            .trim();
+
+    const delta =
+        Number(
+            $("adjustDelta").value
+        );
+
+    const reason =
+        $("adjustReason")
+            .value
+            .trim() ||
+        "Admin adjustment";
+
+
+    if(!userId){
+
+        toast(
+            "Enter a member user ID.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        !delta ||
+        !Number.isInteger(delta)
+    ){
+
+        toast(
+            "Enter a non-zero whole-number point adjustment.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "admin_adjust_member_points",
+                {
+                    p_user_id:userId,
+                    p_delta:delta,
+                    p_reason:reason
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        toast(
+            `Points updated. Current balance: ${fmtNumber(data.points)}`,
+            "success"
+        );
+
+
+        $("adjustDelta").value =
+            "";
+
+        $("adjustReason").value =
+            "";
+
+
+        await loadLeaderboard();
+
+        await loadPointsPage();
+
+        await loadDashboard();
+
+
+    }catch(error){
+
+        toast(
+            "Point adjustment failed: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   AUDIT
+============================================================ */
+
+async function loadAudit(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "crowrules_admin_recent_audit",
+                {
+                    requested_limit:100
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        const rows =
+            data || [];
+
+
+        $("auditBody").innerHTML =
+            rows.map(
+                x=>`
+
+                <tr>
+
+                    <td>
+                        ${fmtDate(
+                            x.created_at
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            x.admin_user_id ||
+                            "—"
+                        )}
+                    </td>
+
+                    <td>
+                        <span class="badge purple">
+                            ${escapeHtml(
+                                x.action
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            x.table_name ||
+                            "—"
+                        )}
+                    </td>
+
+                    <td class="code">
+                        ${escapeHtml(
+                            x.record_id ||
+                            "—"
+                        )}
+                    </td>
+
+                </tr>
+
+            `
+            ).join("");
+
+
+    }catch(error){
+
+        toast(
+            "Audit log failed: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   SCHEMA
+============================================================ */
+
+async function loadSchema(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "admin_schema"
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        state.schema =
+            Array.isArray(data)
+            ? data
+            : [];
+
+
+        state.tables =
+            state.schema.map(
+                x=>
+                    x.table ||
+                    x.table_name
+            ).filter(Boolean);
+
+
+        populateDbTables();
+
+
+    }catch(error){
+
+        console.error(
+            "Schema load failed",
+            error
+        );
+
+    }
+
+}
+
+
+function populateDbTables(){
+
+    const select =
+        $("dbTable");
+
+
+    if(!select){
+        return;
+    }
+
+
+    select.innerHTML =
+        `<option value="">
+            Select table...
+         </option>` +
+        state.tables.map(
+            table=>
+                `<option value="${escapeHtml(table)}">
+                    ${escapeHtml(table)}
+                 </option>`
+        ).join("");
+
+}
+
+
+async function loadDatabaseExplorer(){
+
+    if(!state.schema.length){
+        await loadSchema();
+    }
+
+}
+
+
+async function loadDbTable(){
+
+    const table =
+        $("dbTable").value;
+
+
+    if(!table){
+
+        $("dbTableOutput").innerHTML =
+            `<div class="empty">
+                Select a table.
+             </div>`;
+
+        return;
+
+    }
+
+
+    const search =
+        $("dbSearch").value.trim();
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await sb.rpc(
+                "admin_table_rows",
+                {
+                    p_table:table,
+                    p_limit:100,
+                    p_offset:0,
+                    p_search:search
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        const rows =
+            data.rows || [];
+
+
+        if(!rows.length){
+
+            $("dbTableOutput").innerHTML =
+                `<div class="empty">
+                    No rows.
+                 </div>`;
+
+            return;
+
+        }
+
+
+        const columns =
+            Object.keys(
+                rows[0]
+            );
+
+
+        $("dbTableOutput").innerHTML = `
+
+            <div class="muted"
+                 style="margin-bottom:10px">
+
+                ${fmtNumber(data.count)}
+                record(s)
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            ${
+                                columns.map(
+                                    c=>
+                                        `<th>${escapeHtml(c)}</th>`
+                                ).join("")
+                            }
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        ${
+                            rows.map(
+                                row=>
+                                    `<tr>
+                                        ${
+                                            columns.map(
+                                                c=>
+                                                    `<td>
+                                                        ${escapeHtml(
+                                                            typeof row[c] === "object"
+                                                            ? JSON.stringify(row[c])
+                                                            : String(
+                                                                row[c] ??
+                                                                "—"
+                                                            ).slice(0,160)
+                                                        )}
+                                                    </td>`
+                                            ).join("")
+                                        }
+                                     </tr>`
+                            ).join("")
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        `;
+
+
+    }catch(error){
+
+        $("dbTableOutput").innerHTML =
+            `<div class="empty">
+                ${escapeHtml(
+                    error.message
+                )}
+             </div>`;
+
+    }
+
+}
+
+
+/* ============================================================
+   GLOBAL PERIODIC HEALTH CHECK
+============================================================ */
+
+let healthTimer =
+    null;
+
+
+function startHealthPolling(){
+
+    if(healthTimer){
+        clearInterval(
+            healthTimer
+        );
+    }
+
+
+    healthTimer =
+        setInterval(
+            async()=>{
+
+                if(
+                    state.currentPage ===
+                    "dashboard"
+                ){
+
+                    await loadDashboard();
+
+                }
+
+                if(
+                    state.currentPage ===
+                    "monitor"
+                ){
+
+                    await loadMonitor();
+
+                }
+
+            },
+            60000
+        );
+
+}
+
+
+startHealthPolling();
+
+
+/* ============================================================
+   MODAL CLOSE
+============================================================ */
+
+$("modal")
+    .addEventListener(
+        "click",
+        event=>{
+
+            if(
+                event.target ===
+                $("modal")
+            ){
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+/* ============================================================
+   START
+============================================================ */
+
+init();
 
 </script>
 
