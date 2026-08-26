@@ -1,2378 +1,3356 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>CrowRules Yearbook Studios | School Memories, Reimagined</title>
+<title>CrowRules Yearbook — Preserve The Story</title>
 
 <meta
   name="description"
-  content="CrowRules Yearbook Studios creates cinematic video yearbooks, senior stories, school event films, and lasting digital memories."
+  content="CrowRules Yearbook — a living archive of the people, creators, shows, milestones and memories behind CrowRules Entertainment."
 >
+
+<meta name="theme-color" content="#080808">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 <link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap"
   rel="stylesheet"
 >
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-:root {
-    --bg: #07070b;
-    --bg2: #0d0d14;
-    --panel: #12121b;
-    --panel2: #171722;
-
-    --text: #ffffff;
-    --muted: #a3a3b2;
-
-    --red: #ff3030;
-    --red-dark: #b81818;
-    --red-glow: rgba(255,48,48,.35);
-
-    --border: rgba(255,255,255,.09);
-
-    --max: 1200px;
+:root{
+  --bg:#050505;
+  --bg2:#0b0b0d;
+  --panel:#101014;
+  --panel2:#15151a;
+  --line:#292930;
+  --text:#f5f5f7;
+  --muted:#9a9aa5;
+  --accent:#ffffff;
+  --accent2:#777780;
+  --danger:#ff4d4d;
+  --success:#5cff9d;
+  --shadow:0 20px 70px rgba(0,0,0,.45);
+  --radius:18px;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*{
+  box-sizing:border-box;
 }
 
-html {
-    scroll-behavior: smooth;
+html{
+  scroll-behavior:smooth;
 }
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Montserrat", sans-serif;
-    line-height: 1.6;
-    overflow-x: hidden;
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(255,255,255,.06),transparent 28%),
+    radial-gradient(circle at 90% 20%,rgba(255,255,255,.04),transparent 25%),
+    var(--bg);
+  color:var(--text);
+  font-family:Montserrat,Arial,sans-serif;
+  line-height:1.6;
 }
 
-a {
-    color: inherit;
-    text-decoration: none;
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.035;
+  background-image:
+    linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.4) 1px,transparent 1px);
+  background-size:50px 50px;
+  mask-image:linear-gradient(to bottom,black,transparent);
+  z-index:-1;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
 }
 
 button,
 input,
-textarea {
-    font-family: inherit;
+textarea,
+select{
+  font:inherit;
 }
 
-img {
-    max-width: 100%;
-    display: block;
+button{
+  cursor:pointer;
 }
 
-/* =========================================================
-   BACKGROUND EFFECT
-========================================================= */
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background:
-        linear-gradient(
-            rgba(255,255,255,.015) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(255,255,255,.015) 1px,
-            transparent 1px
-        );
-    background-size: 60px 60px;
-    mask-image: linear-gradient(to bottom, black, transparent);
-    z-index: -2;
+img{
+  max-width:100%;
 }
 
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(255,48,48,.08),
-            transparent 35%
-        );
-    z-index: -3;
+.container{
+  width:min(1180px,calc(100% - 32px));
+  margin:auto;
 }
 
-/* =========================================================
-   CONTAINER
-========================================================= */
-
-.container {
-    width: min(var(--max), calc(100% - 40px));
-    margin: auto;
+.hidden{
+  display:none!important;
 }
 
-/* =========================================================
+/* =========================================
    HEADER
-========================================================= */
+========================================= */
 
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-
-    background: rgba(7,7,11,.78);
-    backdrop-filter: blur(18px);
-
-    border-bottom: 1px solid var(--border);
-
-    transition: .3s ease;
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  backdrop-filter:blur(18px);
+  background:rgba(5,5,5,.82);
+  border-bottom:1px solid rgba(255,255,255,.08);
 }
 
-.header-inner {
-    height: 76px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.nav{
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    font-family: "Orbitron", sans-serif;
-    font-weight: 800;
-    letter-spacing: 1px;
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:220px;
 }
 
-.logo-mark {
-    width: 38px;
-    height: 38px;
-
-    display: grid;
-    place-items: center;
-
-    background: var(--red);
-    color: white;
-
-    border-radius: 8px;
-
-    font-size: 19px;
-
-    box-shadow:
-        0 0 25px var(--red-glow);
+.brand-mark{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:1px solid #444;
+  border-radius:12px;
+  background:#0e0e11;
+  font-size:22px;
 }
 
-.logo span:last-child {
-    font-size: 14px;
-    color: #aaa;
+.brand-copy{
+  display:flex;
+  flex-direction:column;
+  line-height:1.1;
 }
 
-nav {
-    display: flex;
-    gap: 30px;
-    align-items: center;
+.brand-name{
+  font-family:Orbitron,sans-serif;
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:14px;
 }
 
-nav a {
-    color: #aaa;
-    font-size: 13px;
-    font-weight: 600;
-    transition: .25s;
+.brand-sub{
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  margin-top:4px;
 }
 
-nav a:hover {
-    color: white;
+.nav-links{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
+  justify-content:center;
 }
 
-.nav-cta {
-    padding: 10px 18px;
-    background: var(--red);
-    color: white !important;
-    border-radius: 6px;
+.nav-links a{
+  color:#bdbdc5;
+  font-size:12px;
+  padding:9px 11px;
+  border-radius:10px;
+  transition:.2s;
 }
 
-.nav-cta:hover {
-    background: #ff4545;
-    box-shadow: 0 0 20px var(--red-glow);
+.nav-links a:hover{
+  color:#fff;
+  background:#151519;
 }
 
-.menu-toggle {
-    display: none;
-
-    background: none;
-    border: none;
-
-    color: white;
-    font-size: 25px;
-
-    cursor: pointer;
+.member-area{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-/* =========================================================
+.member-pill{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#0d0d10;
+}
+
+.member-avatar{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#222;
+}
+
+.member-name{
+  font-size:11px;
+  font-weight:700;
+}
+
+.btn{
+  border:1px solid var(--line);
+  background:#111115;
+  color:#fff;
+  border-radius:11px;
+  padding:11px 16px;
+  font-weight:700;
+  font-size:12px;
+  transition:.2s;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  border-color:#555;
+  background:#19191f;
+}
+
+.btn.primary{
+  background:#fff;
+  color:#050505;
+  border-color:#fff;
+}
+
+.btn.primary:hover{
+  background:#ddd;
+}
+
+.btn.danger{
+  border-color:#4c2020;
+  color:#ff7777;
+}
+
+/* =========================================
    HERO
-========================================================= */
+========================================= */
 
-.hero {
-    min-height: 100vh;
-
-    display: flex;
-    align-items: center;
-
-    position: relative;
-
-    padding-top: 90px;
-
-    overflow: hidden;
+.hero{
+  min-height:720px;
+  display:flex;
+  align-items:center;
+  position:relative;
+  overflow:hidden;
 }
 
-.hero-glow {
-    position: absolute;
-
-    width: 650px;
-    height: 650px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(255,48,48,.14),
-            transparent 68%
-        );
-
-    right: -200px;
-    top: 50%;
-
-    transform: translateY(-50%);
+.hero::before{
+  content:"";
+  position:absolute;
+  width:650px;
+  height:650px;
+  right:-240px;
+  top:-150px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.12) 0,
+      rgba(255,255,255,.025) 42%,
+      transparent 70%);
+  filter:blur(10px);
 }
 
-.hero-content {
-    max-width: 820px;
-
-    position: relative;
-    z-index: 2;
+.hero-grid{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:60px;
+  align-items:center;
 }
 
-.eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-
-    color: #ff5a5a;
-
-    font-size: 12px;
-    font-weight: 800;
-
-    letter-spacing: 3px;
-    text-transform: uppercase;
-
-    margin-bottom: 25px;
+.kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:7px 11px;
+  color:#bbb;
+  background:#0d0d10;
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  font-size:10px;
+  font-weight:700;
 }
 
-.eyebrow::before {
-    content: "";
-    width: 35px;
-    height: 2px;
-
-    background: var(--red);
+.kicker-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 14px #fff;
 }
 
-.hero h1 {
-    font-family: "Orbitron", sans-serif;
-
-    font-size: clamp(42px, 7vw, 88px);
-
-    line-height: 1.02;
-
-    margin-bottom: 25px;
+.hero h1{
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(42px,7vw,86px);
+  line-height:.98;
+  margin:24px 0;
+  letter-spacing:-.045em;
 }
 
-.hero h1 span {
-    color: var(--red);
-    text-shadow: 0 0 40px var(--red-glow);
+.hero h1 span{
+  display:block;
+  color:#8d8d97;
 }
 
-.hero p {
-    max-width: 700px;
-
-    color: #aaa;
-
-    font-size: 18px;
-
-    line-height: 1.8;
-
-    margin-bottom: 35px;
+.hero p{
+  color:#b2b2bc;
+  font-size:17px;
+  max-width:700px;
 }
 
-.hero-buttons {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+.hero-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:30px;
 }
 
-.btn {
-    border: none;
-    cursor: pointer;
-
-    padding: 14px 24px;
-
-    border-radius: 6px;
-
-    font-weight: 700;
-    font-size: 14px;
-
-    transition: .25s;
+.hero-card{
+  position:relative;
+  border:1px solid #2c2c33;
+  border-radius:26px;
+  min-height:470px;
+  background:
+    linear-gradient(145deg,#151519,#08080a 65%);
+  box-shadow:var(--shadow);
+  overflow:hidden;
 }
 
-.btn-primary {
-    background: var(--red);
-    color: white;
-
-    box-shadow:
-        0 0 25px rgba(255,48,48,.18);
+.hero-card::before{
+  content:"YEAR";
+  position:absolute;
+  font-family:Orbitron,sans-serif;
+  font-size:150px;
+  font-weight:800;
+  line-height:1;
+  color:rgba(255,255,255,.025);
+  transform:rotate(-90deg);
+  right:-65px;
+  top:90px;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        0 0 35px rgba(255,48,48,.35);
+.yearbook-cover{
+  position:absolute;
+  inset:25px;
+  border:1px solid #3b3b43;
+  border-radius:18px;
+  padding:28px;
+  background:
+    linear-gradient(160deg,
+      rgba(255,255,255,.08),
+      transparent 38%),
+    #0b0b0e;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 }
 
-.btn-secondary {
-    background: rgba(255,255,255,.04);
-    color: white;
-
-    border: 1px solid var(--border);
+.cover-top{
+  display:flex;
+  justify-content:space-between;
+  color:#777;
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  letter-spacing:.15em;
 }
 
-.btn-secondary:hover {
-    background: rgba(255,255,255,.08);
+.cover-title{
+  font-family:Orbitron,sans-serif;
+  font-size:52px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:-.05em;
 }
 
-/* =========================================================
-   STATS
-========================================================= */
-
-.stats {
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-
-    background: rgba(255,255,255,.015);
+.cover-title small{
+  display:block;
+  font-family:Montserrat,sans-serif;
+  font-size:11px;
+  letter-spacing:.3em;
+  color:#777;
+  margin-top:15px;
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4,1fr);
+.cover-bottom{
+  color:#777;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.15em;
 }
 
-.stat {
-    padding: 35px 20px;
-
-    text-align: center;
-
-    border-right: 1px solid var(--border);
-}
-
-.stat:last-child {
-    border-right: none;
-}
-
-.stat strong {
-    display: block;
-
-    font-family: "Orbitron", sans-serif;
-
-    font-size: 28px;
-
-    color: white;
-}
-
-.stat span {
-    color: #777;
-    font-size: 12px;
-}
-
-/* =========================================================
+/* =========================================
    SECTIONS
-========================================================= */
+========================================= */
 
-section {
-    scroll-margin-top: 90px;
+section{
+  padding:100px 0;
 }
 
-.section {
-    padding: 110px 0;
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  align-items:end;
+  margin-bottom:35px;
 }
 
-.section-header {
-    max-width: 720px;
-    margin-bottom: 55px;
+.eyebrow{
+  color:#777;
+  font-family:Orbitron,sans-serif;
+  text-transform:uppercase;
+  font-size:10px;
+  letter-spacing:.18em;
 }
 
-.section-header.center {
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
+.section-head h2{
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(28px,4vw,46px);
+  line-height:1.1;
+  margin:8px 0 0;
 }
 
-.section-label {
-    color: var(--red);
-
-    font-size: 11px;
-    font-weight: 800;
-
-    letter-spacing: 3px;
-    text-transform: uppercase;
-
-    margin-bottom: 12px;
+.section-head p{
+  color:#8e8e99;
+  max-width:520px;
+  margin:0;
 }
 
-.section h2 {
-    font-family: "Orbitron", sans-serif;
+/* =========================================
+   VISION
+========================================= */
 
-    font-size: clamp(30px, 5vw, 52px);
-
-    line-height: 1.1;
-
-    margin-bottom: 18px;
+.vision-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:20px;
 }
 
-.section-header p {
-    color: var(--muted);
+.info-card{
+  background:linear-gradient(145deg,#111115,#09090b);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:30px;
+  box-shadow:0 15px 40px rgba(0,0,0,.2);
 }
 
-/* =========================================================
-   SERVICES
-========================================================= */
-
-.services-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 20px;
+.info-card h3{
+  margin:0 0 12px;
+  font-family:Orbitron,sans-serif;
+  font-size:18px;
 }
 
-.service-card {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.045),
-            rgba(255,255,255,.015)
-        );
-
-    border: 1px solid var(--border);
-
-    padding: 35px;
-
-    border-radius: 12px;
-
-    position: relative;
-
-    overflow: hidden;
-
-    transition: .3s;
+.info-card p{
+  margin:0;
+  color:#9999a3;
 }
 
-.service-card::before {
-    content: "";
-
-    position: absolute;
-
-    width: 100%;
-    height: 2px;
-
-    top: 0;
-    left: 0;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            var(--red),
-            transparent
-        );
-
-    transform: translateX(-100%);
-
-    transition: .5s;
+.big-quote{
+  grid-column:1/-1;
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(24px,4vw,43px);
+  line-height:1.25;
+  padding:45px;
+  border:1px solid #33333b;
+  border-radius:24px;
+  background:
+    linear-gradient(135deg,#151519,#09090b);
 }
 
-.service-card:hover {
-    transform: translateY(-7px);
-
-    border-color:
-        rgba(255,48,48,.35);
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.3);
+.big-quote span{
+  color:#777;
 }
 
-.service-card:hover::before {
-    transform: translateX(0);
+/* =========================================
+   ENTERTAINMENT CONNECTION
+========================================= */
+
+.connection{
+  background:
+    linear-gradient(180deg,transparent,rgba(255,255,255,.02),transparent);
 }
 
-.icon {
-    width: 52px;
-    height: 52px;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 10px;
-
-    background: rgba(255,48,48,.1);
-
-    color: var(--red);
-
-    font-size: 22px;
-
-    margin-bottom: 25px;
+.connection-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
 }
 
-.service-card h3 {
-    font-size: 21px;
-    margin-bottom: 12px;
+.connection-card{
+  min-height:210px;
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#0d0d10;
 }
 
-.service-card p {
-    color: #888;
-    font-size: 14px;
+.connection-icon{
+  font-size:25px;
+  margin-bottom:25px;
 }
 
-/* =========================================================
-   SHOWCASE
-========================================================= */
-
-.showcase {
-    background:
-        linear-gradient(
-            180deg,
-            transparent,
-            rgba(255,255,255,.02),
-            transparent
-        );
+.connection-card h3{
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+  margin:0 0 8px;
 }
 
-.showcase-grid {
-    display: grid;
-
-    grid-template-columns:
-        1.5fr 1fr;
-
-    gap: 20px;
+.connection-card p{
+  color:#85858f;
+  font-size:12px;
+  margin:0;
 }
 
-.showcase-card {
-    min-height: 380px;
+/* =========================================
+   YEARBOOKS
+========================================= */
 
-    border-radius: 14px;
-
-    overflow: hidden;
-
-    position: relative;
-
-    border: 1px solid var(--border);
-
-    background:
-        linear-gradient(
-            145deg,
-            #171722,
-            #0c0c11
-        );
+.yearbooks-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
 }
 
-.showcase-card.large {
-    min-height: 500px;
+.yearbook-card{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#0d0d10;
+  transition:.25s;
 }
 
-.showcase-content {
-    position: absolute;
-
-    inset: auto 0 0 0;
-
-    padding: 35px;
-
-    background:
-        linear-gradient(
-            transparent,
-            rgba(0,0,0,.95)
-        );
+.yearbook-card:hover{
+  transform:translateY(-4px);
+  border-color:#4a4a52;
 }
 
-.showcase-content span {
-    color: var(--red);
-
-    font-size: 11px;
-
-    text-transform: uppercase;
-
-    letter-spacing: 2px;
+.yearbook-cover-image{
+  height:270px;
+  display:flex;
+  align-items:end;
+  padding:22px;
+  background:
+    radial-gradient(circle at 75% 25%,rgba(255,255,255,.13),transparent 25%),
+    linear-gradient(145deg,#1a1a20,#070709);
+  background-size:cover;
+  background-position:center;
 }
 
-.showcase-content h3 {
-    font-family: "Orbitron", sans-serif;
-
-    font-size: 28px;
-
-    margin-top: 8px;
+.yearbook-cover-image span{
+  font-family:Orbitron,sans-serif;
+  font-size:45px;
+  font-weight:800;
 }
 
-/* =========================================================
-   PROCESS
-========================================================= */
-
-.process-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(4,1fr);
-
-    gap: 20px;
+.yearbook-body{
+  padding:20px;
 }
 
-.process {
-    padding: 30px;
-
-    border: 1px solid var(--border);
-
-    background: rgba(255,255,255,.02);
-
-    border-radius: 10px;
+.yearbook-body h3{
+  margin:0 0 7px;
+  font-family:Orbitron,sans-serif;
 }
 
-.process-number {
-    font-family: "Orbitron", sans-serif;
-
-    font-size: 32px;
-
-    color: var(--red);
-
-    margin-bottom: 20px;
+.yearbook-body p{
+  color:#85858f;
+  font-size:12px;
+  min-height:58px;
 }
 
-.process h3 {
-    margin-bottom: 10px;
+.card-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:#707078;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
 }
 
-.process p {
-    color: #888;
+/* =========================================
+   MEMBERS
+========================================= */
 
-    font-size: 13px;
+.members-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
 }
 
-/* =========================================================
-   CTA
-========================================================= */
-
-.cta {
-    padding: 100px 0;
+.member-card{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  background:#0d0d10;
+  text-align:center;
 }
 
-.cta-box {
-    position: relative;
-
-    overflow: hidden;
-
-    padding: 70px 50px;
-
-    text-align: center;
-
-    border-radius: 16px;
-
-    border: 1px solid rgba(255,48,48,.25);
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(255,48,48,.14),
-            transparent 60%
-        ),
-        #101016;
+.member-card img{
+  width:78px;
+  height:78px;
+  object-fit:cover;
+  border-radius:50%;
+  border:1px solid #333;
+  background:#18181c;
 }
 
-.cta-box h2 {
-    font-family: "Orbitron", sans-serif;
-
-    font-size: clamp(30px,5vw,55px);
-
-    margin-bottom: 15px;
+.member-card h3{
+  font-size:14px;
+  margin:12px 0 2px;
 }
 
-.cta-box p {
-    max-width: 650px;
-
-    margin: auto auto 30px;
-
-    color: #999;
+.member-role{
+  color:#777;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
 }
 
-/* =========================================================
-   FAQ
-========================================================= */
-
-.faq {
-    max-width: 850px;
-    margin: auto;
+.member-card p{
+  color:#85858f;
+  font-size:11px;
 }
 
-.faq-item {
-    border-bottom: 1px solid var(--border);
+/* =========================================
+   REVIEWS
+========================================= */
+
+.reviews-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
 }
 
-.faq-question {
-    width: 100%;
-
-    background: none;
-    border: none;
-
-    color: white;
-
-    padding: 22px 0;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    text-align: left;
-
-    font-weight: 700;
-
-    cursor: pointer;
+.review-card{
+  padding:26px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#0d0d10;
 }
 
-.faq-question span {
-    color: var(--red);
-
-    font-size: 20px;
-
-    transition: .3s;
+.stars{
+  letter-spacing:3px;
+  margin-bottom:15px;
 }
 
-.faq-answer {
-    max-height: 0;
-
-    overflow: hidden;
-
-    transition: .35s ease;
-
-    color: #888;
-
-    font-size: 14px;
+.review-text{
+  color:#b5b5be;
+  font-size:13px;
 }
 
-.faq-answer p {
-    padding-bottom: 22px;
+.reviewer{
+  margin-top:20px;
+  display:flex;
+  gap:10px;
+  align-items:center;
 }
 
-.faq-item.active .faq-answer {
-    max-height: 200px;
+.reviewer img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#222;
 }
 
-.faq-item.active .faq-question span {
-    transform: rotate(45deg);
+.reviewer strong{
+  display:block;
+  font-size:11px;
 }
 
-/* =========================================================
-   CONTACT
-========================================================= */
-
-.contact-grid {
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 40px;
+.reviewer span{
+  color:#707078;
+  font-size:10px;
 }
 
-.contact-info p {
-    color: #999;
-    margin-bottom: 25px;
+/* =========================================
+   FORMS
+========================================= */
+
+.form-shell{
+  max-width:850px;
+  margin:auto;
+  border:1px solid #292930;
+  border-radius:24px;
+  background:#0d0d10;
+  padding:30px;
 }
 
-.contact-detail {
-    padding: 18px 0;
-
-    border-bottom: 1px solid var(--border);
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
 }
 
-.contact-detail strong {
-    display: block;
-
-    font-size: 12px;
-
-    color: var(--red);
-
-    text-transform: uppercase;
-
-    letter-spacing: 2px;
-
-    margin-bottom: 5px;
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
 }
 
-.contact-detail span {
-    color: #ddd;
+.field.full{
+  grid-column:1/-1;
 }
 
-.contact-form {
-    background: #101016;
-
-    border: 1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 30px;
+.field label{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.13em;
+  color:#8c8c96;
+  font-weight:700;
 }
 
-.form-group {
-    margin-bottom: 18px;
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  border:1px solid #2a2a31;
+  background:#08080a;
+  color:#fff;
+  border-radius:11px;
+  padding:12px 13px;
+  outline:none;
 }
 
-.form-group label {
-    display: block;
-
-    font-size: 12px;
-
-    color: #aaa;
-
-    margin-bottom: 7px;
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:#666;
 }
 
-.form-group input,
-.form-group textarea {
-    width: 100%;
-
-    background: #08080c;
-
-    border: 1px solid var(--border);
-
-    border-radius: 6px;
-
-    padding: 13px;
-
-    color: white;
-
-    outline: none;
-
-    transition: .25s;
+.field textarea{
+  min-height:130px;
+  resize:vertical;
 }
 
-.form-group textarea {
-    resize: vertical;
+.form-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-top:20px;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-    border-color: var(--red);
+.form-status{
+  color:#777;
+  font-size:11px;
 }
 
-/* =========================================================
+/* =========================================
+   MEMBER REVIEW
+========================================= */
+
+.review-form{
+  margin-top:35px;
+  padding-top:35px;
+  border-top:1px solid var(--line);
+}
+
+/* =========================================
+   LOGIN MODAL
+========================================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(10px);
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal-box{
+  width:min(440px,100%);
+  border:1px solid #33333a;
+  border-radius:22px;
+  background:#0d0d10;
+  padding:30px;
+  box-shadow:var(--shadow);
+}
+
+.modal-box h2{
+  font-family:Orbitron,sans-serif;
+  margin-top:0;
+}
+
+.close-modal{
+  float:right;
+  background:none;
+  border:0;
+  color:#777;
+  font-size:20px;
+}
+
+/* =========================================
+   ADMIN
+========================================= */
+
+.admin-panel{
+  display:none;
+}
+
+.admin-panel.visible{
+  display:block;
+}
+
+.admin-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:25px;
+}
+
+.admin-stat{
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:#0d0d10;
+}
+
+.admin-stat span{
+  color:#777;
+  text-transform:uppercase;
+  font-size:9px;
+  letter-spacing:.14em;
+}
+
+.admin-stat strong{
+  display:block;
+  font-family:Orbitron,sans-serif;
+  font-size:28px;
+  margin-top:8px;
+}
+
+.admin-table-wrap{
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:15px;
+}
+
+.admin-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+.admin-table th,
+.admin-table td{
+  padding:13px;
+  border-bottom:1px solid #202026;
+  text-align:left;
+  font-size:11px;
+}
+
+.admin-table th{
+  color:#777;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+
+/* =========================================
+   TOAST
+========================================= */
+
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:3000;
+  max-width:360px;
+  padding:14px 17px;
+  border:1px solid #333;
+  border-radius:13px;
+  background:#111115;
+  color:#ddd;
+  box-shadow:var(--shadow);
+  transform:translateY(30px);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  font-size:12px;
+}
+
+.toast.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+/* =========================================
    FOOTER
-========================================================= */
+========================================= */
 
-footer {
-    border-top: 1px solid var(--border);
-
-    background: #08080c;
-
-    padding: 55px 0 25px;
+footer{
+  border-top:1px solid #1f1f24;
+  padding:60px 0;
+  background:#070709;
 }
 
-.footer-grid {
-    display: grid;
-
-    grid-template-columns:
-        2fr 1fr 1fr;
-
-    gap: 50px;
-
-    padding-bottom: 45px;
+.footer-grid{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  gap:30px;
 }
 
-.footer-brand p {
-    max-width: 420px;
-
-    color: #777;
-
-    margin-top: 15px;
-
-    font-size: 13px;
+.footer-brand{
+  font-family:Orbitron,sans-serif;
+  font-size:20px;
 }
 
-.footer-column h4 {
-    margin-bottom: 15px;
-
-    font-size: 13px;
-
-    text-transform: uppercase;
-
-    letter-spacing: 2px;
+.footer p,
+.footer a{
+  color:#777;
+  font-size:11px;
 }
 
-.footer-column a {
-    display: block;
-
-    color: #777;
-
-    font-size: 13px;
-
-    margin-bottom: 8px;
-
-    transition: .2s;
+.footer-links{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
-.footer-column a:hover {
-    color: white;
+.copyright{
+  border-top:1px solid #1f1f24;
+  margin-top:35px;
+  padding-top:20px;
+  color:#555;
+  font-size:10px;
 }
 
-.copyright {
-    border-top: 1px solid var(--border);
-
-    padding-top: 20px;
-
-    color: #555;
-
-    font-size: 11px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    gap: 20px;
-}
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-.modal {
-    position: fixed;
-
-    inset: 0;
-
-    background: rgba(0,0,0,.82);
-
-    backdrop-filter: blur(10px);
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    z-index: 2000;
-
-    padding: 20px;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    width: 100%;
-    max-width: 500px;
-
-    background: #15151f;
-
-    border: 1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 35px;
-
-    position: relative;
-
-    box-shadow:
-        0 30px 100px rgba(0,0,0,.6);
-}
-
-.modal-close {
-    position: absolute;
-
-    top: 15px;
-    right: 18px;
-
-    background: none;
-
-    border: none;
-
-    color: #777;
-
-    font-size: 25px;
-
-    cursor: pointer;
-}
-
-.modal-content h3 {
-    font-family: "Orbitron", sans-serif;
-
-    margin-bottom: 8px;
-}
-
-.modal-content > p {
-    color: #777;
-
-    font-size: 13px;
-
-    margin-bottom: 25px;
-}
-
-/* =========================================================
-   BACK TO TOP
-========================================================= */
-
-#topBtn {
-    position: fixed;
-
-    bottom: 25px;
-    right: 25px;
-
-    width: 45px;
-    height: 45px;
-
-    border-radius: 50%;
-
-    border: 1px solid var(--border);
-
-    background: #15151d;
-
-    color: white;
-
-    cursor: pointer;
-
-    display: none;
-
-    z-index: 500;
-
-    transition: .3s;
-}
-
-#topBtn:hover {
-    background: var(--red);
-}
-
-/* =========================================================
+/* =========================================
    RESPONSIVE
-========================================================= */
+========================================= */
 
-@media(max-width:900px) {
+@media(max-width:950px){
 
-    nav {
-        position: absolute;
+  .nav{
+    flex-wrap:wrap;
+    padding:12px 0;
+  }
 
-        top: 76px;
-        left: 0;
+  .nav-links{
+    order:3;
+    width:100%;
+    overflow:auto;
+    justify-content:flex-start;
+  }
 
-        width: 100%;
+  .hero-grid{
+    grid-template-columns:1fr;
+  }
 
-        background: #0d0d13;
+  .hero-card{
+    max-width:520px;
+  }
 
-        border-bottom: 1px solid var(--border);
+  .connection-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
 
-        display: none;
+  .members-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
 
-        flex-direction: column;
-
-        padding: 20px;
-    }
-
-    nav.active {
-        display: flex;
-    }
-
-    .menu-toggle {
-        display: block;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2,1fr);
-    }
-
-    .stat:nth-child(2) {
-        border-right: none;
-    }
-
-    .services-grid,
-    .process-grid {
-        grid-template-columns: repeat(2,1fr);
-    }
-
-    .showcase-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .contact-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .footer-grid {
-        grid-template-columns: 1fr 1fr;
-    }
+  .admin-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
 }
 
-@media(max-width:600px) {
+@media(max-width:680px){
 
-    .container {
-        width: min(100% - 28px, var(--max));
-    }
+  .container{
+    width:min(100% - 22px,1180px);
+  }
 
-    .header-inner {
-        height: 68px;
-    }
+  section{
+    padding:70px 0;
+  }
 
-    .hero {
-        padding-top: 100px;
-    }
+  .hero{
+    min-height:auto;
+    padding:80px 0;
+  }
 
-    .hero h1 {
-        font-size: 40px;
-    }
+  .hero h1{
+    font-size:45px;
+  }
 
-    .hero p {
-        font-size: 15px;
-    }
+  .hero-card{
+    min-height:400px;
+  }
 
-    .section {
-        padding: 75px 0;
-    }
+  .vision-grid,
+  .connection-grid,
+  .yearbooks-grid,
+  .reviews-grid,
+  .form-grid,
+  .footer-grid{
+    grid-template-columns:1fr;
+  }
 
-    .services-grid,
-    .process-grid,
-    .stats-grid,
-    .footer-grid {
-        grid-template-columns: 1fr;
-    }
+  .members-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
 
-    .stat {
-        border-right: none;
+  .big-quote{
+    padding:25px;
+  }
 
-        border-bottom: 1px solid var(--border);
-    }
+  .section-head{
+    display:block;
+  }
 
-    .stat:last-child {
-        border-bottom: none;
-    }
+  .section-head p{
+    margin-top:15px;
+  }
 
-    .cta-box {
-        padding: 55px 25px;
-    }
+  .form-footer{
+    flex-direction:column;
+    align-items:stretch;
+  }
 
-    .copyright {
-        flex-direction: column;
-    }
+  .brand{
+    min-width:0;
+  }
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- =======================================================
-HEADER
-======================================================= -->
+<header class="site-header">
+  <div class="container nav">
 
-<header>
+    <a href="#top" class="brand">
+      <div class="brand-mark">♜</div>
 
-<div class="container header-inner">
+      <div class="brand-copy">
+        <div class="brand-name">CROWRULES</div>
+        <div class="brand-sub">Yearbook</div>
+      </div>
+    </a>
 
-<a href="#" class="logo">
+    <nav class="nav-links">
+      <a href="#vision">Vision</a>
+      <a href="#yearbooks">Yearbooks</a>
+      <a href="#members">Members</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#request">Request / Quote</a>
+      <a href="#entertainment">Entertainment</a>
+    </nav>
 
-<div class="logo-mark">🐦‍⬛</div>
+    <div class="member-area" id="memberArea">
 
-<div>
-    <div>CROWRULES</div>
-    <span>YEARBOOK STUDIOS</span>
-</div>
+      <button
+        class="btn"
+        id="loginButton"
+        onclick="openLogin()"
+      >
+        MEMBER LOGIN
+      </button>
 
-</a>
+      <div
+        class="member-pill hidden"
+        id="memberPill"
+      >
+        <img
+          id="memberAvatar"
+          class="member-avatar"
+          src=""
+          alt=""
+        >
 
-<button
-    class="menu-toggle"
-    id="menuToggle"
-    aria-label="Open navigation"
->
-☰
-</button>
+        <span
+          id="memberName"
+          class="member-name"
+        >
+          Member
+        </span>
 
-<nav id="nav">
+        <button
+          class="btn"
+          style="padding:6px 9px"
+          onclick="signOut()"
+        >
+          OUT
+        </button>
+      </div>
 
-<a href="#services">Services</a>
-<a href="#showcase">Productions</a>
-<a href="#process">How It Works</a>
-<a href="#faq">FAQ</a>
-<a href="#contact" class="nav-cta">Request a Quote</a>
+    </div>
 
-</nav>
-
-</div>
-
+  </div>
 </header>
 
+<main id="top">
 
-<!-- =======================================================
-HERO
-======================================================= -->
+<!-- =========================================
+     HERO
+========================================= -->
 
 <section class="hero">
 
-<div class="hero-glow"></div>
+  <div class="container hero-grid">
 
-<div class="container">
+    <div>
 
-<div class="hero-content">
+      <div class="kicker">
+        <span class="kicker-dot"></span>
+        CrowRules Entertainment Archive
+      </div>
 
-<div class="eyebrow">
-CrowRules Entertainment
-</div>
+      <h1>
+        CROWRULES
+        <span>YEARBOOK</span>
+      </h1>
 
-<h1>
-School Memories.<br>
-<span>Reimagined.</span>
-</h1>
+      <p id="heroText">
+        More than a yearbook.
+        A living archive of the people, creators, shows,
+        milestones, memories and moments that make the
+        CrowRules journey worth remembering.
+      </p>
 
-<p>
-Traditional yearbooks preserve photographs.
-CrowRules Yearbook Studios preserves the
-voices, personalities, laughter, stories, and
-moments that made the school year unforgettable.
-</p>
+      <div class="hero-actions">
 
-<div class="hero-buttons">
+        <a
+          href="#yearbooks"
+          class="btn primary"
+        >
+          EXPLORE THE ARCHIVE
+        </a>
 
-<button
-    class="btn btn-primary"
-    onclick="openModal()"
->
-Start a Project
-</button>
+        <a
+          href="#request"
+          class="btn"
+        >
+          REQUEST INFORMATION
+        </a>
 
-<a
-    href="#services"
-    class="btn btn-secondary"
->
-Explore Our Services
-</a>
+      </div>
 
-</div>
+    </div>
 
-</div>
+    <div class="hero-card">
 
-</div>
+      <div class="yearbook-cover">
 
-</section>
+        <div class="cover-top">
+          <span>CROWRULES</span>
+          <span>EST. 2026</span>
+        </div>
 
+        <div class="cover-title">
+          THE
+          <br>
+          STORY
+          <small>
+            PEOPLE • MOMENTS • MEMORIES
+          </small>
+        </div>
 
-<!-- =======================================================
-STATS
-======================================================= -->
+        <div class="cover-bottom">
+          CrowRules Yearbook
+        </div>
 
-<section class="stats">
+      </div>
 
-<div class="container stats-grid">
+    </div>
 
-<div class="stat">
-<strong>01</strong>
-<span>School Year</span>
-</div>
-
-<div class="stat">
-<strong>100%</strong>
-<span>Digital Delivery</span>
-</div>
-
-<div class="stat">
-<strong>4K</strong>
-<span>Cinematic Production</span>
-</div>
-
-<div class="stat">
-<strong>∞</strong>
-<span>Memories Preserved</span>
-</div>
-
-</div>
+  </div>
 
 </section>
 
+<!-- =========================================
+     VISION
+========================================= -->
 
-<!-- =======================================================
-SERVICES
-======================================================= -->
+<section id="vision">
 
-<section id="services" class="section">
+  <div class="container">
 
-<div class="container">
+    <div class="section-head">
 
-<div class="section-header">
+      <div>
+        <div class="eyebrow">The Vision</div>
+        <h2>Why CrowRules Yearbook?</h2>
+      </div>
 
-<div class="section-label">
-What We Create
-</div>
+      <p>
+        Classic yearbooks remember a school year.
+        CrowRules Yearbook remembers a creative community.
+      </p>
 
-<h2>
-More Than A Yearbook.
-</h2>
+    </div>
 
-<p>
-We transform the traditional yearbook concept into
-a cinematic experience students, families, teachers,
-and alumni can revisit for years.
-</p>
+    <div class="vision-grid">
 
-</div>
+      <div class="big-quote">
+        “Classic yearbooks capture a school year.
+        <span>CrowRules Yearbook captures the journey.</span>”
+      </div>
 
+      <article class="info-card">
+        <h3>Not Just A School Year</h3>
 
-<div class="services-grid">
+        <p>
+          CrowRules Yearbook can document creators,
+          community members, entertainment projects,
+          shows, events, milestones and moments from
+          an entire creative ecosystem.
+        </p>
+      </article>
 
-<div class="service-card">
+      <article class="info-card">
+        <h3>A Living Archive</h3>
 
-<div class="icon">🎬</div>
+        <p>
+          Each edition becomes part of a growing
+          CrowRules historical archive rather than
+          disappearing when the year ends.
+        </p>
+      </article>
 
-<h3>Video Yearbooks</h3>
+      <article class="info-card">
+        <h3>People First</h3>
 
-<p>
-A cinematic time capsule of the school year featuring
-students, teachers, activities, sports, events,
-interviews, celebrations, and everyday moments.
-</p>
+        <p>
+          The heart of the Yearbook is the people.
+          Members, creators, collaborators and
+          supporters can become part of the story.
+        </p>
+      </article>
 
-</div>
+      <article class="info-card">
+        <h3>Built For The Future</h3>
 
+        <p>
+          Digital editions allow CrowRules to preserve
+          video, links, creator channels, show history,
+          photographs and interactive memories.
+        </p>
+      </article>
 
-<div class="service-card">
+    </div>
 
-<div class="icon">🎓</div>
-
-<h3>Senior Stories</h3>
-
-<p>
-Personalized graduation films that give seniors
-a chance to tell their story, celebrate their journey,
-and leave something meaningful behind.
-</p>
-
-</div>
-
-
-<div class="service-card">
-
-<div class="icon">🏆</div>
-
-<h3>School Events</h3>
-
-<p>
-Sports, assemblies, dances, performances,
-pep rallies, graduations, fundraisers,
-and the moments that bring a school together.
-</p>
-
-</div>
-
-
-<div class="service-card">
-
-<div class="icon">🎤</div>
-
-<h3>Student Voices</h3>
-
-<p>
-Real interviews and personal stories that capture
-the personality of a graduating class.
-</p>
-
-</div>
-
-
-<div class="service-card">
-
-<div class="icon">📸</div>
-
-<h3>Photo & Video</h3>
-
-<p>
-Professional photography and cinematic video
-coverage designed to complement traditional
-yearbook programs.
-</p>
-
-</div>
-
-
-<div class="service-card">
-
-<div class="icon">☁️</div>
-
-<h3>Digital Archives</h3>
-
-<p>
-Create a lasting digital archive that families,
-students, and future generations can access
-long after graduation.
-</p>
-
-</div>
-
-</div>
-
-</div>
+  </div>
 
 </section>
 
-
-<!-- =======================================================
-SHOWCASE
-======================================================= -->
-
-<section id="showcase" class="section showcase">
-
-<div class="container">
-
-<div class="section-header">
-
-<div class="section-label">
-The CrowRules Approach
-</div>
-
-<h2>
-Your School Has A Story.
-</h2>
-
-<p>
-We build productions around the people who make
-your school unique.
-</p>
-
-</div>
-
-
-<div class="showcase-grid">
-
-<div class="showcase-card large">
-
-<div class="showcase-content">
-
-<span>Featured Production</span>
-
-<h3>
-The Year We Remember
-</h3>
-
-<p>
-A cinematic school-year retrospective.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="showcase-card">
-
-<div class="showcase-content">
-
-<span>Senior Stories</span>
-
-<h3>
-Class of 2027
-</h3>
-
-<p>
-Individual stories. One graduating class.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="showcase-card">
-
-<div class="showcase-content">
-
-<span>School Events</span>
-
-<h3>
-Friday Night Lights
-</h3>
-
-<p>
-Capturing the energy beyond the scoreboard.
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =======================================================
-PROCESS
-======================================================= -->
-
-<section id="process" class="section">
-
-<div class="container">
-
-<div class="section-header center">
-
-<div class="section-label">
-How It Works
-</div>
-
-<h2>
-From School Year To Time Capsule.
-</h2>
-
-<p>
-A simple production process designed to work
-alongside your school's existing schedule.
-</p>
-
-</div>
-
-
-<div class="process-grid">
-
-<div class="process">
-
-<div class="process-number">
-01
-</div>
-
-<h3>Plan</h3>
-
-<p>
-We meet with your school and build a production
-plan around your calendar, goals, and budget.
-</p>
-
-</div>
-
-
-<div class="process">
-
-<div class="process-number">
-02
-</div>
-
-<h3>Capture</h3>
-
-<p>
-We film events, interviews, activities,
-sports, traditions, and everyday moments.
-</p>
-
-</div>
-
-
-<div class="process">
-
-<div class="process-number">
-03
-</div>
-
-<h3>Create</h3>
-
-<p>
-Our production team turns the footage into
-a polished cinematic experience.
-</p>
-
-</div>
-
-
-<div class="process">
-
-<div class="process-number">
-04
-</div>
-
-<h3>Remember</h3>
-
-<p>
-Students and families receive a digital
-memory they can revisit for years.
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =======================================================
-CTA
-======================================================= -->
-
-<section class="cta">
-
-<div class="container">
-
-<div class="cta-box">
-
-<div class="section-label">
-Let's Tell Your Story
-</div>
-
-<h2>
-Make This Year Unforgettable.
-</h2>
-
-<p>
-Whether you're planning a senior class project,
-a complete video yearbook, or event coverage,
-CrowRules Yearbook Studios can help bring it to life.
-</p>
-
-<button
-    class="btn btn-primary"
-    onclick="openModal()"
->
-Talk With CrowRules
-</button>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =======================================================
-FAQ
-======================================================= -->
-
-<section id="faq" class="section">
-
-<div class="container">
-
-<div class="section-header center">
-
-<div class="section-label">
-Questions
-</div>
-
-<h2>
-Frequently Asked Questions
-</h2>
-
-</div>
-
-
-<div class="faq">
-
-<div class="faq-item">
-
-<button class="faq-question">
-
-<span>
-How does a video yearbook work?
-</span>
-
-<span>+</span>
-
-</button>
-
-<div class="faq-answer">
-
-<p>
-We work with the school throughout the year to
-capture important events, interviews, activities,
-student stories, and memorable moments. Those
-elements are edited into a finished cinematic
-production.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="faq-item">
-
-<button class="faq-question">
-
-<span>
-Do you work with existing yearbook programs?
-</span>
-
-<span>+</span>
-
-</button>
-
-<div class="faq-answer">
-
-<p>
-Absolutely. CrowRules Yearbook Studios can operate
-alongside a traditional yearbook team and provide
-the video component without replacing the existing
-program.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="faq-item">
-
-<button class="faq-question">
-
-<span>
-Can parents purchase individual senior films?
-</span>
-
-<span>+</span>
-
-</button>
-
-<div class="faq-answer">
-
-<p>
-Senior Stories can be structured as individual
-productions or as part of a larger senior-class
-package.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="faq-item">
-
-<button class="faq-question">
-
-<span>
-How early should a school contact you?
-</span>
-
-<span>+</span>
-
-</button>
-
-<div class="faq-answer">
-
-<p>
-Ideally, production planning begins before the
-school year so important dates and filming
-opportunities can be incorporated into the schedule.
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =======================================================
-CONTACT
-======================================================= -->
-
-<section id="contact" class="section">
-
-<div class="container">
-
-<div class="contact-grid">
-
-<div class="contact-info">
-
-<div class="section-label">
-Start A Conversation
-</div>
-
-<h2>
-Let's Create Something Worth Remembering.
-</h2>
-
-<p>
-Tell us about your school, graduating class,
-upcoming events, or yearbook vision.
-</p>
-
-
-<div class="contact-detail">
-
-<strong>Email</strong>
-
-<span>
-crowrulesentertainment@gmail.com
-</span>
-
-</div>
-
-
-<div class="contact-detail">
-
-<strong>Studio</strong>
-
-<span>
-CrowRules Entertainment
-</span>
-
-</div>
-
-
-<div class="contact-detail">
-
-<strong>Services</strong>
-
-<span>
-Video Yearbooks • Senior Stories • Event Coverage
-</span>
-
-</div>
-
-</div>
-
-
-<div class="contact-form">
-
-<form id="contactForm">
-
-<div class="form-group">
-
-<label for="formName">
-Name
-</label>
-
-<input
-    id="formName"
-    type="text"
-    required
-    placeholder="Your name"
+<!-- =========================================
+     ENTERTAINMENT CONNECTION
+========================================= -->
+
+<section
+  id="entertainment"
+  class="connection"
 >
 
-</div>
+  <div class="container">
 
+    <div class="section-head">
 
-<div class="form-group">
+      <div>
+        <div class="eyebrow">The Bigger Picture</div>
+        <h2>Connected To Entertainment</h2>
+      </div>
 
-<label for="formEmail">
-Email
-</label>
+      <p>
+        CrowRules Yearbook is the memory layer of
+        CrowRules Entertainment.
+      </p>
 
-<input
-    id="formEmail"
-    type="email"
-    required
-    placeholder="you@example.com"
->
+    </div>
 
-</div>
+    <div class="connection-grid">
 
+      <article class="connection-card">
+        <div class="connection-icon">📺</div>
+        <h3>CrowRules TV</h3>
+        <p>
+          Preserve seasons, shows, episodes, premieres
+          and the people behind the programming.
+        </p>
+      </article>
 
-<div class="form-group">
+      <article class="connection-card">
+        <div class="connection-icon">🎥</div>
+        <h3>Crow's Nest</h3>
+        <p>
+          Highlight content creators and document
+          their journey through CrowRules.
+        </p>
+      </article>
 
-<label for="formSchool">
-School / Organization
-</label>
+      <article class="connection-card">
+        <div class="connection-icon">👥</div>
+        <h3>Members</h3>
+        <p>
+          Give members a place in the official
+          CrowRules historical record.
+        </p>
+      </article>
 
-<input
-    id="formSchool"
-    type="text"
-    placeholder="School name"
->
+      <article class="connection-card">
+        <div class="connection-icon">🕯️</div>
+        <h3>Memories</h3>
+        <p>
+          Preserve milestones, tributes, special
+          moments and stories worth remembering.
+        </p>
+      </article>
 
-</div>
+    </div>
 
-
-<div class="form-group">
-
-<label for="formMessage">
-Tell us about your project
-</label>
-
-<textarea
-    id="formMessage"
-    rows="5"
-    required
-    placeholder="What are you looking for?"
-></textarea>
-
-</div>
-
-
-<button
-    class="btn btn-primary"
-    type="submit"
->
-Send Project Inquiry
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-</div>
+  </div>
 
 </section>
 
+<!-- =========================================
+     YEARBOOK ARCHIVE
+========================================= -->
 
-<!-- =======================================================
-FOOTER
-======================================================= -->
+<section id="yearbooks">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div>
+        <div class="eyebrow">The Archive</div>
+        <h2>Past Yearbooks</h2>
+      </div>
+
+      <p>
+        Every edition becomes another chapter
+        in the CrowRules story.
+      </p>
+
+    </div>
+
+    <div
+      class="yearbooks-grid"
+      id="yearbooksGrid"
+    >
+
+      <div class="info-card">
+        <h3>Loading archive...</h3>
+        <p>
+          Connecting to CrowRules Yearbook.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================
+     MEMBERS
+========================================= -->
+
+<section id="members">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div>
+        <div class="eyebrow">The People</div>
+        <h2>Yearbook Members</h2>
+      </div>
+
+      <p>
+        The people are the story.
+      </p>
+
+    </div>
+
+    <div
+      class="members-grid"
+      id="membersGrid"
+    >
+
+      <div class="info-card">
+        <h3>Loading members...</h3>
+        <p>
+          Looking for published Yearbook members.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================
+     REVIEWS
+========================================= -->
+
+<section id="reviews">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div>
+        <div class="eyebrow">Community Voice</div>
+        <h2>Reviews</h2>
+      </div>
+
+      <p>
+        What people are saying about the
+        CrowRules Yearbook idea.
+      </p>
+
+    </div>
+
+    <div
+      class="reviews-grid"
+      id="reviewsGrid"
+    >
+
+      <div class="info-card">
+        <h3>Loading reviews...</h3>
+        <p>
+          Reviews will appear here after publication.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="review-form">
+
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Member Feedback</div>
+          <h2>Leave A Review</h2>
+        </div>
+      </div>
+
+      <div
+        id="reviewLoginMessage"
+        class="info-card"
+      >
+        <h3>Member login required</h3>
+        <p>
+          Sign in to your CrowRules account to submit
+          a Yearbook review.
+        </p>
+
+        <button
+          class="btn primary"
+          onclick="openLogin()"
+        >
+          MEMBER LOGIN
+        </button>
+      </div>
+
+      <form
+        id="reviewForm"
+        class="form-shell hidden"
+      >
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Your Name</label>
+            <input
+              id="reviewerName"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label>Your Role</label>
+            <input
+              id="reviewerRole"
+              placeholder="Member / Creator / Customer"
+            >
+          </div>
+
+          <div class="field">
+            <label>Rating</label>
+
+            <select id="reviewRating">
+              <option value="5">★★★★★ — 5</option>
+              <option value="4">★★★★☆ — 4</option>
+              <option value="3">★★★☆☆ — 3</option>
+              <option value="2">★★☆☆☆ — 2</option>
+              <option value="1">★☆☆☆☆ — 1</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>Review</label>
+
+            <textarea
+              id="reviewText"
+              required
+              placeholder="Tell us what you think about CrowRules Yearbook..."
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-footer">
+
+          <span
+            class="form-status"
+            id="reviewStatus"
+          ></span>
+
+          <button
+            class="btn primary"
+            type="submit"
+          >
+            SUBMIT REVIEW
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================
+     REQUEST / QUOTE
+========================================= -->
+
+<section id="request">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div>
+        <div class="eyebrow">Start A Project</div>
+        <h2>Request Information / Get A Quote</h2>
+      </div>
+
+      <p>
+        Tell CrowRules what you are planning.
+        We will use the information to understand
+        your project and respond.
+      </p>
+
+    </div>
+
+    <form
+      id="requestForm"
+      class="form-shell"
+    >
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Request Type</label>
+
+          <select id="requestType">
+
+            <option value="quote">
+              Get A Quote
+            </option>
+
+            <option value="information">
+              Request Information
+            </option>
+
+            <option value="partnership">
+              Partnership
+            </option>
+
+            <option value="custom">
+              Custom Yearbook Project
+            </option>
+
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Your Name</label>
+
+          <input
+            id="requestName"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+
+          <input
+            id="requestEmail"
+            type="email"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label>Phone</label>
+
+          <input
+            id="requestPhone"
+            type="tel"
+          >
+        </div>
+
+        <div class="field">
+          <label>Organization</label>
+
+          <input
+            id="requestOrganization"
+            placeholder="School, company, group, creator, etc."
+          >
+        </div>
+
+        <div class="field">
+          <label>School / Group</label>
+
+          <input
+            id="requestGroup"
+          >
+        </div>
+
+        <div class="field">
+          <label>Yearbook Year</label>
+
+          <input
+            id="requestYear"
+            type="number"
+            min="1900"
+            max="2200"
+            value="2026"
+          >
+        </div>
+
+        <div class="field">
+          <label>Estimated People</label>
+
+          <input
+            id="requestPeople"
+            type="number"
+            min="1"
+            placeholder="Example: 100"
+          >
+        </div>
+
+        <div class="field">
+          <label>Package Interest</label>
+
+          <select id="requestPackage">
+
+            <option value="">
+              Select an option
+            </option>
+
+            <option>
+              Digital Yearbook
+            </option>
+
+            <option>
+              Printed Yearbook
+            </option>
+
+            <option>
+              Digital + Printed
+            </option>
+
+            <option>
+              Custom CrowRules Project
+            </option>
+
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Preferred Contact</label>
+
+          <select id="requestContact">
+
+            <option value="email">
+              Email
+            </option>
+
+            <option value="phone">
+              Phone
+            </option>
+
+            <option value="either">
+              Either
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="field full">
+          <label>Project Details</label>
+
+          <textarea
+            id="requestDetails"
+            required
+            placeholder="Tell us about your school, group, organization, event, creator community, or project..."
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="form-footer">
+
+        <span
+          class="form-status"
+          id="requestStatus"
+        ></span>
+
+        <button
+          type="submit"
+          class="btn primary"
+        >
+          SEND REQUEST
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</section>
+
+<!-- =========================================
+     ADMIN PANEL
+========================================= -->
+
+<section
+  id="admin"
+  class="admin-panel"
+>
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div>
+        <div class="eyebrow">Admin Pro</div>
+        <h2>Yearbook Control Center</h2>
+      </div>
+
+      <p>
+        Yearbook data connected directly to
+        CrowRules Admin Pro.
+      </p>
+
+    </div>
+
+    <div class="admin-grid">
+
+      <div class="admin-stat">
+        <span>Yearbooks</span>
+        <strong id="adminYearbooks">0</strong>
+      </div>
+
+      <div class="admin-stat">
+        <span>Members</span>
+        <strong id="adminMembers">0</strong>
+      </div>
+
+      <div class="admin-stat">
+        <span>Requests</span>
+        <strong id="adminRequests">0</strong>
+      </div>
+
+      <div class="admin-stat">
+        <span>Reviews</span>
+        <strong id="adminReviews">0</strong>
+      </div>
+
+    </div>
+
+    <div class="admin-table-wrap">
+
+      <table class="admin-table">
+
+        <thead>
+          <tr>
+            <th>Request</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+
+        <tbody id="adminRequestsTable">
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+<!-- =========================================
+     FOOTER
+========================================= -->
 
 <footer>
 
-<div class="container">
+  <div class="container footer">
 
-<div class="footer-grid">
+    <div class="footer-grid">
 
-<div class="footer-brand">
+      <div>
 
-<div class="logo">
+        <div class="footer-brand">
+          CROWRULES YEARBOOK
+        </div>
 
-<div class="logo-mark">🐦‍⬛</div>
+        <p>
+          Where the moments become part of the story.
+        </p>
 
-<div>
-<div>CROWRULES</div>
-<span>YEARBOOK STUDIOS</span>
-</div>
+        <p>
+          A CrowRules Entertainment project.
+        </p>
 
-</div>
+      </div>
 
-<p>
-A CrowRules Entertainment production studio
-dedicated to preserving school memories through
-cinematic storytelling.
-</p>
+      <div>
 
-</div>
+        <strong>Yearbook</strong>
 
+        <div class="footer-links">
+          <a href="#vision">Vision</a>
+          <a href="#yearbooks">Archive</a>
+          <a href="#members">Members</a>
+          <a href="#reviews">Reviews</a>
+        </div>
 
-<div class="footer-column">
+      </div>
 
-<h4>Explore</h4>
+      <div>
 
-<a href="#services">Services</a>
-<a href="#showcase">Productions</a>
-<a href="#process">How It Works</a>
-<a href="#faq">FAQ</a>
+        <strong>Projects</strong>
 
-</div>
+        <div class="footer-links">
+          <a href="#entertainment">
+            CrowRules Entertainment
+          </a>
 
+          <a href="#request">
+            Request / Quote
+          </a>
 
-<div class="footer-column">
+          <a href="#top">
+            Back To Top
+          </a>
+        </div>
 
-<h4>Contact</h4>
+      </div>
 
-<a href="#contact">Start A Project</a>
+    </div>
 
-<a href="mailto:crowrulesentertainment@gmail.com">
-Email Studio
-</a>
+    <div class="copyright">
+      © <span id="copyrightYear"></span>
+      CrowRules Entertainment.
+      CrowRules Yearbook.
+      All rights reserved.
+    </div>
 
-</div>
-
-</div>
-
-
-<div class="copyright">
-
-<span>
-© 2026 CrowRules Yearbook Studios.
-All rights reserved.
-</span>
-
-<span>
-A CrowRules Entertainment Studio
-</span>
-
-</div>
-
-</div>
+  </div>
 
 </footer>
 
-
-<!-- =======================================================
-MODAL
-======================================================= -->
+<!-- =========================================
+     LOGIN MODAL
+========================================= -->
 
 <div
-    class="modal"
-    id="contactModal"
+  class="modal"
+  id="loginModal"
 >
 
-<div class="modal-content">
+  <div class="modal-box">
 
-<button
-    class="modal-close"
-    onclick="closeModal()"
-    aria-label="Close"
->
-×
-</button>
+    <button
+      class="close-modal"
+      onclick="closeLogin()"
+    >
+      ×
+    </button>
 
-<h3>
-Start A Project
-</h3>
+    <h2>Member Login</h2>
 
-<p>
-Tell us what you're imagining for your school.
-</p>
+    <p style="color:#777;font-size:12px">
+      Use your existing CrowRules account.
+      Your session can remain active across
+      CrowRules sections.
+    </p>
 
-<form id="modalForm">
+    <form id="loginForm">
 
-<div class="form-group">
+      <div class="field">
+        <label>Email</label>
 
-<label>
-Name
-</label>
+        <input
+          id="loginEmail"
+          type="email"
+          required
+        >
+      </div>
 
-<input
-    id="modalName"
-    type="text"
-    required
-    placeholder="Your name"
->
+      <div
+        class="field"
+        style="margin-top:14px"
+      >
+        <label>Password</label>
+
+        <input
+          id="loginPassword"
+          type="password"
+          required
+        >
+      </div>
+
+      <div
+        class="form-status"
+        id="loginStatus"
+        style="margin:15px 0"
+      ></div>
+
+      <button
+        class="btn primary"
+        style="width:100%"
+        type="submit"
+      >
+        SIGN IN
+      </button>
+
+    </form>
+
+    <div
+      style="
+        margin-top:18px;
+        padding-top:18px;
+        border-top:1px solid #222;
+      "
+    >
+
+      <p style="font-size:11px;color:#777">
+        Don't have a CrowRules account?
+      </p>
+
+      <button
+        class="btn"
+        onclick="sendMagicLink()"
+      >
+        EMAIL ME A LOGIN LINK
+      </button>
+
+    </div>
+
+  </div>
 
 </div>
 
-
-<div class="form-group">
-
-<label>
-Email
-</label>
-
-<input
-    id="modalEmail"
-    type="email"
-    required
-    placeholder="you@example.com"
->
-
-</div>
-
-
-<div class="form-group">
-
-<label>
-Project Details
-</label>
-
-<textarea
-    id="modalMessage"
-    rows="5"
-    required
-    placeholder="Tell us about your school and project..."
-></textarea>
-
-</div>
-
-
-<button
-    type="submit"
-    class="btn btn-primary"
->
-Send Inquiry
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-
-<button
-    id="topBtn"
-    onclick="window.scrollTo({top:0,behavior:'smooth'})"
-    aria-label="Back to top"
->
-↑
-</button>
-
+<div
+  class="toast"
+  id="toast"
+></div>
 
 <script>
 
 /* =========================================================
-   MOBILE MENU
+   CROWRULES YEARBOOK v1.0
+   Supabase Project:
+   zauxdqyssratvzmomozf
 ========================================================= */
 
-const menuToggle =
-    document.getElementById("menuToggle");
+const SUPABASE_URL =
+  "https://zauxdqyssratvzmomozf.supabase.co";
 
-const nav =
-    document.getElementById("nav");
+/*
+  IMPORTANT:
+  Replace this with your PUBLIC Supabase publishable/anon key.
 
-menuToggle.addEventListener("click", () => {
+  NEVER place your service_role / secret key here.
+*/
 
-    nav.classList.toggle("active");
+const SUPABASE_KEY =
+  "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
 
-});
+const { createClient } =
+  supabase;
 
-
-document.querySelectorAll("nav a").forEach(link => {
-
-    link.addEventListener("click", () => {
-
-        nav.classList.remove("active");
-
-    });
-
-});
-
+const db =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    }
+  );
 
 /* =========================================================
-   MODAL
+   STATE
 ========================================================= */
 
-const modal =
-    document.getElementById("contactModal");
+let currentUser = null;
+let currentProfile = null;
+let isAdmin = false;
 
+/* =========================================================
+   HELPERS
+========================================================= */
 
-function openModal() {
+function escapeHtml(value){
 
-    modal.classList.add("active");
+  if(value === null || value === undefined){
+    return "";
+  }
 
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
+function showToast(message){
 
-function closeModal() {
+  const toast =
+    document.getElementById("toast");
 
-    modal.classList.remove("active");
+  toast.textContent = message;
 
+  toast.classList.add("show");
+
+  setTimeout(()=>{
+    toast.classList.remove("show");
+  },3500);
 }
 
+function formatDate(value){
 
-modal.addEventListener("click", e => {
+  if(!value){
+    return "";
+  }
 
-    if (e.target === modal) {
+  try{
 
-        closeModal();
+    return new Intl.DateTimeFormat(
+      "en-US",
+      {
+        year:"numeric",
+        month:"short",
+        day:"numeric"
+      }
+    ).format(new Date(value));
+
+  }catch{
+    return "";
+  }
+}
+
+function getInitials(name){
+
+  return String(name || "CR")
+    .split(/\s+/)
+    .slice(0,2)
+    .map(x=>x[0])
+    .join("")
+    .toUpperCase();
+}
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+async function loadSettings(){
+
+  const {
+    data,
+    error
+  } =
+  await db
+    .from("crowrules_yearbook_settings")
+    .select("*")
+    .eq("site_key","crowrules_yearbook")
+    .maybeSingle();
+
+  if(error){
+
+    console.warn(
+      "Yearbook settings:",
+      error.message
+    );
+
+    return;
+  }
+
+  if(!data){
+    return;
+  }
+
+  if(data.hero_text){
+
+    document.getElementById(
+      "heroText"
+    ).textContent =
+      data.hero_text;
+
+  }
+
+  document.title =
+    data.brand_name ||
+    "CrowRules Yearbook";
+}
+
+/* =========================================================
+   YEARBOOKS
+========================================================= */
+
+async function loadYearbooks(){
+
+  const grid =
+    document.getElementById(
+      "yearbooksGrid"
+    );
+
+  const {
+    data,
+    error
+  } =
+  await db
+    .from("crowrules_yearbooks")
+    .select("*")
+    .eq("status","published")
+    .order("year",{ascending:false})
+    .order("sort_order",{ascending:true});
+
+  if(error){
+
+    console.error(error);
+
+    grid.innerHTML = `
+      <div class="info-card">
+        <h3>Archive unavailable</h3>
+        <p>
+          The Yearbook archive could not be loaded.
+          Please refresh the page.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  if(!data || !data.length){
+
+    grid.innerHTML = `
+      <div class="info-card">
+        <h3>The archive is beginning.</h3>
+        <p>
+          The first published CrowRules Yearbook
+          edition will appear here.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  grid.innerHTML =
+    data.map(yearbook=>{
+
+      const cover =
+        yearbook.cover_url
+          ? `style="background-image:url('${escapeHtml(yearbook.cover_url)}')"`
+          : "";
+
+      return `
+        <article class="yearbook-card">
+
+          <div
+            class="yearbook-cover-image"
+            ${cover}
+          >
+            <span>
+              ${escapeHtml(yearbook.year)}
+            </span>
+          </div>
+
+          <div class="yearbook-body">
+
+            <h3>
+              ${escapeHtml(yearbook.title)}
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                yearbook.description ||
+                "CrowRules Yearbook edition."
+              )}
+            </p>
+
+            <div class="card-meta">
+
+              <span>
+                ${escapeHtml(
+                  yearbook.edition_type ||
+                  "Annual"
+                )}
+              </span>
+
+              ${
+                yearbook.yearbook_url
+                ?
+                `
+                  <a
+                    class="btn"
+                    href="${escapeHtml(yearbook.yearbook_url)}"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    VIEW EDITION
+                  </a>
+                `
+                :
+                ""
+              }
+
+            </div>
+
+          </div>
+
+        </article>
+      `;
+
+    }).join("");
+}
+
+/* =========================================================
+   MEMBERS
+========================================================= */
+
+async function loadMembers(){
+
+  const grid =
+    document.getElementById(
+      "membersGrid"
+    );
+
+  const {
+    data,
+    error
+  } =
+  await db
+    .from("crowrules_yearbook_members")
+    .select("*")
+    .eq("is_published",true)
+    .order("featured",{ascending:false})
+    .order("sort_order",{ascending:true})
+    .limit(24);
+
+  if(error){
+
+    console.error(error);
+
+    grid.innerHTML = `
+      <div class="info-card">
+        <h3>Members unavailable</h3>
+        <p>
+          Member records could not be loaded.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  if(!data || !data.length){
+
+    grid.innerHTML = `
+      <div class="info-card">
+        <h3>The first pages are waiting.</h3>
+        <p>
+          Published Yearbook members will appear here.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  grid.innerHTML =
+    data.map(member=>{
+
+      const initials =
+        getInitials(
+          member.display_name
+        );
+
+      const avatar =
+        member.avatar_url ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=16161b&color=ffffff`;
+
+      return `
+        <article class="member-card">
+
+          <img
+            src="${escapeHtml(avatar)}"
+            alt="${escapeHtml(member.display_name)}"
+          >
+
+          <h3>
+            ${escapeHtml(
+              member.display_name
+            )}
+          </h3>
+
+          <div class="member-role">
+            ${escapeHtml(
+              member.role_label ||
+              "CrowRules Member"
+            )}
+          </div>
+
+          ${
+            member.bio
+            ?
+            `
+              <p>
+                ${escapeHtml(member.bio)}
+              </p>
+            `
+            :
+            ""
+          }
+
+          ${
+            member.profile_url
+            ?
+            `
+              <a
+                class="btn"
+                href="${escapeHtml(member.profile_url)}"
+              >
+                PROFILE
+              </a>
+            `
+            :
+            ""
+          }
+
+        </article>
+      `;
+
+    }).join("");
+}
+
+/* =========================================================
+   REVIEWS
+========================================================= */
+
+async function loadReviews(){
+
+  const grid =
+    document.getElementById(
+      "reviewsGrid"
+    );
+
+  const {
+    data,
+    error
+  } =
+  await db
+    .from("crowrules_yearbook_reviews")
+    .select("*")
+    .eq("is_published",true)
+    .order("is_featured",{ascending:false})
+    .order("sort_order",{ascending:true})
+    .order("created_at",{ascending:false})
+    .limit(12);
+
+  if(error){
+
+    console.error(error);
+
+    grid.innerHTML = `
+      <div class="info-card">
+        <h3>Reviews unavailable</h3>
+        <p>
+          Reviews could not be loaded.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  if(!data || !data.length){
+
+    grid.innerHTML = `
+      <div class="info-card">
+        <h3>Be one of the first.</h3>
+        <p>
+          Published reviews will appear here.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  grid.innerHTML =
+    data.map(review=>{
+
+      const avatar =
+        review.avatar_url ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(review.reviewer_name)}&background=16161b&color=ffffff`;
+
+      return `
+        <article class="review-card">
+
+          <div class="stars">
+            ${"★".repeat(
+              Number(review.rating || 5)
+            )}
+            <span style="color:#444">
+              ${"★".repeat(
+                5 - Number(review.rating || 5)
+              )}
+            </span>
+          </div>
+
+          <div class="review-text">
+            “${escapeHtml(
+              review.review_text
+            )}”
+          </div>
+
+          <div class="reviewer">
+
+            <img
+              src="${escapeHtml(avatar)}"
+              alt=""
+            >
+
+            <div>
+
+              <strong>
+                ${escapeHtml(
+                  review.reviewer_name
+                )}
+              </strong>
+
+              <span>
+                ${escapeHtml(
+                  review.reviewer_role ||
+                  "CrowRules Community"
+                )}
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+      `;
+
+    }).join("");
+}
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+async function initializeAuth(){
+
+  const {
+    data
+  } =
+  await db.auth.getSession();
+
+  await handleSession(
+    data?.session || null
+  );
+
+  db.auth.onAuthStateChange(
+    async (_event,session)=>{
+
+      await handleSession(
+        session
+      );
+
+    }
+  );
+}
+
+async function handleSession(session){
+
+  currentUser =
+    session?.user || null;
+
+  if(!currentUser){
+
+    currentProfile = null;
+    isAdmin = false;
+
+    updateLoggedOutUI();
+
+    return;
+  }
+
+  await loadCurrentProfile();
+
+  await determineAdmin();
+
+  updateLoggedInUI();
+
+  prefillMemberForms();
+}
+
+async function loadCurrentProfile(){
+
+  currentProfile = null;
+
+  const {
+    data
+  } =
+  await db
+    .from("profiles")
+    .select("*")
+    .eq("id",currentUser.id)
+    .maybeSingle();
+
+  currentProfile =
+    data || null;
+
+  if(!currentProfile){
+
+    const {
+      data:memberProfile
+    } =
+    await db
+      .from("member_profiles")
+      .select("*")
+      .eq("id",currentUser.id)
+      .maybeSingle();
+
+    if(memberProfile){
+
+      currentProfile =
+        memberProfile;
 
     }
 
-});
+  }
+}
 
+async function determineAdmin(){
 
-document.addEventListener("keydown", e => {
+  isAdmin = false;
 
-    if (e.key === "Escape") {
+  try{
 
-        closeModal();
+    const {
+      data,
+      error
+    } =
+    await db.rpc(
+      "is_current_user_admin"
+    );
 
+    if(!error){
+      isAdmin = Boolean(data);
     }
 
-});
+  }catch(error){
 
+    console.warn(
+      "Admin check:",
+      error
+    );
+
+  }
+
+  if(!isAdmin){
+
+    const role =
+      currentProfile?.role;
+
+    isAdmin =
+      [
+        "admin",
+        "super_admin",
+        "owner",
+        "manager"
+      ].includes(role);
+
+  }
+
+  if(isAdmin){
+
+    document
+      .getElementById("admin")
+      .classList
+      .add("visible");
+
+    await loadAdminData();
+
+  }
+}
+
+function updateLoggedOutUI(){
+
+  document
+    .getElementById("loginButton")
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById("memberPill")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("reviewLoginMessage")
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById("reviewForm")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("admin")
+    .classList
+    .remove("visible");
+}
+
+function updateLoggedInUI(){
+
+  document
+    .getElementById("loginButton")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("memberPill")
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById("reviewLoginMessage")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("reviewForm")
+    .classList
+    .remove("hidden");
+
+  const name =
+    currentProfile?.display_name ||
+    currentProfile?.username ||
+    currentUser.email?.split("@")[0] ||
+    "Member";
+
+  document
+    .getElementById("memberName")
+    .textContent =
+      name;
+
+  document
+    .getElementById("memberAvatar")
+    .src =
+      currentProfile?.avatar_url ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16161b&color=ffffff`;
+}
+
+function prefillMemberForms(){
+
+  const name =
+    currentProfile?.display_name ||
+    currentProfile?.username ||
+    currentUser?.email?.split("@")[0] ||
+    "";
+
+  const email =
+    currentUser?.email ||
+    "";
+
+  if(name){
+
+    document
+      .getElementById("reviewerName")
+      .value = name;
+
+  }
+
+  if(name){
+
+    document
+      .getElementById("requestName")
+      .value =
+      document.getElementById(
+        "requestName"
+      ).value ||
+      name;
+
+  }
+
+  if(email){
+
+    document
+      .getElementById("requestEmail")
+      .value =
+      document.getElementById(
+        "requestEmail"
+      ).value ||
+      email;
+
+  }
+}
 
 /* =========================================================
-   FAQ
+   LOGIN
 ========================================================= */
 
-document.querySelectorAll(".faq-question")
-.forEach(button => {
+function openLogin(){
 
-    button.addEventListener("click", () => {
+  document
+    .getElementById("loginModal")
+    .classList
+    .add("open");
 
-        const item =
-            button.parentElement;
+}
 
+function closeLogin(){
+
+  document
+    .getElementById("loginModal")
+    .classList
+    .remove("open");
+
+}
+
+document
+  .getElementById("loginForm")
+  .addEventListener(
+    "submit",
+    async event=>{
+
+      event.preventDefault();
+
+      const email =
         document
-            .querySelectorAll(".faq-item")
-            .forEach(other => {
+          .getElementById("loginEmail")
+          .value
+          .trim();
 
-                if (other !== item) {
+      const password =
+        document
+          .getElementById("loginPassword")
+          .value;
 
-                    other.classList.remove("active");
+      const status =
+        document
+          .getElementById("loginStatus");
 
-                }
+      status.textContent =
+        "Signing in...";
 
-            });
+      const {
+        error
+      } =
+      await db.auth.signInWithPassword({
+        email,
+        password
+      });
 
-        item.classList.toggle("active");
+      if(error){
 
-    });
+        status.textContent =
+          error.message;
 
-});
+        return;
+      }
 
+      status.textContent =
+        "Signed in.";
 
-/* =========================================================
-   EMAIL GENERATOR
-========================================================= */
+      closeLogin();
 
-function sendInquiry(
-    name,
+      showToast(
+        "Welcome back to CrowRules."
+      );
+
+    }
+  );
+
+async function sendMagicLink(){
+
+  const email =
+    document
+      .getElementById("loginEmail")
+      .value
+      .trim();
+
+  if(!email){
+
+    showToast(
+      "Enter your email first."
+    );
+
+    return;
+  }
+
+  const {
+    error
+  } =
+  await db.auth.signInWithOtp({
     email,
-    school,
-    message
-) {
+    options:{
+      emailRedirectTo:
+        window.location.href
+    }
+  });
 
-    const subject =
-        encodeURIComponent(
-            "CrowRules Yearbook Studios Inquiry"
+  if(error){
+
+    showToast(
+      error.message
+    );
+
+    return;
+  }
+
+  showToast(
+    "Login link sent. Check your email."
+  );
+}
+
+async function signOut(){
+
+  const {
+    error
+  } =
+  await db.auth.signOut();
+
+  if(error){
+
+    showToast(
+      error.message
+    );
+
+    return;
+  }
+
+  showToast(
+    "You have been signed out."
+  );
+}
+
+/* =========================================================
+   REQUEST FORM
+========================================================= */
+
+document
+  .getElementById("requestForm")
+  .addEventListener(
+    "submit",
+    async event=>{
+
+      event.preventDefault();
+
+      const status =
+        document.getElementById(
+          "requestStatus"
         );
 
-    const body =
-        encodeURIComponent(
-`Name: ${name}
+      status.textContent =
+        "Sending request...";
 
-Email: ${email}
+      const payload = {
 
-School / Organization: ${school}
+        user_id:
+          currentUser?.id ||
+          null,
 
-Project Details:
-${message}`
+        request_type:
+          document.getElementById(
+            "requestType"
+          ).value,
+
+        name:
+          document.getElementById(
+            "requestName"
+          ).value.trim(),
+
+        email:
+          document.getElementById(
+            "requestEmail"
+          ).value.trim(),
+
+        phone:
+          document.getElementById(
+            "requestPhone"
+          ).value.trim() ||
+          null,
+
+        organization:
+          document.getElementById(
+            "requestOrganization"
+          ).value.trim() ||
+          null,
+
+        school_or_group:
+          document.getElementById(
+            "requestGroup"
+          ).value.trim() ||
+          null,
+
+        yearbook_year:
+          Number(
+            document.getElementById(
+              "requestYear"
+            ).value
+          ) || null,
+
+        estimated_people:
+          Number(
+            document.getElementById(
+              "requestPeople"
+            ).value
+          ) || null,
+
+        package_interest:
+          document.getElementById(
+            "requestPackage"
+          ).value ||
+          null,
+
+        project_details:
+          document.getElementById(
+            "requestDetails"
+          ).value.trim(),
+
+        preferred_contact:
+          document.getElementById(
+            "requestContact"
+          ).value,
+
+        status:"new"
+
+      };
+
+      const {
+        error
+      } =
+      await db
+        .from(
+          "crowrules_yearbook_requests"
+        )
+        .insert(payload);
+
+      if(error){
+
+        console.error(error);
+
+        status.textContent =
+          error.message;
+
+        return;
+      }
+
+      status.textContent =
+        "Request received.";
+
+      showToast(
+        "Your Yearbook request has been received."
+      );
+
+      event.target.reset();
+
+      prefillMemberForms();
+
+      if(isAdmin){
+
+        await loadAdminData();
+
+      }
+
+    }
+  );
+
+/* =========================================================
+   REVIEW FORM
+========================================================= */
+
+document
+  .getElementById("reviewForm")
+  .addEventListener(
+    "submit",
+    async event=>{
+
+      event.preventDefault();
+
+      if(!currentUser){
+
+        showToast(
+          "Please sign in first."
         );
 
-    window.location.href =
-        `mailto:crowrulesentertainment@gmail.com?subject=${subject}&body=${body}`;
+        return;
+      }
+
+      const status =
+        document.getElementById(
+          "reviewStatus"
+        );
+
+      status.textContent =
+        "Submitting review...";
+
+      const payload = {
+
+        user_id:
+          currentUser.id,
+
+        reviewer_name:
+          document.getElementById(
+            "reviewerName"
+          ).value.trim(),
+
+        reviewer_role:
+          document.getElementById(
+            "reviewerRole"
+          ).value.trim() ||
+          null,
+
+        rating:
+          Number(
+            document.getElementById(
+              "reviewRating"
+            ).value
+          ),
+
+        review_text:
+          document.getElementById(
+            "reviewText"
+          ).value.trim(),
+
+        avatar_url:
+          currentProfile?.avatar_url ||
+          null,
+
+        is_featured:false,
+
+        is_published:false,
+
+        sort_order:0
+
+      };
+
+      const {
+        error
+      } =
+      await db
+        .from(
+          "crowrules_yearbook_reviews"
+        )
+        .insert(payload);
+
+      if(error){
+
+        status.textContent =
+          error.message;
+
+        return;
+      }
+
+      status.textContent =
+        "Submitted for approval.";
+
+      showToast(
+        "Thanks! Your review is waiting for approval."
+      );
+
+      event.target.reset();
+
+      prefillMemberForms();
+
+      if(isAdmin){
+
+        await loadAdminData();
+
+      }
+
+    }
+  );
+
+/* =========================================================
+   ADMIN PRO
+========================================================= */
+
+async function loadAdminData(){
+
+  if(!isAdmin){
+    return;
+  }
+
+  const [
+    yearbooks,
+    members,
+    requests,
+    reviews
+  ] =
+  await Promise.all([
+
+    db
+      .from("crowrules_yearbooks")
+      .select("id",{count:"exact",head:true}),
+
+    db
+      .from("crowrules_yearbook_members")
+      .select("id",{count:"exact",head:true}),
+
+    db
+      .from("crowrules_yearbook_requests")
+      .select("id",{count:"exact",head:true}),
+
+    db
+      .from("crowrules_yearbook_reviews")
+      .select("id",{count:"exact",head:true})
+
+  ]);
+
+  document
+    .getElementById(
+      "adminYearbooks"
+    )
+    .textContent =
+      yearbooks.count || 0;
+
+  document
+    .getElementById(
+      "adminMembers"
+    )
+    .textContent =
+      members.count || 0;
+
+  document
+    .getElementById(
+      "adminRequests"
+    )
+    .textContent =
+      requests.count || 0;
+
+  document
+    .getElementById(
+      "adminReviews"
+    )
+    .textContent =
+      reviews.count || 0;
+
+  await loadAdminRequests();
+}
+
+async function loadAdminRequests(){
+
+  const tbody =
+    document.getElementById(
+      "adminRequestsTable"
+    );
+
+  const {
+    data,
+    error
+  } =
+  await db
+    .from(
+      "crowrules_yearbook_requests"
+    )
+    .select(
+      "id,name,email,request_type,status,created_at"
+    )
+    .order(
+      "created_at",
+      {ascending:false}
+    )
+    .limit(50);
+
+  if(error){
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          ${escapeHtml(error.message)}
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  if(!data?.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          No Yearbook requests yet.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    data.map(request=>`
+
+      <tr>
+
+        <td>
+          ${escapeHtml(
+            request.id.slice(0,8)
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            request.name
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            request.email
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            request.request_type
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            request.status
+          )}
+        </td>
+
+        <td>
+          ${formatDate(
+            request.created_at
+          )}
+        </td>
+
+      </tr>
+
+    `).join("");
+}
+
+/* =========================================================
+   NAV / MODAL UX
+========================================================= */
+
+document
+  .getElementById("loginModal")
+  .addEventListener(
+    "click",
+    event=>{
+
+      if(
+        event.target.id ===
+        "loginModal"
+      ){
+
+        closeLogin();
+
+      }
+
+    }
+  );
+
+/* =========================================================
+   INIT
+========================================================= */
+
+document
+  .getElementById(
+    "copyrightYear"
+  )
+  .textContent =
+    new Date().getFullYear();
+
+async function init(){
+
+  await Promise.all([
+    loadSettings(),
+    loadYearbooks(),
+    loadMembers(),
+    loadReviews()
+  ]);
+
+  await initializeAuth();
 
 }
 
-
-/* =========================================================
-   CONTACT FORM
-========================================================= */
-
-document
-.getElementById("contactForm")
-.addEventListener("submit", e => {
-
-    e.preventDefault();
-
-    sendInquiry(
-
-        document
-            .getElementById("formName")
-            .value,
-
-        document
-            .getElementById("formEmail")
-            .value,
-
-        document
-            .getElementById("formSchool")
-            .value,
-
-        document
-            .getElementById("formMessage")
-            .value
-
-    );
-
-});
-
-
-/* =========================================================
-   MODAL FORM
-========================================================= */
-
-document
-.getElementById("modalForm")
-.addEventListener("submit", e => {
-
-    e.preventDefault();
-
-    sendInquiry(
-
-        document
-            .getElementById("modalName")
-            .value,
-
-        document
-            .getElementById("modalEmail")
-            .value,
-
-        "",
-
-        document
-            .getElementById("modalMessage")
-            .value
-
-    );
-
-    closeModal();
-
-});
-
-
-/* =========================================================
-   BACK TO TOP
-========================================================= */
-
-const topBtn =
-    document.getElementById("topBtn");
-
-window.addEventListener("scroll", () => {
-
-    if (window.scrollY > 600) {
-
-        topBtn.style.display = "block";
-
-    } else {
-
-        topBtn.style.display = "none";
-
-    }
-
-});
-
-
-/* =========================================================
-   HEADER SCROLL EFFECT
-========================================================= */
-
-const header =
-    document.querySelector("header");
-
-window.addEventListener("scroll", () => {
-
-    if (window.scrollY > 50) {
-
-        header.style.background =
-            "rgba(7,7,11,.94)";
-
-    } else {
-
-        header.style.background =
-            "rgba(7,7,11,.78)";
-
-    }
-
-});
+init();
 
 </script>
 
 </body>
 </html>
-```
