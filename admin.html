@@ -14,73 +14,59 @@ button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273
 </style>
 </head>
 <body>
-<div id="status"><div class="box">
-<h2>🐦‍⬛ CrowRules Entertainment</h2>
-<p id="statusText">Loading Admin Pro v3.9…</p>
-<p id="statusDetail" class="small">Connecting to the verified CrowRules Supabase project.</p>
-</div></div>
+<div id="status">
+  <div class="box">
+    <h2>🐦‍⬛ CrowRules Entertainment</h2>
+    <p id="statusText">Loading Admin Pro v3.9…</p>
+    <p id="statusDetail" class="small">Connecting to the verified CrowRules Supabase project.</p>
+  </div>
+</div>
 <script>
-(async()=>{
- const status=document.getElementById('statusText');
- const detail=document.getElementById('statusDetail');
- const clean=v=>String(v??'').replace(/[<>]/g,'');
- const fail=(message,detailText='GitHub Pages may still be publishing the latest Admin Pro build.')=>{
-   status.textContent='Admin Pro could not start';
-   status.className='bad';
-   detail.textContent=clean(message)+' '+detailText;
-   detail.className='small bad';
-   const b=document.createElement('button');
-   b.textContent='Reload Admin Pro';
-   b.onclick=()=>location.reload();
-   document.querySelector('.box').appendChild(b);
- };
- try{
-   status.textContent='Loading Admin Pro v3.9…';
-   const controller=new AbortController();
-   const timer=setTimeout(()=>controller.abort(),12000);
-   const r=await fetch('./admin-v3.9.html?build=20260826-startup-fix',{cache:'no-store',signal:controller.signal});
-   clearTimeout(timer);
-   if(!r.ok)throw new Error('Admin Pro could not be loaded ('+r.status+').');
-   let h=await r.text();
-   if(!h||h.length<500)throw new Error('Admin Pro returned an incomplete HTML document.');
+(async function(){
+  const status=document.getElementById('statusText');
+  const detail=document.getElementById('statusDetail');
+  const clean=v=>String(v??'').replace(/[<>]/g,'');
 
-   const scripts=[
-     './playlist-studio-schedule-picker.js?build=20260826',
-     './schedule-studio.js?build=20260826',
-     './playlist-studio-episodes.js?build=20260826',
-     './admin-v3.9-integrated.js?build=20260826-integrated-2'
-   ];
-   const injection=scripts.map(src=>'<script src="'+src+'"><\\/script>').join('');
-   const bodyClose='
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
-})();
-</script>
-</body>';
-   const pos=h.toLowerCase().lastIndexOf(bodyClose);
-   if(pos<0)throw new Error('Admin Pro HTML is missing its closing body tag.');
-   h=h.slice(0,pos)+injection+h.slice(pos);
+  function fail(message){
+    status.textContent='Admin Pro could not start';
+    status.className='bad';
+    detail.textContent=clean(message);
+    detail.className='small bad';
+    const b=document.createElement('button');
+    b.textContent='Reload Admin Pro';
+    b.onclick=()=>location.reload();
+    document.querySelector('.box').appendChild(b);
+  }
 
-   document.open();
-   document.write(h);
-   document.close();
- }catch(e){
-   fail(e?.name==='AbortError'?'Timed out loading admin-v3.9.html.':(e?.message||e));
- }
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    const r=await fetch('./admin-v3.9.html?build=20260826-loader-fix-2',{cache:'no-store',signal:controller.signal});
+    clearTimeout(timer);
+    if(!r.ok)throw new Error('Admin Pro could not be loaded ('+r.status+').');
+
+    let h=await r.text();
+    if(!h||h.length<500)throw new Error('Admin Pro returned an incomplete HTML document.');
+
+    const scripts=[
+      './playlist-studio-schedule-picker.js?build=20260826',
+      './schedule-studio.js?build=20260826',
+      './playlist-studio-episodes.js?build=20260826',
+      './admin-v3.9-integrated.js?build=20260827-integrated-1'
+    ];
+
+    const injection=scripts.map(src=>'<script src="'+src+'"><\\/script>').join('');
+    const marker='</body>';
+    const pos=h.toLowerCase().lastIndexOf(marker);
+    if(pos<0)throw new Error('Admin Pro HTML is missing its closing body tag.');
+
+    h=h.slice(0,pos)+injection+h.slice(pos);
+    document.open();
+    document.write(h);
+    document.close();
+  }catch(e){
+    fail(e?.name==='AbortError'?'Timed out loading admin-v3.9.html.':(e?.message||e));
+  }
 })();
 </script>
 </body>
