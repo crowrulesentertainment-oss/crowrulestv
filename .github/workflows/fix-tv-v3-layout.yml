@@ -1,0 +1,56 @@
+name: CrowRules TV v3.0 layout fix
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  fix-tv-layout:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove duplicate community cards injected by shared core
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('crowrules-core.js')
+          text = path.read_text(encoding='utf-8')
+
+          marker = 'CrowRules TV v3.0 layout fix: duplicate community injection disabled'
+          if marker in text:
+              print('Layout fix already applied.')
+              raise SystemExit(0)
+
+          pattern = r"async function loadCommunity\(\)\{.*?\}\nasync function startPlaylistFirstTV\(\)\{"
+          replacement = (
+              "async function loadCommunity(){"
+              "/* " + marker + ". tv.html already renders its own v3.0 home sections; "
+              "the shared core must not append a second set of cards at the bottom. */"
+              "return;"
+              "}\nasync function startPlaylistFirstTV(){"
+          )
+
+          updated, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('Could not locate loadCommunity block; no file changed.')
+
+          path.write_text(updated, encoding='utf-8')
+          print('Disabled duplicate community-card injection in crowrules-core.js.')
+
+      - name: Commit layout fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add crowrules-core.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix CrowRules TV v3.0 duplicate bottom cards"
+          git push
