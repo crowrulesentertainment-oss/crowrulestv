@@ -1,0 +1,92 @@
+name: Connect Pacific Northwest Mothers to Admin Pro
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'admin.html'
+      - '.github/workflows/integrate-pnwm-admin.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Safely add PNWM management to Admin Pro
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('admin.html')
+          text=p.read_text(encoding='utf-8')
+
+          nav='<!-- PNWM_ADMIN_NAV --><button class="nav" data-page="pnwmPosts">💜 PNWM Posts</button><button class="nav" data-page="pnwmEvents">📅 PNWM Events</button><button class="nav" data-page="pnwmResources">🔗 PNWM Resources</button><button class="nav" data-page="pnwmSettings">⚙️ PNWM Settings</button><!-- /PNWM_ADMIN_NAV -->'
+          sections='<!-- PNWM_ADMIN_SECTIONS --><section id="page-pnwmPosts" class="page"><h1>Pacific Northwest Mothers — Posts</h1><div id="table-pnwm_posts"></div></section><section id="page-pnwmEvents" class="page"><h1>Pacific Northwest Mothers — Events</h1><div id="table-pnwm_events"></div></section><section id="page-pnwmResources" class="page"><h1>Pacific Northwest Mothers — Resources</h1><div id="table-pnwm_resources"></div></section><section id="page-pnwmSettings" class="page"><h1>Pacific Northwest Mothers — Settings</h1><div id="table-pnwm_settings"></div></section><!-- /PNWM_ADMIN_SECTIONS -->'
+          tables="'pnwm_posts','pnwm_events','pnwm_resources','pnwm_settings'"
+          map="pnwmPosts:'pnwm_posts',pnwmEvents:'pnwm_events',pnwmResources:'pnwm_resources',pnwmSettings:'pnwm_settings'"
+
+          if 'PNWM_ADMIN_NAV' not in text:
+              anchor='<button class="nav" data-page="health">'
+              if anchor not in text: raise SystemExit('Health navigation anchor not found; Admin Pro was not modified.')
+              text=text.replace(anchor,nav+anchor,1)
+
+          if 'PNWM_ADMIN_SECTIONS' not in text:
+              anchor='<section id="page-health" class="page">'
+              if anchor not in text: raise SystemExit('Health section anchor not found; Admin Pro was not modified.')
+              text=text.replace(anchor,sections+anchor,1)
+
+          # Add PNWM tables to the existing dashboard table list exactly once.
+          if "'pnwm_posts'" not in text:
+              anchor="'member_profiles']"
+              if anchor not in text: raise SystemExit('Admin table registry anchor not found; Admin Pro was not modified.')
+              text=text.replace(anchor,"'member_profiles',"+tables+']',1)
+
+          # Add PNWM table column definitions exactly once.
+          if "pnwm_posts:'" not in text:
+              anchor="member_profiles:'"
+              pos=text.find(anchor)
+              if pos<0: raise SystemExit('Admin column registry anchor not found; Admin Pro was not modified.')
+              # Insert definitions immediately before member_profiles.
+              defs="pnwm_posts:'id,title,slug,excerpt,author_name,status,is_featured,published_at,sort_order',pnwm_events:'id,title,location,starts_at,ends_at,status,is_featured',pnwm_resources:'id,title,category,url,is_featured,is_active,sort_order',pnwm_settings:'key,value,updated_at',"
+              text=text[:pos]+defs+text[pos:]
+
+          # Add page-to-table mappings exactly once.
+          if 'pnwmPosts:' not in text:
+              anchor='const map={'
+              if anchor not in text: raise SystemExit('Admin page map anchor not found; Admin Pro was not modified.')
+              text=text.replace(anchor,anchor+map+',',1)
+
+          p.write_text(text,encoding='utf-8')
+          PY
+
+      - name: Verify PNWM Admin Pro integration
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          t=Path('admin.html').read_text(encoding='utf-8')
+          required=['PNWM_ADMIN_NAV','PNWM_ADMIN_SECTIONS','pnwm_posts','pnwm_events','pnwm_resources','pnwm_settings','pnwmPosts','pnwmEvents','pnwmResources','pnwmSettings']
+          missing=[x for x in required if x not in t]
+          if missing: raise SystemExit('Missing Admin Pro PNWM integration: '+', '.join(missing))
+          print('PNWM Admin Pro integration verified.')
+          PY
+
+      - name: Commit only Admin Pro integration
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- admin.html; then
+            echo 'Admin Pro already contains PNWM integration.'
+          else
+            git add admin.html
+            git diff --cached --check
+            git commit -m 'Connect Pacific Northwest Mothers to Admin Pro'
+            git push
+          fi
