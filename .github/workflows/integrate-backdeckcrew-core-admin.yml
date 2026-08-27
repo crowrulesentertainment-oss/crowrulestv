@@ -1,0 +1,71 @@
+name: Integrate Back Deck Crew — Core, Supabase & Admin Pro
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backdeckcrew.html'
+      - 'crowrules-core.js'
+      - 'admin.html'
+      - '.github/workflows/integrate-backdeckcrew-core-admin.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Safely integrate CrowRules Core into Back Deck Crew
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('backdeckcrew.html')
+          text=p.read_text(encoding='utf-8')
+          marker='<script src="./crowrules-core.js"></script>'
+          text=re.sub(r'\s*<script\s+src=["\']\./crowrules-core\.js["\']\s*></script>\s*','\n',text,flags=re.I)
+          m=re.search(r'</body\s*>',text,re.I)
+          if not m: raise SystemExit('No closing body tag; refusing to modify Back Deck Crew')
+          text=text[:m.start()]+'\n'+marker+'\n'+text[m.start():]
+          p.write_text(text,encoding='utf-8')
+          if p.read_text(encoding='utf-8').count(marker)!=1: raise SystemExit('Core integration verification failed')
+          PY
+
+      - name: Safely add Back Deck Crew controls to Admin Pro
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('admin.html')
+          text=p.read_text(encoding='utf-8')
+          marker='<!-- BACKDECKCREW_ADMIN_INTEGRATION -->'
+          if marker in text:
+              print('Back Deck Crew Admin Pro integration already present')
+              raise SystemExit(0)
+          block='''\n<!-- BACKDECKCREW_ADMIN_INTEGRATION -->\n<script>\n(()=>{\n const add=()=>{\n  const aside=document.querySelector('aside');\n  const main=document.querySelector('main');\n  if(!aside||!main)return;\n  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);\n  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);\n  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');\n   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();\n   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);\n   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});\n   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';\n  };\n }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();\n})();\n</script>\n'''
+          m=re.search(r'</body\s*>',text,re.I)
+          if not m: raise SystemExit('No closing body tag; refusing to modify Admin Pro')
+          text=text[:m.start()]+block+text[m.start():]
+          p.write_text(text,encoding='utf-8')
+          PY
+
+      - name: Verify integration
+        run: |
+          grep -q 'crowrules-core.js' backdeckcrew.html
+          grep -q 'BACKDECKCREW_ADMIN_INTEGRATION' admin.html
+          grep -q 'backdeckcrew_settings' admin.html
+          grep -q 'backdeckcrew_members' admin.html
+          git diff --check
+
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backdeckcrew.html admin.html
+          if git diff --cached --quiet; then echo 'No changes needed'; else git commit -m 'Integrate Back Deck Crew with CrowRules Core Supabase and Admin Pro'; git push; fi
