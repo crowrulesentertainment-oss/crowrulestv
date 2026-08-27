@@ -6,30 +6,50 @@
 <meta name="robots" content="noindex,nofollow">
 <title>CrowRules Entertainment — Admin Pro v6.6</title>
 <style>
-html,body{margin:0;width:100%;height:100%;background:#05070b;overflow:hidden}
-iframe{display:block;width:100%;height:100%;border:0;background:#05070b}
+html,body{margin:0;width:100%;height:100%;background:#05070b;color:#fff;font:14px system-ui,sans-serif}
+#status{min-height:100vh;display:grid;place-items:center;text-align:center;padding:20px;box-sizing:border-box}
+.box{max-width:760px;width:100%}.small{color:#8996a8}.bad{color:#ff637b}
+button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273241;background:#151c27;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
-<!-- Admin Pro owns its Supabase session and UI. No wrapper fetch or cross-frame DB code. -->
-<iframe id="adminFrame" title="CrowRules Entertainment Admin Pro v6.6" src="./admin-v6.3.html?admin_v66=1&cb=20260827-2" allow="clipboard-read; clipboard-write"></iframe>
-
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
+<div id="status"><div class="box"><h2>🐦‍⬛ CrowRules Entertainment</h2><p id="statusText">Loading Admin Pro v6.6…</p><p id="statusDetail" class="small">Starting the CrowRules Supabase control center.</p></div></div>
 <script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
+'use strict';
+(async()=>{
+ const text=document.getElementById('statusText');
+ const detail=document.getElementById('statusDetail');
+ const fail=m=>{
+  text.textContent='Admin Pro could not start';
+  text.className='bad';
+  detail.textContent=String(m).replace(/[<>]/g,'');
+  detail.className='small bad';
+  const b=document.createElement('button');
+  b.textContent='Reload';
+  b.onclick=()=>location.reload();
+  document.querySelector('.box').appendChild(b);
+ };
+ try{
+  const c=new AbortController();
+  const timer=setTimeout(()=>c.abort(),20000);
+  const r=await fetch('./admin-v6.3.html?build=20260827-api-fix',{cache:'no-store',signal:c.signal});
+  clearTimeout(timer);
+  if(!r.ok)throw new Error('Admin Pro source returned HTTP '+r.status);
+  let h=await r.text();
+  if(h.length<500)throw new Error('Admin Pro source is incomplete');
+
+  // Replace only the legacy public/anon key in the fetched Admin Pro source.
+  // This is safe for a browser-side Supabase publishable key; never use a service-role key here.
+  const publishableKey='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
+  h=h.replace(/const SUPABASE_KEY\s*=\s*(['"]).*?\1\s*;/,`const SUPABASE_KEY='${publishableKey}';`);
+
+  if(!h.includes(publishableKey))throw new Error('Could not update the Supabase publishable key in Admin Pro source');
+  document.open();
+  document.write(h);
+  document.close();
+ }catch(e){
+  fail(e.name==='AbortError'?'Timed out loading Admin Pro.':e.message||e);
+ }
 })();
 </script>
 </body>
