@@ -1,0 +1,40 @@
+name: Integrate CrowRules Core — CrowRules TV
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tv.html'
+      - 'crowrules-core.js'
+      - '.github/workflows/integrate-crowrules-core-tv.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safely inject CrowRules Core
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('tv.html')
+          text=p.read_text(encoding='utf-8').replace('\r\n','\n')
+          text=re.sub(r'\s*<script\s+src=["\']\.?/?crowrules-core\.js["\']\s*></script>\s*','\n',text,flags=re.I)
+          m=re.search(r'</body\s*>',text,re.I)
+          if not m: raise SystemExit('No </body> found; tv.html was not changed')
+          text=text[:m.start()]+'\n<script src="./crowrules-core.js"></script>\n'+text[m.start():]
+          p.write_text(text,encoding='utf-8')
+          if text.count('<script src="./crowrules-core.js"></script>')!=1: raise SystemExit('Core integration verification failed')
+          if '</html>' not in text.lower(): raise SystemExit('HTML verification failed')
+          PY
+      - name: Commit TV integration only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- tv.html; then echo 'Already integrated'; else git add tv.html && git diff --cached --check && git commit -m 'Integrate crowrules-core.js into CrowRules TV' && git push; fi
