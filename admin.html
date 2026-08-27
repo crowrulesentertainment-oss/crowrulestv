@@ -4,28 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>CrowRules Entertainment — Admin Pro v6.3</title>
-<style>html,body{margin:0;width:100%;height:100%;background:#05070b}iframe{width:100%;height:100%;border:0;display:block}</style>
+<title>CrowRules Entertainment — Admin Pro v6.4</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#05070b;color:#fff;font:14px system-ui,sans-serif}
+#status{min-height:100vh;display:grid;place-items:center;text-align:center;padding:20px;box-sizing:border-box}
+.box{max-width:760px;width:100%}.small{color:#8996a8}.bad{color:#ff637b}
+.spinner{width:28px;height:28px;margin:0 auto 14px;border:3px solid #273241;border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273241;background:#151c27;color:#fff;cursor:pointer}
+</style>
 </head>
 <body>
-<iframe src="./admin-v6.3.html?v=63" title="CrowRules Entertainment Admin Pro v6.3"></iframe>
-
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
+<div id="status"><div class="box"><div class="spinner"></div><h2>🐦‍⬛ CrowRules Entertainment</h2><p id="statusText">Loading Admin Pro v6.4…</p><p id="statusDetail" class="small">Starting the Supabase control center.</p></div></div>
 <script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
+(async()=>{
+ const text=document.getElementById('statusText'),detail=document.getElementById('statusDetail');
+ const fail=m=>{document.querySelector('.spinner')?.remove();text.textContent='Admin Pro could not start';text.className='bad';detail.textContent=String(m).replace(/[<>]/g,'');detail.className='small bad';const b=document.createElement('button');b.textContent='Reload';b.onclick=()=>location.reload();document.querySelector('.box').appendChild(b)};
+ try{
+  const c=new AbortController();const timer=setTimeout(()=>c.abort(),20000);
+  const r=await fetch('./admin-v6.3.html?v=64-supabase-key-fix',{cache:'no-store',signal:c.signal});clearTimeout(timer);
+  if(!r.ok)throw new Error('Admin Pro source returned HTTP '+r.status);
+  let h=await r.text();
+  if(h.length<1000)throw new Error('Admin Pro source is incomplete');
+  const oldKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwiaWF0IjoxNzg3NDIxNzI2LCJleHAiOjIxMDI5OTc3MjZ9.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA';
+  const publishableKey='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
+  if(!h.includes(oldKey))detail.textContent='Using the current Supabase publishable key.';
+  h=h.split(oldKey).join(publishableKey);
+  h=h.replace('Admin Pro v6.3','Admin Pro v6.4').replace(/crowrules-admin-pro-v63/g,'crowrules-admin-pro-v64');
+  document.open();document.write(h);document.close();
+ }catch(e){fail(e.name==='AbortError'?'Timed out loading Admin Pro.':e.message||e)}
 })();
 </script>
 </body>
