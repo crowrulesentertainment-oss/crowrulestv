@@ -1,0 +1,76 @@
+name: Fix Tacoma Nights Live Integration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tacoma-nights.html'
+      - 'crowrules-core.js'
+      - 'youtube-live.js'
+      - '.github/workflows/fix-tacoma-nights-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-live-page:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Safely repair Tacoma Nights integrations
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('tacoma-nights.html')
+          text = path.read_text(encoding='utf-8')
+          original = text
+
+          # Remove duplicate copies of the shared integrations.
+          for src in ('./crowrules-core.js', './youtube-live.js'):
+              pattern = r'\s*<script\s+[^>]*src=["\']' + re.escape(src) + r'["\'][^>]*>\s*</script>\s*'
+              text = re.sub(pattern, '\n', text, flags=re.I)
+
+          # Ensure a dedicated live-player mount exists without disturbing existing markup.
+          if 'id="tacoma-nights-live-player"' not in text and "id='tacoma-nights-live-player'" not in text:
+              anchor = re.search(r'<body\b[^>]*>', text, flags=re.I)
+              if not anchor:
+                  raise SystemExit('No <body> tag found; Tacoma Nights was not modified.')
+              mount = '\n<section id="tacoma-nights-live-player" data-youtube-live-player aria-live="polite"></section>\n'
+              text = text[:anchor.end()] + mount + text[anchor.end():]
+
+          # Inject both scripts immediately before </body> so they run after the page exists.
+          body = re.search(r'</body\s*>', text, flags=re.I)
+          if not body:
+              raise SystemExit('No </body> tag found; Tacoma Nights was not modified.')
+          scripts = '\n<script src="./crowrules-core.js"></script>\n<script src="./youtube-live.js"></script>\n'
+          text = text[:body.start()] + scripts + text[body.start():]
+
+          # Verify exactly one of each and intact closing HTML.
+          if text.count('./crowrules-core.js') != 1:
+              raise SystemExit('crowrules-core.js integration verification failed.')
+          if text.count('./youtube-live.js') != 1:
+              raise SystemExit('youtube-live.js integration verification failed.')
+          if '</html>' not in text.lower():
+              raise SystemExit('Closing </html> tag missing; refusing to commit.')
+
+          path.write_text(text, encoding='utf-8')
+          print('Tacoma Nights live integration repaired.' if text != original else 'Tacoma Nights already repaired; no page changes needed.')
+
+      - name: Commit safe repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- tacoma-nights.html; then
+            echo 'No Tacoma Nights change required.'
+          else
+            git add tacoma-nights.html
+            git diff --cached --check
+            git commit -m 'Fix Tacoma Nights CrowRules Core and YouTube Live integration'
+            git push
+          fi
