@@ -1,208 +1,39 @@
-/* CrowRules Unified Core v1.2
+/* CrowRules Unified Core v1.3
    Shared Supabase integration for every CrowRules branch.
    Public client key only; never place a service-role key in browser code.
-   TV/Admin bridge: Public TV reads the same canonical Supabase records
-   managed by Admin Pro and can refresh when schedule/channel/playlist data changes. */
+   TV/Admin bridge plus public TV community rankings/member section. */
 (function(){
-  'use strict';
-
-  const SUPABASE_URL='https://zauxdqyssratvzmomozf.supabase.co';
-  const SUPABASE_ANON_KEY='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
-  const ADMIN_PRO_URL='https://crowrulesentertainment-oss.github.io/crowrulestv/admin';
-  const TV_URL='https://crowrulesentertainment-oss.github.io/crowrulestv/tv';
-
-  const BRANCHES=[
-    {slug:'entertainment',name:'CrowRules Entertainment',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/',icon:'🏠'},
-    {slug:'tv',name:'CrowRules TV',url:TV_URL,icon:'📺'},
-    {slug:'yearbook',name:'CrowRules Yearbooks',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/yearbook',icon:'📚'},
-    {slug:'awards',name:'CrowRules Awards',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/awards',icon:'🏆'},
-    {slug:'tacoma-nights',name:'Tacoma Nights',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/tacoma-nights',icon:'🌃'},
-    {slug:'backdeckcrew',name:'Back Deck Crew',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/backdeckcrew',icon:'🎥'},
-    {slug:'pnwm',name:'Pacific Northwest Mothers',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/pnwm',icon:'👩‍👧‍👦'},
-    {slug:'crowrules-records',name:'CrowRules Records',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/crowrules-records',icon:'💿'},
-    {slug:'admin',name:'Admin Pro',url:ADMIN_PRO_URL,icon:'⚙️'}
-  ];
-
-  function ready(fn){
-    if(document.readyState==='loading'){
-      document.addEventListener('DOMContentLoaded',fn,{once:true});
-    }else fn();
-  }
-
-  function loadSupabase(){
-    if(window.supabase?.createClient) return Promise.resolve(window.supabase);
-    return new Promise((resolve,reject)=>{
-      const s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-      s.onload=()=>resolve(window.supabase);
-      s.onerror=reject;
-      document.head.appendChild(s);
-    });
-  }
-
-  async function client(){
-    const s=await loadSupabase();
-    if(!window.__crowrulesSupabase){
-      window.__crowrulesSupabase=s.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY,
-        {
-          auth:{
-            persistSession:true,
-            autoRefreshToken:true,
-            detectSessionInUrl:true,
-            storageKey:'crowrules-unified-session',
-            flowType:'pkce'
-          }
-        }
-      );
-    }
-    return window.__crowrulesSupabase;
-  }
-
-  function branchMenu(){
-    if(document.getElementById('crowrules-network-menu')) return;
-
-    const wrap=document.createElement('div');
-    wrap.id='crowrules-network-menu';
-    wrap.innerHTML='<button aria-label="CrowRules Network">☰ CrowRules Network</button><div></div>';
-
-    Object.assign(wrap.style,{
-      position:'fixed',right:'16px',bottom:'16px',zIndex:'99999',fontFamily:'system-ui,sans-serif'
-    });
-
-    const b=wrap.querySelector('button');
-    Object.assign(b.style,{
-      background:'#10131a',color:'#fff',border:'1px solid #394151',borderRadius:'10px',padding:'10px 14px',fontWeight:'800',cursor:'pointer'
-    });
-
-    const menu=wrap.querySelector('div');
-    Object.assign(menu.style,{
-      display:'none',marginBottom:'7px',background:'#0b0e14',border:'1px solid #394151',borderRadius:'12px',padding:'8px',boxShadow:'0 15px 40px #0008',minWidth:'230px'
-    });
-
-    BRANCHES.forEach(x=>{
-      const a=document.createElement('a');
-      a.href=x.url;
-      a.textContent=x.icon+' '+x.name;
-      a.target='_self';
-      Object.assign(a.style,{
-        display:'block',color:'#fff',padding:'9px',textDecoration:'none',borderRadius:'7px'
-      });
-      a.onmouseenter=()=>a.style.background='#1b202b';
-      a.onmouseleave=()=>a.style.background='transparent';
-      menu.appendChild(a);
-    });
-
-    b.onclick=()=>menu.style.display=menu.style.display==='none'?'block':'none';
-    document.body.appendChild(wrap);
-  }
-
-  async function publishBranchRegistry(){
-    try{
-      const c=await client();
-      return await c.from('crowrules_branches')
-        .select('id,name,slug,description,url,icon,sort_order,is_featured,is_active')
-        .eq('is_active',true)
-        .order('sort_order');
-    }catch(e){
-      return {data:BRANCHES,error:e};
-    }
-  }
-
-  async function session(){
-    const c=await client();
-    return c.auth.getSession();
-  }
-
-  async function signOut(){
-    const c=await client();
-    return c.auth.signOut();
-  }
-
-  async function getTVSnapshot(channelId=null){
-    const c=await client();
-
-    const channels=await c.from('tv_channels')
-      .select('*')
-      .eq('is_active',true)
-      .order('sort_order',{ascending:true})
-      .order('channel_number',{ascending:true});
-
-    const schedules=channelId
-      ? await c.from('schedule_items').select('*').eq('channel_id',channelId).limit(500)
-      : {data:[],error:null};
-
-    const playlists=channelId
-      ? await c.from('tv_channel_playlist').select('*').eq('channel_id',channelId).eq('enabled',true).order('playlist_position',{ascending:true})
-      : {data:[],error:null};
-
-    return {
-      channels:channels.data||[],
-      schedules:schedules.data||[],
-      playlists:playlists.data||[],
-      errors:[channels.error,schedules.error,playlists.error].filter(Boolean)
-    };
-  }
-
-  function setupTVRealtime(){
-    if(window.__crowrulesTVRealtimeReady) return window.__crowrulesTVRealtime;
-
-    let channel;
-    client().then(c=>{
-      channel=c.channel('crowrules-unified-tv-sync')
-        .on('postgres_changes',{event:'*',schema:'public',table:'schedule_items'},payload=>{
-          window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'schedule_items',payload}}));
-        })
-        .on('postgres_changes',{event:'*',schema:'public',table:'tv_channel_playlist'},payload=>{
-          window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'tv_channel_playlist',payload}}));
-        })
-        .on('postgres_changes',{event:'*',schema:'public',table:'tv_channels'},payload=>{
-          window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'tv_channels',payload}}));
-        })
-        .on('postgres_changes',{event:'*',schema:'public',table:'episodes'},payload=>{
-          window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'episodes',payload}}));
-        })
-        .subscribe();
-    });
-
-    window.__crowrulesTVRealtimeReady=true;
-    window.__crowrulesTVRealtime=channel||true;
-    return window.__crowrulesTVRealtime;
-  }
-
-  function adminLink(){
-    return ADMIN_PRO_URL;
-  }
-
-  ready(()=>{
-    branchMenu();
-    setupTVRealtime();
-    document.documentElement.dataset.crowrulesCore='1.2';
-
-    /* Public TV v2.6 already has its own realtime loader. This event
-       provides a second, unified bridge without requiring Admin Pro
-       credentials or exposing privileged Supabase access. */
-    window.addEventListener('crowrules:tv-sync',event=>{
-      if(typeof window.refreshLiveData==='function' &&
-         event.detail?.table==='schedule_items'){
-        window.refreshLiveData();
-      }
-    });
-  });
-
-  window.CrowRulesCore={
-    version:'1.2.0',
-    supabaseUrl:SUPABASE_URL,
-    adminUrl:ADMIN_PRO_URL,
-    tvUrl:TV_URL,
-    branches:BRANCHES,
-    client,
-    session,
-    signOut,
-    publishBranchRegistry,
-    getTVSnapshot,
-    setupTVRealtime,
-    adminLink
-  };
+'use strict';
+const SUPABASE_URL='https://zauxdqyssratvzmomozf.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
+const ADMIN_PRO_URL='https://crowrulesentertainment-oss.github.io/crowrulestv/admin';
+const TV_URL='https://crowrulesentertainment-oss.github.io/crowrulestv/tv';
+const BRANCHES=[
+{slug:'entertainment',name:'CrowRules Entertainment',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/',icon:'🏠'},
+{slug:'tv',name:'CrowRules TV',url:TV_URL,icon:'📺'},
+{slug:'yearbook',name:'CrowRules Yearbooks',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/yearbook',icon:'📚'},
+{slug:'awards',name:'CrowRules Awards',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/awards',icon:'🏆'},
+{slug:'tacoma-nights',name:'Tacoma Nights',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/tacoma-nights',icon:'🌃'},
+{slug:'backdeckcrew',name:'Back Deck Crew',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/backdeckcrew',icon:'🎥'},
+{slug:'pnwm',name:'Pacific Northwest Mothers',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/pnwm',icon:'👩‍👧‍👦'},
+{slug:'crowrules-records',name:'CrowRules Records',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/crowrules-records',icon:'💿'},
+{slug:'admin',name:'Admin Pro',url:ADMIN_PRO_URL,icon:'⚙️'}];
+function ready(fn){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fn,{once:true});else fn()}
+function loadSupabase(){if(window.supabase?.createClient)return Promise.resolve(window.supabase);return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.onload=()=>resolve(window.supabase);s.onerror=reject;document.head.appendChild(s)})}
+async function client(){const s=await loadSupabase();if(!window.__crowrulesSupabase)window.__crowrulesSupabase=s.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'crowrules-unified-session',flowType:'pkce'}});return window.__crowrulesSupabase}
+function branchMenu(){if(document.getElementById('crowrules-network-menu'))return;const w=document.createElement('div');w.id='crowrules-network-menu';w.innerHTML='<button aria-label="CrowRules Network">☰ CrowRules Network</button><div></div>';Object.assign(w.style,{position:'fixed',right:'16px',bottom:'16px',zIndex:'99999',fontFamily:'system-ui,sans-serif'});const b=w.querySelector('button');Object.assign(b.style,{background:'#10131a',color:'#fff',border:'1px solid #394151',borderRadius:'10px',padding:'10px 14px',fontWeight:'800',cursor:'pointer'});const m=w.querySelector('div');Object.assign(m.style,{display:'none',marginBottom:'7px',background:'#0b0e14',border:'1px solid #394151',borderRadius:'12px',padding:'8px',boxShadow:'0 15px 40px #0008',minWidth:'230px'});BRANCHES.forEach(x=>{const a=document.createElement('a');a.href=x.url;a.textContent=x.icon+' '+x.name;Object.assign(a.style,{display:'block',color:'#fff',padding:'9px',textDecoration:'none',borderRadius:'7px'});a.onmouseenter=()=>a.style.background='#1b202b';a.onmouseleave=()=>a.style.background='transparent';m.appendChild(a)});b.onclick=()=>m.style.display=m.style.display==='none'?'block':'none';document.body.appendChild(w)}
+async function publishBranchRegistry(){try{return await (await client()).from('crowrules_branches').select('id,name,slug,description,url,icon,sort_order,is_featured,is_active').eq('is_active',true).order('sort_order')}catch(e){return{data:BRANCHES,error:e}}}
+async function session(){return (await client()).auth.getSession()}
+async function signOut(){return (await client()).auth.signOut()}
+async function getTVSnapshot(channelId=null){const c=await client();const channels=await c.from('tv_channels').select('*').eq('is_active',true).order('sort_order').order('channel_number');const schedules=channelId?await c.from('schedule_items').select('*').eq('channel_id',channelId).limit(500):{data:[],error:null};const playlists=channelId?await c.from('tv_channel_playlist').select('*').eq('channel_id',channelId).eq('enabled',true).order('playlist_position'): {data:[],error:null};return{channels:channels.data||[],schedules:schedules.data||[],playlists:playlists.data||[],errors:[channels.error,schedules.error,playlists.error].filter(Boolean)}}
+function setupTVRealtime(){if(window.__crowrulesTVRealtimeReady)return window.__crowrulesTVRealtime;let ch;client().then(c=>{ch=c.channel('crowrules-unified-tv-sync').on('postgres_changes',{event:'*',schema:'public',table:'schedule_items'},p=>window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'schedule_items',payload:p}}))).on('postgres_changes',{event:'*',schema:'public',table:'tv_channel_playlist'},p=>window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'tv_channel_playlist',payload:p}}))).on('postgres_changes',{event:'*',schema:'public',table:'tv_channels'},p=>window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'tv_channels',payload:p}}))).on('postgres_changes',{event:'*',schema:'public',table:'episodes'},p=>window.dispatchEvent(new CustomEvent('crowrules:tv-sync',{detail:{table:'episodes',payload:p}}))).subscribe()});window.__crowrulesTVRealtimeReady=true;window.__crowrulesTVRealtime=ch||true;return window.__crowrulesTVRealtime}
+function adminLink(){return ADMIN_PRO_URL}
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const pick=(o,ks)=>{for(const k of ks)if(o&&o[k]!=null&&o[k]!=='')return o[k];return 0};
+const score=o=>Number(pick(o,['view_count','views','views_count','total_views','watch_count','plays','play_count']))||0;
+function card(x,i,kind){const title=pick(x,['title','name','display_name'])||'Untitled';const img=pick(x,['thumbnail_url','youtube_thumbnail_url','image_url','cover_url','avatar_url']);const meta=kind==='member'?(Number(x.points||x.lifetime_points||0)+' points'):((score(x)).toLocaleString()+' views');return `<article class="card" style="position:relative"><div class="thumb" style="background:#151515;display:grid;place-items:center">${img?`<img src="${esc(img)}" alt="">`:'<span style="font-size:30px">🐦‍⬛</span>'}</div><div class="body"><div class="meta">#${i+1}</div><strong>${esc(title)}</strong><div class="meta">${esc(meta)}</div></div></article>`}
+function section(id,title,sub){const s=document.createElement('section');s.className='section';s.id=id;s.innerHTML=`<div class="container"><div class="sectionHead"><div><h2>${title}</h2><div class="sub">${sub}</div></div></div><div class="cards" id="${id}List"><div class="empty">Loading…</div></div></div>`;return s}
+async function loadCommunity(){if(!location.pathname.endsWith('/tv')&&!location.pathname.endsWith('/tv/'))return;if(document.getElementById('crowrules-community'))return;const main=document.querySelector('main');if(!main)return;const wrap=document.createElement('div');wrap.id='crowrules-community';const shows=section('top-shows','🔥 Top Shows','Most-viewed published shows');const eps=section('top-episodes','🎬 Top Episodes','Most-viewed published episodes');const chans=section('top-channels','📺 Top Channels','Most active channels from Admin Pro schedule data');const members=section('top-members','👥 Top Members','Community leaderboard — public profile names only');const mem=document.createElement('section');mem.className='section';mem.id='member-section';mem.innerHTML='<div class="container"><div class="sectionHead"><div><h2>👤 Member Section</h2><div class="sub">Sign in, keep your session, and manage your CrowRules TV membership</div></div></div><div class="panel" style="padding:22px"><div id="crMemberState">Checking member session…</div><div id="crMemberForm" style="display:none;margin-top:15px;max-width:520px"><input id="crEmail" type="email" placeholder="Email" style="width:100%;padding:11px;margin:5px 0;background:#111;color:#fff;border:1px solid #333;border-radius:9px"><input id="crPassword" type="password" placeholder="Password" style="width:100%;padding:11px;margin:5px 0;background:#111;color:#fff;border:1px solid #333;border-radius:9px"><div class="buttons"><button class="btn primary" id="crSignIn">Sign In</button><button class="btn" id="crCreate">Create Account</button></div><div class="sub" id="crAuthMsg"></div></div></div></div>';[shows,eps,chans,members,mem].forEach(x=>wrap.appendChild(x));main.appendChild(wrap);const c=await client();const [sr,er,cr,mp,ms]=await Promise.all([c.from('shows').select('*').limit(100),c.from('episodes').select('*').limit(100),c.from('tv_channels').select('*').eq('is_active',true).limit(100),c.from('member_profiles').select('id,display_name,username,membership_tier,is_active,avatar_url').eq('is_active',true).limit(100),c.from('member_stats').select('user_id,points,watch_minutes,episodes_watched,likes_count,comments_count,live_sessions').limit(100)]);let sa=sr.data||[],ea=er.data||[],ca=cr.data||[],ma=mp.data||[],stats=ms.data||[];sa=sa.sort((a,b)=>score(b)-score(a)).slice(0,10);ea=ea.sort((a,b)=>score(b)-score(a)).slice(0,10);const counts={};try{const sc=await c.from('schedule_items').select('channel_id').eq('is_active',true).limit(5000);(sc.data||[]).forEach(x=>counts[x.channel_id]=(counts[x.channel_id]||0)+1)}catch(e){}ca=ca.map(x=>({...x,__score:counts[x.id]||0})).sort((a,b)=>b.__score-a.__score).slice(0,10);const sm={};stats.forEach(x=>sm[x.user_id]=x);ma=ma.map(x=>({...x,__score:Number(sm[x.id]?.points||0),points:Number(sm[x.id]?.points||0)})).sort((a,b)=>b.__score-a.__score).slice(0,10);document.getElementById('top-showsList').innerHTML=sa.length?sa.map((x,i)=>card(x,i,'show')).join(''):'<div class="empty">No published shows yet.</div>';document.getElementById('top-episodesList').innerHTML=ea.length?ea.map((x,i)=>card(x,i,'episode')).join(''):'<div class="empty">No published episodes yet.</div>';document.getElementById('top-channelsList').innerHTML=ca.length?ca.map((x,i)=>{x.view_count=x.__score;return card({...x,title:x.name||'CrowRules Channel'},i,'channel')}).join(''):'<div class="empty">No active channels yet.</div>';document.getElementById('top-membersList').innerHTML=ma.length?ma.map((x,i)=>card({...x,title:x.display_name||x.username||'CrowRules Member',avatar_url:x.avatar_url},i,'member')).join(''):'<div class="empty">No public members yet.</div>';async function authState(){const r=await c.auth.getSession();const s=r.data?.session;if(s){document.getElementById('crMemberState').innerHTML=`<strong>Welcome back, ${esc(s.user.user_metadata?.full_name||s.user.email?.split('@')[0]||'Member')}.</strong><div class="sub" style="margin-top:7px">Your CrowRules TV session is active and will persist across the network.</div><div class="buttons"><a class="btn primary" href="#member-section">Member Dashboard</a><button class="btn" id="crOut">Sign Out</button></div>`;document.getElementById('crOut').onclick=async()=>{await c.auth.signOut();authState()}}else{document.getElementById('crMemberState').innerHTML='<strong>Join CrowRules TV</strong><div class="sub" style="margin-top:7px">Sign in or create a free account to become part of the CrowRules community.</div><div class="buttons"><button class="btn primary" id="crOpenAuth">Sign In / Create Account</button></div>';document.getElementById('crOpenAuth').onclick=()=>document.getElementById('crMemberForm').style.display='block'}}document.getElementById('crSignIn').onclick=async()=>{const r=await c.auth.signInWithPassword({email:document.getElementById('crEmail').value.trim(),password:document.getElementById('crPassword').value});document.getElementById('crAuthMsg').textContent=r.error?r.error.message:'Signed in successfully.';if(!r.error)authState()};document.getElementById('crCreate').onclick=async()=>{const r=await c.auth.signUp({email:document.getElementById('crEmail').value.trim(),password:document.getElementById('crPassword').value});document.getElementById('crAuthMsg').textContent=r.error?r.error.message:(r.data.session?'Account created and signed in.':'Account created. Check your email if confirmation is enabled.');if(r.data.session)authState()};c.auth.onAuthStateChange(()=>setTimeout(authState,0));authState()}
+ready(()=>{branchMenu();setupTVRealtime();document.documentElement.dataset.crowrulesCore='1.3';window.addEventListener('crowrules:tv-sync',e=>{if(typeof window.refreshLiveData==='function'&&e.detail?.table==='schedule_items')window.refreshLiveData()});loadCommunity()});
+window.CrowRulesCore={version:'1.3.0',supabaseUrl:SUPABASE_URL,adminUrl:ADMIN_PRO_URL,tvUrl:TV_URL,branches:BRANCHES,client,session,signOut,publishBranchRegistry,getTVSnapshot,setupTVRealtime,adminLink};
 })();
