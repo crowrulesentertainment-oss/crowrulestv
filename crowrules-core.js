@@ -1,4 +1,4 @@
-/* CrowRules Unified Core v1.0
+/* CrowRules Unified Core v1.1
    Shared Supabase integration for every CrowRules branch.
    Public client key only; never place a service-role key in browser code. */
 (function(){
@@ -12,7 +12,7 @@
     {slug:'awards',name:'CrowRules Awards',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/awards',icon:'🏆'},
     {slug:'tacoma-nights',name:'Tacoma Nights',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/tacoma-nights',icon:'🌃'},
     {slug:'backdeckcrew',name:'Back Deck Crew',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/backdeckcrew',icon:'🎥'},
-    {slug:'pnwm',name:'PNW Music',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/pnwm',icon:'🎵'},
+    {slug:'pnwm',name:'Pacific Northwest Mothers',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/pnwm',icon:'👩‍👧‍👦'},
     {slug:'crowrules-records',name:'CrowRules Records',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/crowrules-records',icon:'💿'},
     {slug:'admin',name:'Admin Pro',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/admin',icon:'⚙️'}
   ];
@@ -24,5 +24,5 @@
   async function session(){const c=await client();return c.auth.getSession()}
   async function signOut(){const c=await client();return c.auth.signOut()}
   ready(()=>{branchMenu();document.documentElement.dataset.crowrulesCore='1'});
-  window.CrowRulesCore={version:'1.0.0',supabaseUrl:SUPABASE_URL,branches:BRANCHES,client,session,signOut,publishBranchRegistry};
+  window.CrowRulesCore={version:'1.1.0',supabaseUrl:SUPABASE_URL,branches:BRANCHES,client,session,signOut,publishBranchRegistry};
 })();
