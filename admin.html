@@ -5,70 +5,54 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="same-origin">
-<title>CrowRules Entertainment — Admin Pro v5.2</title>
+<title>CrowRules Entertainment — Admin Pro v5.3</title>
 <style>
 html,body{margin:0;width:100%;height:100%;background:#05070b;color:#fff;font:14px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #status{min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
 .box{width:min(760px,100%);padding:30px;box-sizing:border-box;text-align:center;border:1px solid #202a38;border-radius:18px;background:#0a0f17;box-shadow:0 24px 70px #0009}
-.logo{font-size:34px}.small{color:#8996a8}.bad{color:#ff637b}
+.logo{font-size:34px}.small{color:#8996a8}.bad{color:#ff637b}.ok{color:#72e6a8}
+.spinner{width:34px;height:34px;margin:0 auto 18px;border:3px solid #273241;border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 button{margin-top:14px;padding:10px 15px;border-radius:9px;border:1px solid #273241;background:#151c27;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
-<div id="status" aria-live="polite"><div class="box"><div class="logo">🐦‍⬛</div><h2>CrowRules Entertainment</h2><p id="statusText">Loading Admin Pro v5.2…</p><p id="statusDetail" class="small">Starting the Statistics + Schedule Studio control center.</p></div></div>
+<div id="status" aria-live="polite"><div class="box"><div class="logo">🐦‍⬛</div><h2>CrowRules Entertainment</h2><div class="spinner" id="spinner"></div><p id="statusText">Loading Admin Pro v5.3…</p><p id="statusDetail" class="small">Starting the control center.</p></div></div>
 <script>
-(async()=>{
+(async function(){
 'use strict';
-const status=document.getElementById('status'),text=document.getElementById('statusText'),detail=document.getElementById('statusDetail');
-const fail=message=>{
- text.textContent='Admin Pro v5.2 could not start';text.className='bad';
- detail.textContent=String(message||'Unknown loading error').replace(/[<>]/g,'');detail.className='small bad';
- if(!document.getElementById('reloadAdmin')){const b=document.createElement('button');b.id='reloadAdmin';b.textContent='Reload Admin Pro';b.onclick=()=>location.reload();status.querySelector('.box').appendChild(b)}
-};
+const status=document.getElementById('status');
+const text=document.getElementById('statusText');
+const detail=document.getElementById('statusDetail');
+const spinner=document.getElementById('spinner');
+let timer;
+function fail(message){
+ clearTimeout(timer); spinner.style.display='none'; text.textContent='Admin Pro v5.3 could not start'; text.className='bad'; detail.textContent=String(message||'Unknown loading error').replace(/[<>]/g,''); detail.className='small bad';
+ if(!document.getElementById('reloadAdmin')){const b=document.createElement('button');b.id='reloadAdmin';b.type='button';b.textContent='Reload Admin Pro';b.onclick=function(){location.reload()};status.querySelector('.box').appendChild(b)}
+}
 try{
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
- const response=await fetch('./admin-v4.html?build=20260827-v5.2',{cache:'no-store',credentials:'same-origin',signal:controller.signal});
+ const controller=new AbortController();
+ timer=setTimeout(function(){controller.abort()},30000);
+ text.textContent='Loading Admin Pro v5.3…';
+ const response=await fetch('./admin-v4.html?build=20260827-v5.3&ts='+Date.now(),{method:'GET',cache:'no-store',credentials:'same-origin',redirect:'follow',signal:controller.signal});
  clearTimeout(timer);
  if(!response.ok)throw new Error('Admin Pro core returned HTTP '+response.status);
  let html=await response.text();
- if(html.length<500)throw new Error('Admin Pro core document is incomplete');
- const enhancement=`
-<script>
-(()=>{
-'use strict';
-const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-const tables=[['tv_channels','TV Channels'],['tv_channel_playlist','Channel Playlists'],['schedule_items','Schedule Items'],['live_events','Live Events'],['shows','Shows'],['episodes','Episodes'],['celebrity_deaths','Memorials']];
-async function countRows(table){const r=await db.from(table).select('*',{count:'exact',head:true});if(r.error)throw r.error;return Number(r.count||0)}
-async function stats(target){if(!target)return;target.innerHTML='<div class="notice">Loading live Supabase statistics…</div>';try{const rows=await Promise.all(tables.map(async x=>[x[1],await countRows(x[0])]));const active=await db.from('schedule_items').select('*',{count:'exact',head:true}).eq('is_active',true);const published=await db.from('schedule_items').select('*',{count:'exact',head:true}).eq('status','published');const scheduled=await db.from('schedule_items').select('*',{count:'exact',head:true}).eq('status','scheduled');const live=await db.from('schedule_items').select('*',{count:'exact',head:true}).eq('item_type','live');[active,published,scheduled,live].forEach(r=>{if(r.error)throw r.error});target.innerHTML='<div class="grid">'+rows.map(x=>'<div class="card"><div class="muted">'+esc(x[0])+'</div><b style="font-size:28px">'+x[1]+'</b><div class="muted">database records</div></div>').join('')+'</div><div class="grid" style="margin-top:14px">'+[['Active Schedule',active.count],['Published',published.count],['Scheduled',scheduled.count],['Live Programs',live.count]].map(x=>'<div class="card"><div class="muted">'+esc(x[0])+'</div><b style="font-size:28px">'+Number(x[1]||0)+'</b></div>').join('')+'</div>'}catch(e){target.innerHTML='<div class="notice"><span class="bad">Statistics could not load: '+esc(e.message||e)+'</span></div>'}}
-function addStats(){if(document.getElementById('page-statistics'))return true;const aside=document.querySelector('aside'),main=document.querySelector('main');if(!aside||!main||!window.db)return false;const nav=document.createElement('button');nav.type='button';nav.className='nav';nav.dataset.page='statistics';nav.textContent='📊 Statistics';const scheduleNav=aside.querySelector('[data-page="schedule"]');scheduleNav?aside.insertBefore(nav,scheduleNav):aside.appendChild(nav);const page=document.createElement('section');page.id='page-statistics';page.className='page';page.innerHTML='<div class="hero"><div><h1>📊 Statistics</h1><p class="muted">Live counts from the CrowRules Supabase database.</p></div><button class="primary" id="crStatsRefresh">↻ Refresh</button></div><div id="crStatsBody"></div>';main.appendChild(page);nav.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));nav.classList.add('active');page.classList.add('active');stats(document.getElementById('crStatsBody'))};document.getElementById('crStatsRefresh').onclick=()=>stats(document.getElementById('crStatsBody'));return true}
-let tries=0;const boot=()=>{tries++;if(addStats())return;if(tries<100)setTimeout(boot,200)};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-})();
-<\/script>`;
- const pos=html.toLowerCase().lastIndexOf('
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
-})();
-</script>
-</body>');
- if(pos<0)throw new Error('Admin Pro core is missing </body>');
- html=html.slice(0,pos)+enhancement+html.slice(pos);
- html=html.replaceAll('Admin Pro v4.0','Admin Pro v5.2').replaceAll('build=20260826-v4.1','build=20260827-v5.2').replaceAll('build=20260827-v4.1','build=20260827-v5.2');
- document.open();document.write(html);document.close();
-}catch(e){fail(e.name==='AbortError'?'Timed out loading Admin Pro v5.2.':e.message||e)}
+ if(!html||html.trim().length<500)throw new Error('Admin Pro core document is empty or incomplete');
+ if(!/<html[\s>]/i.test(html))throw new Error('Admin Pro core returned invalid HTML');
+ text.textContent='Starting Admin Pro v5.3…';
+ detail.textContent='Loading the complete administration interface.';
+ const marker='</body>';
+ const bodyIndex=html.toLowerCase().lastIndexOf(marker);
+ if(bodyIndex===-1)throw new Error('Admin Pro core is missing the closing body tag');
+ const enhancement='\n<script>\n(function(){\n  window.CROW_ADMIN_VERSION="5.3";\n  window.CROW_ADMIN_LOADED_AT=new Date().toISOString();\n})();\n<\\/script>\n';
+ html=html.slice(0,bodyIndex)+enhancement+html.slice(bodyIndex);
+ document.open();
+ document.write(html);
+ document.close();
+}catch(error){
+ clearTimeout(timer);
+ fail(error&&error.name==='AbortError'?'Timed out loading Admin Pro v5.3 after 30 seconds.':(error&&error.message)||error);
+}
 })();
 </script>
 </body>
