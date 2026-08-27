@@ -4,42 +4,70 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>CrowRules Entertainment — Admin Pro v4.0</title>
+<meta name="referrer" content="same-origin">
+<title>CrowRules Entertainment — Admin Pro v4.8</title>
 <style>
-html,body{margin:0;background:#05070b;color:#fff;font:14px system-ui,sans-serif}
-#status{min-height:100vh;display:grid;place-items:center;text-align:center;padding:20px}.box{max-width:760px;width:100%}
-.small{color:#8996a8}.bad{color:#ff637b}button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273241;background:#151c27;color:#fff;cursor:pointer}
+html,body{margin:0;width:100%;min-height:100%;background:#05070b;color:#fff;font:14px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#status{min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+.box{width:min(760px,100%);text-align:center;padding:28px;border:1px solid #202a38;border-radius:16px;background:#0a0f17;box-shadow:0 20px 60px #0008}
+.logo{font-size:28px;margin-bottom:8px}.small{color:#8996a8}.bad{color:#ff637b}
+button{margin-top:14px;padding:10px 15px;border-radius:9px;border:1px solid #273241;background:#151c27;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
-<div id="status"><div class="box"><h2>🐦‍⬛ CrowRules Entertainment</h2><p id="statusText">Loading Admin Pro v4.0…</p><p id="statusDetail" class="small">Connecting to the verified CrowRules Supabase control center.</p></div></div>
+<div id="status" aria-live="polite">
+  <div class="box">
+    <div class="logo">🐦‍⬛</div>
+    <h2>CrowRules Entertainment</h2>
+    <p id="statusText">Loading Admin Pro v4.8…</p>
+    <p id="statusDetail" class="small">Starting the verified Admin Pro control center.</p>
+  </div>
+</div>
 <script>
 (async()=>{
- const text=document.getElementById('statusText'),detail=document.getElementById('statusDetail');
- const fail=m=>{text.textContent='Admin Pro v4.0 could not start';text.className='bad';detail.textContent=String(m).replace(/[<>]/g,'');detail.className='small bad';const b=document.createElement('button');b.textContent='Reload';b.onclick=()=>location.reload();document.querySelector('.box').appendChild(b)};
- try{const c=new AbortController(),timer=setTimeout(()=>c.abort(),20000);const r=await fetch('./admin-v4.html?build=20260827-4.1',{cache:'no-store',signal:c.signal});clearTimeout(timer);if(!r.ok)throw new Error('Admin Pro v4.0 returned HTTP '+r.status);const h=await r.text();if(h.length<500)throw new Error('Admin Pro v4.0 document is incomplete');document.open();document.write(h);document.close();}catch(e){fail(e.name==='AbortError'?'Timed out loading Admin Pro v4.0.':e.message||e)}
-})();
-</script>
-<script>
-/* ADMIN_PRO_SCHEDULE_EPISODES_V1 */
-(()=>{
- const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- const wait=()=>{const aside=document.querySelector('aside'),main=document.querySelector('main'),dbw=window.db;if(!aside||!main||!dbw){setTimeout(wait,300);return}if(document.getElementById('page-schedule-episodes'))return;
-  const nav=document.createElement('button');nav.className='nav';nav.dataset.page='schedule-episodes';nav.textContent='📺 Schedule Episodes';aside.appendChild(nav);
-  const page=document.createElement('section');page.id='page-schedule-episodes';page.className='page';page.innerHTML=`<h1>📺 Schedule Episodes</h1><div class="grid"><div class="card"><h2>Add Episode to Schedule</h2><div class="notice" id="sched-msg">Select an episode and channel, then choose the air time.</div><label>Episode<select id="sched-episode" style="width:100%;padding:10px;margin:6px 0 12px"></select></label><label>Channel<select id="sched-channel" style="width:100%;padding:10px;margin:6px 0 12px"><option value="crowrules_tv">CrowRules TV</option><option value="live_events">Live Events</option></select></label><label>Start time<input id="sched-start" type="datetime-local" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box"></label><label>Duration (minutes)<input id="sched-duration" type="number" min="1" value="60" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box"></label><button id="sched-add">➕ Add to Schedule</button></div><div class="card"><h2>Upcoming Schedule</h2><div id="sched-list" class="muted">Loading…</div></div></div>`;main.appendChild(page);
-  const episodeSelect=page.querySelector('#sched-episode'),msg=page.querySelector('#sched-msg'),list=page.querySelector('#sched-list');
-  const note=(s,bad=false)=>{msg.textContent=s;msg.className=bad?'notice bad':'notice'};
-  async function loadEpisodes(){episodeSelect.innerHTML='<option>Loading episodes…</option>';let r=await dbw.from('episodes').select('*').order('created_at',{ascending:false}).limit(500);if(r.error){episodeSelect.innerHTML='<option value="">Unable to load episodes</option>';note(r.error.message,true);return}episodeSelect.innerHTML=(r.data||[]).map(e=>`<option value="${esc(e.id)}">${esc(e.title||e.name||'Untitled Episode')}</option>`).join('')||'<option value="">No episodes found</option>'}
-  async function loadSchedule(){list.textContent='Loading…';let r=await dbw.from('schedule_items').select('*').order('start_time',{ascending:true}).limit(100);if(r.error){list.innerHTML='<span class="bad">'+esc(r.error.message)+'</span>';return}const rows=r.data||[];list.innerHTML=rows.length?rows.map(x=>{const title=x.title||x.name||x.episode_title||x.episode_id||'Untitled';const ch=x.channel||x.channel_slug||x.tv_channel||'Unassigned';const st=x.start_time||x.starts_at||x.scheduled_at||'';return `<div class="notice" style="margin:8px 0"><b>${esc(title)}</b><br><span class="muted">${esc(ch)} · ${esc(st)}</span></div>`}).join(''):'<span class="muted">No scheduled items.</span>'}
-  async function addSchedule(){const episodeId=episodeSelect.value,start=page.querySelector('#sched-start').value,dur=Math.max(1,Number(page.querySelector('#sched-duration').value)||60),channel=page.querySelector('#sched-channel').value;if(!episodeId||!start){note('Choose an episode and start time.',true);return}const startIso=new Date(start).toISOString();const endIso=new Date(new Date(start).getTime()+dur*60000).toISOString();let er=await dbw.from('episodes').select('*').eq('id',episodeId).maybeSingle();if(er.error||!er.data){note(er.error?.message||'Episode not found.',true);return}const ep=er.data;let existing=await dbw.from('schedule_items').select('id').eq('start_time',startIso).eq('episode_id',episodeId).limit(1);if(existing.data?.length){note('That episode is already scheduled at that time.',true);return}const payload={episode_id:episodeId,title:ep.title||ep.name||'Untitled Episode',start_time:startIso,end_time:endIso,channel:channel,channel_slug:channel};let ins=await dbw.from('schedule_items').insert(payload).select();if(ins.error){note('Could not add schedule item: '+ins.error.message,true);return}note('Episode added to the schedule.');await loadSchedule()}
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');await loadEpisodes();await loadSchedule()};page.querySelector('#sched-add').onclick=addSchedule;
- };if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wait);else wait();
-})();
-</script>
+  const root=document.getElementById('status');
+  const text=document.getElementById('statusText');
+  const detail=document.getElementById('statusDetail');
+  const fail=message=>{
+    text.textContent='Admin Pro v4.8 could not start';
+    text.className='bad';
+    detail.textContent=String(message||'Unknown loading error').replace(/[<>]/g,'');
+    detail.className='small bad';
+    if(!document.getElementById('reloadAdmin')){
+      const b=document.createElement('button');
+      b.id='reloadAdmin';b.type='button';b.textContent='Reload Admin Pro';
+      b.onclick=()=>location.reload();root.querySelector('.box').appendChild(b);
+    }
+  };
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),20000);
+    const response=await fetch('./admin-v4.html?build=20260827-v4.8',{cache:'no-store',credentials:'same-origin',signal:controller.signal});
+    clearTimeout(timer);
+    if(!response.ok)throw new Error('Admin Pro core returned HTTP '+response.status);
+    let html=await response.text();
+    if(html.length<500)throw new Error('Admin Pro core document is incomplete');
 
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
-(()=>{const add=()=>{const aside=document.querySelector('aside'),main=document.querySelector('main');if(!aside||!main||!window.db){setTimeout(add,300);return}if(document.getElementById('page-backdeckcrew'))return;const nav=document.createElement('button');nav.className='nav';nav.dataset.page='backdeckcrew';nav.textContent='🎬 Back Deck Crew';aside.appendChild(nav);const page=document.createElement('section');page.id='page-backdeckcrew';page.className='page';page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>';main.appendChild(page);nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>'}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add()})();
+    /*
+      admin-v4.html is the single integration point for Schedule Studio,
+      Playlist Studio, channel routing, and the Supabase-backed admin UI.
+      The old wrapper injected duplicate schedule and Back Deck Crew pages,
+      which caused duplicate cards and conflicting schedule logic.
+    */
+    html=html.replace(/Admin Pro v4\.0/g,'Admin Pro v4.8');
+    html=html.replace(/admin-v4\.js\?build=[^"']+/g,'admin-v4.js?build=20260827-v4.8');
+    html=html.replace(/playlist-studio-schedule-picker\.js\?build=[^"']+/g,'playlist-studio-schedule-picker.js?build=20260827-v4.8');
+    html=html.replace(/schedule-studio\.js\?build=[^"']+/g,'schedule-studio.js?build=20260827-v4.8');
+    html=html.replace(/playlist-studio-episodes\.js\?build=[^"']+/g,'playlist-studio-episodes.js?build=20260827-v4.8');
+    html=html.replace(/admin-v3\.9-integrated\.js\?build=[^"']+/g,'admin-v3.9-integrated.js?build=20260827-v4.8');
+
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(error){
+    fail(error?.name==='AbortError'?'Timed out loading Admin Pro.':error?.message||error);
+  }
+})();
 </script>
 </body>
 </html>
