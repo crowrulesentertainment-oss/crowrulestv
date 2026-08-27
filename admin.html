@@ -26,8 +26,7 @@ button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273
   let h=await r.text();
   if(h.length<1000)throw new Error('Admin Pro source is incomplete');
   const publishableKey='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
-  const legacy=/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9[^'\"\\\s]*/g;
-  h=h.replace(legacy,publishableKey);
+  h=h.replace(/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9[^'\"\\\s]*/g,publishableKey);
   h=h.replaceAll('Admin Pro v6.3','Admin Pro v6.6');
   h=h.replaceAll('crowrules-admin-pro-v63','crowrules-admin-pro-v66');
   h=h.replaceAll("item_type:'live_event'","item_type:'live'");
@@ -43,8 +42,10 @@ button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273
     const channelId=$('schChannel')?.value,episodeId=$('schEpisode')?.value,start=$('schStart')?.value,end=$('schEnd')?.value;
     if(!channelId||!episodeId||!start)throw new Error('Select a channel, episode, and start time.');
     const {data:ep,error:ee}=await db.from('episodes').select('id,show_id,title,description,thumbnail_url,video_url,video_type,youtube_url,duration_seconds').eq('id',episodeId).maybeSingle();if(ee)throw ee;if(!ep)throw new Error('Episode not found.');
-    const payload={channel_id:channelId,show_id:ep.show_id||null,episode_id:ep.id,title:ep.title,description:ep.description||null,starts_at:new Date(start).toISOString(),ends_at:end?new Date(end).toISOString():null,item_type:'episode',status:'scheduled',is_active:true,schedule_source:'manual',duration_seconds:ep.duration_seconds||null,video_url:ep.video_url||null,video_type:ep.video_type||null,youtube_url:ep.youtube_url||null,thumbnail_url:ep.thumbnail_url||null,source_id:null,start_time:new Date(start).toISOString(),end_time:end?new Date(end).toISOString():null};
-    const {data:existing,error:fe}=await db.from('schedule_items').select('id').eq('channel_id',channelId).eq('episode_id',episodeId).eq('starts_at',payload.starts_at).maybeSingle();if(fe)throw fe;
+    const starts=new Date(start).toISOString(),ends=end?new Date(end).toISOString():null;
+    if(ends&&new Date(ends)<=new Date(starts))throw new Error('End time must be after start time.');
+    const payload={channel_id:channelId,show_id:ep.show_id||null,episode_id:ep.id,title:ep.title,description:ep.description||null,starts_at:starts,ends_at:ends,item_type:'episode',status:'scheduled',is_active:true,schedule_source:'manual',duration_seconds:ep.duration_seconds||null,video_url:ep.video_url||null,video_type:ep.video_type||null,youtube_url:ep.youtube_url||null,thumbnail_url:ep.thumbnail_url||null,source_id:null,start_time:starts,end_time:ends};
+    const {data:existing,error:fe}=await db.from('schedule_items').select('id').eq('channel_id',channelId).eq('episode_id',episodeId).eq('starts_at',starts).maybeSingle();if(fe)throw fe;
     const q=existing?.id?db.from('schedule_items').update(payload).eq('id',existing.id):db.from('schedule_items').insert(payload);const {error}=await q;if(error)throw error;alert('Episode scheduled successfully.');if(typeof loadSchedule==='function')await loadSchedule();
    }catch(e){showError('Schedule insert failed',e)}
   };
@@ -54,6 +55,7 @@ button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273
     if(!channelId||!eventId||!start)throw new Error('Select a channel, live event, and start time.');
     const {data:ev,error:ee}=await db.from('live_events').select('id,show_id,episode_id,title,description,thumbnail_url,youtube_url,scheduled_start,scheduled_end').eq('id',eventId).maybeSingle();if(ee)throw ee;if(!ev)throw new Error('Live event not found.');
     const starts=new Date(start).toISOString(),ends=end?new Date(end).toISOString():(ev.scheduled_end?new Date(ev.scheduled_end).toISOString():null);
+    if(ends&&new Date(ends)<=new Date(starts))throw new Error('End time must be after start time.');
     const payload={channel_id:channelId,show_id:ev.show_id||null,episode_id:ev.episode_id||null,title:ev.title,description:ev.description||null,starts_at:starts,ends_at:ends,item_type:'live',status:'scheduled',is_active:true,schedule_source:'live_event',duration_seconds:ends?Math.max(1,Math.round((new Date(ends)-new Date(starts))/1000)):null,video_url:null,video_type:'live',youtube_url:ev.youtube_url||null,thumbnail_url:ev.thumbnail_url||null,source_id:ev.id,start_time:starts,end_time:ends};
     const {data:existing,error:fe}=await db.from('schedule_items').select('id').eq('source_id',ev.id).eq('schedule_source','live_event').maybeSingle();if(fe)throw fe;
     const q=existing?.id?db.from('schedule_items').update(payload).eq('id',existing.id):db.from('schedule_items').insert(payload);const {error}=await q;if(error)throw error;
@@ -62,29 +64,21 @@ button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273
    }catch(e){showError('Live event schedule failed',e)}
   };
  };
-};wait();
+ wait();
 })();
 </script>`;
-  h=h.replace('
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
+  const backdeck=`<script>
 (()=>{
  const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
+  const aside=document.querySelector('aside'),main=document.querySelector('main');if(!aside||!main||document.getElementById('page-backdeckcrew'))return;
+  const nav=document.createElement('button');nav.className='nav';nav.dataset.page='backdeckcrew';nav.textContent='🎬 Back Deck Crew';aside.appendChild(nav);
+  const page=document.createElement('section');page.id='page-backdeckcrew';page.className='page';page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>';main.appendChild(page);
+  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');try{const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';}catch(e){document.getElementById('backdeck-settings').textContent=String(e?.message||e)}};
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
 })();
-</script>
-</body>',patch+'</body>');
+</script>`;
+  h=h.replace('</body>',patch+backdeck+'</body>');
   detail.textContent='Supabase configuration verified. Starting Admin Pro…';
   document.open();document.write(h);document.close();
  }catch(e){fail(e.name==='AbortError'?'Timed out loading Admin Pro.':e.message||e)}
