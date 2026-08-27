@@ -1,0 +1,73 @@
+name: Integrate CrowRules Core — PNWM
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pnwm.html'
+      - 'crowrules-core.js'
+      - '.github/workflows/integrate-crowrules-core-pnwm.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-pnwm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Safely inject crowrules-core.js into pnwm.html
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('pnwm.html')
+          text = p.read_text(encoding='utf-8')
+          marker = '<script src="./crowrules-core.js"></script>'
+
+          if marker in text:
+              print('crowrules-core.js is already integrated into pnwm.html')
+              raise SystemExit(0)
+
+          # Prefer inserting immediately before the first existing closing body tag.
+          # This preserves all existing PNWM markup and JavaScript and does not
+          # depend on the page's exact Supabase script formatting.
+          body_close = re.search(r'</body\\s*>', text, flags=re.IGNORECASE)
+          if not body_close:
+              raise SystemExit('No </body> tag found in pnwm.html; file was not modified.')
+
+          injection = '\n<script src="./crowrules-core.js"></script>\n'
+          text = text[:body_close.start()] + injection + text[body_close.start():]
+          p.write_text(text, encoding='utf-8')
+          print('Safely integrated crowrules-core.js into pnwm.html')
+          PY
+
+      - name: Verify integration
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('pnwm.html').read_text(encoding='utf-8')
+          marker = '<script src="./crowrules-core.js"></script>'
+          if text.count(marker) != 1:
+              raise SystemExit(f'Expected exactly one core script tag; found {text.count(marker)}')
+          print('Verification passed: exactly one crowrules-core.js script tag exists.')
+          PY
+
+      - name: Commit only the PNWM integration
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- pnwm.html; then
+            echo 'No PNWM change needed.'
+          else
+            git add pnwm.html
+            git commit -m 'Integrate crowrules-core.js into PNWM safely'
+            git push
+          fi
