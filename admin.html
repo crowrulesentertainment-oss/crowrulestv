@@ -4,65 +4,71 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>CrowRules Entertainment — Admin Pro v6.5</title>
+<title>CrowRules Entertainment — Admin Pro v6.6</title>
 <style>
 html,body{margin:0;width:100%;height:100%;background:#05070b;color:#fff;font:14px system-ui,sans-serif}
 #status{min-height:100vh;display:grid;place-items:center;text-align:center;padding:20px;box-sizing:border-box}
-.box{max-width:760px;width:100%}.small{color:#8996a8}.bad{color:#ff637b}.good{color:#35d58a}
+.box{max-width:760px;width:100%}.small{color:#8996a8}.bad{color:#ff637b}
 .spinner{width:28px;height:28px;margin:0 auto 14px;border:3px solid #273241;border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 button{margin-top:12px;padding:10px 14px;border-radius:9px;border:1px solid #273241;background:#151c27;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
-<div id="status"><div class="box"><div class="spinner"></div><h2>🐦‍⬛ CrowRules Entertainment</h2><p id="statusText">Loading Admin Pro v6.5…</p><p id="statusDetail" class="small">Connecting to the verified CrowRules Supabase control center.</p></div></div>
+<div id="status"><div class="box"><div class="spinner"></div><h2>🐦‍⬛ CrowRules Entertainment</h2><p id="statusText">Loading Admin Pro v6.6…</p><p id="statusDetail" class="small">Starting the CrowRules Supabase control center.</p></div></div>
 <script>
 (async()=>{
  const text=document.getElementById('statusText'),detail=document.getElementById('statusDetail');
- const fail=m=>{document.querySelector('.spinner')?.remove();text.textContent='Admin Pro v6.5 could not start';text.className='bad';detail.textContent=String(m).replace(/[<>]/g,'');detail.className='small bad';const b=document.createElement('button');b.textContent='Reload';b.onclick=()=>location.reload();document.querySelector('.box').appendChild(b)};
+ const fail=m=>{document.querySelector('.spinner')?.remove();text.textContent='Admin Pro v6.6 could not start';text.className='bad';detail.textContent=String(m).replace(/[<>]/g,'');detail.className='small bad';const b=document.createElement('button');b.textContent='Reload';b.onclick=()=>location.reload();document.querySelector('.box').appendChild(b)};
  try{
   const c=new AbortController();const timer=setTimeout(()=>c.abort(),20000);
-  const r=await fetch('./admin-v6.3.html?v=65',{cache:'no-store',signal:c.signal});clearTimeout(timer);
+  const r=await fetch('./admin-v6.3.html?v=66',{cache:'no-store',signal:c.signal});clearTimeout(timer);
   if(!r.ok)throw new Error('Admin Pro source returned HTTP '+r.status);
   let h=await r.text();
   if(h.length<1000)throw new Error('Admin Pro source is incomplete');
-
-  // Verified CrowRules Supabase project configuration.
-  // Publishable browser keys are safe to embed in a public frontend;
-  // service-role/secret keys must never be placed in this file.
-  const oldKeys=[
-   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIiwicmVmIjoienBhdXhkcXlzc3JhdHZ6bW9tb3pmIiwiaWF0IjoxNzg3NDIxNzI2LCJleHAiOjIxMDI5OTc3MjZ9.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA'
-  ];
   const publishableKey='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
-  oldKeys.forEach(k=>{h=h.split(k).join(publishableKey)});
-  h=h.replaceAll('Admin Pro v6.3','Admin Pro v6.5');
-  h=h.replaceAll('crowrules-admin-pro-v63','crowrules-admin-pro-v65');
+  const legacy=/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9[^'\"\\\s]*/g;
+  h=h.replace(legacy,publishableKey);
+  h=h.replaceAll('Admin Pro v6.3','Admin Pro v6.6');
+  h=h.replaceAll('crowrules-admin-pro-v63','crowrules-admin-pro-v66');
   h=h.replaceAll("item_type:'live_event'","item_type:'live'");
-  h=h.replaceAll('item_type = live_event','item_type = live');
-  h=h.replaceAll('item_type: \"live_event\"','item_type: \"live\"');
   h=h.replaceAll("item_type: 'live_event'","item_type: 'live'");
-
-  detail.textContent='Verified Supabase connection configured. Starting Admin Pro…';
+  h=h.replaceAll('item_type: \"live_event\"','item_type: \"live\"');
+  h=h.replaceAll('item_type = live_event','item_type = live');
+  const patch=`<script>
+(()=>{
+ const wait=()=>{
+  if(typeof db==='undefined'||typeof $==='undefined'){setTimeout(wait,100);return}
+  window.scheduleEpisode=async function(){
+   try{
+    const channelId=$('schChannel')?.value,episodeId=$('schEpisode')?.value,start=$('schStart')?.value,end=$('schEnd')?.value;
+    if(!channelId||!episodeId||!start)throw new Error('Select a channel, episode, and start time.');
+    const {data:ep,error:ee}=await db.from('episodes').select('id,show_id,title,description,thumbnail_url,video_url,video_type,youtube_url,duration_seconds').eq('id',episodeId).maybeSingle();if(ee)throw ee;if(!ep)throw new Error('Episode not found.');
+    const payload={channel_id:channelId,show_id:ep.show_id||null,episode_id:ep.id,title:ep.title,description:ep.description||null,starts_at:new Date(start).toISOString(),ends_at:end?new Date(end).toISOString():null,item_type:'episode',status:'scheduled',is_active:true,schedule_source:'manual',duration_seconds:ep.duration_seconds||null,video_url:ep.video_url||null,video_type:ep.video_type||null,youtube_url:ep.youtube_url||null,thumbnail_url:ep.thumbnail_url||null,source_id:null,start_time:new Date(start).toISOString(),end_time:end?new Date(end).toISOString():null};
+    const {data:existing,error:fe}=await db.from('schedule_items').select('id').eq('channel_id',channelId).eq('episode_id',episodeId).eq('starts_at',payload.starts_at).maybeSingle();if(fe)throw fe;
+    const q=existing?.id?db.from('schedule_items').update(payload).eq('id',existing.id):db.from('schedule_items').insert(payload);const {error}=await q;if(error)throw error;alert('Episode scheduled successfully.');if(typeof loadSchedule==='function')await loadSchedule();
+   }catch(e){showError('Schedule insert failed',e)}
+  };
+  window.scheduleLiveEvent=async function(){
+   try{
+    const channelId=$('liveChannel')?.value,eventId=$('liveEvent')?.value,start=$('liveStart')?.value,end=$('liveEnd')?.value;
+    if(!channelId||!eventId||!start)throw new Error('Select a channel, live event, and start time.');
+    const {data:ev,error:ee}=await db.from('live_events').select('id,show_id,episode_id,title,description,thumbnail_url,youtube_url,scheduled_start,scheduled_end').eq('id',eventId).maybeSingle();if(ee)throw ee;if(!ev)throw new Error('Live event not found.');
+    const starts=new Date(start).toISOString(),ends=end?new Date(end).toISOString():(ev.scheduled_end?new Date(ev.scheduled_end).toISOString():null);
+    const payload={channel_id:channelId,show_id:ev.show_id||null,episode_id:ev.episode_id||null,title:ev.title,description:ev.description||null,starts_at:starts,ends_at:ends,item_type:'live',status:'scheduled',is_active:true,schedule_source:'live_event',duration_seconds:ends?Math.max(1,Math.round((new Date(ends)-new Date(starts))/1000)):null,video_url:null,video_type:'live',youtube_url:ev.youtube_url||null,thumbnail_url:ev.thumbnail_url||null,source_id:ev.id,start_time:starts,end_time:ends};
+    const {data:existing,error:fe}=await db.from('schedule_items').select('id').eq('source_id',ev.id).eq('schedule_source','live_event').maybeSingle();if(fe)throw fe;
+    const q=existing?.id?db.from('schedule_items').update(payload).eq('id',existing.id):db.from('schedule_items').insert(payload);const {error}=await q;if(error)throw error;
+    const {error:ue}=await db.from('live_events').update({channel_id:channelId,starts_at:starts,ends_at:ends}).eq('id',ev.id);if(ue)console.warn('Live event metadata update:',ue);
+    alert('Live event scheduled successfully.');if(typeof loadSchedule==='function')await loadSchedule();
+   }catch(e){showError('Live event schedule failed',e)}
+  };
+ };
+};wait();
+})();
+</script>`;
+  h=h.replace('</body>',patch+'</body>');
+  detail.textContent='Supabase configuration verified. Starting Admin Pro…';
   document.open();document.write(h);document.close();
  }catch(e){fail(e.name==='AbortError'?'Timed out loading Admin Pro.':e.message||e)}
-})();
-</script>
-
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
 })();
 </script>
 </body>
