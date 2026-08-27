@@ -1,6 +1,6 @@
 /* CrowRules YouTube Live bridge — Tacoma Nights single-stream + matching chat */
 (function(){
-  const ENDPOINT='https://zauxdqyssratvzmomozf.supabase.co/functions/v1/youtube-live';
+  const ENDPOINT='https://zauxdqyssratvzmomozf.supabase.co/functions/v1/youtube-live-v3';
   const SITE='tacoma-nights';
   const CHAT_DOMAIN='crowrulesentertainment-oss.github.io';
   const target=()=>document.querySelector('[data-youtube-live-player],#youtube-live-player,#tacoma-nights-live-player');
