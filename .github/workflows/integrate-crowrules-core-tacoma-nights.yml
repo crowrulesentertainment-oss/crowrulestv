@@ -1,4 +1,4 @@
-name: Integrate CrowRules Core — Tacoma Nights
+name: Integrate CrowRules Core + YouTube Live — Tacoma Nights
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'tacoma-nights.html'
       - 'crowrules-core.js'
+      - 'youtube-live.js'
       - '.github/workflows/integrate-crowrules-core-tacoma-nights.yml'
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Safely inject ./crowrules-core.js
+      - name: Safely inject CrowRules Core and YouTube Live bridge
         shell: bash
         run: |
           python3 - <<'PY'
@@ -28,27 +29,31 @@ jobs:
 
           p = Path('tacoma-nights.html')
           text = p.read_text(encoding='utf-8').replace('\r\n', '\n')
-          marker = '<script src="./crowrules-core.js"></script>'
+          core = '<script src="./crowrules-core.js"></script>'
+          live = '<script src="./youtube-live.js"></script>'
 
-          # Normalize/remove any existing core tags so only one remains.
-          text = re.sub(
-              r'\s*<script\s+src=["\'](?:\./)?crowrules-core\.js["\']\s*></script>\s*',
-              '\n', text, flags=re.IGNORECASE
-          )
+          for marker, pattern in [
+              (core, r'\s*<script\s+src=["\'](?:\./)?crowrules-core\.js["\']\s*></script>\s*'),
+              (live, r'\s*<script\s+src=["\'](?:\./)?youtube-live\.js["\']\s*></script>\s*')
+          ]:
+              text = re.sub(pattern, '\n', text, flags=re.IGNORECASE)
 
           match = re.search(r'</body\s*>', text, flags=re.IGNORECASE)
           if not match:
               raise SystemExit('No </body> tag found; Tacoma Nights was not modified.')
 
-          text = text[:match.start()] + '\n' + marker + '\n' + text[match.start():]
+          injection = '\n' + core + '\n' + live + '\n'
+          text = text[:match.start()] + injection + text[match.start():]
           p.write_text(text, encoding='utf-8')
 
           verify = p.read_text(encoding='utf-8')
-          if verify.count(marker) != 1:
+          if verify.count(core) != 1:
               raise SystemExit('Verification failed: expected exactly one CrowRules Core script.')
+          if verify.count(live) != 1:
+              raise SystemExit('Verification failed: expected exactly one YouTube Live bridge script.')
           if '</html>' not in verify.lower():
               raise SystemExit('Verification failed: closing </html> tag is missing.')
-          print('Tacoma Nights CrowRules Core integration verified.')
+          print('Tacoma Nights Core + YouTube Live integration verified.')
           PY
 
       - name: Commit only Tacoma Nights integration
@@ -57,10 +62,10 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           if git diff --quiet -- tacoma-nights.html; then
-            echo 'Tacoma Nights is already integrated.'
+            echo 'Tacoma Nights integration is already current.'
           else
             git add tacoma-nights.html
             git diff --cached --check
-            git commit -m 'Integrate crowrules-core.js into Tacoma Nights'
+            git commit -m 'Add YouTube Live API bridge to Tacoma Nights'
             git push
           fi
