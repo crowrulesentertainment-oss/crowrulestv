@@ -26,33 +26,41 @@ jobs:
           p=Path('admin.html')
           text=p.read_text(encoding='utf-8')
           original=text
-          # Add a navigation item once.
           if 'data-page="awards"' not in text:
               anchor='<button class="nav" data-page="episodes">'
               if anchor not in text: raise SystemExit('Admin navigation anchor not found; no changes made.')
               text=text.replace(anchor,'<button class="nav" data-page="awards">🏆 Awards</button>'+anchor,1)
-          # Add a page container once.
           if 'id="page-awards"' not in text:
               anchor='<section id="page-episodes"'
               if anchor not in text: raise SystemExit('Admin page anchor not found; no changes made.')
-              text=text.replace(anchor,'<section id="page-awards" class="page"><h1>CrowRules Awards</h1><p class="muted">Manage seasons, categories, nominees, votes and winners.</p><div id="table-spectrum_awards_seasons"></div><div id="table-spectrum_awards_categories"></div><div id="table-spectrum_awards_nominees"></div><div id="table-spectrum_awards_votes"></div><div id="table-spectrum_awards_winners"></div></section>'+anchor,1)
-          # Extend the existing table list once.
+              page='<section id="page-awards" class="page"><h1>CrowRules Awards</h1><p class="muted">Manage seasons, categories, nominees, votes and winners.</p><div id="table-spectrum_awards_seasons"></div><div id="table-spectrum_awards_categories"></div><div id="table-spectrum_awards_nominees"></div><div id="table-spectrum_awards_votes"></div><div id="table-spectrum_awards_winners"></div></section>'
+              text=text.replace(anchor,page+anchor,1)
           if "'spectrum_awards_seasons'" not in text:
               text=text.replace("'member_profiles']","'member_profiles','spectrum_awards_seasons','spectrum_awards_categories','spectrum_awards_nominees','spectrum_awards_votes','spectrum_awards_winners']",1)
-          # Extend column map once.
           if "spectrum_awards_seasons:" not in text:
+              # loadTable() uses a table-specific column map; add all existing Awards columns.
+              marker="member_profiles:'id,display_name,username,membership_tier,is_active'"
+              replacement=marker+",spectrum_awards_seasons:'id,name,year,description,status,ceremony_date,nominations_open_at,nominations_close_at,voting_open_at,voting_close_at,published',spectrum_awards_categories:'id,season_id,name,slug,description,sort_order,voting_enabled,published,award_group',spectrum_awards_nominees:'id,category_id,nominee_name,nominee_type,description,image_url,website_url,youtube_url,published,winner,sort_order',spectrum_awards_votes:'id,nominee_id,voter_id,voter_email,ip_hash,created_at',spectrum_awards_winners:'id,category_id,nominee_id,announced_at,published'"
+              if marker not in text: raise SystemExit('Admin table column map anchor not found; no changes made.')
+              text=text.replace(marker,replacement,1)
+          if "const map={awards:" not in text:
               anchor="const map={episodes:'episodes'"
               if anchor not in text: raise SystemExit('Admin map anchor not found; no changes made.')
               text=text.replace(anchor,"const map={awards:'spectrum_awards_seasons',episodes:'episodes'",1)
-          # Make awards page load all five tables without changing existing pages.
           if "b.dataset.page==='awards'" not in text:
               anchor="if(b.dataset.page==='health')await runHealth()"
               if anchor not in text: raise SystemExit('Admin navigation handler anchor not found; no changes made.')
               inject="if(b.dataset.page==='awards'){await loadTable('spectrum_awards_seasons');await loadTable('spectrum_awards_categories');await loadTable('spectrum_awards_nominees');await loadTable('spectrum_awards_votes');await loadTable('spectrum_awards_winners')}"
               text=text.replace(anchor,anchor+';'+inject,1)
           p.write_text(text,encoding='utf-8')
-          if text==original: print('Admin Pro already contains Awards integration.')
           PY
+      - name: Verify Admin Pro Awards integration
+        run: |
+          grep -q 'data-page="awards"' admin.html
+          grep -q 'spectrum_awards_seasons' admin.html
+          grep -q 'spectrum_awards_votes' admin.html
+          grep -q 'spectrum_awards_winners' admin.html
+          echo 'Admin Pro Awards integration verified.'
       - name: Commit only Admin Pro Awards integration
         run: |
           git config user.name 'github-actions[bot]'
