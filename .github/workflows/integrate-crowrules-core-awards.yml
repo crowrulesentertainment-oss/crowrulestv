@@ -1,0 +1,40 @@
+name: Integrate CrowRules Core — CrowRules Awards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'awards.html'
+      - 'crowrules-core.js'
+      - '.github/workflows/integrate-crowrules-core-awards.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safely integrate CrowRules Core
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('awards.html')
+          text=p.read_text(encoding='utf-8').replace('\r\n','\n')
+          marker='<script src="./crowrules-core.js"></script>'
+          text=re.sub(r'\s*<script\s+src=["\']\./crowrules-core\.js["\']\s*></script>\s*','\n',text,flags=re.I)
+          m=re.search(r'</body\s*>',text,flags=re.I)
+          if not m: raise SystemExit('No </body> tag found; awards.html was not modified.')
+          text=text[:m.start()]+'\n'+marker+'\n'+text[m.start():]
+          p.write_text(text,encoding='utf-8')
+          if p.read_text(encoding='utf-8').count(marker)!=1: raise SystemExit('Core integration verification failed.')
+          PY
+      - name: Commit only Awards page change
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- awards.html; then echo 'Awards already integrated.'; else git add awards.html && git diff --cached --check && git commit -m 'Integrate CrowRules Core into CrowRules Awards' && git push; fi
