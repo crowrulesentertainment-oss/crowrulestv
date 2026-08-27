@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowRules TV — Live</title>
+<title>CrowRules TV v1.0</title>
 <meta name="description" content="CrowRules TV — independent 24/7 streaming television.">
 <meta name="theme-color" content="#05070b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,6 +55,9 @@ main{max-width:1500px;margin:auto;padding:22px}
 footer{max-width:1500px;margin:30px auto;padding:25px 22px;color:#667285;font-size:12px;border-top:1px solid var(--line)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modalbox{width:min(460px,100%);background:#0c121b;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}.modalbox h2{font-family:Orbitron;font-size:18px}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:11px;color:#9aa6b5}.field input{background:#070b11;border:1px solid var(--line);color:#fff;padding:12px;border-radius:10px}.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}.primary{background:var(--accent);color:#05070b;border:0;border-radius:10px;padding:11px 15px;font-weight:800}.secondary{background:#121925;color:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 15px}
 .toast{position:fixed;right:18px;bottom:18px;background:#101721;color:#fff;border:1px solid var(--line);padding:12px 15px;border-radius:11px;z-index:200;display:none;font-size:12px}.toast.show{display:block}
+
+.rankGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.rankHead{font-family:Orbitron;font-size:12px;color:var(--accent);letter-spacing:.08em;margin:2px 0 10px}.rankList{display:grid;gap:8px}.rankItem{display:grid;grid-template-columns:32px 42px 1fr auto;align-items:center;gap:9px;border:1px solid var(--line);background:#0a0f17;border-radius:12px;padding:9px}.rankNum{font-family:Orbitron;color:#657286;font-size:12px;text-align:center}.rankImg{width:42px;height:42px;border-radius:9px;object-fit:cover;background:#151c28}.rankName{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rankSub{font-size:9px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rankValue{font-family:Orbitron;font-size:10px;color:#aeb9c7;text-align:right;white-space:nowrap}
+@media(max-width:1100px){.rankGrid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.rankGrid{grid-template-columns:1fr}}
 @media(max-width:1050px){.hero{grid-template-columns:1fr}.cards{grid-template-columns:repeat(3,1fr)}.navlinks{display:none}}
 @media(max-width:700px){main{padding:12px}.nav{padding:0 13px;height:64px}.brand span{display:none}.cards{grid-template-columns:repeat(2,1fr)}.guideRow{grid-template-columns:72px 1fr}.tag{display:none}.playerBar{align-items:flex-start}.controls{display:none}}
 @media(max-width:430px){.cards{grid-template-columns:1fr}.section{padding:14px}}
@@ -68,7 +71,7 @@ footer{max-width:1500px;margin:30px auto;padding:25px 22px;color:#667285;font-si
       <button onclick="scrollToId('live')">Live TV</button>
       <button onclick="scrollToId('guide')">TV Guide</button>
       <button onclick="scrollToId('ondemand')">On Demand</button>
-      <button onclick="scrollToId('events')">Live Events</button>
+      <button onclick="scrollToId('events')">Live Events</button><button onclick="scrollToId('rankings')">Top 10</button>
     </div>
     <button class="member" id="memberBtn" onclick="openAuth()">Member Login</button>
   </nav>
@@ -124,6 +127,17 @@ footer{max-width:1500px;margin:30px auto;padding:25px 22px;color:#667285;font-si
     <div class="sectionHead"><h2 class="sectionTitle">LIVE EVENTS</h2><div class="sectionMeta">Upcoming & active events</div></div>
     <div class="cards" id="eventsList"><div class="empty">Loading live events…</div></div>
   </section>
+
+  <section class="section rankings" id="rankings">
+    <div class="sectionHead"><h2 class="sectionTitle">CROWRULES TV TOP 10</h2><div class="sectionMeta">Live rankings from Admin Pro / Supabase</div></div>
+    <div class="rankGrid">
+      <div><div class="rankHead">TOP SHOWS</div><div id="topShows" class="rankList"><div class="empty">Loading…</div></div></div>
+      <div><div class="rankHead">TOP EPISODES</div><div id="topEpisodes" class="rankList"><div class="empty">Loading…</div></div></div>
+      <div><div class="rankHead">TOP CHANNELS</div><div id="topChannels" class="rankList"><div class="empty">Loading…</div></div></div>
+      <div><div class="rankHead">TOP MEMBERS</div><div id="topMembers" class="rankList"><div class="empty">Loading…</div></div></div>
+    </div>
+  </section>
+
 </main>
 
 <footer>
@@ -337,8 +351,30 @@ async function updateMember(){
 }
 sb.auth.onAuthStateChange(()=>updateMember());
 
+
+async function loadRankings(){
+  const [shows,eps,members,channels]=await Promise.all([
+    sb.from("top_shows").select("*").order("total_views",{ascending:false}).limit(10),
+    sb.from("top_episodes").select("*").order("views",{ascending:false}).limit(10),
+    sb.from("top_members").select("*").order("rank",{ascending:true}).limit(10),
+    sb.from("top_channels").select("*").order("playlist_items",{ascending:false}).order("schedule_items",{ascending:false}).limit(10)
+  ]);
+  renderRanking("topShows",shows.data||[],x=>[x.title,x.category||"Show",Number(x.total_views||0).toLocaleString()+" views",x.thumbnail_url]);
+  renderRanking("topEpisodes",eps.data||[],x=>[x.title,x.show_title||"Episode",Number(x.views||0).toLocaleString()+" views",x.thumbnail_url]);
+  renderRanking("topChannels",channels.data||[],x=>[x.name,x.channel_number!=null?"CH "+x.channel_number:"Channel",Number(x.playlist_items||0).toLocaleString()+" programs",x.logo_url]);
+  renderRanking("topMembers",members.data||[],x=>[x.display_name||"Member",x.membership_tier||"Member",Number(x.lifetime_points||x.points||0).toLocaleString()+" pts",x.avatar_url]);
+}
+function renderRanking(id,data,map){
+  const el=$(id);
+  if(!data.length){el.innerHTML='<div class="empty">No ranking data yet.</div>';return}
+  el.innerHTML=data.map((x,i)=>{const [name,sub,val,img]=map(x);return `<div class="rankItem">
+    <div class="rankNum">${i+1}</div><img class="rankImg" src="${esc(img||"")}" onerror="this.style.visibility='hidden'">
+    <div><div class="rankName">${esc(name)}</div><div class="rankSub">${esc(sub)}</div></div><div class="rankValue">${esc(val)}</div>
+  </div>`}).join("");
+}
+
 async function refresh(){
-  await Promise.all([loadOnDemand(),loadEvents()]);
+  await Promise.all([loadOnDemand(),loadEvents(),loadRankings()]);
   if(state.channel)await Promise.all([loadNowPlaying(),loadGuide()]);
 }
 async function boot(){
@@ -349,7 +385,5 @@ async function boot(){
 }
 boot();
 </script>
-
-<script src="./crowrules-core.js"></script>
 </body>
 </html>
