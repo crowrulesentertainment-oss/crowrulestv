@@ -1,0 +1,134 @@
+name: One-time fix duplicate cards in tv.html
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove duplicate cards from tv.html
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('tv.html')
+          s = p.read_text(encoding='utf-8')
+          if 'function uniqueCards(items,type)' in s:
+              print('Duplicate-card protection already present.')
+              Path('.github/workflows/fix-duplicate-cards.yml').unlink(missing_ok=True)
+              raise SystemExit(0)
+
+          marker = '''function renderCards(container,items,type){'''
+          if marker not in s:
+              raise SystemExit('renderCards marker not found')
+
+          dedupe = '''function uniqueCards(items,type){
+
+  const seen = new Set();
+
+  return (items || []).filter(item => {
+    let key;
+
+    if(type === "channel"){
+      key = [
+        "channel",
+        String(item?.name || "").trim().toLowerCase(),
+        String(item?.channel_number || "").trim()
+      ].join("|");
+    }else if(type === "show"){
+      key = [
+        "show",
+        String(item?.title || "").trim().toLowerCase()
+      ].join("|");
+    }else{
+      key = [
+        "episode",
+        String(item?.show_id || item?.shows?.id || "").trim(),
+        String(item?.season_number || "").trim(),
+        String(item?.episode_number || "").trim(),
+        String(item?.title || "").trim().toLowerCase()
+      ].join("|");
+    }
+
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+'''
+          s = s.replace(marker, dedupe + marker, 1)
+          s = s.replace(
+              'function renderCards(container,items,type){\n\n  if(!container) return;',
+              'function renderCards(container,items,type){\n\n  items = uniqueCards(items,type);\n\n  if(!container) return;',
+              1
+          )
+
+          schedule_marker = '''  state.schedules = (result.data || [])
+    .filter(item => {'''
+          if schedule_marker not in s:
+              raise SystemExit('schedule marker not found')
+          s = s.replace(
+              schedule_marker,
+              '''  const scheduleSeen = new Set();
+
+  state.schedules = (result.data || [])
+    .filter(item => {''',
+              1
+          )
+
+          schedule_filter = '''    .filter(item => {
+      const start = new Date(item.starts_at).getTime();
+      const end = new Date(item.ends_at).getTime();
+      return end >= from && start <= to;
+    })
+    .sort('''
+          if schedule_filter not in s:
+              raise SystemExit('schedule filter marker not found')
+          s = s.replace(
+              schedule_filter,
+              '''    .filter(item => {
+      const start = new Date(item.starts_at).getTime();
+      const end = new Date(item.ends_at).getTime();
+      return end >= from && start <= to;
+    })
+    .filter(item => {
+      const key = [
+        String(item?.channel_id || ""),
+        String(item?.episode_id || item?.episode?.id || ""),
+        String(item?.show_id || item?.show?.id || ""),
+        String(item?.starts_at || ""),
+        String(item?.ends_at || ""),
+        String(item?.title || "").trim().toLowerCase()
+      ].join("|");
+
+      if(scheduleSeen.has(key)) return false;
+      scheduleSeen.add(key);
+      return true;
+    })
+    .sort(''',
+              1
+          )
+
+          p.write_text(s, encoding='utf-8')
+          Path('.github/workflows/fix-duplicate-cards.yml').unlink(missing_ok=True)
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tv.html .github/workflows/fix-duplicate-cards.yml
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Fix duplicate cards in CrowRules TV"
+          git push
