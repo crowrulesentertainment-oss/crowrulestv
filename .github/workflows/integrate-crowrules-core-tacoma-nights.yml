@@ -1,0 +1,66 @@
+name: Integrate CrowRules Core — Tacoma Nights
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tacoma-nights.html'
+      - 'crowrules-core.js'
+      - '.github/workflows/integrate-crowrules-core-tacoma-nights.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Safely inject ./crowrules-core.js
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('tacoma-nights.html')
+          text = p.read_text(encoding='utf-8').replace('\r\n', '\n')
+          marker = '<script src="./crowrules-core.js"></script>'
+
+          # Normalize/remove any existing core tags so only one remains.
+          text = re.sub(
+              r'\s*<script\s+src=["\'](?:\./)?crowrules-core\.js["\']\s*></script>\s*',
+              '\n', text, flags=re.IGNORECASE
+          )
+
+          match = re.search(r'</body\s*>', text, flags=re.IGNORECASE)
+          if not match:
+              raise SystemExit('No </body> tag found; Tacoma Nights was not modified.')
+
+          text = text[:match.start()] + '\n' + marker + '\n' + text[match.start():]
+          p.write_text(text, encoding='utf-8')
+
+          verify = p.read_text(encoding='utf-8')
+          if verify.count(marker) != 1:
+              raise SystemExit('Verification failed: expected exactly one CrowRules Core script.')
+          if '</html>' not in verify.lower():
+              raise SystemExit('Verification failed: closing </html> tag is missing.')
+          print('Tacoma Nights CrowRules Core integration verified.')
+          PY
+
+      - name: Commit only Tacoma Nights integration
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- tacoma-nights.html; then
+            echo 'Tacoma Nights is already integrated.'
+          else
+            git add tacoma-nights.html
+            git diff --cached --check
+            git commit -m 'Integrate crowrules-core.js into Tacoma Nights'
+            git push
+          fi
