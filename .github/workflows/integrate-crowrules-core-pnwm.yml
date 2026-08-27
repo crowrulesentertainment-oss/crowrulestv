@@ -30,9 +30,9 @@ jobs:
           text = p.read_text(encoding='utf-8')
           marker = '<script src="./crowrules-core.js"></script>'
 
-          if marker in text:
-              print('crowrules-core.js is already integrated into Pacific Northwest Mothers')
-              raise SystemExit(0)
+          # Remove duplicate core tags if an earlier attempt inserted more than one.
+          text = text.replace('\r\n', '\n')
+          text = re.sub(r'\s*<script\s+src=["\']\./crowrules-core\.js["\']\s*></script>\s*', '\n', text, flags=re.IGNORECASE)
 
           body_close = re.search(r'</body\s*>', text, flags=re.IGNORECASE)
           if not body_close:
@@ -41,10 +41,10 @@ jobs:
           injection = '\n<script src="./crowrules-core.js"></script>\n'
           text = text[:body_close.start()] + injection + text[body_close.start():]
           p.write_text(text, encoding='utf-8')
-          print('Safely integrated crowrules-core.js into Pacific Northwest Mothers')
+          print('Integrated exactly one crowrules-core.js tag into Pacific Northwest Mothers')
           PY
 
-      - name: Verify integration
+      - name: Verify integration and preserve page
         shell: bash
         run: |
           python3 - <<'PY'
@@ -53,19 +53,21 @@ jobs:
           marker = '<script src="./crowrules-core.js"></script>'
           if text.count(marker) != 1:
               raise SystemExit(f'Expected exactly one core script tag; found {text.count(marker)}')
-          print('Verification passed: exactly one crowrules-core.js script tag exists.')
+          if '</html>' not in text.lower():
+              raise SystemExit('Verification failed: closing HTML tag missing.')
+          print('Verification passed: exactly one core script and valid closing HTML remain.')
           PY
 
-      - name: Commit only the PNWM integration
+      - name: Commit only PNWM if changed
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           if git diff --quiet -- pnwm.html; then
-            echo 'No PNWM change needed.'
+            echo 'PNWM already integrated; nothing to commit.'
           else
             git add pnwm.html
             git diff --cached --check
-            git commit -m 'Integrate crowrules-core.js into Pacific Northwest Mothers safely'
+            git commit -m 'Update Pacific Northwest Mothers with CrowRules Core integration'
             git push
           fi
