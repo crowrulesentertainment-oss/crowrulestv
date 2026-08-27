@@ -1,0 +1,73 @@
+name: Fix duplicate cards in tv.html
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tv.html')
+          s=p.read_text(encoding='utf-8')
+          if 'function uniqueCards(items,type)' not in s:
+              marker='function renderCards(container,items,type){'
+              dedupe='''function uniqueCards(items,type){
+  const seen=new Set();
+  return (items||[]).filter(item=>{
+    const key=type==="channel"
+      ? ["channel",String(item?.name||"").trim().toLowerCase(),String(item?.channel_number||"").trim()].join("|")
+      : type==="show"
+      ? ["show",String(item?.title||"").trim().toLowerCase()].join("|")
+      : ["episode",String(item?.show_id||item?.shows?.id||"").trim(),String(item?.season_number||"").trim(),String(item?.episode_number||"").trim(),String(item?.title||"").trim().toLowerCase()].join("|");
+    if(seen.has(key))return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+'''
+              if marker not in s: raise SystemExit('renderCards marker not found')
+              s=s.replace(marker,dedupe+marker,1)
+              s=s.replace(marker+'\n\n  if(!container) return;',marker+'\n\n  items=uniqueCards(items,type);\n\n  if(!container) return;',1)
+          if 'const scheduleSeen=new Set();' not in s:
+              marker='  state.schedules = (result.data || [])\n    .filter(item => {'
+              if marker not in s: raise SystemExit('schedule marker not found')
+              s=s.replace(marker,'  const scheduleSeen=new Set();\n\n'+marker,1)
+              marker2='''    .filter(item => {
+      const start = new Date(item.starts_at).getTime();
+      const end = new Date(item.ends_at).getTime();
+      return end >= from && start <= to;
+    })
+    .sort('''
+              insert='''    .filter(item => {
+      const start = new Date(item.starts_at).getTime();
+      const end = new Date(item.ends_at).getTime();
+      return end >= from && start <= to;
+    })
+    .filter(item => {
+      const key=[String(item?.channel_id||""),String(item?.episode_id||item?.episode?.id||""),String(item?.show_id||item?.show?.id||""),String(item?.starts_at||""),String(item?.ends_at||""),String(item?.title||"").trim().toLowerCase()].join("|");
+      if(scheduleSeen.has(key))return false;
+      scheduleSeen.add(key);
+      return true;
+    })
+    .sort('''
+              if marker2 not in s: raise SystemExit('schedule filter marker not found')
+              s=s.replace(marker2,insert,1)
+          p.write_text(s,encoding='utf-8')
+          print('patched')
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          rm -f .github/workflows/fix-duplicate-cards.yml .github/workflows/fix-duplicate-cards-v2.yml
+          git add tv.html .github/workflows
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Fix duplicate cards in CrowRules TV"
+          git push
