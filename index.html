@@ -830,6 +830,186 @@ section{
 }
 
 
+
+/* =========================================================
+   IN MEMORIAM — YEAR SELECTOR + HORIZONTAL RAIL
+========================================================= */
+
+.memorial-controls{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    width:min(100%,760px);
+}
+
+.memorial-year-select{
+    min-width:170px;
+    height:48px;
+    padding:0 42px 0 16px;
+    border:1px solid var(--line);
+    border-radius:11px;
+    outline:none;
+    background:#0e0e13;
+    color:#fff;
+    font-family:Orbitron,sans-serif;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:1px;
+    appearance:none;
+    cursor:pointer;
+    background-image:
+        linear-gradient(45deg,transparent 50%,#8b8b96 50%),
+        linear-gradient(135deg,#8b8b96 50%,transparent 50%);
+    background-position:
+        calc(100% - 18px) 20px,
+        calc(100% - 13px) 20px;
+    background-size:5px 5px,5px 5px;
+    background-repeat:no-repeat;
+}
+
+.memorial-year-select:focus{
+    border-color:var(--line2);
+}
+
+.memorial-year-select option{
+    background:#0e0e13;
+    color:#fff;
+}
+
+.memorial-year-view{
+    margin-top:5px;
+}
+
+.memorial-year-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:18px;
+    padding:0 2px;
+}
+
+.memorial-year-title{
+    font-family:Orbitron,sans-serif;
+    font-size:19px;
+    line-height:1.2;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+}
+
+.memorial-year-subtitle{
+    color:#6f6f7a;
+    font-size:10px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
+
+.memorial-rail-wrap{
+    position:relative;
+    overflow:hidden;
+    border:1px solid var(--line);
+    border-radius:20px;
+    background:linear-gradient(
+        145deg,
+        rgba(255,255,255,.035),
+        rgba(255,255,255,.008)
+    );
+    padding:20px;
+}
+
+.memorial-grid{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:18px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:2px 2px 14px;
+    scroll-snap-type:x proximity;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(255,255,255,.24) transparent;
+}
+
+.memorial-grid::-webkit-scrollbar{
+    height:8px;
+}
+
+.memorial-grid::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.memorial-grid::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.22);
+    border-radius:999px;
+}
+
+.memorial-card{
+    flex:0 0 285px;
+    width:285px;
+    scroll-snap-align:start;
+}
+
+.memorial-scroll-hint{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-top:11px;
+    color:#62626d;
+    font-size:9px;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+}
+
+.memorial-scroll-hint span:last-child{
+    color:#858590;
+}
+
+@media(max-width:800px){
+    .memorial-controls{
+        width:100%;
+    }
+
+    .memorial-year-select{
+        flex:1 1 180px;
+    }
+
+    .memorial-rail-wrap{
+        padding:14px;
+    }
+
+    .memorial-card{
+        flex-basis:270px;
+        width:270px;
+    }
+}
+
+@media(max-width:550px){
+    .memorial-controls{
+        display:grid;
+        grid-template-columns:1fr;
+    }
+
+    .memorial-year-select{
+        width:100%;
+    }
+
+    .memorial-year-header{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:6px;
+    }
+
+    .memorial-card{
+        flex-basis:245px;
+        width:245px;
+    }
+}
+
+
 /* =========================================================
    ABOUT
 ========================================================= */
@@ -1852,12 +2032,24 @@ lives and work left an impact.
 
 <div class="memorial-toolbar">
 
+<div class="memorial-controls">
+
 <input
 type="search"
 id="memorialSearch"
 class="memorial-search"
 placeholder="Search the memorial archive..."
-autocomplete="off">
+autocomplete="off"
+aria-label="Search the In Memoriam archive">
+
+<select
+id="memorialYearSelect"
+class="memorial-year-select"
+aria-label="Select memorial year">
+<option value="">ALL YEARS</option>
+</select>
+
+</div>
 
 <div class="memorial-count">
 
@@ -2673,8 +2865,13 @@ async function loadMemorial(){
             memorialRecords.length;
 
 
-        renderMemorialByDay(
+        populateMemorialYears(
             memorialRecords
+        );
+
+        renderMemorialByYear(
+            memorialRecords,
+            ""
         );
 
 
@@ -2739,77 +2936,45 @@ async function loadMemorial(){
 
 
 /* =========================================================
-   GROUP RECORDS BY EXACT DAY OF DEATH
+   GROUP RECORDS BY YEAR
 ========================================================= */
 
-function groupMemorialsByDay(
-    records
-){
+function memorialYear(value){
 
-    const groups =
-        new Map();
+    const day = deathDay(value);
 
+    return day
+        ? day.slice(0,4)
+        : "";
 
-    records.forEach(
-        record => {
-
-            const day =
-                deathDay(
-                    record.date_of_death
-                );
+}
 
 
-            const key =
-                day ||
-                "UNKNOWN";
+function groupMemorialsByYear(records){
 
+    const groups = new Map();
 
-            if(
-                !groups.has(key)
-            ){
+    records.forEach(record => {
 
-                groups.set(
-                    key,
-                    []
-                );
+        const year =
+            memorialYear(record.date_of_death) ||
+            "UNKNOWN";
 
-            }
-
-
-            groups
-                .get(key)
-                .push(record);
-
+        if(!groups.has(year)){
+            groups.set(year,[]);
         }
-    );
 
+        groups.get(year).push(record);
 
-    /*
-     * Sort groups newest day first.
-     * Unknown dates always go last.
-     */
+    });
 
-    return [
-        ...groups.entries()
-    ].sort(
-        ([dayA],[dayB]) => {
+    return [...groups.entries()].sort(
+        ([a],[b]) => {
 
-            if(
-                dayA === "UNKNOWN"
-            ){
-                return 1;
-            }
+            if(a === "UNKNOWN") return 1;
+            if(b === "UNKNOWN") return -1;
 
-            if(
-                dayB === "UNKNOWN"
-            ){
-                return -1;
-            }
-
-
-            return dayB.localeCompare(
-                dayA
-            );
+            return b.localeCompare(a);
 
         }
     );
@@ -2818,20 +2983,58 @@ function groupMemorialsByDay(
 
 
 /* =========================================================
+   YEAR DROPDOWN
+========================================================= */
+
+function populateMemorialYears(records){
+
+    const select =
+        document.getElementById(
+            "memorialYearSelect"
+        );
+
+    if(!select) return;
+
+    const years = [
+        ...new Set(
+            records
+                .map(
+                    record =>
+                        memorialYear(
+                            record.date_of_death
+                        )
+                )
+                .filter(Boolean)
+        )
+    ].sort(
+        (a,b) => b.localeCompare(a)
+    );
+
+    select.innerHTML = `
+        <option value="">ALL YEARS</option>
+        ${years.map(
+            year => `
+                <option value="${escapeHTML(year)}">
+                    ${escapeHTML(year)}
+                </option>
+            `
+        ).join("")}
+    `;
+
+}
+
+
+/* =========================================================
    MEMORIAL CARD
 ========================================================= */
 
-function memorialCard(
-    person
-){
+function memorialCard(person){
 
     const image =
         person.image_url
         ? `
             <img
-                src="${escapeHTML(
-                    person.image_url
-                )}"
+                src="${escapeHTML(person.image_url)}"
                 alt="${escapeHTML(
                     person.person_name ||
                     "In Memoriam"
@@ -2845,26 +3048,20 @@ function memorialCard(
           `
         : fallbackImage();
 
-
     const description =
         person.memorial_text ||
         person.obituary_summary ||
         person.known_for ||
         "";
 
-
     const source =
         person.wikipedia_url ||
         person.official_source_url;
 
-
     return `
-
         <article
             class="memorial-card"
-            data-memorial-id="${escapeHTML(
-                person.id
-            )}">
+            data-memorial-id="${escapeHTML(person.id)}">
 
             <div class="memorial-image">
                 ${image}
@@ -2878,7 +3075,6 @@ function memorialCard(
                         "Unknown"
                     )}
                 </h3>
-
 
                 <div class="memorial-date">
 
@@ -2919,7 +3115,6 @@ function memorialCard(
 
                 </div>
 
-
                 ${
                     person.profession
                     ? `
@@ -2932,27 +3127,21 @@ function memorialCard(
                     : ""
                 }
 
-
                 ${
                     description
                     ? `
                         <p>
-                            ${escapeHTML(
-                                description
-                            )}
+                            ${escapeHTML(description)}
                         </p>
                       `
                     : ""
                 }
 
-
                 ${
                     source
                     ? `
                         <a
-                            href="${escapeHTML(
-                                source
-                            )}"
+                            href="${escapeHTML(source)}"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="memorial-source">
@@ -2965,18 +3154,18 @@ function memorialCard(
             </div>
 
         </article>
-
     `;
 
 }
 
 
 /* =========================================================
-   RENDER BY DAY OF DEATH
+   RENDER MEMORIAL ARCHIVE
 ========================================================= */
 
-function renderMemorialByDay(
-    records
+function renderMemorialByYear(
+    records,
+    selectedYear = ""
 ){
 
     const archive =
@@ -2984,207 +3173,195 @@ function renderMemorialByDay(
             "memorialArchive"
         );
 
-
     document.getElementById(
         "memorialVisibleCount"
     ).textContent =
         records.length;
 
-
-    if(
-        !records.length
-    ){
+    if(!records.length){
 
         archive.innerHTML = `
-
             <div class="empty-state">
-
-                No memorial records are currently
-                available.
-
+                No memorial records match
+                your current search.
             </div>
-
         `;
 
         return;
-
     }
 
-
     const groups =
-        groupMemorialsByDay(
-            records
-        );
+        groupMemorialsByYear(records);
 
+    const visibleGroups =
+        selectedYear
+        ? groups.filter(
+            ([year]) =>
+                year === selectedYear
+        )
+        : groups;
 
     let html = "";
 
+    visibleGroups.forEach(
+        ([year,people]) => {
 
-    groups.forEach(
-        ([day,people]) => {
-
-
-            if(
-                day === "UNKNOWN"
-            ){
-
-                html += `
-
-                    <div
-                        class="memorial-unknown">
-
-                        <div class="memorial-unknown-title">
-                            DATE OF DEATH NOT AVAILABLE
-                        </div>
-
-                        <div class="memorial-grid">
-
-                            ${people
-                                .map(
-                                    memorialCard
-                                )
-                                .join("")
-                            }
-
-                        </div>
-
-                    </div>
-
-                `;
-
-                return;
-
-            }
-
+            const title =
+                year === "UNKNOWN"
+                ? "DATE UNKNOWN"
+                : year;
 
             html += `
+                <div class="memorial-year-view">
 
-                <section
-                    class="memorial-day">
+                    <div class="memorial-year-header">
 
-                    <div
-                        class="memorial-day-heading">
-
-                        <div
-                            class="memorial-day-date">
-
-                            ${escapeHTML(
-                                formatDeathDay(
-                                    day
-                                )
-                            )}
-
+                        <div class="memorial-year-title">
+                            ${escapeHTML(title)}
                         </div>
 
-                        <div
-                            class="memorial-day-rule">
-                        </div>
-
-                        <div
-                            class="memorial-day-count">
-
+                        <div class="memorial-year-subtitle">
                             ${people.length}
-
                             ${
                                 people.length === 1
                                 ? " memorial"
                                 : " memorials"
                             }
-
                         </div>
 
                     </div>
 
+                    <div class="memorial-rail-wrap">
 
-                    <div class="memorial-grid">
+                        <div
+                            class="memorial-grid"
+                            tabindex="0"
+                            aria-label="${escapeHTML(
+                                title
+                            )} memorials — horizontal scroll">
 
-                        ${people
-                            .map(
-                                memorialCard
-                            )
-                            .join("")
-                        }
+                            ${people
+                                .map(memorialCard)
+                                .join("")
+                            }
+
+                        </div>
+
+                        <div class="memorial-scroll-hint">
+                            <span>
+                                ← Swipe or scroll horizontally →
+                            </span>
+                            <span>
+                                ${people.length} cards
+                            </span>
+                        </div>
 
                     </div>
 
-                </section>
-
+                </div>
             `;
 
         }
     );
 
+    archive.innerHTML = html;
 
-    archive.innerHTML =
-        html;
+}
+
+
+/* Compatibility wrapper */
+function renderMemorialByDay(records){
+
+    const select =
+        document.getElementById(
+            "memorialYearSelect"
+        );
+
+    renderMemorialByYear(
+        records,
+        select?.value || ""
+    );
 
 }
 
 
 /* =========================================================
-   MEMORIAL SEARCH
+   SEARCH + YEAR FILTER
 ========================================================= */
+
+function applyMemorialFilters(){
+
+    const query =
+        document.getElementById(
+            "memorialSearch"
+        ).value
+            .trim()
+            .toLowerCase();
+
+    const selectedYear =
+        document.getElementById(
+            "memorialYearSelect"
+        ).value;
+
+    const filtered =
+        memorialRecords.filter(
+            person => {
+
+                const year =
+                    memorialYear(
+                        person.date_of_death
+                    );
+
+                if(
+                    selectedYear &&
+                    year !== selectedYear
+                ){
+                    return false;
+                }
+
+                if(!query){
+                    return true;
+                }
+
+                const text = [
+                    person.person_name,
+                    person.profession,
+                    person.known_for,
+                    person.obituary_summary,
+                    person.memorial_text,
+                    person.date_of_birth,
+                    person.date_of_death
+                ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+                return text.includes(query);
+
+            }
+        );
+
+    renderMemorialByYear(
+        filtered,
+        selectedYear
+    );
+
+}
+
 
 document.getElementById(
     "memorialSearch"
 ).addEventListener(
     "input",
-    event => {
-
-        const query =
-            event.target.value
-                .trim()
-                .toLowerCase();
+    applyMemorialFilters
+);
 
 
-        if(!query){
-
-            renderMemorialByDay(
-                memorialRecords
-            );
-
-            return;
-
-        }
-
-
-        const filtered =
-            memorialRecords.filter(
-                person => {
-
-                    const text = [
-
-                        person.person_name,
-
-                        person.profession,
-
-                        person.known_for,
-
-                        person.obituary_summary,
-
-                        person.memorial_text,
-
-                        person.date_of_death
-
-                    ]
-                    .filter(Boolean)
-                    .join(" ")
-                    .toLowerCase();
-
-
-                    return text.includes(
-                        query
-                    );
-
-                }
-            );
-
-
-        renderMemorialByDay(
-            filtered
-        );
-
-    }
+document.getElementById(
+    "memorialYearSelect"
+).addEventListener(
+    "change",
+    applyMemorialFilters
 );
 
 
