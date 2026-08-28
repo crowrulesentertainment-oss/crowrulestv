@@ -1,4285 +1,2905 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050507">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CrowRules TV — The Rookery</title>
+<title>CrowRules Entertainment | Independent Entertainment Media Company</title>
 
-<meta
-  name="description"
-  content="CrowRules TV — 24/7 independent streaming television."
->
+<meta name="description"
+content="CrowRules Entertainment — an independent entertainment media company creating original programming, live events, creator channels, stories, community projects and digital experiences.">
+
+<meta name="theme-color" content="#050509">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap"
-  rel="stylesheet"
->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
 :root{
-  --bg:#050507;
-  --panel:#0b0b10;
-  --panel2:#111119;
-  --panel3:#171720;
-  --line:rgba(255,255,255,.08);
-  --line2:rgba(255,255,255,.15);
-  --text:#f7f7fb;
-  --muted:#9494a4;
-  --red:#ff1748;
-  --cyan:#39e7ff;
-  --purple:#9b5cff;
-  --gold:#ffc857;
-  --green:#43e68b;
-  --radius:18px;
-  --shadow:0 20px 70px rgba(0,0,0,.45);
+    --bg:#050509;
+    --bg2:#0b0b12;
+    --panel:#101019;
+    --panel2:#151521;
+    --line:rgba(255,255,255,.10);
+    --text:#f5f5f7;
+    --muted:#a7a7b4;
+    --accent:#7c3cff;
+    --accent2:#b66cff;
+    --danger:#ff4d6d;
+    --success:#35e58c;
+    --gold:#e7c66a;
+    --shadow:0 25px 70px rgba(0,0,0,.45);
+    --radius:22px;
 }
 
 *{
-  box-sizing:border-box;
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
 html{
-  scroll-behavior:smooth;
+    scroll-behavior:smooth;
 }
 
 body{
-  margin:0;
-  background:
-    radial-gradient(circle at 80% 0%,rgba(155,92,255,.12),transparent 34rem),
-    radial-gradient(circle at 5% 35%,rgba(57,231,255,.045),transparent 30rem),
-    var(--bg);
-  color:var(--text);
-  font-family:Montserrat,Arial,sans-serif;
-  overflow-x:hidden;
+    background:
+        radial-gradient(circle at 15% 10%,rgba(124,60,255,.12),transparent 30%),
+        radial-gradient(circle at 85% 20%,rgba(182,108,255,.08),transparent 25%),
+        var(--bg);
+    color:var(--text);
+    font-family:Montserrat,Arial,sans-serif;
+    line-height:1.6;
+    min-height:100vh;
 }
 
-body:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:-1;
-  opacity:.025;
-  background-image:
-    linear-gradient(rgba(255,255,255,.8) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.8) 1px,transparent 1px);
-  background-size:80px 80px;
+a{
+    color:inherit;
+    text-decoration:none;
 }
 
 button,
 input{
-  font:inherit;
+    font:inherit;
 }
 
 button{
-  cursor:pointer;
+    cursor:pointer;
 }
 
-a{
-  color:inherit;
-  text-decoration:none;
+img{
+    max-width:100%;
+    display:block;
 }
 
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:100;
-  height:70px;
-  display:flex;
-  align-items:center;
-  gap:20px;
-  padding:0 27px;
-  background:rgba(5,5,7,.88);
-  border-bottom:1px solid var(--line);
-  backdrop-filter:blur(18px);
+.container{
+    width:min(1180px,92%);
+    margin:auto;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  min-width:max-content;
-}
+/* =========================================================
+   HEADER
+========================================================= */
 
-.crow-mark{
-  width:41px;
-  height:41px;
-  display:grid;
-  place-items:center;
-  border-radius:12px;
-  border:1px solid var(--line);
-  background:linear-gradient(135deg,#20202b,#08080b);
-  font-size:22px;
-}
-
-.brand strong{
-  display:block;
-  font:800 15px Orbitron;
-  letter-spacing:1px;
-}
-
-.brand small{
-  display:block;
-  margin-top:2px;
-  color:var(--muted);
-  font-size:8px;
-  letter-spacing:2px;
+.site-header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+    background:rgba(5,5,9,.88);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--line);
 }
 
 .nav{
-  display:flex;
-  flex:1;
-  gap:3px;
+    min-height:76px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:25px;
 }
 
-.nav button{
-  border:0;
-  border-radius:9px;
-  background:none;
-  color:#aaaab7;
-  padding:10px 11px;
-  font-size:10px;
-  font-weight:800;
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:max-content;
 }
 
-.nav button:hover{
-  background:#15151d;
-  color:white;
+.brand-crow{
+    width:43px;
+    height:43px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(135deg,var(--accent),#24104f);
+    box-shadow:0 0 30px rgba(124,60,255,.30);
+    font-size:23px;
 }
 
-.actions{
-  display:flex;
-  align-items:center;
-  gap:8px;
+.brand-text{
+    font-family:Orbitron,sans-serif;
+    font-size:16px;
+    font-weight:800;
+    letter-spacing:1px;
 }
 
-.live-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  font-size:9px;
-  font-weight:800;
-  letter-spacing:1px;
+.brand-text span{
+    display:block;
+    color:var(--accent2);
+    font-size:9px;
+    letter-spacing:3px;
+    margin-top:-2px;
 }
 
-.dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--red);
-  box-shadow:0 0 13px var(--red);
-  animation:pulse 1.5s infinite;
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:6px;
 }
 
-@keyframes pulse{
-  50%{
-    opacity:.35;
-    transform:scale(.7);
-  }
+.nav-links a{
+    padding:9px 11px;
+    color:#d7d7df;
+    font-size:13px;
+    font-weight:600;
+    border-radius:10px;
+    transition:.2s;
 }
 
-.icon-btn,
-.member-btn{
-  height:39px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:#0e0e14;
-  color:white;
-}
-
-.icon-btn{
-  width:39px;
+.nav-links a:hover{
+    background:rgba(255,255,255,.07);
+    color:#fff;
 }
 
 .member-btn{
-  padding:0 13px;
-  font-size:9px;
-  font-weight:800;
+    background:linear-gradient(135deg,var(--accent),#4e20b8);
+    padding:10px 16px !important;
+    color:#fff !important;
 }
 
-/* =====================================================
-   MAIN
-===================================================== */
-
-main{
-  max-width:1500px;
-  margin:auto;
-  padding:0 27px 70px;
+.menu-btn{
+    display:none;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:#fff;
+    width:43px;
+    height:43px;
+    border-radius:12px;
+    font-size:20px;
 }
 
-/* =====================================================
+/* =========================================================
    HERO
-===================================================== */
+========================================================= */
 
 .hero{
-  min-height:620px;
-  display:grid;
-  grid-template-columns:1.08fr .92fr;
-  align-items:center;
-  gap:42px;
+    min-height:850px;
+    padding:155px 0 90px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+        linear-gradient(90deg,rgba(5,5,9,.98) 0%,rgba(5,5,9,.82) 45%,rgba(5,5,9,.45) 100%),
+        radial-gradient(circle at 70% 45%,rgba(124,60,255,.22),transparent 35%);
+    pointer-events:none;
+}
+
+.hero-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:60px;
+    align-items:center;
+    position:relative;
+    z-index:2;
 }
 
 .eyebrow{
-  margin-bottom:15px;
-  color:var(--cyan);
-  font:700 10px Orbitron;
-  letter-spacing:2.5px;
+    color:var(--accent2);
+    font-family:Orbitron,sans-serif;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    margin-bottom:18px;
 }
 
 .hero h1{
-  margin:0 0 22px;
-  font:800 clamp(45px,6vw,86px)/.96 Orbitron;
-  letter-spacing:-3px;
+    font-family:Orbitron,sans-serif;
+    font-size:clamp(38px,6vw,76px);
+    line-height:1.04;
+    letter-spacing:-2px;
+    margin-bottom:25px;
 }
 
 .hero h1 span{
-  color:transparent;
-  -webkit-text-stroke:1px white;
+    color:var(--accent2);
+    text-shadow:0 0 35px rgba(182,108,255,.25);
 }
 
-.hero p{
-  max-width:650px;
-  color:#b4b4c0;
-  font-size:14px;
-  line-height:1.8;
+.hero-description{
+    color:#c5c5cf;
+    font-size:18px;
+    max-width:720px;
+    margin-bottom:32px;
 }
 
 .hero-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
-  margin-top:27px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
 }
 
-.primary,
-.secondary{
-  border-radius:11px;
-  padding:13px 17px;
-  font-size:10px;
-  font-weight:800;
+.btn{
+    border:1px solid var(--line);
+    border-radius:13px;
+    padding:13px 19px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    font-weight:700;
+    font-size:13px;
+    transition:.2s;
 }
 
-.primary{
-  border:0;
-  color:white;
-  background:linear-gradient(135deg,var(--red),#ff416d);
-  box-shadow:0 10px 35px rgba(255,23,72,.2);
+.btn-primary{
+    border:none;
+    background:linear-gradient(135deg,var(--accent),#5120c5);
+    box-shadow:0 10px 35px rgba(124,60,255,.25);
 }
 
-.secondary{
-  border:1px solid var(--line);
-  background:#111119;
-  color:white;
+.btn-primary:hover{
+    transform:translateY(-2px);
 }
 
-/* =====================================================
-   PLAYER
-===================================================== */
-
-.player{
-  overflow:hidden;
-  border:1px solid var(--line);
-  border-radius:23px;
-  background:#08080d;
-  box-shadow:var(--shadow);
+.btn-secondary{
+    background:rgba(255,255,255,.05);
 }
 
-.screen{
-  position:relative;
-  aspect-ratio:16/9;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  background:
-    radial-gradient(circle at 65% 45%,rgba(155,92,255,.35),transparent 28%),
-    linear-gradient(135deg,#09090d,#17131d 55%,#07070a);
+.btn-secondary:hover{
+    background:rgba(255,255,255,.09);
 }
 
-.screen iframe,
-.screen video{
-  width:100%;
-  height:100%;
-  border:0;
-  object-fit:cover;
+.hero-card{
+    min-height:460px;
+    border:1px solid var(--line);
+    border-radius:32px;
+    background:
+        radial-gradient(circle at 50% 30%,rgba(124,60,255,.25),transparent 35%),
+        linear-gradient(145deg,#14111e,#08080d);
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-.screen:after{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0 4px,
-      rgba(255,255,255,.015) 5px
-    );
+.hero-card::before{
+    content:"CROW";
+    position:absolute;
+    font-family:Orbitron;
+    font-size:130px;
+    font-weight:900;
+    color:rgba(255,255,255,.025);
+    transform:rotate(-12deg);
 }
 
-.screen-label{
-  position:absolute;
-  z-index:5;
-  left:15px;
-  top:15px;
+.crow-symbol{
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:
+        radial-gradient(circle,#9b63ff 0%,#5420b4 40%,#160c2e 72%);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:
+        0 0 90px rgba(124,60,255,.35),
+        inset 0 0 50px rgba(255,255,255,.06);
+    font-size:90px;
+    position:relative;
+    z-index:2;
 }
 
-.screen-time{
-  position:absolute;
-  z-index:5;
-  right:15px;
-  bottom:15px;
-  padding:7px 9px;
-  border-radius:7px;
-  background:rgba(0,0,0,.65);
-  font:700 9px Orbitron;
+.hero-status{
+    position:absolute;
+    bottom:24px;
+    left:24px;
+    right:24px;
+    padding:14px 17px;
+    border:1px solid var(--line);
+    border-radius:15px;
+    background:rgba(0,0,0,.35);
+    backdrop-filter:blur(10px);
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
 }
 
-.player-placeholder{
-  text-align:center;
-  position:relative;
-  z-index:2;
+.status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    display:inline-block;
+    background:var(--success);
+    box-shadow:0 0 12px var(--success);
+    margin-right:7px;
 }
 
-.player-placeholder .crow-big{
-  font-size:54px;
-  margin-bottom:12px;
-}
-
-.player-placeholder strong{
-  display:block;
-  font:700 14px Orbitron;
-}
-
-.player-placeholder small{
-  display:block;
-  margin-top:7px;
-  color:var(--muted);
-  font-size:9px;
-}
-
-.now-playing{
-  padding:18px 20px;
-}
-
-.now-top{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-}
-
-.tiny{
-  color:var(--muted);
-  font-size:9px;
-  letter-spacing:1px;
-}
-
-.now-playing h3{
-  margin:7px 0 4px;
-  font-size:18px;
-}
-
-.meta{
-  color:var(--muted);
-  font-size:10px;
-}
-
-.progress{
-  height:4px;
-  margin-top:15px;
-  overflow:hidden;
-  border-radius:99px;
-  background:#24242c;
-}
-
-.progress i{
-  display:block;
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,var(--red),var(--purple));
-  transition:width .4s linear;
-}
-
-/* =====================================================
+/* =========================================================
    SECTIONS
-===================================================== */
+========================================================= */
 
-.section{
-  margin-top:48px;
+section{
+    padding:100px 0;
+    scroll-margin-top:85px;
 }
 
-.section-head{
-  display:flex;
-  align-items:end;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:16px;
+.section-heading{
+    margin-bottom:45px;
 }
 
-.section-title{
-  font:700 20px Orbitron;
+.section-heading.center{
+    text-align:center;
 }
 
-.section-desc{
-  margin-top:6px;
-  color:var(--muted);
-  font-size:11px;
+.section-heading h2{
+    font-family:Orbitron,sans-serif;
+    font-size:clamp(28px,4vw,45px);
+    margin-bottom:12px;
 }
 
-.more{
-  border:0;
-  background:none;
-  color:#aaa;
-  font-size:9px;
-  font-weight:800;
+.section-heading p{
+    color:var(--muted);
+    max-width:760px;
 }
 
-/* =====================================================
-   CARDS
-===================================================== */
-
-.cards{
-  display:grid;
-  grid-auto-flow:column;
-  grid-auto-columns:minmax(215px,1fr);
-  gap:13px;
-  overflow-x:auto;
-  padding-bottom:7px;
+.section-heading.center p{
+    margin:auto;
 }
 
-.card{
-  position:relative;
-  min-height:235px;
-  overflow:hidden;
-  border:1px solid var(--line);
-  border-radius:16px;
-  background:#0c0c12;
-  cursor:pointer;
-  transition:.25s;
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats{
+    margin-top:-40px;
+    position:relative;
+    z-index:5;
 }
 
-.card:hover{
-  transform:translateY(-5px);
-  border-color:rgba(255,255,255,.2);
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
 }
 
-.thumb{
-  position:relative;
-  height:137px;
-  display:flex;
-  align-items:flex-end;
-  padding:13px;
-  overflow:hidden;
-  background:
-    linear-gradient(135deg,#16161f,#252033 60%,#0a0a0d);
+.stat{
+    padding:24px;
+    background:rgba(16,16,25,.88);
+    border:1px solid var(--line);
+    border-radius:18px;
+    text-align:center;
+    backdrop-filter:blur(12px);
 }
 
-.thumb.has-image{
-  background-size:cover;
-  background-position:center;
+.stat-number{
+    font-family:Orbitron;
+    font-size:30px;
+    font-weight:800;
+    color:#fff;
 }
 
-.thumb:after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(
-    transparent 25%,
-    rgba(0,0,0,.78)
-  );
+.stat-label{
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
 }
 
-.thumb-title{
-  position:relative;
-  z-index:2;
-  font:800 16px Orbitron;
-  text-shadow:0 2px 14px #000;
+/* =========================================================
+   ABOUT
+========================================================= */
+
+.about-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:30px;
 }
 
-.badge{
-  position:absolute;
-  z-index:3;
-  left:10px;
-  top:10px;
-  padding:5px 7px;
-  border-radius:6px;
-  background:var(--red);
-  font:800 8px Orbitron;
+.panel{
+    background:linear-gradient(145deg,rgba(19,19,29,.95),rgba(10,10,15,.95));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+    box-shadow:var(--shadow);
 }
 
-.rank{
-  position:absolute;
-  z-index:3;
-  right:9px;
-  top:9px;
-  color:rgba(255,255,255,.25);
-  font:800 18px Orbitron;
+.panel h3{
+    font-family:Orbitron;
+    font-size:19px;
+    margin-bottom:15px;
 }
 
-.card-body{
-  padding:12px;
+.panel p{
+    color:#bdbdc7;
 }
 
-.card-body strong{
-  display:block;
-  font-size:12px;
+.quote{
+    border-left:3px solid var(--accent);
+    padding-left:20px;
+    margin-top:22px;
+    color:#ddd;
+    font-size:18px;
 }
 
-.card-body p{
-  margin:6px 0 0;
-  color:var(--muted);
-  font-size:10px;
-  line-height:1.5;
+/* =========================================================
+   VISION
+========================================================= */
+
+.vision-section{
+    background:
+        linear-gradient(rgba(8,8,13,.94),rgba(8,8,13,.94)),
+        radial-gradient(circle at 50% 0%,rgba(124,60,255,.22),transparent 50%);
 }
 
-/* =====================================================
-   AIRSPACE
-===================================================== */
-
-.airspace{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
+.vision-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
 }
 
-.channel{
-  position:relative;
-  min-height:170px;
-  padding:18px;
-  border:1px solid var(--line);
-  border-radius:16px;
-  background:linear-gradient(135deg,#101017,#09090d);
+.vision-card{
+    padding:32px;
+    border:1px solid var(--line);
+    border-radius:22px;
+    background:rgba(255,255,255,.025);
 }
 
-.channel-number{
-  color:var(--cyan);
-  font:700 9px Orbitron;
-  letter-spacing:1px;
+.vision-icon{
+    font-size:32px;
+    margin-bottom:18px;
 }
 
-.channel-status{
-  position:absolute;
-  right:13px;
-  top:14px;
-  font-size:8px;
-  font-weight:800;
+.vision-card h3{
+    font-family:Orbitron;
+    font-size:17px;
+    margin-bottom:10px;
 }
 
-.channel-status.live{
-  color:var(--red);
+.vision-card p{
+    color:var(--muted);
+    font-size:14px;
 }
 
-.channel-status.active{
-  color:var(--green);
+/* =========================================================
+   HISTORY
+========================================================= */
+
+.timeline{
+    max-width:900px;
+    margin:auto;
+    position:relative;
 }
 
-.channel h3{
-  margin:14px 0 7px;
-  font:700 14px Orbitron;
+.timeline::before{
+    content:"";
+    position:absolute;
+    left:20px;
+    top:0;
+    bottom:0;
+    width:1px;
+    background:linear-gradient(var(--accent),transparent);
 }
 
-.channel p{
-  min-height:32px;
-  color:var(--muted);
-  font-size:10px;
-  line-height:1.5;
+.timeline-item{
+    position:relative;
+    padding-left:65px;
+    margin-bottom:35px;
 }
 
-.channel button{
-  padding:9px 11px;
-  font-size:8px;
+.timeline-dot{
+    position:absolute;
+    left:13px;
+    top:4px;
+    width:15px;
+    height:15px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 20px rgba(124,60,255,.7);
 }
 
-/* =====================================================
+.timeline-year{
+    color:var(--accent2);
+    font-family:Orbitron;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:2px;
+}
+
+.timeline-item h3{
+    margin:5px 0 7px;
+    font-family:Orbitron;
+}
+
+.timeline-item p{
+    color:var(--muted);
+}
+
+/* =========================================================
+   BRANCHES
+========================================================= */
+
+.branch-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+.branch-card{
+    min-height:210px;
+    padding:27px;
+    border:1px solid var(--line);
+    border-radius:22px;
+    background:linear-gradient(145deg,#11111b,#0a0a0f);
+    transition:.25s;
+    position:relative;
+    overflow:hidden;
+}
+
+.branch-card:hover{
+    transform:translateY(-5px);
+    border-color:rgba(124,60,255,.45);
+}
+
+.branch-icon{
+    font-size:30px;
+    margin-bottom:17px;
+}
+
+.branch-card h3{
+    font-family:Orbitron;
+    font-size:18px;
+    margin-bottom:9px;
+}
+
+.branch-card p{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:17px;
+}
+
+.branch-link{
+    color:var(--accent2);
+    font-size:12px;
+    font-weight:800;
+}
+
+/* =========================================================
+   PROGRAMMING
+========================================================= */
+
+.program-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+.program-card{
+    border:1px solid var(--line);
+    border-radius:20px;
+    overflow:hidden;
+    background:var(--panel);
+}
+
+.program-image{
+    aspect-ratio:16/9;
+    background:
+        radial-gradient(circle at center,rgba(124,60,255,.35),transparent 55%),
+        #0c0c13;
+    display:grid;
+    place-items:center;
+    color:#777;
+    font-size:40px;
+}
+
+.program-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.program-body{
+    padding:19px;
+}
+
+.program-category{
+    font-size:10px;
+    color:var(--accent2);
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font-weight:800;
+}
+
+.program-body h3{
+    font-family:Orbitron;
+    font-size:16px;
+    margin:6px 0;
+}
+
+.program-body p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================================================
+   MEMORIAL
+========================================================= */
+
+.memorial-section{
+    background:
+        radial-gradient(circle at 50% 0%,rgba(120,120,150,.08),transparent 40%),
+        #08080d;
+}
+
+.memorial-intro{
+    max-width:800px;
+    color:var(--muted);
+    margin-bottom:35px;
+}
+
+.memorial-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:17px;
+}
+
+.memorial-card{
+    background:linear-gradient(145deg,#15151d,#0c0c12);
+    border:1px solid var(--line);
+    border-radius:18px;
+    overflow:hidden;
+    transition:.2s;
+}
+
+.memorial-card:hover{
+    transform:translateY(-3px);
+}
+
+.memorial-image{
+    aspect-ratio:1/1;
+    background:#111;
+    display:grid;
+    place-items:center;
+    color:#555;
+}
+
+.memorial-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:grayscale(.8);
+}
+
+.memorial-body{
+    padding:17px;
+}
+
+.memorial-body h3{
+    font-family:Orbitron;
+    font-size:14px;
+}
+
+.memorial-date{
+    color:#999;
+    font-size:11px;
+    margin:5px 0;
+}
+
+.memorial-body p{
+    color:var(--muted);
+    font-size:11px;
+}
+
+/* =========================================================
+   TACOMA
+========================================================= */
+
+.tacoma{
+    position:relative;
+    overflow:hidden;
+}
+
+.tacoma-card{
+    border-radius:30px;
+    border:1px solid var(--line);
+    background:
+        radial-gradient(circle at 85% 30%,rgba(124,60,255,.20),transparent 30%),
+        linear-gradient(145deg,#11111b,#08080d);
+    padding:55px;
+}
+
+.tacoma-card h2{
+    font-family:Orbitron;
+    font-size:clamp(30px,4vw,50px);
+    margin-bottom:15px;
+}
+
+.tacoma-card p{
+    max-width:800px;
+    color:#bcbcc6;
+    font-size:16px;
+}
+
+/* =========================================================
    MEMBERS
-===================================================== */
+========================================================= */
 
-.members{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
+.members-section{
+    background:#07070c;
 }
 
-.member-panel,
-.roost{
-  padding:21px;
-  border:1px solid var(--line);
-  border-radius:18px;
-  background:#0b0b10;
+.member-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
 }
 
-.member-row{
-  display:grid;
-  grid-template-columns:38px 1fr auto;
-  align-items:center;
-  gap:12px;
-  padding:12px 0;
-  border-bottom:1px solid rgba(255,255,255,.055);
+.member-card{
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:26px;
+    background:var(--panel);
+    text-align:center;
 }
 
-.member-row:last-child{
-  border-bottom:0;
+.member-avatar{
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    margin:0 auto 14px;
+    background:linear-gradient(135deg,var(--accent),#201033);
+    overflow:hidden;
+    display:grid;
+    place-items:center;
+    font-size:28px;
 }
 
-.avatar{
-  width:38px;
-  height:38px;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  border-radius:50%;
-  border:1px solid var(--line);
-  background:linear-gradient(135deg,#20202b,#0c0c11);
+.member-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
 }
 
-.avatar img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.member-card h3{
+    font-family:Orbitron;
+    font-size:15px;
 }
 
-.member-row strong{
-  font-size:11px;
+.member-role{
+    color:var(--accent2);
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    margin:4px 0 10px;
 }
 
-.member-row small{
-  display:block;
-  margin-top:4px;
-  color:var(--muted);
-  font-size:9px;
+.member-card p{
+    color:var(--muted);
+    font-size:12px;
 }
 
-.xp{
-  color:var(--gold);
-  font:700 10px Orbitron;
-}
-
-/* =====================================================
-   MY ROOST
-===================================================== */
-
-.roost{
-  position:relative;
-  overflow:hidden;
-  background:
-    linear-gradient(120deg,#120b16,#0b0b11 55%,#0a0d12);
-  border-color:rgba(155,92,255,.2);
-}
-
-.roost h2{
-  margin:0;
-  font:800 24px Orbitron;
-}
-
-.roost > p{
-  color:#aaa;
-  font-size:11px;
-  line-height:1.7;
-}
-
-.roost-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:18px;
-}
-
-.roost-item{
-  padding:14px;
-  border:1px solid var(--line);
-  border-radius:13px;
-  background:rgba(0,0,0,.22);
-}
-
-.roost-item b{
-  font:700 10px Orbitron;
-}
-
-.roost-item p{
-  margin:7px 0 0;
-  color:#aaa;
-  font-size:10px;
-}
-
-.resume{
-  margin-top:15px;
-  padding:14px;
-  border:1px solid var(--line);
-  border-radius:13px;
-  background:#09090e;
-}
-
-.resume-head{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  font-size:10px;
-  font-weight:800;
-}
-
-/* =====================================================
-   RANDOM
-===================================================== */
-
-.random{
-  margin-top:48px;
-  padding:30px;
-  text-align:center;
-  border:1px solid rgba(57,231,255,.16);
-  border-radius:20px;
-  background:
-    radial-gradient(circle,rgba(57,231,255,.06),transparent 55%),
-    #09090e;
-}
-
-.random h2{
-  margin:0 0 8px;
-  font:800 25px Orbitron;
-}
-
-.random p{
-  color:var(--muted);
-  font-size:11px;
-}
-
-/* =====================================================
-   MIDNIGHT
-===================================================== */
-
-.midnight{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  padding:24px;
-  border:1px solid rgba(255,23,72,.18);
-  border-radius:20px;
-  background:linear-gradient(135deg,#0d080c,#09090e);
-}
-
-.midnight h2{
-  margin:0 0 7px;
-  font:800 18px Orbitron;
-}
-
-.midnight p{
-  color:#aaa;
-  font-size:11px;
-}
-
-.countdown{
-  color:var(--red);
-  white-space:nowrap;
-  font:800 26px Orbitron;
-}
-
-/* =====================================================
-   LOADING
-===================================================== */
-
-.loading{
-  padding:40px;
-  color:var(--muted);
-  text-align:center;
-  font:700 10px Orbitron;
-}
-
-.error{
-  padding:25px;
-  border:1px solid rgba(255,23,72,.2);
-  border-radius:14px;
-  background:rgba(255,23,72,.04);
-  color:#ff9bb0;
-  font-size:11px;
-}
-
-/* =====================================================
-   MODALS
-===================================================== */
+/* =========================================================
+   AUTH MODAL
+========================================================= */
 
 .modal{
-  position:fixed;
-  inset:0;
-  z-index:200;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(0,0,0,.78);
-  backdrop-filter:blur(10px);
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    background:rgba(0,0,0,.75);
+    backdrop-filter:blur(10px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
 }
 
 .modal.open{
-  display:flex;
+    display:flex;
 }
 
 .modal-box{
-  width:min(620px,100%);
-  max-height:85vh;
-  overflow:auto;
-  padding:24px;
-  border:1px solid var(--line);
-  border-radius:20px;
-  background:#0c0c12;
-  box-shadow:var(--shadow);
+    width:min(440px,100%);
+    background:#11111a;
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:30px;
+    box-shadow:var(--shadow);
+    position:relative;
 }
 
-.modal-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+.modal-close{
+    position:absolute;
+    right:15px;
+    top:13px;
+    background:none;
+    border:0;
+    color:#aaa;
+    font-size:25px;
 }
 
-.modal-head h2{
-  margin:0;
-  font:700 18px Orbitron;
+.modal-box h2{
+    font-family:Orbitron;
+    margin-bottom:8px;
 }
 
-.close{
-  width:34px;
-  height:34px;
-  border:0;
-  border-radius:8px;
-  background:#181820;
-  color:white;
-}
-
-.search-box{
-  display:flex;
-  gap:8px;
-  margin-top:18px;
-}
-
-.search-box input{
-  width:100%;
-  padding:12px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  outline:none;
-  background:#08080c;
-  color:white;
-}
-
-.search-result{
-  padding:13px 0;
-  border-bottom:1px solid var(--line);
-  font-size:11px;
-}
-
-.search-result small{
-  display:block;
-  margin-top:4px;
-  color:var(--muted);
+.modal-box p{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:20px;
 }
 
 .auth-form{
-  display:grid;
-  gap:10px;
-  margin-top:18px;
+    display:grid;
+    gap:12px;
 }
 
 .auth-form input{
-  width:100%;
-  padding:13px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:#08080d;
-  color:white;
-  outline:none;
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:#08080d;
+    color:#fff;
+    outline:none;
 }
 
-/* =====================================================
-   TOAST
-===================================================== */
-
-.toast{
-  position:fixed;
-  right:18px;
-  bottom:18px;
-  z-index:300;
-  padding:13px 16px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:#111118;
-  box-shadow:var(--shadow);
-  font-size:11px;
-  opacity:0;
-  transform:translateY(20px);
-  pointer-events:none;
-  transition:.25s;
+.auth-form input:focus{
+    border-color:var(--accent);
 }
 
-.toast.show{
-  opacity:1;
-  transform:none;
+.auth-message{
+    min-height:20px;
+    color:var(--accent2);
+    font-size:12px;
 }
 
-/* =====================================================
+/* =========================================================
+   NEWSLETTER
+========================================================= */
+
+.newsletter{
+    padding:60px 0;
+}
+
+.newsletter-box{
+    border:1px solid var(--line);
+    border-radius:25px;
+    padding:35px;
+    background:
+        radial-gradient(circle at 80% 0%,rgba(124,60,255,.16),transparent 35%),
+        var(--panel);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:30px;
+}
+
+.newsletter-box h2{
+    font-family:Orbitron;
+    font-size:25px;
+}
+
+.newsletter-box p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.newsletter-form{
+    display:flex;
+    gap:9px;
+    min-width:380px;
+}
+
+.newsletter-form input{
+    flex:1;
+    min-width:0;
+    border:1px solid var(--line);
+    background:#08080d;
+    color:#fff;
+    padding:13px;
+    border-radius:12px;
+    outline:none;
+}
+
+/* =========================================================
    FOOTER
-===================================================== */
+========================================================= */
 
 footer{
-  padding:38px 28px;
-  border-top:1px solid var(--line);
-  color:#777;
-  text-align:center;
-  font-size:10px;
-}
-
-footer strong{
-  color:#bbb;
-  font-family:Orbitron;
-}
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media(max-width:1000px){
-
-  .nav{
-    display:none;
-  }
-
-  .hero{
-    grid-template-columns:1fr;
-    min-height:auto;
+    border-top:1px solid var(--line);
     padding:55px 0 25px;
-  }
+    background:#040407;
+}
 
-  .airspace{
-    grid-template-columns:1fr 1fr;
-  }
+.footer-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr 1fr;
+    gap:35px;
+}
 
-  .members{
-    grid-template-columns:1fr;
-  }
+.footer-brand p{
+    color:var(--muted);
+    font-size:12px;
+    max-width:330px;
+    margin-top:12px;
+}
+
+.footer-col h4{
+    font-family:Orbitron;
+    font-size:12px;
+    margin-bottom:13px;
+}
+
+.footer-col a{
+    display:block;
+    color:#9696a3;
+    font-size:12px;
+    margin:7px 0;
+}
+
+.footer-col a:hover{
+    color:#fff;
+}
+
+.footer-bottom{
+    border-top:1px solid var(--line);
+    margin-top:35px;
+    padding-top:20px;
+    color:#70707b;
+    font-size:11px;
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading{
+    padding:40px;
+    text-align:center;
+    color:#888;
+}
+
+.spinner{
+    width:30px;
+    height:30px;
+    border:2px solid rgba(255,255,255,.1);
+    border-top-color:var(--accent);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    margin:auto;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:950px){
+
+    .nav-links{
+        position:absolute;
+        top:76px;
+        left:0;
+        right:0;
+        background:#09090e;
+        border-bottom:1px solid var(--line);
+        padding:15px;
+        display:none;
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .nav-links.open{
+        display:flex;
+    }
+
+    .nav-links a{
+        padding:13px;
+    }
+
+    .menu-btn{
+        display:block;
+    }
+
+    .hero-grid{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        min-height:auto;
+        padding-bottom:80px;
+    }
+
+    .hero-card{
+        min-height:350px;
+    }
+
+    .stats-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .about-grid,
+    .vision-grid{
+        grid-template-columns:1fr;
+    }
+
+    .branch-grid,
+    .program-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .memorial-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .member-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .newsletter-box{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .newsletter-form{
+        min-width:0;
+    }
+
+    .footer-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
 }
 
 @media(max-width:600px){
 
-  .topbar{
-    height:62px;
-    padding:0 13px;
-  }
+    section{
+        padding:75px 0;
+    }
 
-  .brand strong{
-    font-size:12px;
-  }
+    .hero{
+        padding-top:120px;
+    }
 
-  .brand small{
-    font-size:7px;
-  }
+    .hero h1{
+        font-size:40px;
+    }
 
-  .actions{
-    margin-left:auto;
-  }
+    .hero-description{
+        font-size:15px;
+    }
 
-  .live-pill{
-    display:none;
-  }
+    .stats-grid,
+    .branch-grid,
+    .program-grid,
+    .memorial-grid,
+    .member-grid{
+        grid-template-columns:1fr;
+    }
 
-  main{
-    padding:0 14px 50px;
-  }
+    .tacoma-card{
+        padding:30px;
+    }
 
-  .hero{
-    padding:42px 0 25px;
-  }
+    .newsletter-form{
+        flex-direction:column;
+    }
 
-  .hero h1{
-    font-size:44px;
-    letter-spacing:-2px;
-  }
+    .footer-grid{
+        grid-template-columns:1fr;
+    }
 
-  .hero p{
-    font-size:13px;
-  }
-
-  .airspace{
-    grid-template-columns:1fr;
-  }
-
-  .cards{
-    grid-auto-columns:78%;
-  }
-
-  .roost-grid{
-    grid-template-columns:1fr;
-  }
-
-  .midnight{
-    display:block;
-  }
-
-  .countdown{
-    margin-top:15px;
-  }
+    .footer-bottom{
+        flex-direction:column;
+    }
 }
-
 </style>
 </head>
 
 <body>
 
-<header class="topbar">
+<!-- ======================================================
+     HEADER
+====================================================== -->
 
-  <a class="brand" href="#">
-    <div class="crow-mark">🐦</div>
+<header class="site-header">
+    <div class="container nav">
 
-    <div>
-      <strong>CROWRULES TV</strong>
-      <small>THE ROOKERY</small>
+        <a href="#top" class="brand">
+            <div class="brand-crow">🐦‍⬛</div>
+            <div class="brand-text">
+                CROWRULES
+                <span>ENTERTAINMENT</span>
+            </div>
+        </a>
+
+        <button class="menu-btn" id="menuBtn">☰</button>
+
+        <nav class="nav-links" id="navLinks">
+            <a href="#about">About</a>
+            <a href="#vision">Vision</a>
+            <a href="#history">History</a>
+            <a href="#branches">Branches</a>
+            <a href="#programming">Programming</a>
+            <a href="#memorial">In Memoriam</a>
+            <a href="#tacoma">Tacoma</a>
+            <a href="#members">Members</a>
+            <a href="#" class="member-btn" id="memberButton">Member Login</a>
+        </nav>
+
     </div>
-  </a>
-
-  <nav class="nav">
-
-    <button data-scroll="live">
-      LIVE TV
-    </button>
-
-    <button data-scroll="shows">
-      THE ROOKERY
-    </button>
-
-    <button data-scroll="channels">
-      AIRSPACE
-    </button>
-
-    <button data-scroll="new">
-      JUST LANDED
-    </button>
-
-    <button data-scroll="members">
-      CROW CIRCLE
-    </button>
-
-  </nav>
-
-  <div class="actions">
-
-    <span class="live-pill">
-      <i class="dot"></i>
-      ON AIR
-    </span>
-
-    <button
-      class="icon-btn"
-      id="searchBtn"
-      aria-label="Search"
-    >
-      ⌕
-    </button>
-
-    <button
-      class="member-btn"
-      id="memberBtn"
-    >
-      MY ROOST
-    </button>
-
-  </div>
-
 </header>
 
+<main id="top">
 
-<main>
+<!-- ======================================================
+     HERO
+====================================================== -->
 
-<!-- =====================================================
-     HERO / LIVE TV
-===================================================== -->
+<section class="hero">
 
-<section class="hero" id="live">
+    <div class="container hero-grid">
 
-  <div>
+        <div>
 
-    <div class="eyebrow">
-      ● CROWRULES BROADCAST NETWORK
-    </div>
+            <div class="eyebrow">
+                Independent Entertainment Media Company
+            </div>
 
-    <h1>
-      THE CROW<br>
-      <span>IS ON AIR.</span>
-    </h1>
+            <h1>
+                Welcome to<br>
+                <span id="heroBrand">CrowRules Entertainment</span>
+            </h1>
 
-    <p>
-      CrowRules TV is a living 24/7 independent streaming network.
-      Original shows, live events, creators, stories and the people
-      who make the flock move — all in one place.
-    </p>
+            <p class="hero-description" id="heroTagline">
+                Stories. People. Creativity. Community.
+                Building an independent entertainment network from the Pacific Northwest.
+            </p>
 
-    <div class="hero-actions">
+            <div class="hero-actions">
 
-      <button
-        class="primary"
-        id="watchLive"
-      >
-        ▶ WATCH LIVE
-      </button>
+                <a href="#branches" class="btn btn-primary">
+                    Explore CrowRules
+                </a>
 
-      <button
-        class="secondary"
-        id="guideBtn"
-      >
-        ▦ LIVE GUIDE
-      </button>
+                <a href="#members" class="btn btn-secondary">
+                    Become a Member
+                </a>
 
-      <button
-        class="secondary"
-        id="hopBtn"
-      >
-        ↻ CHANNEL HOP
-      </button>
+                <a href="#programming" class="btn btn-secondary">
+                    Explore Programming
+                </a>
 
-    </div>
+            </div>
 
-  </div>
-
-
-  <div class="player">
-
-    <div
-      class="screen"
-      id="playerScreen"
-    >
-
-      <div class="screen-label">
-
-        <span class="live-pill">
-          <i class="dot"></i>
-          LIVE
-        </span>
-
-      </div>
-
-      <div class="player-placeholder">
-
-        <div class="crow-big">
-          🐦
         </div>
 
-        <strong id="playerMessage">
-          CONNECTING TO THE ROOKERY
-        </strong>
+        <div class="hero-card">
 
-        <small>
-          CrowRules TV 24/7
-        </small>
+            <div class="crow-symbol">
+                🐦‍⬛
+            </div>
 
-      </div>
+            <div class="hero-status">
+                <span>
+                    <span class="status-dot"></span>
+                    CrowRules Network
+                </span>
 
-      <div class="screen-time">
-        24/7
-      </div>
+                <span id="networkStatus">
+                    ONLINE
+                </span>
+            </div>
 
-    </div>
-
-
-    <div class="now-playing">
-
-      <div class="now-top">
-
-        <span class="tiny">
-          CURRENT TRANSMISSION
-        </span>
-
-        <span
-          class="meta"
-          id="clock"
-        >
-          --:--:--
-        </span>
-
-      </div>
-
-      <h3 id="nowTitle">
-        Loading CrowRules TV...
-      </h3>
-
-      <div
-        class="meta"
-        id="nowMeta"
-      >
-        Connecting to schedule...
-      </div>
-
-      <div class="progress">
-        <i id="nowProgress"></i>
-      </div>
+        </div>
 
     </div>
-
-  </div>
 
 </section>
 
+<!-- ======================================================
+     STATS
+====================================================== -->
 
-<!-- =====================================================
-     SIGNAL
-===================================================== -->
+<div class="stats">
 
-<section class="section">
+    <div class="container stats-grid">
 
-  <div class="signal-main"
-       style="
-       position:relative;
-       overflow:hidden;
-       padding:23px;
-       border:1px solid var(--line);
-       border-radius:18px;
-       background:linear-gradient(135deg,#101018,#09090e);
-       ">
+        <div class="stat">
+            <div class="stat-number" id="branchCount">—</div>
+            <div class="stat-label">Branches</div>
+        </div>
 
-    <div class="eyebrow">
-      📡 THE SIGNAL
+        <div class="stat">
+            <div class="stat-number" id="showCount">—</div>
+            <div class="stat-label">Shows</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number" id="channelCount">—</div>
+            <div class="stat-label">Channels</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number" id="memorialCount">—</div>
+            <div class="stat-label">Memorial Records</div>
+        </div>
+
     </div>
 
-    <h2
-      style="
-      margin:7px 0 9px;
-      font:800 24px Orbitron;
-      "
-    >
-      Something is always happening.
-    </h2>
+</div>
 
-    <p
-      style="
-      max-width:700px;
-      color:#aaa;
-      font-size:12px;
-      line-height:1.7;
-      "
-    >
-      CrowRules TV automatically reads the current broadcast data,
-      schedule and network catalog from the CrowRules database.
-    </p>
+<!-- ======================================================
+     ABOUT
+====================================================== -->
 
-    <div
-      id="signalStatus"
-      style="
-      margin-top:17px;
-      color:var(--green);
-      font:700 9px Orbitron;
-      "
-    >
-      ● SUPABASE CONNECTED
+<section id="about">
+
+    <div class="container">
+
+        <div class="section-heading">
+            <div class="eyebrow">Who We Are</div>
+            <h2>About CrowRules Entertainment</h2>
+            <p>
+                An independent media company built around original ideas,
+                authentic voices and the belief that great stories don't
+                have to come from a giant corporation.
+            </p>
+        </div>
+
+        <div class="about-grid">
+
+            <article class="panel">
+
+                <h3>Our Story</h3>
+
+                <p id="aboutText">
+                    CrowRules Entertainment is an independent entertainment
+                    media company focused on building a home for original
+                    programming, creators, live events, digital storytelling,
+                    community projects and experiences.
+                </p>
+
+                <div class="quote">
+                    “Build something worth remembering.”
+                </div>
+
+            </article>
+
+            <article class="panel">
+
+                <h3>What We Believe</h3>
+
+                <p>
+                    CrowRules Entertainment is designed to give creators,
+                    storytellers and audiences a place where independent
+                    creativity can grow.
+                </p>
+
+                <br>
+
+                <p>
+                    From CrowRules TV and creator channels to Tacoma-focused
+                    programming, digital archives and future projects,
+                    everything connects to one larger entertainment universe.
+                </p>
+
+            </article>
+
+        </div>
+
     </div>
-
-  </div>
 
 </section>
 
+<!-- ======================================================
+     VISION
+====================================================== -->
 
-<!-- =====================================================
-     TOP SHOWS
-===================================================== -->
+<section id="vision" class="vision-section">
 
-<section
-  class="section"
-  id="shows"
->
+    <div class="container">
 
-  <div class="section-head">
+        <div class="section-heading center">
 
-    <div>
+            <div class="eyebrow">The Future</div>
 
-      <div class="section-title">
-        🪶 THE ROOKERY
-      </div>
+            <h2>Our Vision</h2>
 
-      <div class="section-desc">
-        Top shows from CrowRules TV.
-      </div>
+            <p id="visionText">
+                Build an independent entertainment ecosystem where
+                original programming, creators, community and technology
+                come together.
+            </p>
+
+        </div>
+
+        <div class="vision-grid">
+
+            <article class="vision-card">
+
+                <div class="vision-icon">📺</div>
+
+                <h3>Independent Television</h3>
+
+                <p>
+                    Build CrowRules TV into an independent streaming network
+                    featuring original shows, scheduled programming,
+                    live events and creator channels.
+                </p>
+
+            </article>
+
+            <article class="vision-card">
+
+                <div class="vision-icon">🎙️</div>
+
+                <h3>Original Stories</h3>
+
+                <p>
+                    Create original series, conversations, documentaries,
+                    mysteries, audio storytelling and experimental media.
+                </p>
+
+            </article>
+
+            <article class="vision-card">
+
+                <div class="vision-icon">🪶</div>
+
+                <h3>Creator Community</h3>
+
+                <p>
+                    Give independent creators a home inside the larger
+                    CrowRules Entertainment ecosystem.
+                </p>
+
+            </article>
+
+        </div>
 
     </div>
-
-    <button class="more">
-      ALL SHOWS →
-    </button>
-
-  </div>
-
-  <div
-    class="cards"
-    id="showsList"
-  >
-
-    <div class="loading">
-      LOADING SHOWS...
-    </div>
-
-  </div>
 
 </section>
 
+<!-- ======================================================
+     HISTORY
+====================================================== -->
 
-<!-- =====================================================
-     TOP EPISODES
-===================================================== -->
+<section id="history">
 
-<section class="section">
+    <div class="container">
 
-  <div class="section-head">
+        <div class="section-heading center">
 
-    <div>
+            <div class="eyebrow">Where We Came From</div>
 
-      <div class="section-title">
-        🔥 TOP EPISODES
-      </div>
+            <h2>The CrowRules Story</h2>
 
-      <div class="section-desc">
-        Episodes getting the most attention from the flock.
-      </div>
+            <p>
+                A growing independent media project built one idea at a time.
+            </p>
+
+        </div>
+
+        <div class="timeline">
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <div class="timeline-year">THE BEGINNING</div>
+
+                <h3>An Independent Idea</h3>
+
+                <p>
+                    CrowRules began as a creative vision focused on making
+                    original entertainment and building a platform around
+                    authentic conversations and storytelling.
+                </p>
+
+            </div>
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <div class="timeline-year">CROW RULES TV</div>
+
+                <h3>The Network Takes Shape</h3>
+
+                <p>
+                    The vision expanded into CrowRules TV, creating a
+                    dedicated home for shows, episodes, scheduled programming,
+                    live events and independent creators.
+                </p>
+
+            </div>
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <div class="timeline-year">THE COMMUNITY</div>
+
+                <h3>Creators & Members</h3>
+
+                <p>
+                    Membership, creator channels, community interaction,
+                    digital archives and new entertainment branches became
+                    part of the larger ecosystem.
+                </p>
+
+            </div>
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <div class="timeline-year">THE FUTURE</div>
+
+                <h3>Building the Network</h3>
+
+                <p>
+                    CrowRules Entertainment continues toward a larger
+                    independent entertainment network connecting television,
+                    creators, stories, music, community and technology.
+                </p>
+
+            </div>
+
+        </div>
 
     </div>
-
-    <button class="more">
-      RANKINGS →
-    </button>
-
-  </div>
-
-  <div
-    class="cards"
-    id="episodesList"
-  >
-
-    <div class="loading">
-      LOADING EPISODES...
-    </div>
-
-  </div>
 
 </section>
 
+<!-- ======================================================
+     BRANCHES
+====================================================== -->
 
-<!-- =====================================================
-     TOP CHANNELS
-===================================================== -->
+<section id="branches">
 
-<section
-  class="section"
-  id="channels"
->
+    <div class="container">
 
-  <div class="section-head">
+        <div class="section-heading">
 
-    <div>
+            <div class="eyebrow">The CrowRules Universe</div>
 
-      <div class="section-title">
-        📡 THE AIRSPACE
-      </div>
+            <h2>Our Branches</h2>
 
-      <div class="section-desc">
-        CrowRules TV channels currently available.
-      </div>
+            <p>
+                Explore the growing collection of CrowRules Entertainment
+                projects and destinations.
+            </p>
+
+        </div>
+
+        <div id="branchesGrid" class="branch-grid">
+
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+
+        </div>
 
     </div>
-
-  </div>
-
-  <div
-    class="airspace"
-    id="channelsList"
-  >
-
-    <div class="loading">
-      LOADING CHANNELS...
-    </div>
-
-  </div>
 
 </section>
 
+<!-- ======================================================
+     PROGRAMMING
+====================================================== -->
 
-<!-- =====================================================
-     NEW RELEASES
-===================================================== -->
+<section id="programming">
 
-<section
-  class="section"
-  id="new"
->
+    <div class="container">
 
-  <div class="section-head">
+        <div class="section-heading">
 
-    <div>
+            <div class="eyebrow">Watch & Listen</div>
 
-      <div class="section-title">
-        🛬 JUST LANDED
-      </div>
+            <h2>Featured Programming</h2>
 
-      <div class="section-desc">
-        The newest episodes landing in the Rookery.
-      </div>
+            <p>
+                Original programming and entertainment from across the
+                CrowRules ecosystem.
+            </p>
+
+        </div>
+
+        <div id="programGrid" class="program-grid">
+
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+
+        </div>
 
     </div>
-
-  </div>
-
-  <div
-    class="cards"
-    id="newList"
-  >
-
-    <div class="loading">
-      LOADING NEW RELEASES...
-    </div>
-
-  </div>
 
 </section>
 
+<!-- ======================================================
+     MEMORIAL
+====================================================== -->
 
-<!-- =====================================================
+<section id="memorial" class="memorial-section">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <div class="eyebrow">Remembering Those We've Lost</div>
+
+            <h2>In Memoriam</h2>
+
+            <p class="memorial-intro">
+                A respectful digital memorial honoring entertainers,
+                creators, performers and public figures whose lives and
+                work left an impact.
+            </p>
+
+        </div>
+
+        <div id="memorialGrid" class="memorial-grid">
+
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ======================================================
+     TACOMA
+====================================================== -->
+
+<section id="tacoma" class="tacoma">
+
+    <div class="container">
+
+        <div class="tacoma-card">
+
+            <div class="eyebrow">Pacific Northwest</div>
+
+            <h2>About Tacoma</h2>
+
+            <p>
+                Tacoma is more than a location for CrowRules Entertainment.
+                It is part of the identity behind the stories, conversations,
+                culture and community that inspire the network.
+            </p>
+
+            <br>
+
+            <p>
+                From the streets of Tacoma to the wider Pacific Northwest,
+                CrowRules aims to spotlight real people, real conversations,
+                local stories, mysteries, sports, creativity and the unique
+                character of the region.
+            </p>
+
+            <br>
+
+            <a
+                href="https://www.cityoftacoma.org/"
+                target="_blank"
+                rel="noopener"
+                class="btn btn-secondary">
+                Explore Tacoma
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ======================================================
      MEMBERS
-===================================================== -->
+====================================================== -->
 
-<section
-  class="section"
-  id="members"
->
+<section id="members" class="members-section">
 
-  <div class="section-head">
+    <div class="container">
 
-    <div>
+        <div class="section-heading center">
 
-      <div class="section-title">
-        🐦 THE CROW CIRCLE
-      </div>
+            <div class="eyebrow">Community</div>
 
-      <div class="section-desc">
-        The members helping build the network.
-      </div>
+            <h2>The CrowRules Community</h2>
+
+            <p>
+                Members are part of the larger CrowRules Entertainment
+                community and help shape the future of the network.
+            </p>
+
+            <br>
+
+            <button class="btn btn-primary" id="joinButton">
+                Join CrowRules
+            </button>
+
+        </div>
+
+        <div id="memberGrid" class="member-grid">
+
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+
+        </div>
 
     </div>
-
-  </div>
-
-
-  <div class="members">
-
-    <div
-      class="member-panel"
-      id="membersList"
-    >
-
-      <div class="loading">
-        LOADING MEMBERS...
-      </div>
-
-    </div>
-
-
-    <div class="roost">
-
-      <div class="eyebrow">
-        🪶 MEMBER SPACE
-      </div>
-
-      <h2>
-        MY ROOST
-      </h2>
-
-      <p id="memberStatus">
-        Checking your CrowRules membership...
-      </p>
-
-
-      <div class="roost-grid">
-
-        <div class="roost-item">
-          <b>▶ RESUME FLIGHT</b>
-          <p>
-            Continue watching where you stopped.
-          </p>
-        </div>
-
-        <div class="roost-item">
-          <b>❤️ SAVED FLIGHTS</b>
-          <p>
-            Your favorite CrowRules content.
-          </p>
-        </div>
-
-        <div class="roost-item">
-          <b>🏆 ACHIEVEMENTS</b>
-          <p>
-            Member points and milestones.
-          </p>
-        </div>
-
-        <div class="roost-item">
-          <b>🔔 THE SIGNAL</b>
-          <p>
-            Personal network notifications.
-          </p>
-        </div>
-
-      </div>
-
-
-      <div
-        class="resume"
-        id="resumeBox"
-      >
-
-        <div class="resume-head">
-
-          <span id="resumeTitle">
-            No active flight
-          </span>
-
-          <span id="resumePercent">
-            --
-          </span>
-
-        </div>
-
-        <div class="progress">
-
-          <i
-            id="resumeProgress"
-            style="width:0%"
-          ></i>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
 
 </section>
 
+<!-- ======================================================
+     NEWSLETTER
+====================================================== -->
 
-<!-- =====================================================
-     RANDOM
-===================================================== -->
+<section class="newsletter">
 
-<section class="random">
+    <div class="container">
 
-  <div class="eyebrow">
-    🎲 RANDOM TRANSMISSION
-  </div>
+        <div class="newsletter-box">
 
-  <h2>
-    FLY SOMETHING RANDOM
-  </h2>
+            <div>
 
-  <p>
-    Let the Crow choose something from the live catalog.
-  </p>
+                <div class="eyebrow">Stay Connected</div>
 
-  <button
-    class="primary"
-    id="randomBtn"
-  >
-    🐦 TAKE ME SOMEWHERE
-  </button>
+                <h2>Join the CrowRules Newsletter</h2>
 
-</section>
+                <p>
+                    Get updates about shows, live events, creators and
+                    new CrowRules Entertainment projects.
+                </p>
 
+            </div>
 
-<!-- =====================================================
-     MIDNIGHT
-===================================================== -->
+            <form id="newsletterForm" class="newsletter-form">
 
-<section class="section">
+                <input
+                    id="newsletterEmail"
+                    type="email"
+                    placeholder="Your email address"
+                    required>
 
-  <div class="midnight">
+                <button class="btn btn-primary" type="submit">
+                    Subscribe
+                </button>
 
-    <div>
+            </form>
 
-      <div class="eyebrow">
-        ⚠ SPECIAL TRANSMISSION
-      </div>
-
-      <h2>
-        THE MIDNIGHT SIGNAL
-      </h2>
-
-      <p>
-        Special broadcasts, mysteries and late-night transmissions.
-      </p>
+        </div>
 
     </div>
-
-    <div
-      class="countdown"
-      id="midnightCountdown"
-    >
-      00:00:00
-    </div>
-
-  </div>
 
 </section>
 
 </main>
 
+<!-- ======================================================
+     FOOTER
+====================================================== -->
 
 <footer>
 
-  <strong>CROWRULES TV</strong>
+    <div class="container">
 
-  <br><br>
+        <div class="footer-grid">
 
-  THE ROOKERY • 24/7 INDEPENDENT BROADCAST NETWORK
+            <div class="footer-brand">
 
-  <br><br>
+                <div class="brand">
 
-  © <span id="year"></span>
-  CrowRules Entertainment
+                    <div class="brand-crow">🐦‍⬛</div>
+
+                    <div class="brand-text">
+                        CROWRULES
+                        <span>ENTERTAINMENT</span>
+                    </div>
+
+                </div>
+
+                <p>
+                    Independent entertainment media.
+                    Original stories. Independent creators.
+                    A growing network from the Pacific Northwest.
+                </p>
+
+            </div>
+
+            <div class="footer-col">
+
+                <h4>EXPLORE</h4>
+
+                <a href="#about">About</a>
+                <a href="#vision">Vision</a>
+                <a href="#history">History</a>
+                <a href="#branches">Branches</a>
+
+            </div>
+
+            <div class="footer-col">
+
+                <h4>NETWORK</h4>
+
+                <a href="#programming">Programming</a>
+                <a href="#members">Members</a>
+                <a href="#memorial">In Memoriam</a>
+                <a href="#tacoma">Tacoma</a>
+
+            </div>
+
+            <div class="footer-col">
+
+                <h4>CONNECT</h4>
+
+                <a
+                    id="youtubeLink"
+                    href="https://www.youtube.com/@CrowRules_TV"
+                    target="_blank"
+                    rel="noopener">
+                    YouTube
+                </a>
+
+                <a
+                    id="facebookLink"
+                    href="#"
+                    target="_blank"
+                    rel="noopener">
+                    Facebook
+                </a>
+
+                <a
+                    id="instagramLink"
+                    href="#"
+                    target="_blank"
+                    rel="noopener">
+                    Instagram
+                </a>
+
+                <a href="#members">
+                    Join the Community
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+
+            <span>
+                © <span id="currentYear"></span> CrowRules Entertainment.
+                All rights reserved.
+            </span>
+
+            <span>
+                Built independently in Tacoma, Washington.
+            </span>
+
+        </div>
+
+    </div>
 
 </footer>
 
+<!-- ======================================================
+     MEMBER MODAL
+====================================================== -->
 
-<!-- =====================================================
-     SEARCH
-===================================================== -->
+<div class="modal" id="authModal">
 
-<div
-  class="modal"
-  id="searchModal"
->
+    <div class="modal-box">
 
-  <div class="modal-box">
-
-    <div class="modal-head">
-
-      <h2>
-        SEARCH THE ROOKERY
-      </h2>
-
-      <button
-        class="close"
-        data-close="searchModal"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div class="search-box">
-
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Search shows, episodes, channels..."
-        autocomplete="off"
-      >
-
-    </div>
-
-    <div id="searchResults"></div>
-
-  </div>
-
-</div>
-
-
-<!-- =====================================================
-     MEMBER AUTH
-===================================================== -->
-
-<div
-  class="modal"
-  id="memberModal"
->
-
-  <div class="modal-box">
-
-    <div class="modal-head">
-
-      <h2>
-        🪶 MY ROOST
-      </h2>
-
-      <button
-        class="close"
-        data-close="memberModal"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div id="authContent">
-
-      <p
-        style="
-        color:#aaa;
-        font-size:11px;
-        line-height:1.7;
-        "
-      >
-        Sign in to access your CrowRules member space.
-      </p>
-
-      <form
-        class="auth-form"
-        id="loginForm"
-      >
-
-        <input
-          type="email"
-          id="loginEmail"
-          placeholder="Email address"
-          required
-        >
-
-        <button
-          class="primary"
-          type="submit"
-        >
-          SEND MAGIC LOGIN LINK
+        <button class="modal-close" id="modalClose">
+            ×
         </button>
 
-      </form>
+        <h2 id="authTitle">
+            Member Login
+        </h2>
+
+        <p id="authSubtitle">
+            Sign in to your CrowRules Entertainment account.
+        </p>
+
+        <form id="authForm" class="auth-form">
+
+            <input
+                id="authEmail"
+                type="email"
+                placeholder="Email address"
+                required>
+
+            <input
+                id="authPassword"
+                type="password"
+                placeholder="Password"
+                required>
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+                Sign In
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="signupToggle">
+                Create Account
+            </button>
+
+            <div class="auth-message" id="authMessage"></div>
+
+        </form>
 
     </div>
-
-  </div>
 
 </div>
-
-
-<!-- =====================================================
-     GUIDE
-===================================================== -->
-
-<div
-  class="modal"
-  id="guideModal"
->
-
-  <div class="modal-box">
-
-    <div class="modal-head">
-
-      <h2>
-        📡 LIVE AIRWAVE GUIDE
-      </h2>
-
-      <button
-        class="close"
-        data-close="guideModal"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div id="guideList">
-
-      <div class="loading">
-        LOADING GUIDE...
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<div
-  class="toast"
-  id="toast"
-></div>
-
 
 <script>
-
-"use strict";
-
-
-/* =====================================================
-   SUPABASE CONFIGURATION
-===================================================== */
+/* =========================================================
+   CROWRULES ENTERTAINMENT
+   SUPABASE CONNECTION
+========================================================= */
 
 const SUPABASE_URL =
-  "https://zauxdqyssratvzmomozf.supabase.co";
+    "https://zauxdqyssratvzmomozf.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
+    "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
 
-const supabaseClient =
-  window.supabase.createClient(
+const { createClient } = supabase;
+
+const db = createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
-  );
+);
 
 
-/* =====================================================
-   GLOBAL STATE
-===================================================== */
-
-let currentNowPlaying = null;
-let currentChannels = [];
-let currentEpisodes = [];
-let currentShows = [];
-let currentGuide = [];
-let currentUser = null;
-
-
-/* =====================================================
+/* =========================================================
    HELPERS
-===================================================== */
+========================================================= */
+
+const $ = id => document.getElementById(id);
 
 function escapeHTML(value){
+    if(value === null || value === undefined) return "";
 
-  if(value === null || value === undefined){
-    return "";
-  }
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
 
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+function formatDate(value){
+
+    if(!value) return "";
+
+    const date = new Date(value);
+
+    if(Number.isNaN(date.getTime())){
+        return value;
+    }
+
+    return date.toLocaleDateString(
+        undefined,
+        {
+            year:"numeric",
+            month:"short",
+            day:"numeric"
+        }
+    );
+}
+
+function fallbackImage(text){
+
+    return `
+        <div style="
+            font-family:Orbitron;
+            font-size:11px;
+            color:#777;
+            text-align:center;
+            padding:20px;">
+            ${escapeHTML(text || "CROW")}
+        </div>
+    `;
 }
 
 
-function formatViews(value){
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-  const n = Number(value || 0);
+$("menuBtn").addEventListener("click",()=>{
 
-  if(n >= 1000000){
-    return (n/1000000).toFixed(1)+"M";
-  }
+    $("navLinks").classList.toggle("open");
 
-  if(n >= 1000){
-    return (n/1000).toFixed(1)+"K";
-  }
+});
 
-  return n.toLocaleString();
-}
+document.querySelectorAll(".nav-links a").forEach(link=>{
 
+    link.addEventListener("click",()=>{
 
-function formatDuration(seconds){
+        $("navLinks").classList.remove("open");
 
-  const total = Number(seconds || 0);
+    });
 
-  if(!total){
-    return "";
-  }
-
-  const minutes =
-    Math.floor(total / 60);
-
-  const secs =
-    total % 60;
-
-  return (
-    minutes +
-    ":" +
-    String(secs).padStart(2,"0")
-  );
-}
+});
 
 
-function showToast(message){
+/* =========================================================
+   SETTINGS
+========================================================= */
 
-  const toast =
-    document.getElementById("toast");
+async function loadSettings(){
 
-  toast.textContent = message;
-
-  toast.classList.add("show");
-
-  clearTimeout(window.__toastTimer);
-
-  window.__toastTimer =
-    setTimeout(()=>{
-      toast.classList.remove("show");
-    },2800);
-}
-
-
-function openModal(id){
-
-  document
-    .getElementById(id)
-    .classList.add("open");
-
-}
-
-
-function closeModal(id){
-
-  document
-    .getElementById(id)
-    .classList.remove("open");
-
-}
-
-
-/* =====================================================
-   TOP SHOWS
-   Existing Supabase view:
-   top_shows
-===================================================== */
-
-async function loadTopShows(){
-
-  const container =
-    document.getElementById("showsList");
-
-  try{
-
-    const {data,error} =
-      await supabaseClient
-        .from("top_shows")
-        .select(`
-          id,
-          title,
-          slug,
-          description,
-          thumbnail_url,
-          banner_url,
-          category,
-          episode_count,
-          total_views,
-          latest_episode_at
-        `)
-        .limit(12);
+    const {
+        data,
+        error
+    } = await db
+        .from("crowrules_entertainment_settings")
+        .select("*")
+        .limit(1)
+        .maybeSingle();
 
     if(error){
-      throw error;
+
+        console.warn(
+            "CrowRules settings:",
+            error.message
+        );
+
+        return;
+
     }
 
-    currentShows = data || [];
+    if(!data) return;
 
-    if(!currentShows.length){
+    if(data.brand_name){
 
-      container.innerHTML =
-        `<div class="loading">
-          NO SHOWS AVAILABLE
-        </div>`;
+        $("heroBrand").textContent =
+            data.brand_name;
 
-      return;
+        document.title =
+            data.brand_name +
+            " | Independent Entertainment Media Company";
+
     }
 
-    container.innerHTML =
-      currentShows.map((show,index)=>{
+    if(data.tagline){
 
-        const image =
-          show.thumbnail_url ||
-          show.banner_url ||
-          "";
+        $("heroTagline").textContent =
+            data.tagline;
 
-        const imageStyle =
-          image
-            ? `style="background-image:url('${escapeHTML(image)}')"`
-            : "";
+    }
 
-        return `
+    if(data.about_text){
 
-          <article
-            class="card"
-            data-show-id="${escapeHTML(show.id)}"
-            data-title="${escapeHTML(show.title)}"
-          >
+        $("aboutText").textContent =
+            data.about_text;
 
-            <div
-              class="thumb ${image ? "has-image" : ""}"
-              ${imageStyle}
-            >
+    }
 
-              <span class="rank">
-                ${String(index+1).padStart(2,"0")}
-              </span>
+    if(data.vision){
 
-              <span class="badge">
-                ${escapeHTML(show.category || "SHOW")}
-              </span>
+        $("visionText").textContent =
+            data.vision;
 
-              <span class="thumb-title">
-                ${escapeHTML(show.title)}
-              </span>
+    }
 
-            </div>
+    if(data.youtube_url){
 
-            <div class="card-body">
+        $("youtubeLink").href =
+            data.youtube_url;
 
-              <strong>
-                ${escapeHTML(show.title)}
-              </strong>
+    }
 
-              <p>
-                ${escapeHTML(
-                  show.episode_count || 0
-                )}
-                episodes
-                •
-                ${formatViews(show.total_views)}
-                views
-              </p>
+    if(data.facebook_url){
 
-              <p>
-                ${escapeHTML(
-                  show.description ||
-                  "CrowRules TV original programming."
-                )}
-              </p>
+        $("facebookLink").href =
+            data.facebook_url;
 
-            </div>
+    }
 
-          </article>
+    if(data.instagram_url){
 
-        `;
+        $("instagramLink").href =
+            data.instagram_url;
 
-      }).join("");
-
-  }catch(error){
-
-    console.error(
-      "Top shows:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="error">
-        Unable to load top shows.
-      </div>`;
-  }
+    }
 
 }
 
 
-/* =====================================================
-   TOP EPISODES
-   Existing Supabase view:
-   top_episodes
-===================================================== */
+/* =========================================================
+   BRANCHES
+========================================================= */
 
-async function loadTopEpisodes(){
+async function loadBranches(){
 
-  const container =
-    document.getElementById("episodesList");
-
-  try{
-
-    const {data,error} =
-      await supabaseClient
-        .from("top_episodes")
-        .select(`
-          id,
-          show_id,
-          show_title,
-          title,
-          description,
-          thumbnail_url,
-          views,
-          published_at,
-          duration_seconds
-        `)
-        .order("views",{ascending:false})
-        .limit(12);
+    const {
+        data,
+        error
+    } = await db
+        .from("crowrules_branches")
+        .select("*")
+        .eq("is_active",true)
+        .order("sort_order",{ascending:true});
 
     if(error){
-      throw error;
+
+        console.error(
+            "Branches:",
+            error.message
+        );
+
+        $("branchesGrid").innerHTML =
+            `<div class="panel">
+                Unable to load CrowRules branches.
+            </div>`;
+
+        return;
+
     }
 
-    currentEpisodes = data || [];
+    $("branchCount").textContent =
+        data?.length || 0;
 
-    if(!currentEpisodes.length){
+    if(!data?.length){
 
-      container.innerHTML =
-        `<div class="loading">
-          NO EPISODES AVAILABLE
-        </div>`;
+        $("branchesGrid").innerHTML =
+            `<div class="panel">
+                More CrowRules branches are coming soon.
+            </div>`;
 
-      return;
+        return;
+
     }
 
-    container.innerHTML =
-      currentEpisodes.map((episode,index)=>{
+    $("branchesGrid").innerHTML =
+        data.map(branch=>{
 
-        const image =
-          episode.thumbnail_url || "";
+            const url =
+                branch.url || "#";
 
-        const imageStyle =
-          image
-            ? `style="background-image:url('${escapeHTML(image)}')"`
-            : "";
+            const target =
+                url.startsWith("http")
+                ? `target="_blank" rel="noopener"`
+                : "";
 
-        return `
+            return `
+                <article class="branch-card">
 
-          <article
-            class="card"
-            data-episode-id="${escapeHTML(episode.id)}"
-          >
+                    <div class="branch-icon">
+                        ${escapeHTML(branch.icon || "🪶")}
+                    </div>
 
-            <div
-              class="thumb ${image ? "has-image" : ""}"
-              ${imageStyle}
-            >
+                    <h3>
+                        ${escapeHTML(branch.name)}
+                    </h3>
 
-              <span class="rank">
-                ${String(index+1).padStart(2,"0")}
-              </span>
+                    <p>
+                        ${escapeHTML(
+                            branch.description ||
+                            "A CrowRules Entertainment project."
+                        )}
+                    </p>
 
-              <span class="badge">
-                TOP ${index+1}
-              </span>
+                    <a
+                        class="branch-link"
+                        href="${escapeHTML(url)}"
+                        ${target}>
+                        EXPLORE →
+                    </a>
 
-              <span class="thumb-title">
-                ${escapeHTML(
-                  episode.show_title ||
-                  "CrowRules TV"
-                )}
-              </span>
+                </article>
+            `;
 
-            </div>
-
-            <div class="card-body">
-
-              <strong>
-                ${escapeHTML(episode.title)}
-              </strong>
-
-              <p>
-                ${escapeHTML(
-                  episode.show_title || ""
-                )}
-              </p>
-
-              <p>
-                ${formatViews(episode.views)}
-                views
-                ${
-                  episode.duration_seconds
-                    ? " • "+
-                      formatDuration(
-                        episode.duration_seconds
-                      )
-                    : ""
-                }
-              </p>
-
-            </div>
-
-          </article>
-
-        `;
-
-      }).join("");
-
-  }catch(error){
-
-    console.error(
-      "Top episodes:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="error">
-        Unable to load top episodes.
-      </div>`;
-  }
+        }).join("");
 
 }
 
 
-/* =====================================================
-   TOP CHANNELS
-   Existing Supabase view:
-   top_channels
-===================================================== */
+/* =========================================================
+   SHOWS
+========================================================= */
+
+async function loadShows(){
+
+    const {
+        data,
+        error
+    } = await db
+        .from("shows")
+        .select(`
+            id,
+            title,
+            slug,
+            description,
+            thumbnail_url,
+            category,
+            status,
+            is_featured,
+            is_active,
+            published
+        `)
+        .eq("is_active",true)
+        .eq("published",true)
+        .order("is_featured",{ascending:false})
+        .order("sort_order",{ascending:true})
+        .limit(6);
+
+    if(error){
+
+        console.error(
+            "Shows:",
+            error.message
+        );
+
+        $("programGrid").innerHTML =
+            `<div class="panel">
+                Unable to load programming.
+            </div>`;
+
+        return;
+
+    }
+
+    $("showCount").textContent =
+        data?.length || 0;
+
+    if(!data?.length){
+
+        $("programGrid").innerHTML =
+            `<div class="panel">
+                Programming is being prepared.
+            </div>`;
+
+        return;
+
+    }
+
+    $("programGrid").innerHTML =
+        data.map(show=>{
+
+            const image = show.thumbnail_url
+                ? `<img
+                    src="${escapeHTML(show.thumbnail_url)}"
+                    alt="${escapeHTML(show.title)}"
+                    loading="lazy">`
+                : fallbackImage("CROWRULES TV");
+
+            return `
+                <article class="program-card">
+
+                    <div class="program-image">
+                        ${image}
+                    </div>
+
+                    <div class="program-body">
+
+                        <div class="program-category">
+                            ${escapeHTML(
+                                show.category ||
+                                "Original Programming"
+                            )}
+                        </div>
+
+                        <h3>
+                            ${escapeHTML(show.title)}
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                show.description ||
+                                "CrowRules original programming."
+                            )}
+                        </p>
+
+                    </div>
+
+                </article>
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   CHANNELS
+========================================================= */
 
 async function loadChannels(){
 
-  const container =
-    document.getElementById("channelsList");
-
-  try{
-
-    const {data,error} =
-      await supabaseClient
-        .from("top_channels")
-        .select(`
-          id,
-          name,
-          slug,
-          description,
-          logo_url,
-          banner_url,
-          channel_number,
-          is_active,
-          playlist_items,
-          schedule_items
-        `)
-        .limit(12);
+    const {
+        data,
+        error
+    } = await db
+        .from("tv_channels")
+        .select("id")
+        .eq("is_active",true);
 
     if(error){
-      throw error;
-    }
 
-    currentChannels = data || [];
-
-    if(!currentChannels.length){
-
-      container.innerHTML =
-        `<div class="loading">
-          NO CHANNELS AVAILABLE
-        </div>`;
-
-      return;
-    }
-
-    container.innerHTML =
-      currentChannels.map(channel=>`
-
-        <article
-          class="channel"
-          data-channel-id="${escapeHTML(channel.id)}"
-        >
-
-          <div class="channel-number">
-            CHANNEL
-            ${
-              channel.channel_number ??
-              "—"
-            }
-          </div>
-
-          <div
-            class="channel-status ${
-              channel.is_active
-                ? "active"
-                : ""
-            }"
-          >
-            ${
-              channel.is_active
-                ? "ACTIVE"
-                : "OFFLINE"
-            }
-          </div>
-
-          <h3>
-            ${escapeHTML(channel.name)}
-          </h3>
-
-          <p>
-            ${escapeHTML(
-              channel.description ||
-              "CrowRules TV channel."
-            )}
-          </p>
-
-          <button
-            class="secondary channel-watch"
-          >
-            TUNE IN
-          </button>
-
-        </article>
-
-      `).join("");
-
-  }catch(error){
-
-    console.error(
-      "Channels:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="error">
-        Unable to load channels.
-      </div>`;
-  }
-
-}
-
-
-/* =====================================================
-   NEW RELEASES
-   Existing Supabase catalog:
-   crowrules_tv_catalog
-===================================================== */
-
-async function loadNewReleases(){
-
-  const container =
-    document.getElementById("newList");
-
-  try{
-
-    const {data,error} =
-      await supabaseClient
-        .from("crowrules_tv_catalog")
-        .select(`
-          episode_id,
-          show_id,
-          show_title,
-          episode_number,
-          episode_title,
-          episode_description,
-          thumbnail_url,
-          youtube_url,
-          published_at,
-          category,
-          episode_status
-        `)
-        .order(
-          "published_at",
-          {ascending:false}
-        )
-        .limit(12);
-
-    if(error){
-      throw error;
-    }
-
-    if(!data || !data.length){
-
-      container.innerHTML =
-        `<div class="loading">
-          NO NEW RELEASES
-        </div>`;
-
-      return;
-    }
-
-    container.innerHTML =
-      data.map(item=>{
-
-        const image =
-          item.thumbnail_url || "";
-
-        const imageStyle =
-          image
-            ? `style="background-image:url('${escapeHTML(image)}')"`
-            : "";
-
-        return `
-
-          <article
-            class="card"
-            data-release-id="${escapeHTML(item.episode_id)}"
-          >
-
-            <div
-              class="thumb ${image ? "has-image" : ""}"
-              ${imageStyle}
-            >
-
-              <span class="badge">
-                NEW
-              </span>
-
-              <span class="thumb-title">
-                ${escapeHTML(
-                  item.show_title ||
-                  "CrowRules TV"
-                )}
-              </span>
-
-            </div>
-
-            <div class="card-body">
-
-              <strong>
-                ${escapeHTML(
-                  item.episode_title ||
-                  "New Episode"
-                )}
-              </strong>
-
-              <p>
-                ${escapeHTML(
-                  item.show_title || ""
-                )}
-                ${
-                  item.episode_number
-                    ? " • E"+
-                      item.episode_number
-                    : ""
-                }
-              </p>
-
-              <p>
-                ${escapeHTML(
-                  item.episode_description ||
-                  "Freshly landed."
-                )}
-              </p>
-
-            </div>
-
-          </article>
-
-        `;
-
-      }).join("");
-
-  }catch(error){
-
-    console.error(
-      "New releases:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="error">
-        Unable to load new releases.
-      </div>`;
-  }
-
-}
-
-
-/* =====================================================
-   NOW PLAYING
-   Existing Supabase view:
-   tv_channel_now_playing
-===================================================== */
-
-async function loadNowPlaying(){
-
-  try{
-
-    const {data,error} =
-      await supabaseClient
-        .from("tv_channel_now_playing")
-        .select(`
-          channel_id,
-          channel_name,
-          channel_slug,
-          logo_url,
-          banner_url,
-          stream_url,
-          stream_type,
-          autoplay,
-          schedule_item_id,
-          starts_at,
-          ends_at,
-          schedule_title,
-          schedule_description,
-          item_type,
-          episode_id,
-          show_id,
-          episode_title,
-          episode_description,
-          episode_thumbnail,
-          youtube_url,
-          video_url,
-          video_type,
-          playback_source,
-          playback_type,
-          playback_mode
-        `)
-        .limit(1);
-
-    if(error){
-      throw error;
-    }
-
-    currentNowPlaying =
-      data && data.length
-        ? data[0]
-        : null;
-
-    if(!currentNowPlaying){
-
-      document.getElementById(
-        "nowTitle"
-      ).textContent =
-        "CrowRules TV";
-
-      document.getElementById(
-        "nowMeta"
-      ).textContent =
-        "No current transmission";
-
-      return;
-    }
-
-    updateNowPlayingUI();
-
-  }catch(error){
-
-    console.error(
-      "Now playing:",
-      error
-    );
-
-    document.getElementById(
-      "signalStatus"
-    ).textContent =
-      "● DATABASE CONNECTED • NOW PLAYING UNAVAILABLE";
-
-    document.getElementById(
-      "signalStatus"
-    ).style.color =
-      "#ffc857";
-
-  }
-
-}
-
-
-function updateNowPlayingUI(){
-
-  const item =
-    currentNowPlaying;
-
-  if(!item){
-    return;
-  }
-
-  const title =
-    item.schedule_title ||
-    item.episode_title ||
-    item.channel_name ||
-    "CrowRules TV";
-
-  const meta =
-    [
-      item.channel_name,
-      item.episode_title
-    ]
-    .filter(Boolean)
-    .join(" • ");
-
-  document.getElementById(
-    "nowTitle"
-  ).textContent = title;
-
-  document.getElementById(
-    "nowMeta"
-  ).textContent =
-    meta ||
-    "Live CrowRules TV transmission";
-
-  updatePlayer(item);
-
-}
-
-
-/* =====================================================
-   PLAYER
-===================================================== */
-
-function updatePlayer(item){
-
-  const screen =
-    document.getElementById(
-      "playerScreen"
-    );
-
-  const stream =
-    item.stream_url ||
-    item.video_url ||
-    "";
-
-  const streamType =
-    (
-      item.stream_type ||
-      item.video_type ||
-      ""
-    ).toLowerCase();
-
-  const youtube =
-    item.youtube_url ||
-    "";
-
-  if(youtube){
-
-    const videoId =
-      extractYouTubeId(youtube);
-
-    if(videoId){
-
-      screen.innerHTML = `
-
-        <div class="screen-label">
-
-          <span class="live-pill">
-            <i class="dot"></i>
-            LIVE
-          </span>
-
-        </div>
-
-        <iframe
-          src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowfullscreen
-          title="CrowRules TV"
-        ></iframe>
-
-        <div class="screen-time">
-          24/7
-        </div>
-
-      `;
-
-      return;
-    }
-  }
-
-  if(stream){
-
-    if(
-      streamType.includes("youtube")
-    ){
-
-      const videoId =
-        extractYouTubeId(stream);
-
-      if(videoId){
-
-        screen.innerHTML = `
-
-          <div class="screen-label">
-
-            <span class="live-pill">
-              <i class="dot"></i>
-              LIVE
-            </span>
-
-          </div>
-
-          <iframe
-            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowfullscreen
-            title="CrowRules TV"
-          ></iframe>
-
-          <div class="screen-time">
-            24/7
-          </div>
-
-        `;
+        console.warn(
+            "Channels:",
+            error.message
+        );
 
         return;
-      }
+
     }
 
-    if(
-      streamType.includes("video") ||
-      stream.endsWith(".mp4") ||
-      stream.endsWith(".webm") ||
-      stream.endsWith(".m3u8")
-    ){
-
-      screen.innerHTML = `
-
-        <div class="screen-label">
-
-          <span class="live-pill">
-            <i class="dot"></i>
-            LIVE
-          </span>
-
-        </div>
-
-        <video
-          id="liveVideo"
-          autoplay
-          muted
-          playsinline
-          controls
-          controlsList="nodownload"
-          disablePictureInPicture
-          src="${escapeHTML(stream)}"
-        ></video>
-
-        <div class="screen-time">
-          24/7
-        </div>
-
-      `;
-
-      return;
-    }
-  }
-
-  screen.innerHTML = `
-
-    <div class="screen-label">
-
-      <span class="live-pill">
-        <i class="dot"></i>
-        LIVE
-      </span>
-
-    </div>
-
-    <div class="player-placeholder">
-
-      <div class="crow-big">
-        🐦
-      </div>
-
-      <strong>
-        ${escapeHTML(
-          item.channel_name ||
-          "CROWRULES TV"
-        )}
-      </strong>
-
-      <small>
-        ${escapeHTML(
-          item.schedule_title ||
-          item.episode_title ||
-          "Broadcast transmission"
-        )}
-      </small>
-
-    </div>
-
-    <div class="screen-time">
-      24/7
-    </div>
-
-  `;
+    $("channelCount").textContent =
+        data?.length || 0;
 
 }
 
 
-function extractYouTubeId(url){
+/* =========================================================
+   MEMORIAL
+========================================================= */
 
-  if(!url){
-    return null;
-  }
+async function loadMemorial(){
 
-  try{
-
-    const parsed =
-      new URL(url);
-
-    if(
-      parsed.hostname.includes(
-        "youtube.com"
-      )
-    ){
-
-      if(
-        parsed.pathname === "/watch"
-      ){
-        return parsed.searchParams.get("v");
-      }
-
-      if(
-        parsed.pathname.startsWith("/live/")
-      ){
-        return parsed.pathname
-          .split("/live/")[1]
-          .split("/")[0];
-      }
-
-      if(
-        parsed.pathname.startsWith("/embed/")
-      ){
-        return parsed.pathname
-          .split("/embed/")[1]
-          .split("/")[0];
-      }
-    }
-
-    if(
-      parsed.hostname === "youtu.be"
-    ){
-
-      return parsed.pathname
-        .replace("/","")
-        .split("/")[0];
-
-    }
-
-  }catch{
-
-    return null;
-
-  }
-
-  return null;
-}
-
-
-/* =====================================================
-   TV GUIDE
-   Existing Supabase view:
-   tv_guide
-===================================================== */
-
-async function loadGuide(){
-
-  try{
-
-    const {data,error} =
-      await supabaseClient
-        .from("tv_guide")
+    const {
+        data,
+        error
+    } = await db
+        .from("celebrity_deaths")
         .select(`
-          id,
-          channel_id,
-          channel_name,
-          channel_number,
-          show_id,
-          episode_id,
-          title,
-          description,
-          starts_at,
-          ends_at,
-          duration_seconds,
-          item_type,
-          status,
-          thumbnail_url,
-          video_url,
-          video_type,
-          youtube_url,
-          schedule_source,
-          source_id,
-          is_now,
-          is_upcoming,
-          is_past
+            id,
+            person_name,
+            date_of_birth,
+            date_of_death,
+            age_at_death,
+            profession,
+            known_for,
+            obituary_summary,
+            memorial_text,
+            image_url,
+            wikipedia_url,
+            official_source_url,
+            verification_status,
+            publication_status,
+            featured
         `)
-        .order(
-          "starts_at",
-          {ascending:true}
-        )
-        .limit(30);
+        .eq("verification_status","verified")
+        .eq("publication_status","published")
+        .order("featured",{ascending:false})
+        .order("date_of_death",{ascending:false})
+        .limit(8);
 
     if(error){
-      throw error;
+
+        console.error(
+            "Memorial:",
+            error.message
+        );
+
+        $("memorialGrid").innerHTML =
+            `<div class="panel">
+                The memorial database is currently unavailable.
+            </div>`;
+
+        return;
+
     }
 
-    currentGuide = data || [];
+    $("memorialCount").textContent =
+        data?.length || 0;
 
-    renderGuide();
+    if(!data?.length){
 
-  }catch(error){
+        $("memorialGrid").innerHTML =
+            `<div class="panel">
+                Memorial records will appear here as they are published.
+            </div>`;
 
-    console.error(
-      "TV guide:",
-      error
-    );
+        return;
 
-    document.getElementById(
-      "guideList"
-    ).innerHTML =
-      `<div class="error">
-        Unable to load the TV guide.
-      </div>`;
+    }
 
-  }
+    $("memorialGrid").innerHTML =
+        data.map(person=>{
 
-}
+            const image =
+                person.image_url
+                ? `<img
+                    src="${escapeHTML(person.image_url)}"
+                    alt="${escapeHTML(person.person_name)}"
+                    loading="lazy">`
+                : fallbackImage("IN MEMORIAM");
 
+            return `
+                <article class="memorial-card">
 
-function renderGuide(){
+                    <div class="memorial-image">
+                        ${image}
+                    </div>
 
-  const container =
-    document.getElementById(
-      "guideList"
-    );
+                    <div class="memorial-body">
 
-  if(!currentGuide.length){
+                        <h3>
+                            ${escapeHTML(
+                                person.person_name
+                            )}
+                        </h3>
 
-    container.innerHTML =
-      `<div class="loading">
-        NO PROGRAMMING FOUND
-      </div>`;
+                        <div class="memorial-date">
 
-    return;
-  }
+                            ${formatDate(
+                                person.date_of_birth
+                            )}
+                            –
+                            ${formatDate(
+                                person.date_of_death
+                            )}
 
-  container.innerHTML =
-    currentGuide.map(item=>{
+                            ${
+                                person.age_at_death
+                                ? ` · Age ${escapeHTML(
+                                    person.age_at_death
+                                  )}`
+                                : ""
+                            }
 
-      const start =
-        item.starts_at
-          ? new Date(
-              item.starts_at
-            ).toLocaleTimeString(
-              [],
-              {
-                hour:"numeric",
-                minute:"2-digit"
-              }
-            )
-          : "--";
+                        </div>
 
-      const end =
-        item.ends_at
-          ? new Date(
-              item.ends_at
-            ).toLocaleTimeString(
-              [],
-              {
-                hour:"numeric",
-                minute:"2-digit"
-              }
-            )
-          : "--";
+                        <p>
+                            ${escapeHTML(
+                                person.profession ||
+                                person.known_for ||
+                                person.obituary_summary ||
+                                person.memorial_text ||
+                                ""
+                            )}
+                        </p>
 
-      return `
+                    </div>
 
-        <div class="search-result">
+                </article>
+            `;
 
-          <strong>
-
-            ${escapeHTML(
-              item.channel_name ||
-              "CrowRules TV"
-            )}
-
-            •
-
-            ${escapeHTML(
-              item.title ||
-              "Programming"
-            )}
-
-          </strong>
-
-          <small>
-
-            ${start}
-            —
-            ${end}
-
-            ${
-              item.is_now
-                ? " • NOW PLAYING"
-                : item.is_upcoming
-                  ? " • UPCOMING"
-                  : ""
-            }
-
-          </small>
-
-        </div>
-
-      `;
-
-    }).join("");
+        }).join("");
 
 }
 
 
-/* =====================================================
-   TOP MEMBERS
-   Existing Supabase view:
-   top_members
-===================================================== */
+/* =========================================================
+   PUBLIC MEMBERS
+========================================================= */
 
-async function loadTopMembers(){
+async function loadMembers(){
 
-  const container =
-    document.getElementById(
-      "membersList"
-    );
+    /*
+       Public members are read from member_profiles.
+       RLS determines which profiles are publicly visible.
+    */
 
-  try{
-
-    const {data,error} =
-      await supabaseClient
-        .from("top_members")
+    const {
+        data,
+        error
+    } = await db
+        .from("member_profiles")
         .select(`
-          user_id,
-          display_name,
-          avatar_url,
-          membership_tier,
-          points,
-          level,
-          lifetime_points,
-          rank
+            id,
+            display_name,
+            username,
+            membership_tier,
+            avatar_url,
+            bio,
+            is_active
         `)
-        .order(
-          "rank",
-          {ascending:true}
-        )
-        .limit(10);
+        .eq("is_active",true)
+        .limit(6);
 
     if(error){
-      throw error;
-    }
 
-    if(!data || !data.length){
-
-      container.innerHTML =
-        `<div class="loading">
-          NO MEMBERS AVAILABLE
-        </div>`;
-
-      return;
-    }
-
-    container.innerHTML =
-      data.map((member,index)=>{
-
-        const avatar =
-          member.avatar_url;
-
-        return `
-
-          <div class="member-row">
-
-            <div class="avatar">
-
-              ${
-                avatar
-                  ? `
-                    <img
-                      src="${escapeHTML(avatar)}"
-                      alt=""
-                    >
-                  `
-                  : "🐦"
-              }
-
-            </div>
-
-            <div>
-
-              <strong>
-
-                ${
-                  Number(
-                    member.rank ||
-                    index+1
-                  )
-                }.
-
-                ${escapeHTML(
-                  member.display_name ||
-                  "Crow Member"
-                )}
-
-              </strong>
-
-              <small>
-
-                ${escapeHTML(
-                  member.membership_tier ||
-                  "Member"
-                )}
-
-                ${
-                  member.level
-                    ? " • Level "+
-                      member.level
-                    : ""
-                }
-
-              </small>
-
-            </div>
-
-            <div class="xp">
-
-              ${Number(
-                member.points ||
-                member.lifetime_points ||
-                0
-              ).toLocaleString()}
-
-              XP
-
-            </div>
-
-          </div>
-
-        `;
-
-      }).join("");
-
-  }catch(error){
-
-    console.error(
-      "Members:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="error">
-        Unable to load member rankings.
-      </div>`;
-
-  }
-
-}
-
-
-/* =====================================================
-   AUTH
-===================================================== */
-
-async function loadCurrentUser(){
-
-  const {
-    data
-  } =
-    await supabaseClient
-      .auth
-      .getUser();
-
-  currentUser =
-    data?.user ||
-    null;
-
-  updateMemberUI();
-
-  if(currentUser){
-
-    await loadWatchProgress();
-
-  }
-
-}
-
-
-function updateMemberUI(){
-
-  const status =
-    document.getElementById(
-      "memberStatus"
-    );
-
-  const button =
-    document.getElementById(
-      "memberBtn"
-    );
-
-  if(currentUser){
-
-    status.innerHTML = `
-
-      Welcome back.
-
-      <strong>
-        ${escapeHTML(
-          currentUser.email ||
-          "Crow Member"
-        )}
-      </strong>
-
-      <br><br>
-
-      Your Roost is connected to your CrowRules account.
-
-      <br><br>
-
-      <button
-        class="secondary"
-        id="signOutBtn"
-      >
-        SIGN OUT
-      </button>
-
-    `;
-
-    button.textContent =
-      "MY ROOST";
-
-    setTimeout(()=>{
-
-      const signOut =
-        document.getElementById(
-          "signOutBtn"
+        console.warn(
+            "Members:",
+            error.message
         );
 
-      if(signOut){
+        $("memberGrid").innerHTML =
+            `<div class="panel">
+                Member profiles will appear here.
+            </div>`;
 
-        signOut.addEventListener(
-          "click",
-          async ()=>{
+        return;
 
-            await supabaseClient
-              .auth
-              .signOut();
+    }
 
-            currentUser = null;
+    if(!data?.length){
 
-            updateMemberUI();
+        $("memberGrid").innerHTML =
+            `<div class="panel">
+                The CrowRules community is growing.
+                Become one of the first members.
+            </div>`;
 
-            closeModal(
-              "memberModal"
-            );
+        return;
 
-            showToast(
-              "Signed out of My Roost."
-            );
+    }
 
-          }
-        );
+    $("memberGrid").innerHTML =
+        data.map(member=>{
 
-      }
+            const avatar =
+                member.avatar_url
+                ? `<img
+                    src="${escapeHTML(member.avatar_url)}"
+                    alt="${escapeHTML(
+                        member.display_name ||
+                        member.username ||
+                        "Member"
+                    )}">`
+                : "👤";
 
-    },0);
+            return `
+                <article class="member-card">
 
-  }else{
+                    <div class="member-avatar">
+                        ${avatar}
+                    </div>
 
-    status.innerHTML = `
-      Sign in to unlock your personal
-      CrowRules TV Roost.
-    `;
+                    <h3>
+                        ${escapeHTML(
+                            member.display_name ||
+                            member.username ||
+                            "CrowRules Member"
+                        )}
+                    </h3>
 
-    button.textContent =
-      "MY ROOST";
+                    <div class="member-role">
+                        ${escapeHTML(
+                            member.membership_tier ||
+                            "Member"
+                        )}
+                    </div>
 
-  }
+                    <p>
+                        ${escapeHTML(
+                            member.bio ||
+                            "CrowRules Entertainment community member."
+                        )}
+                    </p>
+
+                </article>
+            `;
+
+        }).join("");
 
 }
 
 
-/* =====================================================
-   MAGIC LINK LOGIN
-===================================================== */
+/* =========================================================
+   AUTH MODAL
+========================================================= */
 
-document
-  .getElementById("loginForm")
-  .addEventListener(
+let signupMode = false;
+
+function openAuth(){
+
+    $("authModal").classList.add("open");
+
+}
+
+function closeAuth(){
+
+    $("authModal").classList.remove("open");
+
+    $("authMessage").textContent = "";
+
+}
+
+$("memberButton").addEventListener(
+    "click",
+    event=>{
+
+        event.preventDefault();
+
+        openAuth();
+
+    }
+);
+
+$("joinButton").addEventListener(
+    "click",
+    openAuth
+);
+
+$("modalClose").addEventListener(
+    "click",
+    closeAuth
+);
+
+$("authModal").addEventListener(
+    "click",
+    event=>{
+
+        if(event.target === $("authModal")){
+
+            closeAuth();
+
+        }
+
+    }
+);
+
+$("signupToggle").addEventListener(
+    "click",
+    ()=>{
+
+        signupMode = !signupMode;
+
+        $("authTitle").textContent =
+            signupMode
+            ? "Join CrowRules"
+            : "Member Login";
+
+        $("authSubtitle").textContent =
+            signupMode
+            ? "Create your CrowRules Entertainment member account."
+            : "Sign in to your CrowRules Entertainment account.";
+
+        $("signupToggle").textContent =
+            signupMode
+            ? "Back to Login"
+            : "Create Account";
+
+    }
+);
+
+
+/* =========================================================
+   AUTH SUBMIT
+========================================================= */
+
+$("authForm").addEventListener(
     "submit",
     async event=>{
 
-      event.preventDefault();
+        event.preventDefault();
 
-      const email =
-        document
-          .getElementById(
-            "loginEmail"
-          )
-          .value
-          .trim();
+        const email =
+            $("authEmail").value.trim();
 
-      if(!email){
-        return;
-      }
+        const password =
+            $("authPassword").value;
 
-      const redirectTo =
-        window.location.href
-          .split("#")[0];
+        $("authMessage").textContent =
+            signupMode
+            ? "Creating your account..."
+            : "Signing in...";
 
-      const {
-        error
-      } =
-        await supabaseClient
-          .auth
-          .signInWithOtp({
+        if(signupMode){
 
-            email,
+            const {
+                data,
+                error
+            } = await db.auth.signUp({
+                email,
+                password
+            });
 
-            options:{
-              emailRedirectTo:
-                redirectTo
+            if(error){
+
+                $("authMessage").textContent =
+                    error.message;
+
+                return;
+
             }
 
-          });
+            if(data.session){
 
-      if(error){
+                $("authMessage").textContent =
+                    "Account created. You are now signed in.";
 
-        showToast(
-          error.message
-        );
+            }else{
 
-        return;
-      }
+                $("authMessage").textContent =
+                    "Account created. Check your email if confirmation is required.";
 
-      showToast(
-        "Magic login link sent."
-      );
+            }
 
-      document.getElementById(
-        "loginForm"
-      ).innerHTML = `
+        }else{
 
-        <div
-          style="
-          padding:20px;
-          border:1px solid var(--line);
-          border-radius:12px;
-          text-align:center;
-          "
-        >
+            const {
+                error
+            } = await db.auth.signInWithPassword({
+                email,
+                password
+            });
 
-          <strong>
-            CHECK YOUR EMAIL
-          </strong>
+            if(error){
 
-          <p
-            style="
-            color:#aaa;
-            font-size:11px;
-            line-height:1.6;
-            "
-          >
-            A CrowRules login link has been sent to
-            ${escapeHTML(email)}.
-          </p>
+                $("authMessage").textContent =
+                    error.message;
 
-        </div>
+                return;
 
-      `;
+            }
+
+            $("authMessage").textContent =
+                "Login successful.";
+
+            setTimeout(
+                closeAuth,
+                700
+            );
+
+        }
 
     }
-  );
+);
 
 
-/* =====================================================
+/* =========================================================
    AUTH STATE
-===================================================== */
+========================================================= */
 
-supabaseClient
-  .auth
-  .onAuthStateChange(
-    async (_event,session)=>{
-
-      currentUser =
-        session?.user ||
-        null;
-
-      updateMemberUI();
-
-      if(currentUser){
-
-        await loadWatchProgress();
-
-      }
-
-    }
-  );
-
-
-/* =====================================================
-   WATCH PROGRESS
-   Existing Supabase table:
-   watch_progress
-===================================================== */
-
-async function loadWatchProgress(){
-
-  if(!currentUser){
-    return;
-  }
-
-  try{
+async function updateAuthUI(){
 
     const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("watch_progress")
-        .select(`
-          episode_id,
-          progress_seconds,
-          duration_seconds,
-          completed,
-          updated_at
-        `)
-        .eq(
-          "user_id",
-          currentUser.id
-        )
-        .eq(
-          "completed",
-          false
-        )
-        .order(
-          "updated_at",
-          {ascending:false}
-        )
-        .limit(1);
+        data
+    } = await db.auth.getSession();
 
-    if(error){
-      throw error;
+    const session =
+        data?.session;
+
+    if(session){
+
+        $("memberButton").textContent =
+            "Member Account";
+
+        $("memberButton").dataset.loggedIn =
+            "true";
+
+    }else{
+
+        $("memberButton").textContent =
+            "Member Login";
+
+        $("memberButton").dataset.loggedIn =
+            "false";
+
     }
-
-    if(!data || !data.length){
-
-      document.getElementById(
-        "resumeTitle"
-      ).textContent =
-        "No active flight";
-
-      document.getElementById(
-        "resumePercent"
-      ).textContent =
-        "--";
-
-      return;
-    }
-
-    const progress =
-      data[0];
-
-    const seconds =
-      Number(
-        progress.progress_seconds ||
-        0
-      );
-
-    const duration =
-      Number(
-        progress.duration_seconds ||
-        0
-      );
-
-    const percentage =
-      duration
-        ? Math.min(
-            100,
-            Math.round(
-              seconds /
-              duration *
-              100
-            )
-          )
-        : 0;
-
-    document.getElementById(
-      "resumeTitle"
-    ).textContent =
-      "Episode "+progress.episode_id;
-
-    document.getElementById(
-      "resumePercent"
-    ).textContent =
-      percentage+"% WATCHED";
-
-    document.getElementById(
-      "resumeProgress"
-    ).style.width =
-      percentage+"%";
-
-  }catch(error){
-
-    console.warn(
-      "Watch progress:",
-      error
-    );
-
-  }
 
 }
 
+db.auth.onAuthStateChange(
+    (_event,_session)=>{
 
-/* =====================================================
-   SEARCH
-===================================================== */
-
-function buildSearchIndex(){
-
-  const results = [
-
-    ...currentShows.map(show=>({
-
-      name:show.title,
-
-      type:"SHOW",
-
-      description:
-        show.description ||
-        ""
-
-    })),
-
-    ...currentEpisodes.map(ep=>({
-
-      name:ep.title,
-
-      type:"EPISODE",
-
-      description:
-        (
-          ep.show_title ||
-          ""
-        )+
-        " • "+
-        (
-          ep.description ||
-          ""
-        )
-
-    })),
-
-    ...currentChannels.map(channel=>({
-
-      name:channel.name,
-
-      type:"CHANNEL",
-
-      description:
-        channel.description ||
-        ""
-
-    }))
-
-  ];
-
-  return results;
-
-}
-
-
-document
-  .getElementById("searchInput")
-  .addEventListener(
-    "input",
-    event=>{
-
-      const query =
-        event.target.value
-          .trim()
-          .toLowerCase();
-
-      const container =
-        document.getElementById(
-          "searchResults"
-        );
-
-      if(!query){
-
-        container.innerHTML =
-          `<p style="color:#777;font-size:11px">
-            Search the CrowRules TV universe.
-          </p>`;
-
-        return;
-
-      }
-
-      const results =
-        buildSearchIndex()
-          .filter(item=>
-            (
-              item.name+
-              " "+
-              item.description
-            )
-            .toLowerCase()
-            .includes(query)
-          );
-
-      if(!results.length){
-
-        container.innerHTML =
-          `<p style="color:#777;font-size:11px">
-            No transmission found.
-          </p>`;
-
-        return;
-
-      }
-
-      container.innerHTML =
-        results
-          .slice(0,20)
-          .map(item=>`
-
-            <div class="search-result">
-
-              <strong>
-                ${escapeHTML(
-                  item.name
-                )}
-              </strong>
-
-              <small>
-                ${escapeHTML(
-                  item.type
-                )}
-                •
-                ${escapeHTML(
-                  item.description
-                )}
-              </small>
-
-            </div>
-
-          `)
-          .join("");
+        updateAuthUI();
 
     }
-  );
+);
 
 
-/* =====================================================
-   NAVIGATION
-===================================================== */
+/* =========================================================
+   NEWSLETTER
+========================================================= */
 
-document
-  .querySelectorAll(
-    "[data-scroll]"
-  )
-  .forEach(button=>{
+$("newsletterForm").addEventListener(
+    "submit",
+    async event=>{
 
-    button.addEventListener(
-      "click",
-      ()=>{
+        event.preventDefault();
 
-        const target =
-          document.getElementById(
-            button.dataset.scroll
-          );
+        const email =
+            $("newsletterEmail").value
+                .trim()
+                .toLowerCase();
 
-        if(target){
+        if(!email) return;
 
-          target.scrollIntoView({
-            behavior:"smooth",
-            block:"start"
-          });
+        const button =
+            $("newsletterForm button");
+
+        button.disabled = true;
+
+        button.textContent =
+            "Saving...";
+
+        const {
+            error
+        } = await db
+            .from("newsletter_subscribers")
+            .upsert(
+                {
+                    email,
+                    status:"subscribed"
+                },
+                {
+                    onConflict:"email"
+                }
+            );
+
+        if(error){
+
+            alert(
+                "Unable to subscribe right now. Please try again."
+            );
+
+            console.error(
+                "Newsletter:",
+                error.message
+            );
+
+            button.disabled = false;
+            button.textContent = "Subscribe";
+
+            return;
 
         }
 
-      }
-    );
+        $("newsletterEmail").value = "";
 
-  });
+        button.textContent =
+            "Subscribed ✓";
 
-
-/* =====================================================
-   MODALS
-===================================================== */
-
-document
-  .querySelectorAll(
-    "[data-close]"
-  )
-  .forEach(button=>{
-
-    button.addEventListener(
-      "click",
-      ()=>{
-        closeModal(
-          button.dataset.close
-        );
-      }
-    );
-
-  });
-
-
-document
-  .querySelectorAll(".modal")
-  .forEach(modal=>{
-
-    modal.addEventListener(
-      "click",
-      event=>{
-
-        if(
-          event.target === modal
-        ){
-          modal.classList.remove(
-            "open"
-          );
-        }
-
-      }
-    );
-
-  });
-
-
-document
-  .getElementById("searchBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-
-      openModal(
-        "searchModal"
-      );
-
-      setTimeout(
-        ()=>{
-          document
-            .getElementById(
-              "searchInput"
-            )
-            .focus();
-        },
-        100
-      );
-
-    }
-  );
-
-
-document
-  .getElementById("memberBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-
-      openModal(
-        "memberModal"
-      );
-
-    }
-  );
-
-
-document
-  .getElementById("guideBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-
-      openModal(
-        "guideModal"
-      );
-
-    }
-  );
-
-
-/* =====================================================
-   WATCH LIVE
-===================================================== */
-
-document
-  .getElementById("watchLive")
-  .addEventListener(
-    "click",
-    ()=>{
-
-      document
-        .getElementById("live")
-        .scrollIntoView({
-          behavior:"smooth"
-        });
-
-      showToast(
-        "Tuned into CrowRules TV."
-      );
-
-    }
-  );
-
-
-/* =====================================================
-   CHANNEL HOP
-===================================================== */
-
-document
-  .getElementById("hopBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-
-      if(!currentChannels.length){
-
-        showToast(
-          "No channels are currently available."
+        setTimeout(
+            ()=>{
+                button.disabled = false;
+                button.textContent = "Subscribe";
+            },
+            2500
         );
 
-        return;
-      }
+    }
+);
 
-      const index =
-        Math.floor(
-          Math.random() *
-          currentChannels.length
+
+/* =========================================================
+   ANALYTICS
+========================================================= */
+
+async function recordPageView(){
+
+    try{
+
+        await db
+            .from("analytics_events")
+            .insert({
+                event_type:"page_view",
+                table_name:null,
+                record_id:null,
+                path:window.location.pathname,
+                referrer:document.referrer || null,
+                session_id:getSessionId(),
+                visitor_id:getVisitorId(),
+                user_agent:navigator.userAgent,
+                metadata:{
+                    page:"crowrules-entertainment-home"
+                }
+            });
+
+    }catch(error){
+
+        console.debug(
+            "Analytics unavailable:",
+            error.message
         );
 
-      const channel =
-        currentChannels[index];
-
-      document.getElementById(
-        "nowTitle"
-      ).textContent =
-        channel.name;
-
-      document.getElementById(
-        "nowMeta"
-      ).textContent =
-        channel.description ||
-        "CrowRules TV channel";
-
-      document
-        .getElementById("live")
-        .scrollIntoView({
-          behavior:"smooth"
-        });
-
-      showToast(
-        "Channel Hop → "+
-        channel.name
-      );
-
     }
-  );
 
+}
 
-/* =====================================================
-   RANDOM TRANSMISSION
-===================================================== */
+function getSessionId(){
 
-document
-  .getElementById("randomBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-
-      const pool = [
-
-        ...currentEpisodes.map(
-          episode=>
-            episode.title
-        ),
-
-        ...currentShows.map(
-          show=>
-            show.title
-        )
-
-      ];
-
-      if(!pool.length){
-
-        showToast(
-          "The catalog is still loading."
+    let id =
+        sessionStorage.getItem(
+            "crowrules_session_id"
         );
 
-        return;
+    if(!id){
 
-      }
+        id =
+            crypto.randomUUID();
 
-      const choice =
-        pool[
-          Math.floor(
-            Math.random() *
-            pool.length
-          )
-        ];
-
-      document.getElementById(
-        "nowTitle"
-      ).textContent =
-        choice;
-
-      document.getElementById(
-        "nowMeta"
-      ).textContent =
-        "Random transmission selected by the Crow";
-
-      document
-        .getElementById("live")
-        .scrollIntoView({
-          behavior:"smooth"
-        });
-
-      showToast(
-        "The Crow selected: "+
-        choice
-      );
+        sessionStorage.setItem(
+            "crowrules_session_id",
+            id
+        );
 
     }
-  );
 
-
-/* =====================================================
-   CHANNEL WATCH BUTTONS
-===================================================== */
-
-document.addEventListener(
-  "click",
-  event=>{
-
-    const button =
-      event.target.closest(
-        ".channel-watch"
-      );
-
-    if(!button){
-      return;
-    }
-
-    const channel =
-      button.closest(
-        ".channel"
-      );
-
-    if(!channel){
-      return;
-    }
-
-    const channelId =
-      channel.dataset.channelId;
-
-    const record =
-      currentChannels.find(
-        item=>
-          String(item.id) ===
-          String(channelId)
-      );
-
-    if(!record){
-      return;
-    }
-
-    document.getElementById(
-      "nowTitle"
-    ).textContent =
-      record.name;
-
-    document.getElementById(
-      "nowMeta"
-    ).textContent =
-      record.description ||
-      "CrowRules TV channel";
-
-    document
-      .getElementById("live")
-      .scrollIntoView({
-        behavior:"smooth"
-      });
-
-    showToast(
-      "Tuned into "+
-      record.name
-    );
-
-  }
-);
-
-
-/* =====================================================
-   LIVE CLOCK
-===================================================== */
-
-function updateClock(){
-
-  const now =
-    new Date();
-
-  const time =
-    now.toLocaleTimeString(
-      [],
-      {
-        hour:"2-digit",
-        minute:"2-digit",
-        second:"2-digit"
-      }
-    );
-
-  document.getElementById(
-    "clock"
-  ).textContent =
-    time;
+    return id;
 
 }
 
-setInterval(
-  updateClock,
-  1000
-);
+function getVisitorId(){
 
-updateClock();
+    let id =
+        localStorage.getItem(
+            "crowrules_visitor_id"
+        );
 
+    if(!id){
 
-/* =====================================================
-   MIDNIGHT COUNTDOWN
-===================================================== */
+        id =
+            crypto.randomUUID();
 
-function updateMidnight(){
+        localStorage.setItem(
+            "crowrules_visitor_id",
+            id
+        );
 
-  const now =
-    new Date();
+    }
 
-  const midnight =
-    new Date(now);
-
-  midnight.setHours(
-    24,
-    0,
-    0,
-    0
-  );
-
-  const diff =
-    midnight-now;
-
-  const hours =
-    Math.floor(
-      diff/3600000
-    );
-
-  const minutes =
-    Math.floor(
-      (diff%3600000)/60000
-    );
-
-  const seconds =
-    Math.floor(
-      (diff%60000)/1000
-    );
-
-  document.getElementById(
-    "midnightCountdown"
-  ).textContent =
-    String(hours).padStart(2,"0")+
-    ":"+
-    String(minutes).padStart(2,"0")+
-    ":"+
-    String(seconds).padStart(2,"0");
-
-}
-
-setInterval(
-  updateMidnight,
-  1000
-);
-
-updateMidnight();
-
-
-/* =====================================================
-   LIVE PROGRESS
-===================================================== */
-
-function updateProgramProgress(){
-
-  if(!currentNowPlaying){
-    return;
-  }
-
-  const start =
-    currentNowPlaying.starts_at
-      ? new Date(
-          currentNowPlaying.starts_at
-        ).getTime()
-      : null;
-
-  const end =
-    currentNowPlaying.ends_at
-      ? new Date(
-          currentNowPlaying.ends_at
-        ).getTime()
-      : null;
-
-  if(
-    !start ||
-    !end ||
-    end <= start
-  ){
-    return;
-  }
-
-  const now =
-    Date.now();
-
-  const percentage =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        (
-          (now-start)/
-          (end-start)
-        )*100
-      )
-    );
-
-  document.getElementById(
-    "nowProgress"
-  ).style.width =
-    percentage+"%";
-
-}
-
-setInterval(
-  updateProgramProgress,
-  1000
-);
-
-
-/* =====================================================
-   SUPABASE REALTIME
-=====================================================
-
-   This listens for changes so the homepage can
-   refresh the current broadcast without requiring
-   a manual page refresh.
-
-===================================================== */
-
-try{
-
-  supabaseClient
-    .channel(
-      "crowrules-tv-live"
-    )
-    .on(
-      "postgres_changes",
-      {
-        event:"*",
-        schema:"public",
-        table:"tv_channel_now_playing"
-      },
-      ()=>{
-        loadNowPlaying();
-      }
-    )
-    .subscribe();
-
-}catch(error){
-
-  console.warn(
-    "Realtime unavailable:",
-    error
-  );
+    return id;
 
 }
 
 
-/* =====================================================
-   PERIODIC DATA REFRESH
-===================================================== */
+/* =========================================================
+   INITIALIZE
+========================================================= */
 
-setInterval(
-  ()=>{
-    loadNowPlaying();
-    loadGuide();
-  },
-  30000
-);
+async function initialize(){
 
+    $("currentYear").textContent =
+        new Date().getFullYear();
 
-/* =====================================================
-   NON-DOWNLOAD PLAYER UI
-===================================================== */
-
-document.addEventListener(
-  "contextmenu",
-  event=>{
-
-    if(
-      event.target.closest(
-        ".player"
-      )
-    ){
-
-      event.preventDefault();
-
-    }
-
-  }
-);
-
-
-document.addEventListener(
-  "dragstart",
-  event=>{
-
-    if(
-      event.target.closest(
-        ".player"
-      )
-    ){
-
-      event.preventDefault();
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   ESCAPE KEY
-===================================================== */
-
-document.addEventListener(
-  "keydown",
-  event=>{
-
-    if(
-      event.key === "Escape"
-    ){
-
-      document
-        .querySelectorAll(
-          ".modal.open"
-        )
-        .forEach(modal=>{
-          modal.classList.remove(
-            "open"
-          );
-        });
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   INITIALIZATION
-===================================================== */
-
-async function initializeCrowRulesTV(){
-
-  document.getElementById(
-    "year"
-  ).textContent =
-    new Date().getFullYear();
-
-  document.getElementById(
-    "signalStatus"
-  ).textContent =
-    "● CONNECTING TO SUPABASE";
-
-  await Promise.allSettled([
-
-    loadNowPlaying(),
-
-    loadTopShows(),
-
-    loadTopEpisodes(),
-
-    loadChannels(),
-
-    loadNewReleases(),
-
-    loadTopMembers(),
-
-    loadGuide(),
-
-    loadCurrentUser()
-
-  ]);
-
-  document.getElementById(
-    "signalStatus"
-  ).textContent =
-    "● SUPABASE CONNECTED";
-
-  document.getElementById(
-    "signalStatus"
-  ).style.color =
-    "var(--green)";
+    await Promise.allSettled([
+        loadSettings(),
+        loadBranches(),
+        loadShows(),
+        loadChannels(),
+        loadMemorial(),
+        loadMembers(),
+        updateAuthUI(),
+        recordPageView()
+    ]);
 
 }
 
-initializeCrowRulesTV();
+initialize();
 
 </script>
 
