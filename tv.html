@@ -4,4226 +4,1007 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050505">
-
 <title>CrowRules TV — 24/7 Streaming Network</title>
-
-<meta
-  name="description"
-  content="CrowRules TV — independent 24/7 streaming television, original shows, channels, episodes, live events and Crow Rooms."
->
-
+<meta name="description" content="CrowRules TV — independent 24/7 streaming television, original shows, channels, episodes, TV guide and Crow Rooms.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap"
-  rel="stylesheet"
->
-
-<!-- Supabase -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- HLS playback -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <style>
-:root{
-  --bg:#050505;
-  --panel:#0c0c0f;
-  --panel2:#121216;
-  --panel3:#18181d;
-  --line:#28282f;
-  --text:#f5f5f7;
-  --muted:#96969f;
-  --muted2:#6d6d76;
-  --danger:#ff304f;
-  --success:#50e38c;
-  --warning:#ffc857;
-  --radius:18px;
-  --shadow:0 20px 60px rgba(0,0,0,.35);
-}
-
-*{
-  box-sizing:border-box;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  margin:0;
-  min-height:100vh;
-  background:
-    radial-gradient(circle at 10% 0%,rgba(255,255,255,.08),transparent 28rem),
-    radial-gradient(circle at 90% 10%,rgba(120,120,150,.07),transparent 30rem),
-    var(--bg);
-  color:var(--text);
-  font-family:Montserrat,system-ui,sans-serif;
-}
-
-button,
-input,
-select,
-textarea{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-button:disabled{
-  cursor:not-allowed;
-  opacity:.55;
-}
-
-a{
-  color:inherit;
-  text-decoration:none;
-}
-
-img{
-  max-width:100%;
-}
-
-.hidden{
-  display:none!important;
-}
-
-/* NAV */
-
-.nav{
-  position:sticky;
-  top:0;
-  z-index:100;
-  display:flex;
-  align-items:center;
-  gap:20px;
-  padding:14px 4vw;
-  background:rgba(5,5,5,.88);
-  backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(255,255,255,.07);
-}
-
-.logo{
-  font:800 20px Orbitron,sans-serif;
-  letter-spacing:1px;
-  white-space:nowrap;
-}
-
-.logo span{
-  color:#999;
-}
-
-.navlinks{
-  display:flex;
-  gap:17px;
-  flex:1;
-}
-
-.navlinks a{
-  color:#aaa;
-  font-size:12px;
-  font-weight:800;
-  transition:.2s;
-}
-
-.navlinks a:hover{
-  color:#fff;
-}
-
-.search{
-  width:220px;
-  background:#111116;
-  border:1px solid #2c2c33;
-  border-radius:999px;
-  padding:9px 14px;
-  color:#fff;
-  outline:none;
-}
-
-.search:focus{
-  border-color:#55555e;
-}
-
-.member-btn{
-  border:1px solid #33333b;
-  background:#18181d;
-  color:#fff;
-  border-radius:999px;
-  padding:9px 15px;
-  font-weight:800;
-}
-
-/* HERO */
-
-.hero{
-  min-height:600px;
-  position:relative;
-  display:flex;
-  align-items:end;
-  padding:80px 5vw 55px;
-  overflow:hidden;
-  border-bottom:1px solid #18181d;
-}
-
-.hero-art{
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(
-      90deg,
-      #050505 4%,
-      rgba(5,5,5,.78) 40%,
-      rgba(5,5,5,.28) 72%,
-      #050505 100%
-    ),
-    linear-gradient(
-      0deg,
-      #050505 0%,
-      transparent 65%
-    ),
-    radial-gradient(
-      ellipse at 75% 35%,
-      rgba(255,255,255,.14),
-      transparent 22rem
-    ),
-    linear-gradient(
-      120deg,
-      transparent 0 48%,
-      rgba(255,255,255,.035) 49% 50%,
-      transparent 51%
-    );
-}
-
-.hero-content{
-  position:relative;
-  z-index:2;
-  max-width:760px;
-}
-
-.eyebrow{
-  font:700 11px Orbitron,sans-serif;
-  letter-spacing:3px;
-  color:#bdbdc5;
-  margin-bottom:14px;
-}
-
-.live-dot{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-}
-
-.live-dot i{
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  background:var(--danger);
-  box-shadow:0 0 16px var(--danger);
-}
-
-.hero h1{
-  margin:0 0 16px;
-  font:800 clamp(42px,7vw,84px)/1 Orbitron,sans-serif;
-}
-
-.hero p{
-  max-width:680px;
-  color:#c4c4cb;
-  line-height:1.75;
-}
-
-.actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:25px;
-}
-
-/* BUTTONS */
-
-.primary,
-.ghost{
-  border-radius:999px;
-  padding:10px 17px;
-  font-weight:800;
-}
-
-.primary{
-  border:0;
-  background:#f2f2f3;
-  color:#050505;
-}
-
-.ghost{
-  background:#18181d;
-  color:#fff;
-  border:1px solid #34343c;
-}
-
-.primary:hover,
-.ghost:hover,
-.member-btn:hover{
-  filter:brightness(1.12);
-}
-
-/* MAIN */
-
-main{
-  padding:0 5vw 80px;
-}
-
-.section{
-  margin:38px 0;
-}
-
-.section-head{
-  display:flex;
-  align-items:end;
-  justify-content:space-between;
-  gap:15px;
-  margin-bottom:15px;
-}
-
-.section-head h2{
-  margin:0;
-  font:700 19px Orbitron,sans-serif;
-}
-
-.section-head span{
-  color:#777780;
-  font-size:11px;
-}
-
-/* CARDS */
-
-.rail{
-  display:grid;
-  grid-auto-flow:column;
-  grid-auto-columns:minmax(220px,25vw);
-  gap:14px;
-  overflow-x:auto;
-  padding:3px 2px 12px;
-  scrollbar-width:thin;
-}
-
-.card{
-  min-width:0;
-  overflow:hidden;
-  background:linear-gradient(145deg,#151519,#0a0a0d);
-  border:1px solid #25252c;
-  border-radius:var(--radius);
-  transition:.2s;
-}
-
-.card:hover{
-  transform:translateY(-3px);
-  border-color:#44444c;
-  box-shadow:var(--shadow);
-}
-
-.thumb{
-  position:relative;
-  aspect-ratio:16/9;
-  overflow:hidden;
-  display:grid;
-  place-items:center;
-  background:
-    radial-gradient(circle at 70% 30%,rgba(255,255,255,.16),transparent 25%),
-    linear-gradient(135deg,#25252c,#09090c);
-}
-
-.thumb img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.thumb::after{
-  content:"CROW";
-  position:absolute;
-  right:9px;
-  top:8px;
-  font:700 9px Orbitron,sans-serif;
-  color:#888;
-  letter-spacing:2px;
-  pointer-events:none;
-}
-
-.badge{
-  position:absolute;
-  z-index:3;
-  left:9px;
-  top:9px;
-  padding:5px 7px;
-  border-radius:6px;
-  background:#eee;
-  color:#050505;
-  font-size:9px;
-  font-weight:900;
-}
-
-.badge.live{
-  background:var(--danger);
-  color:#fff;
-}
-
-.card-body{
-  padding:13px;
-}
-
-.title{
-  font-size:14px;
-  font-weight:800;
-  line-height:1.35;
-}
-
-.meta{
-  margin-top:5px;
-  color:#8d8d97;
-  font-size:11px;
-  line-height:1.5;
-}
-
-.watch{
-  width:100%;
-  margin-top:11px;
-  padding:8px;
-  border-radius:10px;
-  border:1px solid #34343c;
-  background:#202027;
-  color:#fff;
-  font-size:11px;
-  font-weight:800;
-}
-
-/* UPCOMING */
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-
-.program{
-  padding:18px;
-}
-
-.program .time{
-  color:#aaa;
-  font:700 10px Orbitron;
-  letter-spacing:1px;
-  margin-bottom:12px;
-}
-
-.program.live{
-  border-color:#5c222d;
-}
-
-.program.live .time{
-  color:#ff5268;
-}
-
-/* GUIDE */
-
-.guide{
-  overflow:auto;
-  border:1px solid #27272e;
-  border-radius:16px;
-}
-
-.guide table{
-  width:100%;
-  min-width:800px;
-  border-collapse:collapse;
-}
-
-.guide th,
-.guide td{
-  padding:13px;
-  text-align:left;
-  border-bottom:1px solid #202026;
-  font-size:12px;
-}
-
-.guide th{
-  color:#777780;
-  font-weight:700;
-}
-
-.guide td{
-  color:#c9c9cf;
-}
-
-.guide .now{
-  color:#fff;
-  font-weight:800;
-}
-
-.live-label{
-  display:inline-block;
-  padding:3px 6px;
-  border-radius:5px;
-  background:var(--danger);
-  color:#fff;
-  font-size:8px;
-  font-weight:900;
-}
-
-/* CHAT */
-
-.chat-wrap{
-  display:grid;
-  grid-template-columns:270px 1fr;
-  min-height:560px;
-  overflow:hidden;
-  background:#0a0a0c;
-  border:1px solid #28282f;
-  border-radius:22px;
-}
-
-.rooms{
-  padding:17px;
-  background:#0c0c0f;
-  border-right:1px solid #28282f;
-}
-
-.rooms h3{
-  margin:0 0 15px;
-  font:700 13px Orbitron;
-}
-
-.room{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  padding:11px;
-  margin-bottom:4px;
-  border-radius:10px;
-  color:#aaa;
-  font-size:12px;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.room:hover,
-.room.active{
-  background:#1b1b20;
-  color:#fff;
-}
-
-.room-status{
-  color:#777;
-  font-size:9px;
-}
-
-.chat{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-}
-
-.chat-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:16px 20px;
-  border-bottom:1px solid #28282f;
-}
-
-.chat-title{
-  font-weight:800;
-}
-
-.messages{
-  flex:1;
-  min-height:350px;
-  overflow:auto;
-  padding:18px;
-}
-
-.msg{
-  margin-bottom:15px;
-}
-
-.msg strong{
-  font-size:12px;
-}
-
-.msg time{
-  margin-left:7px;
-  color:#666;
-  font-size:9px;
-}
-
-.msg p{
-  margin:4px 0 0;
-  color:#c4c4ca;
-  font-size:13px;
-  line-height:1.5;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-}
-
-.chat-input{
-  display:flex;
-  gap:8px;
-  padding:14px;
-  border-top:1px solid #28282f;
-}
-
-.chat-input input{
-  flex:1;
-  min-width:0;
-  padding:11px;
-  border-radius:12px;
-  border:1px solid #303039;
-  background:#15151a;
-  color:#fff;
-  outline:none;
-}
-
-.chat-input input:focus{
-  border-color:#55555e;
-}
-
-/* STATUS */
-
-.status{
-  position:fixed;
-  right:18px;
-  bottom:18px;
-  z-index:1000;
-  max-width:min(420px,calc(100vw - 36px));
-  padding:11px 14px;
-  border:1px solid #35353d;
-  border-radius:12px;
-  background:#16161a;
-  color:#ddd;
-  font-size:11px;
-  box-shadow:var(--shadow);
-  opacity:0;
-  transform:translateY(8px);
-  pointer-events:none;
-  transition:.25s;
-}
-
-.status.show{
-  opacity:1;
-  transform:none;
-}
-
-/* MODALS */
-
-.modal{
-  position:fixed;
-  inset:0;
-  z-index:500;
-  display:none;
-  place-items:center;
-  padding:20px;
-  background:rgba(0,0,0,.82);
-  backdrop-filter:blur(9px);
-}
-
-.modal.open{
-  display:grid;
-}
-
-.modal-box{
-  width:min(1050px,100%);
-  max-height:92vh;
-  overflow:auto;
-  background:#0c0c0f;
-  border:1px solid #35353d;
-  border-radius:20px;
-  box-shadow:var(--shadow);
-}
-
-.modal-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 18px;
-  border-bottom:1px solid #292930;
-}
-
-.close{
-  border:0;
-  background:none;
-  color:#aaa;
-  font-size:25px;
-}
-
-.player{
-  position:relative;
-  aspect-ratio:16/9;
-  background:#020202;
-  display:grid;
-  place-items:center;
-}
-
-.player video,
-.player iframe{
-  display:none;
-  width:100%;
-  height:100%;
-  border:0;
-  background:#000;
-}
-
-.player video.active,
-.player iframe.active{
-  display:block;
-}
-
-.player-fallback{
-  padding:30px;
-  text-align:center;
-  color:#666;
-  font:700 14px Orbitron;
-}
-
-.authbox{
-  padding:24px;
-}
-
-.authbox input{
-  display:block;
-  width:100%;
-  margin:9px 0;
-  padding:11px;
-  border-radius:10px;
-  border:1px solid #303039;
-  background:#15151a;
-  color:#fff;
-  outline:none;
-}
-
-.auth-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:13px;
-}
-
-/* CONNECTION PANEL */
-
-.connection{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  margin-top:18px;
-  color:#888;
-  font-size:10px;
-}
-
-.connection i{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#666;
-}
-
-.connection.ok i{
-  background:var(--success);
-  box-shadow:0 0 10px var(--success);
-}
-
-.connection.error i{
-  background:var(--danger);
-}
-
-/* FOOTER */
-
-.footer{
-  padding:50px 5vw;
-  border-top:1px solid #202025;
-  color:#707078;
-  font-size:11px;
-  line-height:1.7;
-}
-
-/* MOBILE */
-
-@media(max-width:1000px){
-
-  .navlinks{
-    display:none;
-  }
-
-  .grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .chat-wrap{
-    grid-template-columns:1fr;
-  }
-
-  .rooms{
-    display:flex;
-    gap:7px;
-    overflow-x:auto;
-    border-right:0;
-    border-bottom:1px solid #28282f;
-  }
-
-  .rooms h3{
-    display:none;
-  }
-
-  .room{
-    min-width:max-content;
-  }
-}
-
-@media(max-width:650px){
-
-  .search{
-    width:130px;
-  }
-
-  .hero{
-    min-height:530px;
-    padding:60px 6vw 40px;
-  }
-
-  main{
-    padding-left:4vw;
-    padding-right:4vw;
-  }
-
-  .grid{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .rail{
-    grid-auto-columns:72vw;
-  }
-
-  .search{
-    display:none;
-  }
-
-  .logo{
-    font-size:17px;
-  }
-}
+:root{--bg:#050505;--panel:#0c0c0f;--panel2:#141418;--line:#292930;--text:#f5f5f7;--muted:#92929c;--danger:#ff304f;--radius:18px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(255,255,255,.07),transparent 28rem),radial-gradient(circle at 85% 15%,rgba(130,130,150,.06),transparent 25rem),var(--bg);color:var(--text);font-family:Montserrat,system-ui,sans-serif}
+button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}
+a{color:inherit;text-decoration:none}
+.nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:22px;padding:14px 4vw;background:rgba(5,5,5,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.07)}
+.logo{font:800 20px Orbitron,sans-serif;letter-spacing:1px;white-space:nowrap}.logo span{color:#aaa}
+.navlinks{display:flex;gap:18px;flex:1}.navlinks a{font-size:12px;color:#aaa;font-weight:800}.navlinks a:hover{color:#fff}
+.search{width:210px;background:#111116;border:1px solid #2b2b31;border-radius:999px;padding:9px 14px;color:white;outline:none}
+.primary,.ghost{border-radius:999px;padding:10px 16px;font-weight:800}.primary{border:0;background:#f3f3f3;color:#050505}.ghost{background:#18181d;color:#fff;border:1px solid #303038}
+.hero{min-height:590px;display:flex;align-items:end;padding:70px 5vw 48px;position:relative;overflow:hidden}.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#050505 5%,rgba(5,5,5,.75) 42%,rgba(5,5,5,.15) 75%,#050505),linear-gradient(0deg,#050505 0%,transparent 55%)}.hero-art{position:absolute;inset:0;background:linear-gradient(120deg,transparent 0 48%,rgba(255,255,255,.035) 49% 50%,transparent 51%),radial-gradient(ellipse at 72% 35%,rgba(255,255,255,.12),transparent 20rem)}.hero-content{position:relative;max-width:720px}
+.eyebrow{font:700 12px Orbitron,sans-serif;letter-spacing:3px;color:#bbb;margin-bottom:15px}.live-dot{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#fff}.live-dot i{width:9px;height:9px;border-radius:50%;background:var(--danger);box-shadow:0 0 14px var(--danger)}
+h1{font:800 clamp(40px,7vw,82px) Orbitron,sans-serif;margin:0 0 14px;line-height:1.02}.hero p{color:#c0c0c8;max-width:650px;line-height:1.7}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+main{padding:0 5vw 80px}.section{margin:34px 0}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px}.section h2{font:700 20px Orbitron,sans-serif;margin:0}.section-head span{font-size:11px;color:#777}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(210px,25vw);gap:14px;overflow-x:auto;padding:3px 2px 12px}
+.card{background:linear-gradient(145deg,#151519,#0b0b0d);border:1px solid #25252b;border-radius:var(--radius);overflow:hidden;transition:.2s}.card:hover{transform:translateY(-3px);border-color:#44444d;box-shadow:0 18px 45px rgba(0,0,0,.3)}
+.thumb{aspect-ratio:16/9;position:relative;overflow:hidden;background:radial-gradient(circle at 70% 30%,rgba(255,255,255,.18),transparent 25%),linear-gradient(135deg,#24242b,#0b0b0d)}.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.thumb-label{position:absolute;left:10px;top:10px;z-index:3;background:#eee;color:#050505;padding:5px 7px;border-radius:7px;font-size:9px;font-weight:900}
+.card-body{padding:12px}.title{font-weight:800;font-size:14px}.meta{font-size:11px;color:#8f8f99;margin-top:5px}.watch{margin-top:10px;width:100%;background:#202027;color:white;border:1px solid #34343c;border-radius:10px;padding:8px;font-weight:800;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.chat-wrap{display:grid;grid-template-columns:270px 1fr;min-height:540px;background:#0a0a0c;border:1px solid #28282e;border-radius:22px;overflow:hidden}.rooms{border-right:1px solid #28282e;padding:18px;background:#0c0c0f}.rooms h3{font:700 14px Orbitron,sans-serif;margin:0 0 16px}.room{width:100%;display:flex;justify-content:space-between;gap:8px;padding:12px;border:0;border-radius:11px;background:transparent;color:#aaa;font-size:12px;font-weight:700;text-align:left}.room:hover,.room.active{background:#1b1b20;color:white}.online{color:#8f8f96;font-size:10px}
+.chat{display:flex;flex-direction:column;min-width:0}.chat-head{padding:16px 20px;border-bottom:1px solid #28282e;display:flex;justify-content:space-between}.chat-title{font-weight:800}.messages{flex:1;overflow:auto;padding:18px}.msg{margin-bottom:13px}.msg strong{font-size:12px}.msg time{font-size:9px;color:#666;margin-left:7px}.msg p{margin:4px 0 0;color:#c3c3c9;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.chat-input{display:flex;gap:8px;padding:14px;border-top:1px solid #28282e}.chat-input input{flex:1;background:#15151a;color:white;border:1px solid #303039;border-radius:12px;padding:11px;outline:none}
+.guide{overflow:auto;border:1px solid #27272d;border-radius:16px}.guide table{border-collapse:collapse;width:100%;min-width:760px}.guide th,.guide td{padding:13px;border-bottom:1px solid #202026;text-align:left;font-size:12px}.guide th{color:#888}.now{color:white;font-weight:800}.now b{display:inline-block;background:var(--danger);border-radius:5px;padding:3px 5px;font-size:9px;margin-right:5px}
+.footer{padding:50px 5vw;border-top:1px solid #202025;color:#777;font-size:12px}
+.status{position:fixed;right:18px;bottom:18px;z-index:500;background:#16161a;border:1px solid #33333b;border-radius:12px;padding:10px 13px;font-size:11px;color:#aaa;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;max-width:min(520px,90vw)}.status.show{opacity:1;transform:translateY(0)}
+.modal{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;place-items:center;padding:20px}.modal.open{display:grid}.modal-box{width:min(1000px,100%);max-height:90vh;overflow:auto;background:#0c0c0f;border:1px solid #33333a;border-radius:20px}.modal-top{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #27272d}.x{background:none;border:0;color:#aaa;font-size:24px}
+.player{aspect-ratio:16/9;background:#020202;display:grid;place-items:center;color:#666;font:700 16px Orbitron,sans-serif}.player video,.player iframe{width:100%;height:100%;border:0;display:none}
+.authbox{padding:22px}.authbox input{display:block;width:100%;margin:9px 0;background:#15151a;color:white;border:1px solid #303039;border-radius:10px;padding:11px;outline:none}.auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.error-box{padding:15px;border:1px solid #55232c;background:#1b0d10;border-radius:12px;color:#ff9aa8;font-size:12px;line-height:1.6}.empty{padding:20px;border:1px dashed #303038;border-radius:14px;color:#777;font-size:12px}
+.member-info{padding:12px 14px;margin:0 0 12px;background:#141418;border:1px solid #2a2a31;border-radius:12px;font-size:12px;color:#bbb}.member-info strong{color:#fff}
+@media(max-width:900px){.navlinks{display:none}.search{width:130px}.grid{grid-template-columns:repeat(2,1fr)}.chat-wrap{grid-template-columns:1fr}.rooms{display:flex;overflow:auto;gap:8px;border-right:0;border-bottom:1px solid #28282e}.rooms h3{display:none}.room{min-width:max-content;width:auto}.hero{min-height:540px}}
+@media(max-width:560px){.search{display:none}.grid{grid-template-columns:1fr 1fr}.rail{grid-auto-columns:72vw}.hero{padding-left:6vw;padding-right:6vw}main{padding-left:4vw;padding-right:4vw}.chat-input{flex-direction:column}}
 </style>
 </head>
 
 <body>
-
 <header class="nav">
-
-  <a class="logo" href="#live">
-    CROW<span>RULES</span> TV
-  </a>
-
-  <nav class="navlinks">
-    <a href="#live">WATCH LIVE</a>
-    <a href="#channels">CHANNELS</a>
-    <a href="#shows">SHOWS</a>
-    <a href="#episodes">EPISODES</a>
-    <a href="#guide">TV GUIDE</a>
-    <a href="#rooms">CROW ROOMS</a>
-  </nav>
-
-  <input
-    id="search"
-    class="search"
-    type="search"
-    placeholder="Search CrowRules…"
-    autocomplete="off"
-  >
-
-  <button id="memberBtn" class="member-btn">
-    👤 MEMBER
-  </button>
-
+<a class="logo" href="#">CROW<span>RULES</span> TV</a>
+<nav class="navlinks">
+<a href="#live">WATCH LIVE</a><a href="#channels">CHANNELS</a><a href="#shows">SHOWS</a><a href="#episodes">EPISODES</a><a href="#guide">TV GUIDE</a><a href="#rooms">CROW ROOMS</a>
+</nav>
+<input id="search" class="search" placeholder="Search CrowRules…" autocomplete="off">
+<button id="memberBtn" class="ghost" type="button">👤 Member</button>
 </header>
 
 <section class="hero" id="live">
-
-  <div class="hero-art"></div>
-
-  <div class="hero-content">
-
-    <div class="eyebrow">
-      <span class="live-dot">
-        <i></i>
-        LIVE 24/7
-      </span>
-    </div>
-
-    <h1>CROWRULES TV</h1>
-
-    <p>
-      Independent television from the CrowRules Entertainment universe —
-      original shows, creator channels, strange stories, live events,
-      scheduled programming and a community watching together.
-    </p>
-
-    <div class="actions">
-
-      <button class="primary" id="watchLiveBtn">
-        ▶ WATCH LIVE
-      </button>
-
-      <a class="ghost" href="#guide">
-        ▣ TV GUIDE
-      </a>
-
-      <a class="ghost" href="#rooms">
-        💬 CROW ROOMS
-      </a>
-
-    </div>
-
-    <div id="connection" class="connection">
-      <i></i>
-      <span>Connecting to CrowRules TV…</span>
-    </div>
-
-  </div>
-
+<div class="hero-art"></div>
+<div class="hero-content">
+<div class="eyebrow"><span class="live-dot"><i></i> LIVE 24/7</span></div>
+<h1>CROWRULES TV</h1>
+<p>Independent television from the CrowRules Entertainment universe — live channels, original shows, strange stories, creator programming and a community that watches together.</p>
+<div class="actions">
+<button class="primary" id="watchLiveBtn" type="button">▶ WATCH LIVE</button>
+<a class="ghost" href="#guide">▣ VIEW SCHEDULE</a>
+<a class="ghost" href="#rooms">💬 JOIN CROW ROOMS</a>
+</div>
+</div>
 </section>
 
 <main>
-
-<!-- CHANNELS -->
-
 <section class="section" id="channels">
-
-  <div class="section-head">
-    <h2>📺 CHANNELS</h2>
-    <span id="channelStatus">Loading…</span>
-  </div>
-
-  <div
-    class="rail"
-    id="channelsRail"
-  ></div>
-
+<div class="section-head"><h2>📺 CHANNELS</h2><span id="channelStatus">Connecting…</span></div>
+<div class="rail" id="channelsRail"></div>
 </section>
-
-
-<!-- SHOWS -->
 
 <section class="section" id="shows">
-
-  <div class="section-head">
-    <h2>🔥 TOP SHOWS</h2>
-    <span id="showStatus">Loading…</span>
-  </div>
-
-  <div
-    class="rail"
-    id="showsRail"
-  ></div>
-
+<div class="section-head"><h2>🔥 TOP SHOWS</h2><span id="showStatus">Connecting…</span></div>
+<div class="rail" id="showsRail"></div>
 </section>
-
-
-<!-- EPISODES -->
 
 <section class="section" id="episodes">
-
-  <div class="section-head">
-    <h2>▶ TOP EPISODES</h2>
-    <span id="episodeStatus">Loading…</span>
-  </div>
-
-  <div
-    class="rail"
-    id="episodesRail"
-  ></div>
-
+<div class="section-head"><h2>▶ TOP EPISODES</h2><span id="episodeStatus">Connecting…</span></div>
+<div class="rail" id="episodesRail"></div>
 </section>
-
-
-<!-- LIVE / UPCOMING -->
 
 <section class="section">
-
-  <div class="section-head">
-    <h2>🔴 LIVE & UPCOMING</h2>
-    <span>Powered by schedule_items</span>
-  </div>
-
-  <div
-    class="grid"
-    id="upcomingGrid"
-  ></div>
-
+<div class="section-head"><h2>🔴 LIVE & UPCOMING</h2><span id="upcomingStatus">TV schedule</span></div>
+<div class="grid" id="upcomingGrid"></div>
 </section>
-
-
-<!-- GUIDE -->
 
 <section class="section" id="guide">
-
-  <div class="section-head">
-
-    <h2>📡 TV GUIDE</h2>
-
-    <span id="guideStatus">
-      Loading…
-    </span>
-
-  </div>
-
-  <div class="guide">
-
-    <table>
-
-      <thead>
-
-        <tr>
-          <th>TIME</th>
-          <th>CHANNEL</th>
-          <th>PROGRAM</th>
-          <th>STATUS</th>
-        </tr>
-
-      </thead>
-
-      <tbody id="guideBody"></tbody>
-
-    </table>
-
-  </div>
-
+<div class="section-head"><h2>📡 TV GUIDE</h2><span id="guideStatus">Connecting…</span></div>
+<div class="guide"><table><thead><tr><th>TIME</th><th>CHANNEL</th><th>PROGRAM</th><th>STATUS</th></tr></thead><tbody id="guideBody"></tbody></table></div>
 </section>
-
-
-<!-- CROW ROOMS -->
 
 <section class="section" id="rooms">
-
-  <div class="section-head">
-
-    <h2>💬 CROW ROOMS</h2>
-
-    <span>
-      Watch together. Talk together.
-    </span>
-
-  </div>
-
-  <div class="chat-wrap">
-
-    <aside class="rooms">
-
-      <h3>ROOMS</h3>
-
-      <div id="roomList"></div>
-
-    </aside>
-
-    <div class="chat">
-
-      <div class="chat-head">
-
-        <div>
-
-          <div
-            class="chat-title"
-            id="chatRoomName"
-          >
-            Crow Rooms
-          </div>
-
-          <div
-            class="meta"
-            id="presenceText"
-          >
-            Connecting…
-          </div>
-
-        </div>
-
-        <span>🐦</span>
-
-      </div>
-
-      <div
-        class="messages"
-        id="messages"
-      ></div>
-
-      <form
-        class="chat-input"
-        id="chatForm"
-      >
-
-        <input
-          id="chatMessage"
-          maxlength="500"
-          autocomplete="off"
-          placeholder="Sign in to chat…"
-        >
-
-        <button
-          class="primary"
-          type="submit"
-        >
-          SEND
-        </button>
-
-      </form>
-
-    </div>
-
-  </div>
-
+<div class="section-head"><h2>💬 CROW ROOMS</h2><span id="roomsStatus">Connecting…</span></div>
+<div class="chat-wrap">
+<aside class="rooms"><h3>ROOMS</h3><div id="roomList"></div></aside>
+<div class="chat">
+<div class="chat-head"><div><div class="chat-title" id="chatRoomName">Connecting…</div><div class="meta" id="presenceText">Connecting…</div></div><span>🐦</span></div>
+<div class="messages" id="messages"></div>
+<form class="chat-input" id="chatForm"><input id="chatMessage" maxlength="1000" placeholder="Sign in to chat…" autocomplete="off"><button class="primary" type="submit">SEND</button></form>
+</div>
+</div>
 </section>
-
-
-<!-- MEMBERS -->
 
 <section class="section">
-
-  <div class="card">
-
-    <div class="card-body">
-
-      <div
-        style="
-          font:700 22px Orbitron;
-          margin-bottom:8px;
-        "
-      >
-        ⭐ BECOME PART OF THE ROOST
-      </div>
-
-      <p class="meta" style="font-size:13px">
-
-        Create a free CrowRules member account to participate
-        in Crow Rooms, save favorites, continue watching,
-        follow shows and build your CrowRules profile.
-
-      </p>
-
-      <button
-        class="primary"
-        id="joinBtn"
-      >
-        BECOME A MEMBER
-      </button>
-
-    </div>
-
-  </div>
-
+<div class="card" style="padding:28px">
+<div style="font:700 22px Orbitron">⭐ Become part of the Roost.</div>
+<p class="meta" style="font-size:13px;line-height:1.7">Create a free member account to use Crow Rooms, save favorites, continue watching, follow shows and build your CrowRules profile.</p>
+<button class="primary" id="joinBtn" type="button">BECOME A MEMBER</button>
+</div>
 </section>
-
 </main>
 
+<footer class="footer">© 2026 CrowRules Entertainment · CrowRules TV · Independent. Strange. Original.</footer>
+<div id="status" class="status"></div>
 
-<footer class="footer">
-
-  © 2026 CrowRules Entertainment · CrowRules TV
-
-  <br>
-
-  Independent. Strange. Original.
-
-  <br>
-
-  Powered by CrowRules Entertainment + Supabase.
-
-</footer>
-
-
-<!-- STATUS -->
-
-<div
-  id="status"
-  class="status"
-></div>
-
-
-<!-- PLAYER -->
-
-<div
-  id="playerModal"
-  class="modal"
->
-
-  <div class="modal-box">
-
-    <div class="modal-top">
-
-      <strong id="playerTitle">
-        🔴 CROWRULES TV
-      </strong>
-
-      <button
-        class="close"
-        id="closePlayer"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div class="player">
-
-      <div
-        class="player-fallback"
-        id="playerFallback"
-      >
-        SELECT A CHANNEL OR PROGRAM
-      </div>
-
-      <video
-        id="video"
-        controls
-        playsinline
-        preload="metadata"
-      ></video>
-
-      <iframe
-        id="yt"
-        allow="autoplay; fullscreen; picture-in-picture"
-        allowfullscreen
-      ></iframe>
-
-    </div>
-
-  </div>
-
+<div id="playerModal" class="modal">
+<div class="modal-box">
+<div class="modal-top"><strong id="playerTitle">🔴 CROWRULES TV</strong><button class="x" id="closePlayer" type="button">×</button></div>
+<div class="player" id="player">
+<div id="playerFallback">SELECT A PROGRAM OR CHANNEL TO PLAY</div>
+<video id="video" controls playsinline></video>
+<iframe id="yt" title="CrowRules video" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+</div>
+</div>
 </div>
 
-
-<!-- AUTH -->
-
-<div
-  id="authModal"
-  class="modal"
->
-
-  <div class="modal-box">
-
-    <div class="modal-top">
-
-      <strong>
-        👤 CROW MEMBER
-      </strong>
-
-      <button
-        class="close"
-        id="closeAuth"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div class="authbox">
-
-      <div id="authState"></div>
-
-      <input
-        id="authEmail"
-        type="email"
-        autocomplete="email"
-        placeholder="Email"
-      >
-
-      <input
-        id="authPassword"
-        type="password"
-        autocomplete="current-password"
-        placeholder="Password"
-      >
-
-      <div class="auth-actions">
-
-        <button
-          class="primary"
-          id="signInBtn"
-        >
-          SIGN IN
-        </button>
-
-        <button
-          class="ghost"
-          id="signUpBtn"
-        >
-          CREATE ACCOUNT
-        </button>
-
-        <button
-          class="ghost"
-          id="signOutBtn"
-        >
-          SIGN OUT
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
+<div id="authModal" class="modal">
+<div class="modal-box">
+<div class="modal-top"><strong>👤 CROW MEMBER</strong><button class="x" id="closeAuth" type="button">×</button></div>
+<div class="authbox">
+<div id="authState"></div>
+<input id="authEmail" type="email" autocomplete="email" placeholder="Email">
+<input id="authPassword" type="password" autocomplete="current-password" placeholder="Password">
+<div class="auth-actions">
+<button class="primary" id="signInBtn" type="button">SIGN IN</button>
+<button class="ghost" id="signUpBtn" type="button">CREATE ACCOUNT</button>
+<button class="ghost" id="signOutBtn" type="button">SIGN OUT</button>
 </div>
-
+</div>
+</div>
+</div>
 
 <script>
-"use strict";
+/* =========================================================
+   CROWRULES TV v12.0 — SUPABASE-SAFE REWRITE
 
-/* ============================================================
-   CROWRULES TV
-   Supabase + Admin Pro compatible frontend
-   ============================================================ */
+   Fixes:
+   - Uses the CURRENT publishable key, not the old anon JWT.
+   - Never embeds schedule_items -> tv_channels, avoiding the
+     "more than one relationship" PostgREST error.
+   - Loads channels separately and maps them in JavaScript.
+   - Chat history has a display_name fallback for stale schema
+     caches and never makes chat dependent on a join.
+   - Uses only columns confirmed to exist in the current schema.
+   - Handles auth/session errors cleanly.
+   - Realtime presence/broadcast is optional; database chat remains
+     the source of truth.
+   ========================================================= */
 
-const SUPABASE_URL =
-  "https://zauxdqyssratvzmomozf.supabase.co";
+const SUPABASE_URL = "https://zauxdqyssratvzmomozf.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
 
-const SUPABASE_KEY =
-  "sb_publishable_-Z6wecSOxwOk6IBut2zLn_8DfRxnE9";
+let sb = null;
 
-const sb =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY,
-    {
-      auth:{
-        persistSession:true,
-        autoRefreshToken:true,
-        detectSessionInUrl:true
-      },
-      realtime:{
-        params:{
-          eventsPerSecond:10
-        }
-      }
-    }
-  );
+const app = {
+  user: null,
+  rooms: [],
+  activeRoom: null,
+  roomChannel: null,
+  channels: [],
+  shows: [],
+  episodes: [],
+  schedule: [],
+  playItems: new Map(),
+  roomEpoch: 0
+};
 
-
-/* ============================================================
-   STATE
-   ============================================================ */
-
-let currentUser = null;
-
-let channels = [];
-let shows = [];
-let episodes = [];
-let schedule = [];
-let rooms = [];
-
-let activeRoom = null;
-let chatChannel = null;
-
-let hls = null;
-
-let toastTimer = null;
-
-let loading = false;
-
-
-/* ============================================================
-   HELPERS
-   ============================================================ */
-
-function $(id){
-  return document.getElementById(id);
-}
-
+const $ = id => document.getElementById(id);
 
 function esc(value){
-  return String(value ?? "")
-    .replace(/[&<>"']/g,function(char){
-      return {
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#39;"
-      }[char];
-    });
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
 }
-
-
-function safeNumber(value){
-  const n = Number(value);
-  return Number.isFinite(n) ? n : 0;
-}
-
-
-function imageHTML(url){
-  if(!url){
-    return "";
-  }
-
-  return `
-    <img
-      src="${esc(url)}"
-      loading="lazy"
-      alt=""
-      onerror="this.style.display='none'"
-    >
-  `;
-}
-
 
 function toast(message){
   const el = $("status");
-
   el.textContent = message;
-
   el.classList.add("show");
-
-  clearTimeout(toastTimer);
-
-  toastTimer =
-    setTimeout(
-      ()=>el.classList.remove("show"),
-      4000
-    );
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => el.classList.remove("show"), 4500);
 }
 
-
-function setConnection(state,message){
-
-  const box = $("connection");
-
-  box.classList.remove(
-    "ok",
-    "error"
-  );
-
-  if(state){
-    box.classList.add(state);
-  }
-
-  box.querySelector("span").textContent =
-    message;
+function showError(areaId, message){
+  const el = $(areaId);
+  if(el) el.innerHTML = `<div class="error-box">${esc(message)}</div>`;
 }
 
-
-function slugify(value){
-
-  return String(value || "")
-    .toLowerCase()
-    .trim()
-    .replace(/['"]/g,"")
-    .replace(/[^a-z0-9]+/g,"-")
-    .replace(/^-+|-+$/g,"");
+function imageHTML(url){
+  return url ? `<img src="${esc(url)}" loading="lazy" alt="" onerror="this.remove()">` : "";
 }
-
-
-function firstValue(row,...keys){
-
-  for(const key of keys){
-
-    if(
-      row &&
-      row[key] !== undefined &&
-      row[key] !== null &&
-      row[key] !== ""
-    ){
-      return row[key];
-    }
-
-  }
-
-  return null;
-}
-
-
-/* ============================================================
-   YOUTUBE
-   ============================================================ */
 
 function youtubeId(url){
-
-  if(!url){
-    return null;
-  }
-
+  if(!url) return null;
   try{
-
-    const u =
-      new URL(url);
-
-    if(
-      u.hostname === "youtu.be" ||
-      u.hostname.endsWith(".youtu.be")
-    ){
-
-      return u.pathname
-        .replace(/^\/+/,"")
-        .split("/")[0];
-
+    const u = new URL(url);
+    if(u.hostname === "youtu.be" || u.hostname.endsWith(".youtu.be")){
+      return u.pathname.replace(/^\/+/,"").split("/")[0] || null;
     }
-
-    if(
-      u.hostname.includes("youtube.com")
-    ){
-
-      if(u.searchParams.get("v")){
-        return u.searchParams.get("v");
-      }
-
-      const parts =
-        u.pathname
-          .split("/")
-          .filter(Boolean);
-
-      const index =
-        parts.findIndex(
-          x =>
-            x === "embed" ||
-            x === "shorts" ||
-            x === "live"
-        );
-
-      if(index >= 0 && parts[index+1]){
-        return parts[index+1];
-      }
-
-      return parts.at(-1) || null;
+    if(u.hostname.includes("youtube.com")){
+      if(u.searchParams.get("v")) return u.searchParams.get("v");
+      const parts = u.pathname.split("/").filter(Boolean);
+      const i = parts.findIndex(x => ["embed","shorts","live"].includes(x));
+      if(i >= 0 && parts[i+1]) return parts[i+1];
     }
-
-  }catch(error){}
-
+  }catch(_){}
   return null;
 }
 
+function registerPlayItem(item, prefix){
+  const id = `${prefix}-${item.id}`;
+  item._playId = id;
+  app.playItems.set(id, item);
+  return item;
+}
 
-/* ============================================================
-   PLAYER
-   ============================================================ */
+function cardHTML(item, kind){
+  const title = item.title || item.name || "CrowRules";
+  const meta = item.description || item.category || item.channel_name || "CrowRules original";
+  const thumb = item.thumbnail_url || item.youtube_thumbnail_url || item.banner_url || item.logo_url || "";
+  const id = item._playId || "";
+  return `
+    <article class="card">
+      <div class="thumb">
+        ${imageHTML(thumb)}
+        ${kind === "channel" ? `<span class="thumb-label">● CHANNEL</span>` : ""}
+      </div>
+      <div class="card-body">
+        <div class="title">${esc(title)}</div>
+        <div class="meta">${esc(meta)}</div>
+        <button class="watch" type="button" data-play-id="${esc(id)}">▶ WATCH</button>
+      </div>
+    </article>`;
+}
 
-function stopPlayer(){
+function bindPlayButtons(){
+  document.querySelectorAll("[data-play-id]").forEach(btn => {
+    if(btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", () => {
+      const item = app.playItems.get(btn.dataset.playId);
+      if(item) playItem(item);
+    });
+  });
+}
 
-  if(hls){
+/* ---------------- PLAYER ---------------- */
 
-    try{
-      hls.destroy();
-    }catch(error){}
+function openPlayer(){ $("playerModal").classList.add("open"); }
 
-    hls = null;
-  }
+function closePlayer(){
+  const video = $("video");
+  video.pause();
+  video.removeAttribute("src");
+  video.load();
+  video.style.display = "none";
+  $("yt").src = "";
+  $("yt").style.display = "none";
+  $("playerFallback").style.display = "grid";
+  $("playerModal").classList.remove("open");
+}
+
+function playItem(item){
+  openPlayer();
+  $("playerTitle").textContent = "▶ " + (item.title || item.name || "CrowRules TV");
 
   const video = $("video");
   const yt = $("yt");
+  const fallback = $("playerFallback");
 
   video.pause();
   video.removeAttribute("src");
   video.load();
-
-  video.classList.remove("active");
-
+  video.style.display = "none";
   yt.src = "";
-  yt.classList.remove("active");
+  yt.style.display = "none";
+  fallback.style.display = "grid";
 
-  $("playerFallback").style.display =
-    "block";
-}
+  const directURL = item.video_url || item.stream_url;
+  const youtubeURL = item.youtube_url || item.url;
 
-
-function openPlayer(){
-
-  $("playerModal")
-    .classList.add("open");
-}
-
-
-function closePlayer(){
-
-  stopPlayer();
-
-  $("playerModal")
-    .classList.remove("open");
-}
-
-
-function playItem(item){
-
-  item = item || {};
-
-  stopPlayer();
-
-  const title =
-    firstValue(
-      item,
-      "title",
-      "name"
-    ) ||
-    "CrowRules TV";
-
-  $("playerTitle").textContent =
-    "▶ " + title;
-
-  const videoUrl =
-    firstValue(
-      item,
-      "video_url",
-      "stream_url",
-      "playback_url",
-      "media_url"
-    );
-
-  const youtubeUrl =
-    firstValue(
-      item,
-      "youtube_url",
-      "url"
-    );
-
-  const streamType =
-    String(
-      firstValue(
-        item,
-        "stream_type",
-        "video_type",
-        "media_type"
-      ) || ""
-    ).toLowerCase();
-
-  const fallback =
-    $("playerFallback");
-
-  const video =
-    $("video");
-
-  const yt =
-    $("yt");
-
-
-  /* YouTube */
-
-  const yid =
-    youtubeId(youtubeUrl);
-
-  if(yid){
-
-    yt.src =
-      "https://www.youtube.com/embed/" +
-      encodeURIComponent(yid) +
-      "?autoplay=1&rel=0&modestbranding=1";
-
-    yt.classList.add("active");
-
-    fallback.style.display =
-      "none";
-
-    openPlayer();
-
+  if(directURL){
+    video.src = directURL;
+    video.style.display = "block";
+    fallback.style.display = "none";
+    video.play().catch(() => {});
     return;
   }
 
-
-  /* Video / HLS */
-
-  if(videoUrl){
-
-    fallback.style.display =
-      "none";
-
-    video.classList.add("active");
-
-    const isHLS =
-      streamType.includes("hls") ||
-      /\.m3u8(?:$|\?)/i.test(videoUrl);
-
-
-    /*
-      Native HLS
-    */
-
-    if(
-      isHLS &&
-      video.canPlayType("application/vnd.apple.mpegurl")
-    ){
-
-      video.src =
-        videoUrl;
-
-      video.play()
-        .catch(()=>{});
-
-    }
-
-    /*
-      hls.js
-    */
-
-    else if(
-      isHLS &&
-      window.Hls &&
-      Hls.isSupported()
-    ){
-
-      hls =
-        new Hls({
-          enableWorker:true,
-          lowLatencyMode:true
-        });
-
-      hls.loadSource(videoUrl);
-
-      hls.attachMedia(video);
-
-      hls.on(
-        Hls.Events.MANIFEST_PARSED,
-        ()=>{
-          video.play()
-            .catch(()=>{});
-        }
-      );
-
-      hls.on(
-        Hls.Events.ERROR,
-        function(event,data){
-
-          if(data.fatal){
-
-            toast(
-              "The live stream could not be played."
-            );
-
-          }
-
-        }
-      );
-
-    }
-
-    /*
-      Normal MP4/WebM/etc.
-    */
-
-    else{
-
-      video.src =
-        videoUrl;
-
-      video.play()
-        .catch(()=>{});
-
-    }
-
-    openPlayer();
-
+  const id = youtubeId(youtubeURL);
+  if(id){
+    yt.src = `https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
+    yt.style.display = "block";
+    fallback.style.display = "none";
     return;
   }
 
-
-  fallback.textContent =
-    "No playable video is configured for this program.";
-
-  fallback.style.display =
-    "block";
-
-  openPlayer();
-
-  toast(
-    "Add a stream_url, video_url or youtube_url in Admin Pro."
-  );
+  toast("No playable video or stream URL is configured for this item.");
 }
-
-
-/* ============================================================
-   CHANNEL PLAYBACK
-   ============================================================ */
-
-function playChannel(channel){
-
-  if(!channel){
-    return;
-  }
-
-  playItem({
-
-    title:
-      channel.name ||
-      "CrowRules TV",
-
-    stream_url:
-      firstValue(
-        channel,
-        "stream_url",
-        "playback_url",
-        "video_url"
-      ),
-
-    stream_type:
-      firstValue(
-        channel,
-        "stream_type",
-        "video_type"
-      ),
-
-    youtube_url:
-      firstValue(
-        channel,
-        "youtube_url",
-        "url"
-      )
-
-  });
-}
-
 
 function watchLive(){
+  const preferred = app.channels.find(c => c.slug === "crowrules-tv" || c.slug === "crowrules-tv-channel");
+  const live = app.channels.find(c => c.stream_url);
+  const channel = preferred || live || app.channels[0];
 
-  const now =
-    new Date();
+  if(channel){
+    playItem({...channel, title: channel.name || "CrowRules TV — Live"});
+  }else{
+    toast("No active CrowRules TV channel was found.");
+  }
+}
 
-  const active =
-    schedule.find(item => {
+/* ---------------- AUTH ---------------- */
 
-      const start =
-        new Date(item.starts_at);
+function updateAuthUI(){
+  const button = $("memberBtn");
+  const stateBox = $("authState");
+  const input = $("chatMessage");
 
-      const end =
-        item.ends_at
-          ? new Date(item.ends_at)
-          : new Date(
-              start.getTime() +
-              60 * 60 * 1000
-            );
+  if(app.user){
+    const name = app.user.email?.split("@")[0] || "Member";
+    button.textContent = "👤 " + name;
+    stateBox.innerHTML = `<div class="member-info">Signed in as <strong>${esc(app.user.email)}</strong>.</div>`;
+    input.placeholder = "Write a message…";
+    $("signOutBtn").style.display = "";
+  }else{
+    button.textContent = "👤 Member";
+    stateBox.innerHTML = `<div class="member-info">Sign in or create a free CrowRules member account.</div>`;
+    input.placeholder = "Sign in to chat…";
+    $("signOutBtn").style.display = "";
+  }
+}
 
-      return (
-        start <= now &&
-        end > now
-      );
+async function refreshSession(){
+  if(!sb) return;
+  try{
+    const {data,error} = await sb.auth.getSession();
+    if(error) throw error;
+    app.user = data.session?.user || null;
+    updateAuthUI();
+  }catch(error){
+    console.error("getSession", error);
+    toast("Session check failed: " + error.message);
+  }
+}
 
+async function signIn(){
+  if(!sb){ toast("Supabase is not configured."); return; }
+
+  const email = $("authEmail").value.trim();
+  const password = $("authPassword").value;
+
+  if(!email || !password){
+    toast("Enter your email and password.");
+    return;
+  }
+
+  const btn = $("signInBtn");
+  btn.disabled = true;
+
+  try{
+    const {data,error} = await sb.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    app.user = data.user || null;
+    updateAuthUI();
+    toast("Signed in successfully.");
+    closeAuth();
+  }catch(error){
+    console.error("signIn", error);
+    toast("Sign in failed: " + error.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function signUp(){
+  if(!sb){ toast("Supabase is not configured."); return; }
+
+  const email = $("authEmail").value.trim();
+  const password = $("authPassword").value;
+
+  if(!email){ toast("Enter an email."); return; }
+  if(password.length < 6){ toast("Password must contain at least 6 characters."); return; }
+
+  const btn = $("signUpBtn");
+  btn.disabled = true;
+
+  try{
+    const {data,error} = await sb.auth.signUp({
+      email,
+      password,
+      options:{emailRedirectTo: window.location.origin + window.location.pathname}
     });
+    if(error) throw error;
 
-
-  if(active){
-
-    const channel =
-      channels.find(
-        c =>
-          String(c.id) ===
-          String(active.channel_id)
-      );
-
-    const merged = {
-      ...active,
-      ...(channel || {})
-    };
-
-    playItem(merged);
-
-    return;
+    if(data.session){
+      app.user = data.user || null;
+      updateAuthUI();
+      toast("Account created and signed in.");
+      closeAuth();
+    }else{
+      toast("Account created. Check your email if confirmation is enabled in Supabase Auth.");
+    }
+  }catch(error){
+    console.error("signUp", error);
+    toast("Account creation failed: " + error.message);
+  }finally{
+    btn.disabled = false;
   }
-
-
-  const main =
-    channels.find(c =>
-      c.slug === "crowrules-tv"
-    ) ||
-    channels[0];
-
-  if(main){
-
-    playChannel(main);
-
-    return;
-  }
-
-
-  toast(
-    "No active CrowRules TV channel has been configured yet."
-  );
-
 }
 
-
-/* ============================================================
-   CARD
-   ============================================================ */
-
-function card({
-  title,
-  meta,
-  image,
-  kind,
-  item
-}){
-
-  const encoded =
-    encodeURIComponent(
-      JSON.stringify(item || {})
-    );
-
-  let badge = "";
-
-  if(kind === "channel"){
-    badge =
-      `<span class="badge">CHANNEL</span>`;
+async function signOut(){
+  if(!sb) return;
+  try{
+    const {error} = await sb.auth.signOut();
+    if(error) throw error;
+    app.user = null;
+    updateAuthUI();
+    if(app.roomChannel) await safeRemoveRoomChannel();
+    toast("Signed out.");
+    closeAuth();
+  }catch(error){
+    console.error("signOut", error);
+    toast("Sign out failed: " + error.message);
   }
-
-  if(kind === "live"){
-    badge =
-      `<span class="badge live">● LIVE</span>`;
-  }
-
-  return `
-
-    <article class="card">
-
-      <div class="thumb">
-
-        ${imageHTML(image)}
-
-        ${badge}
-
-      </div>
-
-      <div class="card-body">
-
-        <div class="title">
-          ${esc(title || "Untitled")}
-        </div>
-
-        <div class="meta">
-          ${esc(meta || "CrowRules original")}
-        </div>
-
-        <button
-          class="watch"
-          data-play="${encoded}"
-        >
-          ▶ WATCH
-        </button>
-
-      </div>
-
-    </article>
-
-  `;
 }
 
-
-/* ============================================================
-   DATABASE ERROR
-   ============================================================ */
-
-function databaseError(label,error){
-
-  console.error(
-    "CrowRules TV:",
-    label,
-    error
-  );
-
-  toast(
-    label +
-    ": " +
-    (error?.message || "Database error")
-  );
+function showMember(){
+  $("authModal").classList.add("open");
+  updateAuthUI();
 }
 
+function closeAuth(){ $("authModal").classList.remove("open"); }
 
-/* ============================================================
-   LOAD CHANNELS
-   ============================================================ */
+/* ---------------- CHANNELS ---------------- */
 
 async function loadChannels(){
-
-  const result =
-    await sb
-      .from("tv_channels")
-      .select("*")
-      .eq("is_active",true)
-      .order("sort_order",{ascending:true})
-      .order("name",{ascending:true});
-
-  if(result.error){
-
-    /*
-      Compatibility retry without sort_order.
-    */
-
-    const retry =
-      await sb
-        .from("tv_channels")
-        .select("*")
-        .eq("is_active",true)
-        .order("name",{ascending:true});
-
-    if(retry.error){
-
-      databaseError(
-        "Channels",
-        retry.error
-      );
-
-      channels = [];
-
-      $("channelsRail").innerHTML =
-        `<p class="meta">
-          Unable to load channels from Supabase.
-        </p>`;
-
-      return;
-    }
-
-    channels =
-      retry.data || [];
-
-  }else{
-
-    channels =
-      result.data || [];
-
-  }
-
-
-  $("channelStatus").textContent =
-    channels.length +
-    (
-      channels.length === 1
-        ? " channel"
-        : " channels"
-    );
-
-
-  $("channelsRail").innerHTML =
-    channels.length
-
-      ? channels.map(channel =>
-          card({
-            title:
-              firstValue(
-                channel,
-                "name",
-                "title"
-              ) || "Channel",
-
-            meta:
-              firstValue(
-                channel,
-                "description",
-                "channel_description",
-                "stream_type"
-              ) || "CrowRules channel",
-
-            image:
-              firstValue(
-                channel,
-                "banner_url",
-                "logo_url",
-                "image_url",
-                "thumbnail_url"
-              ),
-
-            kind:"channel",
-
-            item:channel
-          })
-        ).join("")
-
-      : `<p class="meta">
-          No active channels found.
-        </p>`;
-}
-
-
-/* ============================================================
-   LOAD SHOWS
-   ============================================================ */
-
-async function loadShows(){
-
-  const result =
-    await sb
-      .from("shows")
-      .select("*")
-      .eq("is_active",true)
-      .order("sort_order",{ascending:true})
-      .order("title",{ascending:true});
-
-
-  if(result.error){
-
-    const retry =
-      await sb
-        .from("shows")
-        .select("*")
-        .eq("is_active",true)
-        .order("title",{ascending:true});
-
-    if(retry.error){
-
-      databaseError(
-        "Shows",
-        retry.error
-      );
-
-      shows = [];
-
-      $("showsRail").innerHTML =
-        `<p class="meta">
-          Unable to load shows from Supabase.
-        </p>`;
-
-      return;
-    }
-
-    shows =
-      retry.data || [];
-
-  }else{
-
-    shows =
-      result.data || [];
-
-  }
-
-
-  /*
-    Public visibility filtering is handled here
-    so the query remains compatible with both
-    published and is_published schemas.
-  */
-
-  shows =
-    shows.filter(show => {
-
-      const published =
-        firstValue(
-          show,
-          "is_published",
-          "published"
-        );
-
-      if(
-        published === null ||
-        published === undefined
-      ){
-        return true;
-      }
-
-      return Boolean(published);
-
-    });
-
-
-  $("showStatus").textContent =
-    shows.length +
-    (
-      shows.length === 1
-        ? " show"
-        : " shows"
-    );
-
-
-  $("showsRail").innerHTML =
-    shows.length
-
-      ? shows.map(show =>
-          card({
-            title:
-              firstValue(
-                show,
-                "title",
-                "name"
-              ) || "Untitled Show",
-
-            meta:
-              firstValue(
-                show,
-                "category",
-                "description",
-                "status"
-              ) || "CrowRules original",
-
-            image:
-              firstValue(
-                show,
-                "thumbnail_url",
-                "banner_url",
-                "image_url"
-              ),
-
-            item:show
-          })
-        ).join("")
-
-      : `<p class="meta">
-          No published shows found.
-        </p>`;
-}
-
-
-/* ============================================================
-   LOAD EPISODES
-   ============================================================ */
-
-async function loadEpisodes(){
-
-  const result =
-    await sb
-      .from("episodes")
-      .select("*")
-      .eq("is_active",true)
-      .eq("is_published",true)
-      .order("featured",{ascending:false})
-      .order("views",{ascending:false})
-      .limit(40);
-
-
-  if(result.error){
-
-    /*
-      Compatibility fallback.
-    */
-
-    const retry =
-      await sb
-        .from("episodes")
-        .select("*")
-        .eq("is_active",true)
-        .order("created_at",{ascending:false})
-        .limit(40);
-
-
-    if(retry.error){
-
-      databaseError(
-        "Episodes",
-        retry.error
-      );
-
-      episodes = [];
-
-      $("episodesRail").innerHTML =
-        `<p class="meta">
-          Unable to load episodes from Supabase.
-        </p>`;
-
-      return;
-    }
-
-    episodes =
-      (retry.data || [])
-        .filter(e => {
-
-          const published =
-            firstValue(
-              e,
-              "is_published",
-              "published"
-            );
-
-          return (
-            published === null ||
-            published === undefined ||
-            Boolean(published)
-          );
-
-        });
-
-  }else{
-
-    episodes =
-      result.data || [];
-
-  }
-
-
-  $("episodeStatus").textContent =
-    episodes.length +
-    (
-      episodes.length === 1
-        ? " episode"
-        : " episodes"
-    );
-
-
-  $("episodesRail").innerHTML =
-    episodes.length
-
-      ? episodes.map(ep => {
-
-          const season =
-            firstValue(
-              ep,
-              "season",
-              "season_number"
-            );
-
-          const number =
-            firstValue(
-              ep,
-              "episode_number",
-              "episode"
-            );
-
-          const views =
-            safeNumber(
-              ep.views
-            );
-
-
-          let meta = "";
-
-          if(
-            season !== null ||
-            number !== null
-          ){
-
-            meta =
-              "S" +
-              (season ?? "—") +
-              " E" +
-              (number ?? "—");
-
-          }
-
-          if(views){
-
-            meta +=
-              (
-                meta
-                  ? " • "
-                  : ""
-              ) +
-              views.toLocaleString() +
-              " views";
-
-          }
-
-
-          return card({
-
-            title:
-              firstValue(
-                ep,
-                "title",
-                "name"
-              ) || "Episode",
-
-            meta:
-              meta ||
-              firstValue(
-                ep,
-                "short_description",
-                "description"
-              ) ||
-              "CrowRules episode",
-
-            image:
-              firstValue(
-                ep,
-                "thumbnail_url",
-                "youtube_thumbnail_url",
-                "banner_url",
-                "image_url"
-              ),
-
-            item:ep
-
-          });
-
-        }).join("")
-
-      : `<p class="meta">
-          No published episodes found.
-        </p>`;
-}
-
-
-/* ============================================================
-   LOAD SCHEDULE
-   ============================================================ */
-
-async function loadSchedule(){
-
-  const from =
-    new Date(
-      Date.now() -
-      6 * 60 * 60 * 1000
-    ).toISOString();
-
-  const to =
-    new Date(
-      Date.now() +
-      14 * 24 * 60 * 60 * 1000
-    ).toISOString();
-
-
-  const result =
-    await sb
-      .from("schedule_items")
-      .select("*")
-      .eq("is_active",true)
-      .gte("starts_at",from)
-      .lte("starts_at",to)
-      .order("starts_at",{ascending:true})
-      .limit(200);
-
-
-  if(result.error){
-
-    databaseError(
-      "Schedule",
-      result.error
-    );
-
-    schedule = [];
-
-    renderSchedule();
-
+  const rail = $("channelsRail");
+  if(!sb){ showError("channelsRail","Supabase is not configured."); return; }
+
+  const {data,error} = await sb.from("tv_channels")
+    .select("id,name,slug,description,logo_url,banner_url,stream_url,channel_number,is_active,sort_order,stream_type,autoplay,playback_mode,loop_playlist,rotation_started_at")
+    .eq("is_active",true)
+    .order("sort_order",{ascending:true})
+    .order("name",{ascending:true});
+
+  if(error){
+    console.error("tv_channels",error);
+    $("channelStatus").textContent = "Connection error";
+    showError("channelsRail","Could not load TV channels: " + error.message);
     return;
   }
 
+  app.channels = data || [];
+  $("channelStatus").textContent = app.channels.length + " channels";
 
-  schedule =
-    result.data || [];
+  const cards = app.channels.map(c => registerPlayItem({...c,kind:"channel"},"channel"));
+  rail.innerHTML = cards.length ? cards.map(c => cardHTML(c,"channel")).join("") : `<div class="empty">No active channels found.</div>`;
+  bindPlayButtons();
+}
 
+/* ---------------- SHOWS ---------------- */
+
+async function loadShows(){
+  const rail = $("showsRail");
+  if(!sb){ showError("showsRail","Supabase is not configured."); return; }
+
+  const {data,error} = await sb.from("shows")
+    .select("id,title,slug,description,thumbnail_url,category,status,banner_url,logo_url,content_type,is_featured,is_active,sort_order,published,is_published,views")
+    .eq("is_active",true)
+    .or("published.eq.true,is_published.eq.true,status.eq.active")
+    .order("sort_order",{ascending:true})
+    .order("title",{ascending:true});
+
+  if(error){
+    console.error("shows",error);
+    $("showStatus").textContent = "Connection error";
+    showError("showsRail","Could not load shows: " + error.message);
+    return;
+  }
+
+  app.shows = (data || []).filter(s => s.published === true || s.is_published === true || s.status === "active");
+  $("showStatus").textContent = app.shows.length + " shows";
+
+  const cards = app.shows.map(s => registerPlayItem({...s,kind:"show"},"show"));
+  rail.innerHTML = cards.length ? cards.map(c => cardHTML(c,"show")).join("") : `<div class="empty">No published shows found.</div>`;
+  bindPlayButtons();
+}
+
+/* ---------------- EPISODES ---------------- */
+
+async function loadEpisodes(){
+  const rail = $("episodesRail");
+  if(!sb){ showError("episodesRail","Supabase is not configured."); return; }
+
+  const {data,error} = await sb.from("episodes")
+    .select("id,show_id,episode_number,season_number,title,description,youtube_url,thumbnail_url,published_at,duration_seconds,status,featured,youtube_thumbnail_url,premiere_at,season,slug,short_description,banner_url,video_url,video_type,release_date,is_active,is_featured,is_free,views,sort_order,channel_id,is_published")
+    .eq("is_active",true)
+    .or("is_published.eq.true,status.eq.published")
+    .order("featured",{ascending:false})
+    .order("is_featured",{ascending:false})
+    .order("views",{ascending:false})
+    .order("sort_order",{ascending:true})
+    .limit(30);
+
+  if(error){
+    console.error("episodes",error);
+    $("episodeStatus").textContent = "Connection error";
+    showError("episodesRail","Could not load episodes: " + error.message);
+    return;
+  }
+
+  app.episodes = (data || []).filter(e => e.is_published === true || e.status === "published");
+  $("episodeStatus").textContent = app.episodes.length + " episodes";
+
+  const cards = app.episodes.map(e => registerPlayItem({...e,kind:"episode"},"episode"));
+  rail.innerHTML = cards.length ? cards.map(c => cardHTML(c,"episode")).join("") : `<div class="empty">No published episodes found.</div>`;
+  bindPlayButtons();
+}
+
+/* ---------------- SCHEDULE ----------------
+   IMPORTANT: NO PostgREST EMBED.
+   schedule_items has multiple FKs to tv_channels in the existing
+   database. We intentionally fetch schedule rows and channels
+   independently, then map channel_id in JavaScript.
+------------------------------------------------ */
+
+async function loadSchedule(){
+  if(!sb) return;
+
+  const from = new Date(Date.now() - 6*60*60*1000).toISOString();
+  const to = new Date(Date.now() + 14*24*60*60*1000).toISOString();
+
+  const {data,error} = await sb.from("schedule_items")
+    .select("id,show_id,episode_id,title,description,starts_at,ends_at,item_type,status,created_at,updated_at,channel_id,thumbnail_url,schedule_source,duration_seconds,video_url,video_type,youtube_url,sort_order,source_id,start_time,end_time,is_active")
+    .eq("is_active",true)
+    .gte("starts_at",from)
+    .lte("starts_at",to)
+    .order("starts_at",{ascending:true})
+    .limit(200);
+
+  if(error){
+    console.error("schedule_items",error);
+    $("guideStatus").textContent = "Connection error";
+    $("guideBody").innerHTML = `<tr><td colspan="4">${esc(error.message)}</td></tr>`;
+    return;
+  }
+
+  app.schedule = data || [];
+
+  const ids = [...new Set(app.schedule.map(x => x.channel_id).filter(Boolean))];
+  let channelMap = new Map();
+
+  if(ids.length){
+    const result = await sb.from("tv_channels")
+      .select("id,name,slug,logo_url,stream_url")
+      .in("id",ids);
+
+    if(result.error){
+      console.error("schedule channel lookup",result.error);
+    }else{
+      channelMap = new Map((result.data || []).map(c => [String(c.id),c]));
+    }
+  }
+
+  app.schedule = app.schedule.map(item => ({
+    ...item,
+    channel: channelMap.get(String(item.channel_id)) || null
+  }));
 
   renderSchedule();
 }
 
-
-/* ============================================================
-   SCHEDULE STATUS
-   ============================================================ */
+function getScheduleEnd(item){
+  if(item.ends_at) return new Date(item.ends_at);
+  if(item.end_time) return new Date(item.end_time);
+  const start = new Date(item.starts_at);
+  const duration = Number(item.duration_seconds || 3600);
+  return new Date(start.getTime() + duration*1000);
+}
 
 function scheduleState(item){
-
-  const now =
-    new Date();
-
-  const start =
-    new Date(item.starts_at);
-
-  const end =
-    item.ends_at
-      ? new Date(item.ends_at)
-      : new Date(
-          start.getTime() +
-          60 * 60 * 1000
-        );
-
-
-  if(
-    start <= now &&
-    end > now
-  ){
-    return "LIVE";
-  }
-
-  if(start > now){
-    return "UP NEXT";
-  }
-
+  const now = new Date();
+  const start = new Date(item.starts_at);
+  const end = getScheduleEnd(item);
+  if(start <= now && end > now) return "LIVE";
+  if(start > now) return "UP NEXT";
   return "ENDED";
 }
 
-
-/* ============================================================
-   CHANNEL NAME
-   ============================================================ */
-
-function scheduleChannelName(item){
-
-  const channel =
-    channels.find(
-      c =>
-        String(c.id) ===
-        String(item.channel_id)
-    );
-
-  return (
-    channel?.name ||
-    item.channel_name ||
-    "CrowRules TV"
-  );
-}
-
-
-/* ============================================================
-   RENDER SCHEDULE
-   ============================================================ */
-
 function renderSchedule(){
+  const now = new Date();
+  const active = app.schedule.filter(item => getScheduleEnd(item) >= now);
 
-  const now =
-    new Date();
+  $("guideStatus").textContent = active.length + " scheduled";
 
-
-  const active =
-    schedule.filter(item => {
-
-      const start =
-        new Date(item.starts_at);
-
-      const end =
-        item.ends_at
-          ? new Date(item.ends_at)
-          : new Date(
-              start.getTime() +
-              60 * 60 * 1000
-            );
-
-      return end >= now;
-
-    });
-
-
-  $("guideStatus").textContent =
-    active.length +
-    " programs";
-
-
-  $("guideBody").innerHTML =
-    active
-      .slice(0,60)
-      .map(item => {
-
-        const start =
-          new Date(item.starts_at);
-
-        const state =
-          scheduleState(item);
-
-        const channel =
-          scheduleChannelName(item);
-
-
-        return `
-
-          <tr>
-
-            <td>
-              ${start.toLocaleString(
-                [],
-                {
-                  weekday:"short",
-                  month:"short",
-                  day:"numeric",
-                  hour:"numeric",
-                  minute:"2-digit"
-                }
-              )}
-            </td>
-
-            <td>
-              ${esc(channel)}
-            </td>
-
-            <td class="${
-              state === "LIVE"
-                ? "now"
-                : ""
-            }">
-
-              ${esc(
-                firstValue(
-                  item,
-                  "title",
-                  "name"
-                ) ||
-                "Untitled Program"
-              )}
-
-            </td>
-
-            <td>
-
-              ${
-                state === "LIVE"
-
-                  ? `<span class="live-label">
-                       ● LIVE
-                     </span>`
-
-                  : esc(state)
-
-              }
-
-            </td>
-
-          </tr>
-
-        `;
-
-      })
-      .join("");
-
-
-  if(!active.length){
-
-    $("guideBody").innerHTML = `
-
+  $("guideBody").innerHTML = active.slice(0,50).map(item => {
+    const status = scheduleState(item);
+    const start = new Date(item.starts_at);
+    const channel = item.channel?.name || "CrowRules TV";
+    return `
       <tr>
-        <td colspan="4">
-          No active schedule items found.
-        </td>
-      </tr>
+        <td>${esc(start.toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}))}</td>
+        <td>${esc(channel)}</td>
+        <td class="${status==="LIVE"?"now":""}">${esc(item.title || "Untitled Program")}</td>
+        <td>${status==="LIVE" ? "<b>● LIVE</b>" : esc(status)}</td>
+      </tr>`;
+  }).join("") || `<tr><td colspan="4">No schedule items are currently available.</td></tr>`;
 
-    `;
-
-  }
-
-
-  const upcoming =
-    active.slice(0,4);
-
-
-  $("upcomingGrid").innerHTML =
-    upcoming.length
-
-      ? upcoming.map(item => {
-
-          const state =
-            scheduleState(item);
-
-          const start =
-            new Date(item.starts_at);
-
-          const title =
-            firstValue(
-              item,
-              "title",
-              "name"
-            ) ||
-            "Program";
-
-          const channel =
-            scheduleChannelName(item);
-
-
-          return `
-
-            <article
-              class="card program ${
-                state === "LIVE"
-                  ? "live"
-                  : ""
-              }"
-            >
-
-              <div class="time">
-
-                ${
-                  state === "LIVE"
-
-                    ? "🔴 LIVE NOW"
-
-                    : start.toLocaleString(
-                        [],
-                        {
-                          weekday:"short",
-                          hour:"numeric",
-                          minute:"2-digit"
-                        }
-                      )
-
-                }
-
-              </div>
-
-              <div class="title">
-                ${esc(title)}
-              </div>
-
-              <div class="meta">
-                ${esc(channel)}
-              </div>
-
-              <button
-                class="watch"
-                data-play="${encodeURIComponent(
-                  JSON.stringify(item)
-                )}"
-              >
-
-                ${
-                  state === "LIVE"
-                    ? "▶ WATCH LIVE"
-                    : "VIEW PROGRAM"
-                }
-
-              </button>
-
-            </article>
-
-          `;
-
-        }).join("")
-
-      : `
-
-        <article class="card program">
-
-          <div class="time">
-            SCHEDULE
-          </div>
-
-          <div class="title">
-            No programs scheduled
-          </div>
-
-          <div class="meta">
-            Add programming through Admin Pro.
-          </div>
-
-        </article>
-
-      `;
-
+  renderUpcoming(active);
 }
 
+function renderUpcoming(items){
+  const grid = $("upcomingGrid");
+  const four = items.slice(0,4);
 
-/* ============================================================
-   LOAD ROOMS
-   ============================================================ */
+  grid.innerHTML = four.map(item => {
+    const status = scheduleState(item);
+    const channel = item.channel?.name || "CrowRules TV";
+    const playable = registerPlayItem({...item,kind:"schedule"},"schedule");
+    const start = new Date(item.starts_at);
+
+    return `
+      <article class="card" style="padding:18px">
+        <div class="eyebrow">${status==="LIVE" ? "🔴 LIVE NOW" : esc(start.toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}))}</div>
+        <div class="title">${esc(item.title || "Program")}</div>
+        <div class="meta">${esc(channel)}</div>
+        <button class="watch" type="button" data-play-id="${esc(playable._playId)}">${status==="LIVE" ? "WATCH" : "VIEW"}</button>
+      </article>`;
+  }).join("") || `<div class="empty">No upcoming programs.</div>`;
+
+  bindPlayButtons();
+}
+
+/* ---------------- CROW ROOMS ---------------- */
 
 async function loadRooms(){
+  const list = $("roomList");
+  if(!sb){ showError("roomList","Supabase is not configured."); return; }
 
-  const result =
-    await sb
-      .from("chat_rooms")
-      .select("*")
-      .eq("is_enabled",true)
-      .eq("is_public",true)
-      .order("created_at",{ascending:true});
+  list.innerHTML = `<div class="meta">Loading rooms…</div>`;
 
+  const {data,error} = await sb.from("chat_rooms")
+    .select("id,slug,name,description,room_type,channel_id,show_id,episode_id,is_public,is_members_only,is_enabled,slow_mode_seconds,created_at")
+    .eq("is_enabled",true)
+    .order("created_at",{ascending:true});
+
+  if(error){
+    console.error("chat_rooms",error);
+    $("roomsStatus").textContent = "Connection error";
+    showError("roomList","Crow Rooms could not connect: " + error.message);
+    return;
+  }
+
+  app.rooms = data || [];
+  $("roomsStatus").textContent = app.rooms.length + " rooms";
+
+  if(!app.rooms.length){
+    list.innerHTML = `<div class="empty">No enabled rooms found.</div>`;
+    return;
+  }
+
+  list.innerHTML = app.rooms.map(room => `
+    <button type="button" class="room" data-room-id="${esc(room.id)}">
+      <span>${esc(room.name)}</span><span class="online">●</span>
+    </button>`).join("");
+
+  list.querySelectorAll("[data-room-id]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const room = app.rooms.find(r => String(r.id) === String(btn.dataset.roomId));
+      if(room) selectRoom(room);
+    });
+  });
+
+  const selected = app.rooms.find(r => r.slug === "main-roost") || app.rooms[0];
+  await selectRoom(selected);
+}
+
+async function safeRemoveRoomChannel(){
+  if(!sb || !app.roomChannel) return;
+  try{ await sb.removeChannel(app.roomChannel); }catch(error){ console.warn(error); }
+  app.roomChannel = null;
+}
+
+async function selectRoom(room){
+  if(!room?.id || !sb) return;
+
+  const epoch = ++app.roomEpoch;
+  app.activeRoom = room;
+
+  $("chatRoomName").textContent = room.name;
+  document.querySelectorAll(".room").forEach(btn => btn.classList.toggle("active", btn.dataset.roomId === String(room.id)));
+
+  await safeRemoveRoomChannel();
+  await loadMessages(room, epoch);
+
+  if(epoch !== app.roomEpoch) return;
+
+  const presenceKey = app.user?.id || "guest-" + (window.crypto?.randomUUID?.() || Math.random().toString(36).slice(2));
+
+  app.roomChannel = sb.channel("crow-room:" + room.id, {
+    config:{broadcast:{self:true},presence:{key:presenceKey}}
+  });
+
+  app.roomChannel
+    .on("broadcast",{event:"message"},({payload}) => {
+      if(payload && String(payload.room_id || room.id) === String(room.id)) addMessage(payload);
+    })
+    .on("presence",{event:"sync"},updatePresence);
+
+  app.roomChannel.subscribe(async status => {
+    if(status === "SUBSCRIBED"){
+      try{
+        await app.roomChannel.track({
+          user_id: app.user?.id || null,
+          online_at: new Date().toISOString()
+        });
+      }catch(error){ console.warn("presence track",error); }
+      updatePresence();
+    }
+    if(status === "CHANNEL_ERROR" || status === "TIMED_OUT"){
+      $("presenceText").textContent = "Realtime unavailable · chat still works when signed in";
+    }
+  });
+}
+
+async function loadMessages(room, epoch){
+  const box = $("messages");
+  box.innerHTML = "";
+
+  if(!room?.id){
+    $("presenceText").textContent = "Room unavailable";
+    return;
+  }
+
+  /* First use the canonical column that now exists. */
+  let result = await sb.from("chat_messages")
+    .select("id,room_id,user_id,message,created_at,display_name,is_deleted")
+    .eq("room_id",room.id)
+    .eq("is_deleted",false)
+    .order("created_at",{ascending:false})
+    .limit(50);
+
+  /* Compatibility fallback for an older PostgREST schema cache. */
+  if(result.error && /display_name|schema cache|column/i.test(result.error.message || "")){
+    console.warn("Retrying chat history without display_name",result.error);
+    result = await sb.from("chat_messages")
+      .select("id,room_id,user_id,message,created_at,is_deleted")
+      .eq("room_id",room.id)
+      .eq("is_deleted",false)
+      .order("created_at",{ascending:false})
+      .limit(50);
+  }
+
+  if(epoch !== app.roomEpoch) return;
 
   if(result.error){
-
-    databaseError(
-      "Crow Rooms",
-      result.error
-    );
-
-    rooms = [];
-
-    $("roomList").innerHTML =
-      `<div class="meta">
-        Unable to load Crow Rooms.
-      </div>`;
-
+    console.error("chat_messages",result.error);
+    showError("messages","Chat history could not be loaded: " + result.error.message);
     return;
   }
 
-
-  /*
-    Database-level unique slug protection
-    means duplicate rooms should no longer
-    appear here.
-  */
-
-  const seen =
-    new Set();
-
-  rooms =
-    (result.data || [])
-      .filter(room => {
-
-        const slug =
-          room.slug ||
-          slugify(room.name);
-
-        if(seen.has(slug)){
-          return false;
-        }
-
-        seen.add(slug);
-
-        return true;
-
-      });
-
-
-  $("roomList").innerHTML =
-    rooms.length
-
-      ? rooms.map(room => `
-
-          <div
-            class="room ${
-              room.slug === activeRoom?.slug
-                ? "active"
-                : ""
-            }"
-            data-room-id="${esc(room.id)}"
-          >
-
-            <span>
-              ${esc(
-                room.name ||
-                room.slug ||
-                "Crow Room"
-              )}
-            </span>
-
-            <span class="room-status">
-              ●
-            </span>
-
-          </div>
-
-        `).join("")
-
-      : `<div class="meta">
-          No public Crow Rooms configured.
-        </div>`;
-
-
-  document
-    .querySelectorAll(".room")
-    .forEach(el => {
-
-      el.addEventListener(
-        "click",
-        ()=>{
-
-          const room =
-            rooms.find(
-              r =>
-                String(r.id) ===
-                String(
-                  el.dataset.roomId
-                )
-            );
-
-          if(room){
-            selectRoom(room);
-          }
-
-        }
-      );
-
-    });
-
-
-  if(!activeRoom){
-
-    const main =
-      rooms.find(
-        r =>
-          r.slug ===
-          "main-roost"
-      ) ||
-      rooms[0];
-
-    if(main){
-      await selectRoom(main);
-    }
-
-  }else{
-
-    const same =
-      rooms.find(
-        r =>
-          String(r.id) ===
-          String(activeRoom.id)
-      );
-
-    if(same){
-      await selectRoom(
-        same,
-        false
-      );
-    }
-
-  }
-
+  const rows = (result.data || []).reverse();
+  rows.forEach(addMessage);
+  $("presenceText").textContent = "Chat connected";
 }
 
+function addMessage(message){
+  const element = document.createElement("div");
+  element.className = "msg";
 
-/* ============================================================
-   SELECT ROOM
-   ============================================================ */
+  const time = message.created_at
+    ? new Date(message.created_at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})
+    : "now";
 
-async function selectRoom(
-  room,
-  reconnect=true
-){
+  const name = message.display_name || "Crow";
 
-  if(!room){
-    return;
-  }
+  element.innerHTML = `
+    <strong>${esc(name)}</strong>
+    <time>${esc(time)}</time>
+    <p>${esc(message.message)}</p>`;
 
-
-  activeRoom =
-    room;
-
-
-  $("chatRoomName").textContent =
-    room.name ||
-    room.slug ||
-    "Crow Room";
-
-
-  document
-    .querySelectorAll(".room")
-    .forEach(el => {
-
-      el.classList.toggle(
-        "active",
-        String(
-          el.dataset.roomId
-        ) ===
-        String(room.id)
-      );
-
-    });
-
-
-  await loadMessages();
-
-
-  if(!reconnect){
-    return;
-  }
-
-
-  if(chatChannel){
-
-    try{
-      await sb.removeChannel(
-        chatChannel
-      );
-    }catch(error){}
-
-    chatChannel = null;
-  }
-
-
-  /*
-    Use a stable presence key for
-    authenticated users and a temporary
-    key for visitors.
-  */
-
-  const presenceKey =
-    currentUser?.id ||
-    "visitor-" +
-    Math.random()
-      .toString(36)
-      .slice(2);
-
-
-  chatChannel =
-    sb.channel(
-      "crow-room:" +
-      room.id,
-      {
-        config:{
-          broadcast:{
-            self:false
-          },
-          presence:{
-            key:presenceKey
-          }
-        }
-      }
-    );
-
-
-  chatChannel.on(
-    "broadcast",
-    {
-      event:"message"
-    },
-    payload => {
-
-      if(payload?.payload){
-        addMessage(
-          payload.payload,
-          false
-        );
-      }
-
-    }
-  );
-
-
-  chatChannel.on(
-    "presence",
-    {
-      event:"sync"
-    },
-    updatePresence
-  );
-
-
-  chatChannel.on(
-    "presence",
-    {
-      event:"join"
-    },
-    updatePresence
-  );
-
-
-  chatChannel.on(
-    "presence",
-    {
-      event:"leave"
-    },
-    updatePresence
-  );
-
-
-  await chatChannel.subscribe(
-    async status => {
-
-      if(
-        status ===
-        "SUBSCRIBED"
-      ){
-
-        try{
-
-          await chatChannel.track({
-            user_id:
-              currentUser?.id ||
-              null,
-
-            online_at:
-              new Date()
-                .toISOString()
-          });
-
-        }catch(error){}
-
-        updatePresence();
-
-      }
-
-      if(
-        status ===
-        "CHANNEL_ERROR"
-      ){
-
-        $("presenceText")
-          .textContent =
-          "Room connection error";
-
-      }
-
-    }
-  );
-
+  $("messages").appendChild(element);
+  const box = $("messages");
+  box.scrollTop = box.scrollHeight;
 }
-
-
-/* ============================================================
-   PRESENCE
-   ============================================================ */
 
 function updatePresence(){
-
-  if(!chatChannel){
-    return;
+  if(!app.roomChannel) return;
+  try{
+    const presence = app.roomChannel.presenceState();
+    const count = Object.keys(presence || {}).length;
+    $("presenceText").textContent = count + " online · live room";
+  }catch(_){
+    $("presenceText").textContent = "Realtime connected";
   }
-
-
-  const state =
-    chatChannel
-      .presenceState();
-
-
-  const count =
-    Object.keys(state).length;
-
-
-  $("presenceText").textContent =
-    count +
-    (
-      count === 1
-        ? " viewer online"
-        : " viewers online"
-    );
 }
 
+/* ---------------- SEND CHAT ---------------- */
 
-/* ============================================================
-   LOAD CHAT MESSAGES
-   ============================================================ */
+async function sendMessage(event){
+  event.preventDefault();
 
-async function loadMessages(){
+  const input = $("chatMessage");
+  const text = input.value.trim();
 
-  $("messages").innerHTML =
-    `<div class="meta">
-      Loading messages…
-    </div>`;
+  if(!text) return;
 
-
-  if(!activeRoom?.id){
-
-    $("messages").innerHTML =
-      `<div class="meta">
-        This room is not connected to a database record.
-      </div>`;
-
-    return;
-  }
-
-
-  const result =
-    await sb
-      .from("chat_messages")
-      .select("*")
-      .eq(
-        "room_id",
-        activeRoom.id
-      )
-      .eq(
-        "is_deleted",
-        false
-      )
-      .order(
-        "created_at",
-        {
-          ascending:false
-        }
-      )
-      .limit(100);
-
-
-  if(result.error){
-
-    databaseError(
-      "Messages",
-      result.error
-    );
-
-    $("messages").innerHTML =
-      `<div class="meta">
-        Unable to load messages.
-      </div>`;
-
-    return;
-  }
-
-
-  $("messages").innerHTML =
-    "";
-
-
-  (result.data || [])
-    .reverse()
-    .forEach(
-      message =>
-        addMessage(
-          message,
-          true
-        )
-    );
-
-
-  scrollMessages();
-
-}
-
-
-/* ============================================================
-   ADD MESSAGE
-   ============================================================ */
-
-function addMessage(
-  message,
-  initial
-){
-
-  if(!message){
-    return;
-  }
-
-
-  const el =
-    document.createElement(
-      "div"
-    );
-
-  el.className =
-    "msg";
-
-
-  const name =
-    firstValue(
-      message,
-      "display_name",
-      "username"
-    ) ||
-    "Crow";
-
-
-  const text =
-    message.message ||
-    "";
-
-
-  let time =
-    "now";
-
-
-  if(
-    initial &&
-    message.created_at
-  ){
-
-    time =
-      new Date(
-        message.created_at
-      ).toLocaleTimeString(
-        [],
-        {
-          hour:"numeric",
-          minute:"2-digit"
-        }
-      );
-
-  }
-
-
-  el.innerHTML = `
-
-    <strong>
-      ${esc(name)}
-    </strong>
-
-    <time>
-      ${esc(time)}
-    </time>
-
-    <p>
-      ${esc(text)}
-    </p>
-
-  `;
-
-
-  $("messages")
-    .appendChild(el);
-
-
-  scrollMessages();
-}
-
-
-function scrollMessages(){
-
-  const box =
-    $("messages");
-
-  box.scrollTop =
-    box.scrollHeight;
-
-}
-
-
-/* ============================================================
-   SEND MESSAGE
-   ============================================================ */
-
-async function sendMessage(){
-
-  const input =
-    $("chatMessage");
-
-  const text =
-    input.value.trim();
-
-
-  if(!text){
-    return;
-  }
-
-
-  if(!currentUser){
-
-    toast(
-      "Sign in to use Crow Rooms."
-    );
-
+  if(!app.user){
+    toast("Sign in to send messages.");
     showMember();
-
     return;
   }
 
-
-  if(!activeRoom?.id){
-
-    toast(
-      "This Crow Room is not connected to Supabase."
-    );
-
+  const room = app.activeRoom;
+  if(!room?.id){
+    toast("Select a Crow Room first.");
     return;
   }
 
-
-  /*
-    Members-only room protection.
-  */
-
-  if(
-    activeRoom.is_members_only !== false &&
-    activeRoom.is_members_only === true
-  ){
-
-    /*
-      currentUser exists, therefore member
-      authentication is satisfied.
-    */
-
-  }
-
-
-  /*
-    Load profile.
-  */
-
-  let display =
-    currentUser.email
-      ?.split("@")[0] ||
-    "Crow";
-
-
-  const profile =
-    await sb
-      .from("profiles")
-      .select("*")
-      .eq(
-        "id",
-        currentUser.id
-      )
+  if(room.is_members_only){
+    const membership = await sb.from("chat_room_members")
+      .select("room_id")
+      .eq("room_id",room.id)
+      .eq("user_id",app.user.id)
       .maybeSingle();
 
-
-  if(
-    !profile.error &&
-    profile.data
-  ){
-
-    display =
-      firstValue(
-        profile.data,
-        "display_name",
-        "username",
-        "name"
-      ) ||
-      display;
-
-  }
-
-
-  /*
-    Respect optional slow mode.
-  */
-
-  if(
-    activeRoom.slow_mode_seconds
-  ){
-
-    const last =
-      Number(
-        localStorage.getItem(
-          "crowrules-last-chat"
-        ) || 0
-      );
-
-    const elapsed =
-      (Date.now() - last) /
-      1000;
-
-    if(
-      elapsed <
-      Number(
-        activeRoom.slow_mode_seconds
-      )
-    ){
-
-      toast(
-        "Please wait before sending another message."
-      );
-
+    if(membership.error || !membership.data){
+      toast("This room is for members of the room.");
       return;
     }
-
   }
 
+  let displayName = app.user.email?.split("@")[0] || "Crow";
 
-  const row = {
+  const profile = await sb.from("profiles")
+    .select("display_name")
+    .eq("id",app.user.id)
+    .maybeSingle();
 
-    room_id:
-      activeRoom.id,
+  if(!profile.error && profile.data?.display_name){
+    displayName = profile.data.display_name;
+  }
 
-    user_id:
-      currentUser.id,
-
-    display_name:
-      display,
-
-    message:
-      text,
-
-    is_deleted:
-      false
-
+  const payload = {
+    room_id: room.id,
+    user_id: app.user.id,
+    display_name: displayName,
+    message: text
   };
 
+  const {data,error} = await sb.from("chat_messages")
+    .insert(payload)
+    .select("id,room_id,user_id,message,created_at,display_name")
+    .single();
 
-  const result =
-    await sb
-      .from("chat_messages")
-      .insert(row)
-      .select("*")
-      .single();
-
-
-  if(result.error){
-
-    databaseError(
-      "Send message",
-      result.error
-    );
-
+  if(error){
+    console.error("chat insert",error);
+    toast("Message failed: " + error.message);
     return;
   }
-
 
   input.value = "";
 
-  localStorage.setItem(
-    "crowrules-last-chat",
-    String(Date.now())
-  );
-
-
-  /*
-    Broadcast only to OTHER clients.
-    self:false prevents the sender receiving
-    a duplicate copy.
-  */
-
-  if(chatChannel){
-
-    await chatChannel.send({
-
-      type:"broadcast",
-
-      event:"message",
-
-      payload:
-        result.data
-
-    });
-
-  }
-
-
-  /*
-    Add the message locally once.
-  */
-
-  addMessage(
-    result.data,
-    false
-  );
-
-}
-
-
-/* ============================================================
-   AUTH UI
-   ============================================================ */
-
-function updateAuthUI(){
-
-  const button =
-    $("memberBtn");
-
-  const state =
-    $("authState");
-
-
-  if(currentUser){
-
-    const name =
-      currentUser.user_metadata
-        ?.display_name ||
-      currentUser.email
-        ?.split("@")[0] ||
-      "Member";
-
-
-    button.textContent =
-      "👤 " +
-      name;
-
-
-    state.innerHTML = `
-
-      <p>
-        Signed in as
-        <strong>
-          ${esc(currentUser.email)}
-        </strong>.
-      </p>
-
-      <p class="meta">
-        Your CrowRules member session
-        is being kept active automatically.
-      </p>
-
-    `;
-
-
-    $("chatMessage")
-      .placeholder =
-      "Write a message…";
-
-
-    $("signOutBtn")
-      .style.display =
-      "inline-block";
-
-  }else{
-
-    button.textContent =
-      "👤 MEMBER";
-
-
-    state.innerHTML = `
-
-      <p>
-        Sign in or create a free
-        CrowRules member account.
-      </p>
-
-    `;
-
-
-    $("chatMessage")
-      .placeholder =
-      "Sign in to chat…";
-
-
-    $("signOutBtn")
-      .style.display =
-      "none";
-
-  }
-
-}
-
-
-/* ============================================================
-   AUTH
-   ============================================================ */
-
-async function signIn(){
-
-  const email =
-    $("authEmail")
-      .value
-      .trim();
-
-  const password =
-    $("authPassword")
-      .value;
-
-
-  if(!email || !password){
-
-    toast(
-      "Enter your email and password."
-    );
-
-    return;
-  }
-
-
-  const result =
-    await sb.auth
-      .signInWithPassword({
-        email,
-        password
-      });
-
-
-  if(result.error){
-
-    toast(
-      result.error.message
-    );
-
-    return;
-  }
-
-
-  toast(
-    "Welcome back to the Roost."
-  );
-
-
-  closeAuth();
-}
-
-
-/* ============================================================
-   SIGN UP
-   ============================================================ */
-
-async function signUp(){
-
-  const email =
-    $("authEmail")
-      .value
-      .trim();
-
-  const password =
-    $("authPassword")
-      .value;
-
-
-  if(!email){
-
-    toast(
-      "Enter an email address."
-    );
-
-    return;
-  }
-
-
-  if(password.length < 6){
-
-    toast(
-      "Password must be at least 6 characters."
-    );
-
-    return;
-  }
-
-
-  const result =
-    await sb.auth
-      .signUp({
-        email,
-        password
-      });
-
-
-  if(result.error){
-
-    toast(
-      result.error.message
-    );
-
-    return;
-  }
-
-
-  if(result.data.session){
-
-    toast(
-      "Account created. Welcome to the Roost!"
-    );
-
-  }else{
-
-    toast(
-      "Account created. Check your email to confirm your account."
-    );
-
-  }
-
-
-  closeAuth();
-}
-
-
-/* ============================================================
-   SIGN OUT
-   ============================================================ */
-
-async function signOut(){
-
-  const result =
-    await sb.auth.signOut();
-
-
-  if(result.error){
-
-    toast(
-      result.error.message
-    );
-
-    return;
-  }
-
-
-  toast(
-    "Signed out."
-  );
-
-}
-
-
-/* ============================================================
-   AUTH MODAL
-   ============================================================ */
-
-function showMember(){
-
-  $("authModal")
-    .classList.add("open");
-
-  updateAuthUI();
-
-}
-
-
-function closeAuth(){
-
-  $("authModal")
-    .classList.remove("open");
-
-}
-
-
-/* ============================================================
-   SEARCH
-   ============================================================ */
-
-$("search")
-  .addEventListener(
-    "input",
-    function(){
-
-      const q =
-        this.value
-          .toLowerCase()
-          .trim();
-
-
-      document
-        .querySelectorAll(
-          ".card"
-        )
-        .forEach(card => {
-
-          const text =
-            card.innerText
-              .toLowerCase();
-
-
-          card.style.display =
-            !q ||
-            text.includes(q)
-              ? ""
-              : "none";
-
-        });
-
-    }
-  );
-
-
-/* ============================================================
-   GLOBAL PLAY BUTTON HANDLER
-   ============================================================ */
-
-document.addEventListener(
-  "click",
-  event => {
-
-    const button =
-      event.target.closest(
-        "[data-play]"
-      );
-
-
-    if(!button){
-      return;
-    }
-
-
+  /* The insert is the source of truth. Broadcast only speeds up other clients. */
+  if(app.roomChannel){
     try{
-
-      const item =
-        JSON.parse(
-          decodeURIComponent(
-            button.dataset.play
-          )
-        );
-
-
-      playItem(item);
-
+      await app.roomChannel.send({
+        type:"broadcast",
+        event:"message",
+        payload:data
+      });
     }catch(error){
-
-      console.error(error);
-
-      toast(
-        "Unable to open this program."
-      );
-
+      console.warn("chat broadcast",error);
     }
-
   }
-);
 
+  /* If broadcast self-delivery is disabled by project settings, render locally. */
+  if(!$("messages").lastElementChild || $("messages").lastElementChild.textContent.indexOf(text) === -1){
+    addMessage(data);
+  }
+}
 
-/* ============================================================
-   MODAL EVENTS
-   ============================================================ */
+/* ---------------- SEARCH ---------------- */
 
-$("watchLiveBtn")
-  .addEventListener(
-    "click",
-    watchLive
-  );
+function searchSite(event){
+  const query = event.target.value.toLowerCase().trim();
+  document.querySelectorAll(".card").forEach(card => {
+    card.style.display = !query || card.innerText.toLowerCase().includes(query) ? "" : "none";
+  });
+}
 
+/* ---------------- BOOT ---------------- */
 
-$("closePlayer")
-  .addEventListener(
-    "click",
-    closePlayer
-  );
+function initSupabase(){
+  if(!window.supabase){
+    toast("Supabase JavaScript library failed to load.");
+    return false;
+  }
 
-
-$("playerModal")
-  .addEventListener(
-    "click",
-    event => {
-
-      if(
-        event.target ===
-        $("playerModal")
-      ){
-
-        closePlayer();
-
+  try{
+    sb = window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true,
+        flowType:"pkce"
+      },
+      realtime:{
+        params:{eventsPerSecond:10}
       }
+    });
+    return true;
+  }catch(error){
+    console.error("Supabase initialization",error);
+    toast("Could not initialize Supabase: " + error.message);
+    return false;
+  }
+}
 
-    }
-  );
+function installEvents(){
+  $("memberBtn").addEventListener("click",showMember);
+  $("joinBtn").addEventListener("click",showMember);
+  $("watchLiveBtn").addEventListener("click",watchLive);
+  $("closePlayer").addEventListener("click",closePlayer);
+  $("closeAuth").addEventListener("click",closeAuth);
+  $("signInBtn").addEventListener("click",signIn);
+  $("signUpBtn").addEventListener("click",signUp);
+  $("signOutBtn").addEventListener("click",signOut);
+  $("chatForm").addEventListener("submit",sendMessage);
+  $("search").addEventListener("input",searchSite);
 
+  $("playerModal").addEventListener("click",e => {
+    if(e.target.id === "playerModal") closePlayer();
+  });
 
-$("memberBtn")
-  .addEventListener(
-    "click",
-    showMember
-  );
+  $("authModal").addEventListener("click",e => {
+    if(e.target.id === "authModal") closeAuth();
+  });
 
-
-$("joinBtn")
-  .addEventListener(
-    "click",
-    showMember
-  );
-
-
-$("closeAuth")
-  .addEventListener(
-    "click",
-    closeAuth
-  );
-
-
-$("authModal")
-  .addEventListener(
-    "click",
-    event => {
-
-      if(
-        event.target ===
-        $("authModal")
-      ){
-
-        closeAuth();
-
-      }
-
-    }
-  );
-
-
-$("signInBtn")
-  .addEventListener(
-    "click",
-    signIn
-  );
-
-
-$("signUpBtn")
-  .addEventListener(
-    "click",
-    signUp
-  );
-
-
-$("signOutBtn")
-  .addEventListener(
-    "click",
-    signOut
-  );
-
-
-$("chatForm")
-  .addEventListener(
-    "submit",
-    event => {
-
-      event.preventDefault();
-
-      sendMessage();
-
-    }
-  );
-
-
-/* ============================================================
-   ESCAPE KEY
-   ============================================================ */
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    if(
-      event.key ===
-      "Escape"
-    ){
-
+  document.addEventListener("keydown",e => {
+    if(e.key === "Escape"){
       closePlayer();
       closeAuth();
-
     }
+  });
+}
 
-  }
-);
+(async function boot(){
+  installEvents();
 
+  if(!initSupabase()) return;
 
-/* ============================================================
-   AUTH STATE
-   ============================================================ */
+  await refreshSession();
+  updateAuthUI();
 
-sb.auth.onAuthStateChange(
-  async (
-    event,
-    session
-  ) => {
-
-    currentUser =
-      session?.user ||
-      null;
-
-
+  /* Keep auth callback lightweight. Do not await database work inside it. */
+  sb.auth.onAuthStateChange((_event,session) => {
+    app.user = session?.user || null;
     updateAuthUI();
 
-
-    /*
-      Reconnect presence using the
-      authenticated user's ID.
-    */
-
-    if(
-      activeRoom &&
-      event !== "INITIAL_SESSION"
-    ){
-
-      await selectRoom(
-        activeRoom
-      );
-
-    }
-
-  }
-);
-
-
-/* ============================================================
-   REALTIME ADMIN PRO SYNC
-   ============================================================ */
-
-function startRealtime(){
-
-  /*
-    Admin Pro changes to channels.
-  */
-
-  sb
-    .channel(
-      "crowrules-tv-data"
-    )
-
-    .on(
-      "postgres_changes",
-      {
-        event:"*",
-        schema:"public",
-        table:"tv_channels"
-      },
-      async ()=>{
-        await loadChannels();
+    setTimeout(() => {
+      if(app.activeRoom && app.roomChannel){
+        try{
+          app.roomChannel.track({
+            user_id: app.user?.id || null,
+            online_at: new Date().toISOString()
+          });
+        }catch(_){}
       }
-    )
-
-    .on(
-      "postgres_changes",
-      {
-        event:"*",
-        schema:"public",
-        table:"shows"
-      },
-      async ()=>{
-        await loadShows();
-      }
-    )
-
-    .on(
-      "postgres_changes",
-      {
-        event:"*",
-        schema:"public",
-        table:"episodes"
-      },
-      async ()=>{
-        await loadEpisodes();
-      }
-    )
-
-    .on(
-      "postgres_changes",
-      {
-        event:"*",
-        schema:"public",
-        table:"schedule_items"
-      },
-      async ()=>{
-        await loadSchedule();
-      }
-    )
-
-    .on(
-      "postgres_changes",
-      {
-        event:"*",
-        schema:"public",
-        table:"chat_rooms"
-      },
-      async ()=>{
-        await loadRooms();
-      }
-    )
-
-    .subscribe();
-
-}
-
-
-/* ============================================================
-   SUPABASE CONNECTION TEST
-   ============================================================ */
-
-async function verifyConnection(){
-
-  try{
-
-    /*
-      A public table query confirms that
-      the URL/key/client are functioning.
-    */
-
-    const result =
-      await sb
-        .from("tv_channels")
-        .select("id")
-        .limit(1);
-
-
-    if(result.error){
-
-      setConnection(
-        "error",
-        "Supabase database connection error"
-      );
-
-
-      console.error(
-        "Supabase connection:",
-        result.error
-      );
-
-
-      toast(
-        "Supabase: " +
-        result.error.message
-      );
-
-
-      return false;
-    }
-
-
-    setConnection(
-      "ok",
-      "Connected to CrowRules Supabase"
-    );
-
-
-    return true;
-
-  }catch(error){
-
-    setConnection(
-      "error",
-      "Supabase connection failed"
-    );
-
-
-    console.error(error);
-
-    return false;
-
-  }
-
-}
-
-
-/* ============================================================
-   INITIALIZE
-   ============================================================ */
-
-async function initialize(){
-
-  if(loading){
-    return;
-  }
-
-  loading = true;
-
-
-  try{
-
-    /*
-      Restore persistent authentication.
-    */
-
-    const session =
-      await sb.auth
-        .getSession();
-
-
-    currentUser =
-      session.data
-        ?.session
-        ?.user ||
-      null;
-
-
-    updateAuthUI();
-
-
-    /*
-      Verify database.
-    */
-
-    const connected =
-      await verifyConnection();
-
-
-    if(!connected){
-      return;
-    }
-
-
-    /*
-      Load everything used by CrowRules TV.
-    */
-
-    await Promise.all([
-      loadChannels(),
-      loadShows(),
-      loadEpisodes(),
-      loadSchedule(),
-      loadRooms()
-    ]);
-
-
-    /*
-      Keep Admin Pro changes synchronized.
-    */
-
-    startRealtime();
-
-
-    /*
-      Schedule display updates.
-    */
-
-    setInterval(
-      ()=>{
-        renderSchedule();
-      },
-      30000
-    );
-
-
-    /*
-      Refresh catalog/schedule periodically.
-      This also protects against environments
-      where realtime replication isn't enabled.
-    */
-
-    setInterval(
-      async ()=>{
-        await loadChannels();
-        await loadShows();
-        await loadEpisodes();
-        await loadSchedule();
-      },
-      120000
-    );
-
-
-  }catch(error){
-
-    console.error(
-      "CrowRules TV initialization:",
-      error
-    );
-
-    setConnection(
-      "error",
-      "CrowRules TV initialization failed"
-    );
-
-    toast(
-      error?.message ||
-      "CrowRules TV failed to initialize."
-    );
-
-  }finally{
-
-    loading = false;
-
-  }
-
-}
-
-
-initialize();
-
+    },0);
+  });
+
+  await Promise.allSettled([
+    loadChannels(),
+    loadShows(),
+    loadEpisodes(),
+    loadSchedule(),
+    loadRooms()
+  ]);
+
+  setInterval(() => {
+    if(app.schedule.length) renderSchedule();
+  },30000);
+
+  setInterval(() => {
+    if(sb && app.activeRoom) loadMessages(app.activeRoom,app.roomEpoch);
+  },60000);
+})();
 </script>
-
-<script src="./crowrules-core.js"></script>
 </body>
 </html>
