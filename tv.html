@@ -51,8 +51,67 @@
 "use strict";
 const SUPABASE_URL="https://zauxdqyssratvzmomozf.supabase.co";
 const SUPABASE_KEY="sb_publishable_-Z6wecSOxwOk6IBut2zLn_8DfRxnE9";
-const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let db=null;
+let supabaseReady=false;
+let supabaseError=null;
 const SHOP_URL="https://jonathan-riehle-shop.fourthwall.com/";
+
+async function initSupabase(){
+  if(db) return db;
+  try{
+    if(!window.supabase || typeof window.supabase.createClient !== "function"){
+      await new Promise((resolve,reject)=>{
+        const existing=document.querySelector("script[data-supabase-sdk]");
+        if(existing){
+          existing.addEventListener("load",resolve,{once:true});
+          existing.addEventListener("error",()=>reject(new Error("Supabase SDK failed to load.")),{once:true});
+          return;
+        }
+        const script=document.createElement("script");
+        script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.dataset.supabaseSdk="1";
+        script.onload=resolve;
+        script.onerror=()=>reject(new Error("Supabase SDK failed to load."));
+        document.head.appendChild(script);
+      });
+    }
+    if(!window.supabase || typeof window.supabase.createClient !== "function")
+      throw new Error("Supabase JavaScript client is unavailable.");
+
+    db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+
+    const test=await Promise.race([
+      db.from("tv_channels").select("id").eq("is_active",true).limit(1),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Supabase connection timed out.")),12000))
+    ]);
+
+    if(test.error) throw test.error;
+    supabaseReady=true;
+    setConnectionStatus("CONNECTED");
+    return db;
+  }catch(error){
+    supabaseError=error;
+    supabaseReady=false;
+    console.error("CrowRules TV Supabase connection:",error);
+    setConnectionStatus("CONNECTION ERROR");
+    return null;
+  }
+}
+
+function setConnectionStatus(text){
+  let el=document.getElementById("supabaseStatus");
+  if(!el){
+    el=document.createElement("span");
+    el.id="supabaseStatus";
+    el.style.cssText="position:fixed;left:14px;bottom:14px;z-index:9999;padding:7px 10px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(5,5,7,.9);backdrop-filter:blur(10px);font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.08em;color:#9ba0ad;box-shadow:0 8px 30px rgba(0,0,0,.3);";
+    document.body.appendChild(el);
+  }
+  el.textContent="SUPABASE: "+text;
+  el.style.color=text==="CONNECTED" ? "#d9ff00" : "#ff405f";
+}
+
 const $=id=>document.getElementById(id);const clean=v=>String(v??"").trim();const esc=v=>String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 const first=(o,keys)=>{for(const k of keys)if(o&&o[k]!=null&&clean(o[k])!=="")return o[k];return ""};
 const setText=(id,t)=>{const e=$(id);if(e)e.textContent=t??""};
@@ -84,7 +143,7 @@ function playHls(r,s){const v=$("video");$("placeholder").style.display="none";v
 function play(r){state.playerGeneration++;resetMedia();if(!r){setText("playerStatus","OFFLINE");$("placeholderText").textContent="Nothing is currently scheduled on this channel.";return}state.selectedProgram=r;metadata(r);$("warning").classList.add("hidden");const s=normalize(r);if(!s){setText("playerStatus","NO SOURCE");$("placeholderText").textContent="This program is scheduled, but no playable source is configured.";$("warning").textContent="Add a YouTube, HLS, or direct video source to this schedule item or episode.";$("warning").classList.remove("hidden");transition(r);return}s.kind==="youtube"?playYouTube(r,s):s.kind==="hls"?playHls(r,s):playVideo(r,s);transition(r);rememberState()}
 async function loadChannels(){const rows=await query("tv_channels","*",{col:"sort_order",asc:true},100,[{op:"eq",col:"is_active",val:true}]);state.channels=rows;$("channelsRail").innerHTML=rows.length?rows.map((c,i)=>{const image=first(c,["banner_url","logo_url","thumbnail_url","image_url"]),id=c.id??i;return`<article class="card" data-search-card><div class="thumb">${image?`<img loading="lazy" src="${esc(image)}" alt="${esc(c.name)}">`:`<div class="thumb-fallback">${esc(c.name)}</div>`}<span class="badge live">LIVE</span><span class="viewer-count" data-viewer-channel="${esc(id)}">● 0 watching</span>${c.channel_number!=null?`<span class="number">CH ${esc(c.channel_number)}</span>`:""}</div><div class="body"><div class="title">${esc(c.name)}</div><div class="meta">${esc(c.description||"CrowRules TV channel")}</div><button class="watch" data-channel="${esc(id)}">▶ WATCH CHANNEL</button></div></article>`}).join(""):"<div class='chat-note'>No active channels are published.</div>";$("channelsRail").querySelectorAll("[data-channel]").forEach(b=>b.onclick=()=>{const c=rows.find(x=>String(x.id)===b.dataset.channel)||rows[Number(b.dataset.channel)];if(c)loadChannel(c,true)});setText("channelStatus",rows.length+" CHANNEL"+(rows.length===1?"":"S"));renderViewerCounts();return rows}
 async function loadChannelGuide(){if(!state.selectedChannel)return[];const start=new Date(Date.now()-6*3600000).toISOString(),end=new Date(Date.now()+7*86400000).toISOString();const r=await db.from("schedule_items").select("*").eq("channel_id",state.selectedChannel.id).eq("is_active",true).neq("status","cancelled").gte("ends_at",start).lte("starts_at",end).order("starts_at",{ascending:true}).limit(500);state.guide=(r.data||[]).filter(validSchedule);return state.guide}
-async function loadGlobalGuide(){const start=new Date(Date.now()-6*3600000).toISOString(),end=new Date(Date.now()+7*86400000).toISOString();const r=await db.from("schedule_items").select("*,tv_channels:channel_id(name,channel_number)").eq("is_active",true).neq("status","cancelled").gte("ends_at",start).lte("starts_at",end).order("starts_at",{ascending:true}).limit(500);if(r.error){state.guide=(await query("schedule_items","*",{col:"starts_at",asc:true},500,[{op:"eq",col:"is_active",val:true}])).filter(validSchedule)}else state.guide=(r.data||[]).filter(validSchedule).map(x=>({...x,channel_name:x.channel_name||x.tv_channels?.name||"CrowRules TV",channel_number:x.channel_number??x.tv_channels?.channel_number??null}));return state.guide}
+async function loadGlobalGuide(){if(!db)return [];const start=new Date(Date.now()-6*3600000).toISOString(),end=new Date(Date.now()+7*86400000).toISOString();const r=await db.from("schedule_items").select("*,tv_channels:channel_id(name,channel_number)").eq("is_active",true).neq("status","cancelled").gte("ends_at",start).lte("starts_at",end).order("starts_at",{ascending:true}).limit(500);if(r.error){state.guide=(await query("schedule_items","*",{col:"starts_at",asc:true},500,[{op:"eq",col:"is_active",val:true}])).filter(validSchedule)}else state.guide=(r.data||[]).filter(validSchedule).map(x=>({...x,channel_name:x.channel_name||x.tv_channels?.name||"CrowRules TV",channel_number:x.channel_number??x.tv_channels?.channel_number??null}));return state.guide}
 function renderGuide(){const rows=state.guide.filter(r=>isNow(r)||new Date(r.starts_at).getTime()>Date.now()).slice(0,150);$("guideBody").innerHTML=rows.length?rows.map(r=>`<tr class="${isNow(r)?"now-row":""} data-search-card><td>${esc(fmtTime(r.starts_at))}</td><td>${esc(r.channel_name||"CrowRules TV")}${r.channel_number!=null?`<br><small>CH ${esc(r.channel_number)}</small>`:""}</td><td><strong>${isNow(r)?`<span class="badge live" style="position:static;margin-right:5px">NOW</span>`:""}${esc(r.title||"Programming")}</strong>${r.description?`<br><small>${esc(r.description)}</small>`:""}</td><td>${esc(String(r.item_type||"PROGRAM").toUpperCase())}</td><td>${esc(fmtTime(r.ends_at))}</td><td><button class="watch" style="margin:0" data-guide="${esc(r.id)}">WATCH</button></td></tr>`).join(""):"<tr><td colspan='6'><div class='chat-note'>No current or upcoming programming is scheduled.</div></td></tr>";$("guideBody").querySelectorAll("[data-guide]").forEach(b=>b.onclick=()=>{const row=state.guide.find(x=>String(x.id)===b.dataset.guide),c=state.channels.find(x=>String(x.id)===String(row?.channel_id));if(c)loadChannel(c,true,row)});setText("guideStatus",rows.length+" ITEMS")}
 async function loadChannel(c,manual=false,preferred=null){if(!c)return;state.playerGeneration++;clearTimeout(state.transitionTimer);state.selectedChannel=c;await updateViewerPresence(c.id);renderViewerCounts();await loadChannelGuide();let current=preferred&&String(preferred.channel_id)===String(c.id)?state.guide.find(x=>String(x.id)===String(preferred.id))||null:currentFor(c.id,state.guide);if(!current){const next=nextFor(c.id,state.guide);resetMedia();setText("playerStatus","STANDBY");setText("playerTitle",c.name);setText("infoTitle",c.name);setText("infoMeta",next?`Next: ${next.title} • ${fmtTime(next.starts_at)}`:"No current or upcoming program.");$("placeholderText").textContent=next?`${c.name} is between programs. Next: ${next.title} at ${fmtTime(next.starts_at)}.`:`${c.name} has no current or upcoming programming scheduled.`;if(next)state.transitionTimer=setTimeout(()=>refreshSelected(true),Math.max(500,new Date(next.starts_at).getTime()-Date.now()+250))}else play(current);await openChannelChat(c);if(manual){$("live").scrollIntoView({behavior:"smooth",block:"start"});toast(`Now selected: ${c.name}`)}rememberState()}
 async function refreshSelected(force=false){if(!state.selectedChannel)return;const c=state.selectedChannel,old=state.selectedProgram;await loadChannelGuide();const current=currentFor(c.id,state.guide);if(!current){if(force||old)await loadChannel(c,false);return}if(!old||String(old.id)!==String(current.id))await loadChannel(c,false);else{metadata(current);transition(current);setText("playerStatus","LIVE")}}
@@ -113,8 +172,8 @@ const mini={active:false,closed:false,observer:null,hls:null};function destroyMi
 function updateMiniPlayer(){if(!state.selectedProgram||!state.selectedChannel)return;const r=state.selectedProgram,s=normalize(r);if(!s)return;stopMini();setText("miniTitle",r.title||state.selectedChannel.name||"CrowRules TV");const y=$("miniYT"),v=$("miniVideoElement");if(s.kind==="youtube"){const p=new URLSearchParams({autoplay:"1",controls:"1",rel:"0",modestbranding:"1",playsinline:"1",mute:"1"}),o=scheduledOffset(r);if(o>0)p.set("start",String(o));y.src="https://www.youtube.com/embed/"+encodeURIComponent(s.id)+"?"+p.toString();y.classList.add("active")}else if(s.kind==="hls"){v.classList.add("active");if(v.canPlayType("application/vnd.apple.mpegurl")){v.src=s.url;v.onloadedmetadata=()=>v.play().catch(()=>{})}else if(window.Hls&&Hls.isSupported()){const h=new Hls({enableWorker:true,lowLatencyMode:true,backBufferLength:30,maxBufferLength:30});mini.hls=h;h.loadSource(s.url);h.attachMedia(v);h.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}))}}else{v.classList.add("active");v.src=s.url;v.onloadedmetadata=()=>v.play().catch(()=>{})}}
 function showMini(){if(mini.closed||mini.active||!state.selectedProgram)return;updateMiniPlayer();$("miniPlayer").classList.add("show");mini.active=true}function hideMini(){if(!mini.active)return;$("miniPlayer").classList.remove("show");stopMini();mini.active=false}
 function initMiniPlayer(){if(location.search.includes("tvpopout=1"))return;const live=$("live");$("miniClose").onclick=e=>{e.preventDefault();e.stopPropagation();mini.closed=true;hideMini()};$("miniPlayer").onclick=e=>{if(e.target.closest("#miniClose"))return;watchLive()};mini.observer=new IntersectionObserver(es=>{const e=es[0];if(!e||mini.closed)return;if(e.isIntersecting&&e.intersectionRatio>.35)hideMini();else if(scrollY>300)showMini()},{threshold:[0,.35,1]});mini.observer.observe(live);addEventListener("scroll",()=>{if(scrollY<250){mini.closed=false;hideMini()}},{passive:true})}
-async function bootPopout(){document.body.classList.add("tv-popout-mode");document.title="CrowRules TV — TV Window";if(!db){$("placeholderText").textContent="Supabase could not initialize.";return}await initViewerPresence();const channels=await loadChannels(),p=new URLSearchParams(location.search),requested=p.get("channel"),c=channels.find(x=>String(x.id)===String(requested))||channels[0];if(!c){resetMedia();setText("playerStatus","OFFLINE");$("placeholderText").textContent="No active CrowRules TV channels are configured.";return}await loadChannel(c,false);setInterval(()=>refreshSelected(false).catch(console.warn),10000)}
-async function boot(){if(location.search.includes("tvpopout=1"))return bootPopout();if(!db){toast("Supabase client failed to initialize.");return}setText("year",new Date().getFullYear());await initViewerPresence();const channels=await loadChannels();await Promise.all([loadShows(),loadEpisodes(),loadMembers(),loadGlobalGuide()]);renderGuide();await updateAuth();const saved=rememberedChannel(),c=channels.find(x=>String(x.id)===String(saved))||channels[0];if(c)await loadChannel(c,false);else{resetMedia();setText("playerStatus","OFFLINE");$("placeholderText").textContent="No active CrowRules TV channels are configured."}initMiniPlayer();initSearch()}
+async function bootPopout(){await initSupabase();document.body.classList.add("tv-popout-mode");document.title="CrowRules TV — TV Window";if(!db){$("placeholderText").textContent="Supabase could not initialize. Check the connection indicator and reload.";return}await initViewerPresence();const channels=await loadChannels(),p=new URLSearchParams(location.search),requested=p.get("channel"),c=channels.find(x=>String(x.id)===String(requested))||channels[0];if(!c){resetMedia();setText("playerStatus","OFFLINE");$("placeholderText").textContent="No active CrowRules TV channels are configured.";return}await loadChannel(c,false);setInterval(()=>refreshSelected(false).catch(console.warn),10000)}
+async function boot(){await initSupabase();if(location.search.includes("tvpopout=1"))return bootPopout();if(!db){toast("Supabase connection failed. Check the connection indicator and reload.",6000);return}setText("year",new Date().getFullYear());await initViewerPresence();const channels=await loadChannels();await Promise.all([loadShows(),loadEpisodes(),loadMembers(),loadGlobalGuide()]);renderGuide();await updateAuth();const saved=rememberedChannel(),c=channels.find(x=>String(x.id)===String(saved))||channels[0];if(c)await loadChannel(c,false);else{resetMedia();setText("playerStatus","OFFLINE");$("placeholderText").textContent="No active CrowRules TV channels are configured."}initMiniPlayer();initSearch()}
 function initSearch(){const s=$("search");s.addEventListener("input",()=>{const term=clean(s.value).toLowerCase();document.querySelectorAll("[data-search-card]").forEach(c=>c.classList.toggle("search-hidden",!!term&&!c.textContent.toLowerCase().includes(term)))})}
 $("watchLiveBtn").onclick=watchLive;$("reloadBtn").onclick=()=>state.selectedChannel?refreshSelected(true):toast("Select a channel first.");$("popoutBtn").onclick=popout;$("fullBtn").onclick=fullscreen;$("memberBtn").onclick=openMember;$("closeMember").onclick=closeMember;$("channelSendBtn").onclick=sendChannelMessage;$("channelMessageInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChannelMessage()}});$("memberModal").addEventListener("click",e=>{if(e.target===$("memberModal"))closeMember()});
 state.guideTimer=setInterval(async()=>{try{await loadGlobalGuide();renderGuide();if(state.selectedChannel)await refreshSelected(false)}catch(e){console.warn("Schedule refresh",e)}},10000);
@@ -122,7 +181,6 @@ if(db)db.auth.onAuthStateChange(async()=>{setTimeout(()=>updateAuth(),0)});
 boot();
 })();
 </script>
-
 <script src="./crowrules-core.js"></script>
 </body>
 </html>
