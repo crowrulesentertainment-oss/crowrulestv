@@ -28,6 +28,22 @@ main{padding:0 5vw 75px}.section{margin:36px 0}.section-head{display:flex;align-
 .mini-player{position:fixed;right:18px;bottom:18px;width:min(360px,calc(100vw - 36px));z-index:3500;background:#08080a;border:1px solid #3a3a43;border-radius:15px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.55);display:none}.mini-player.show{display:block}.mini-video{aspect-ratio:16/9;background:#000}.mini-video iframe,.mini-video video{width:100%;height:100%;border:0;display:none}.mini-head{padding:9px 11px;display:flex;justify-content:space-between;gap:10px;background:#111116;font-size:9px;font-weight:800}.mini-close{background:none;border:0;color:#aaa}
 @media(max-width:1000px){.members-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.watch-layout{grid-template-columns:1fr}.channel-messages{max-height:380px}}
 @media(max-width:600px){.navlinks{display:none}.search{display:none}.nav{padding:12px 4vw}.hero{min-height:470px;padding:60px 5vw 40px}main{padding:0 4vw 60px}.rail{grid-auto-columns:72vw}.player-top{align-items:flex-start;flex-direction:column}.player-actions{width:100%}.player-actions button{flex:1}.chat-input{flex-direction:column}.chat-input button{width:100%}.members-grid{grid-template-columns:1fr}.mini-player{right:10px;bottom:10px;width:calc(100vw - 20px)}}
+
+body.tv-popout-mode{background:#050507;overflow:hidden}
+body.tv-popout-mode>.nav,body.tv-popout-mode>.hero,body.tv-popout-mode>main>section:not(#live),body.tv-popout-mode>.footer,body.tv-popout-mode>.mini-player,body.tv-popout-mode>.modal,body.tv-popout-mode>.status-toast{display:none!important}
+body.tv-popout-mode main{padding:0!important;margin:0!important;height:100vh}
+body.tv-popout-mode #live{display:block!important;margin:0;padding:0;height:100vh}
+body.tv-popout-mode .section-head,body.tv-popout-mode .channel-chat,body.tv-popout-mode .player-info{display:none!important}
+body.tv-popout-mode .watch-layout{display:block;height:100vh}
+body.tv-popout-mode .player{height:100vh;border:0;border-radius:0}
+body.tv-popout-mode .player-top{position:absolute;z-index:10;left:0;right:0;top:0;background:linear-gradient(#050507dd,transparent);border:0}
+body.tv-popout-mode .screen{height:100vh;aspect-ratio:auto}
+body.tv-popout-mode .player-actions #reloadBtn,body.tv-popout-mode .player-actions #popoutBtn{display:none}
+body.tv-popout-mode .player-actions button{background:#111116cc}
+#miniPlayer .mini-anchor{display:block;aspect-ratio:16/9;width:100%;visibility:hidden}
+#miniPlayer .screen{width:100%;height:auto;aspect-ratio:16/9;position:relative}
+#miniPlayer .screen .placeholder{display:none!important}
+#miniPlayer .mini-close{font-size:18px;line-height:1}
 </style>
 </head>
 <body>
@@ -126,7 +142,7 @@ function playYouTube(row,p){const f=$("yt"),start=scheduledOffset(row),q=new URL
 function playVideo(row,p){const v=$("video");$("placeholder").style.display="none";v.classList.add("active");v.src=p.url;v.autoplay=true;v.playsInline=true;v.onended=()=>refreshSelected(true);v.onerror=()=>playerError("The video stream could not be played.");v.onloadedmetadata=()=>{seek(v,scheduledOffset(row));v.play().catch(()=>setText("playerStatus","CLICK TO PLAY"))};setText("playerStatus",isNow(row)?"LIVE":"LOADING")}
 function playHls(row,p){const v=$("video");$("placeholder").style.display="none";v.classList.add("active");v.autoplay=true;v.playsInline=true;if(v.canPlayType("application/vnd.apple.mpegurl")){v.src=p.url;v.onloadedmetadata=()=>{seek(v,scheduledOffset(row));v.play().catch(()=>setText("playerStatus","CLICK TO PLAY"))}}else if(window.Hls&&Hls.isSupported()){const h=new Hls({enableWorker:true,lowLatencyMode:true,backBufferLength:30,maxBufferLength:30,liveSyncDurationCount:3,liveMaxLatencyDurationCount:6});state.hls=h;h.loadSource(p.url);h.attachMedia(v);h.on(Hls.Events.MANIFEST_PARSED,()=>{v.play().catch(()=>setText("playerStatus","CLICK TO PLAY"))});h.on(Hls.Events.ERROR,(_,d)=>{if(d?.fatal){if(d.type===Hls.ErrorTypes.NETWORK_ERROR)try{h.startLoad()}catch{}else if(d.type===Hls.ErrorTypes.MEDIA_ERROR)try{h.recoverMediaError()}catch{}else playerError("The HLS stream could not be played.")}})}else return playerError("This browser does not support HLS playback.");v.onended=()=>refreshSelected(true);v.onerror=()=>playerError("The HLS stream could not be played.");setText("playerStatus",isNow(row)?"LIVE":"LOADING")}
 
-function play(row){state.playerGeneration++;resetMedia();if(!row){setText("playerStatus","OFFLINE");$("placeholderText").textContent="Nothing is currently scheduled on this channel.";return}state.selectedProgram=row;metadata(row);$("warning").classList.add("hidden");const p=normalize(row);if(!p){setText("playerStatus","NO SOURCE");$("placeholderText").textContent="This program is scheduled, but no playable source is configured.";$("warning").textContent="Add a YouTube, HLS, or direct video source to the schedule item or episode.";$("warning").classList.remove("hidden");transition(row);return}if(p.kind==="youtube")playYouTube(row,p);else if(p.kind==="hls")playHls(row,p);else playVideo(row,p);transition(row);rememberState()}
+function play(row){state.playerGeneration++;resetMedia();if(!row){setText("playerStatus","OFFLINE");$("placeholderText").textContent="Nothing is currently scheduled on this channel.";return}state.selectedProgram=row;setText("miniTitle",row.title||state.selectedChannel?.name||"CrowRules TV");metadata(row);$("warning").classList.add("hidden");const p=normalize(row);if(!p){setText("playerStatus","NO SOURCE");$("placeholderText").textContent="This program is scheduled, but no playable source is configured.";$("warning").textContent="Add a YouTube, HLS, or direct video source to the schedule item or episode.";$("warning").classList.remove("hidden");transition(row);return}if(p.kind==="youtube")playYouTube(row,p);else if(p.kind==="hls")playHls(row,p);else playVideo(row,p);transition(row);rememberState()}
 
 async function loadChannels(){const rows=await query("tv_channels","*",{col:"sort_order",asc:true},100,[{op:"eq",col:"is_active",val:true}]);state.channels=rows;const el=$("channelsRail");el.innerHTML=rows.length?rows.map((c,i)=>{const img=first(c,["banner_url","logo_url","thumbnail_url","image_url"]);return`<article class="card" data-search-card><div class="thumb">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(c.name)}">`:`<div class="thumb-fallback">${esc(c.name)}</div>`}<span class="badge live">LIVE</span>${c.channel_number!=null?`<span class="number">CH ${esc(c.channel_number)}</span>`:""}</div><div class="body"><div class="title">${esc(c.name)}</div><div class="meta">${esc(c.description||"CrowRules TV channel")}</div><button class="watch" data-channel="${esc(c.id||i)}">▶ WATCH CHANNEL</button></div></article>`}).join(""):`<div class="chat-note">No active channels are published.</div>`;el.querySelectorAll("[data-channel]").forEach(b=>b.onclick=()=>{const c=rows.find(x=>String(x.id)===b.dataset.channel)||rows[Number(b.dataset.channel)];if(c)loadChannel(c,true)});setText("channelStatus",`${rows.length} CHANNEL${rows.length===1?"":"S"}`);return rows}
 function updateChannelCards(){document.querySelectorAll("[data-channel-card]").forEach(x=>x.classList.toggle("channel-selected",String(x.dataset.channelCard)===String(state.selectedChannel?.id)))}
@@ -136,7 +152,7 @@ async function loadGlobalGuide(){const s=new Date(Date.now()-6*3600000).toISOStr
 
 function renderGuide(){const rows=state.guide.filter(r=>isNow(r)||new Date(r.starts_at).getTime()>Date.now()).slice(0,150);const b=$("guideBody");b.innerHTML=rows.length?rows.map(r=>`<tr class="${isNow(r)?"now-row":""}" data-search-card><td>${esc(fmtTime(r.starts_at))}</td><td>${esc(r.channel_name||"CrowRules TV")}${r.channel_number!=null?`<br><small>CH ${esc(r.channel_number)}</small>`:""}</td><td><strong>${isNow(r)?'<span class="badge live" style="position:static;margin-right:5px">NOW</span>':""}${esc(r.title||"Programming")}</strong>${r.description?`<br><small>${esc(r.description)}</small>`:""}</td><td>${esc(String(r.item_type||"PROGRAM").toUpperCase())}</td><td>${esc(fmtTime(r.ends_at))}</td><td><button class="watch" style="margin:0" data-guide="${esc(r.id)}">WATCH</button></td></tr>`).join(""):`<tr><td colspan="6"><div class="chat-note">No current or upcoming programming is scheduled.</div></td></tr>`;b.querySelectorAll("[data-guide]").forEach(x=>x.onclick=()=>{const r=state.guide.find(a=>String(a.id)===x.dataset.guide),c=state.channels.find(a=>String(a.id)===String(r?.channel_id));if(c)loadChannel(c,true,r)});setText("guideStatus",`${rows.length} ITEMS`)}
 
-async function loadChannel(channel,manual=false,preferred=null){if(!channel)return;state.playerGeneration++;clearTimeout(state.transitionTimer);state.selectedChannel=channel;updateChannelCards();setText("playerStatus","LOADING");await loadChannelGuide();let current=preferred&&String(preferred.channel_id)===String(channel.id)?state.guide.find(x=>String(x.id)===String(preferred.id)):currentFor(channel.id,state.guide);if(!current){const n=nextFor(channel.id,state.guide);resetMedia();setText("playerStatus","STANDBY");setText("playerTitle",channel.name);setText("infoTitle",channel.name);setText("infoMeta",n?`Next: ${n.title} • ${fmtTime(n.starts_at)}`:"No current or upcoming program.");$("placeholderText").textContent=n?`${channel.name} is between programs. Next: ${n.title} at ${fmtTime(n.starts_at)}.`:`${channel.name} has no current or upcoming programming scheduled.`;if(n){clearTimeout(state.transitionTimer);state.transitionTimer=setTimeout(()=>refreshSelected(true),Math.max(500,new Date(n.starts_at).getTime()-Date.now()+250))}}else play(current);await openChannelChat(channel);if(manual){$("live").scrollIntoView({behavior:"smooth"});toast(`Now selected: ${channel.name}`)}rememberState()}
+async function loadChannel(channel,manual=false,preferred=null){if(!channel)return;state.playerGeneration++;clearTimeout(state.transitionTimer);state.selectedChannel=channel;updateChannelCards();broadcastTVState();setText("playerStatus","LOADING");await loadChannelGuide();let current=preferred&&String(preferred.channel_id)===String(channel.id)?state.guide.find(x=>String(x.id)===String(preferred.id)):currentFor(channel.id,state.guide);if(!current){const n=nextFor(channel.id,state.guide);resetMedia();setText("playerStatus","STANDBY");setText("playerTitle",channel.name);setText("infoTitle",channel.name);setText("infoMeta",n?`Next: ${n.title} • ${fmtTime(n.starts_at)}`:"No current or upcoming program.");$("placeholderText").textContent=n?`${channel.name} is between programs. Next: ${n.title} at ${fmtTime(n.starts_at)}.`:`${channel.name} has no current or upcoming programming scheduled.`;if(n){clearTimeout(state.transitionTimer);state.transitionTimer=setTimeout(()=>refreshSelected(true),Math.max(500,new Date(n.starts_at).getTime()-Date.now()+250))}}else play(current);await openChannelChat(channel);if(manual){$("live").scrollIntoView({behavior:"smooth"});toast(`Now selected: ${channel.name}`)}rememberState()}
 
 async function refreshSelected(force=false){if(!state.selectedChannel)return;const c=state.selectedChannel,old=state.selectedProgram;await loadChannelGuide();const cur=currentFor(c.id,state.guide);if(!cur){if(force||old)await loadChannel(c,false);return}if(!old||String(old.id)!==String(cur.id))await loadChannel(c,false);else{metadata(cur);transition(cur);setText("playerStatus","LIVE")}}
 
@@ -159,28 +175,59 @@ async function auth(mode){const email=clean($("authEmail").value),password=$("au
 
 function rememberState(){try{localStorage.setItem("crowrules-tv-state",JSON.stringify({channelId:state.selectedChannel?.id||null,at:Date.now()}))}catch{}}
 function rememberedChannel(){try{const x=JSON.parse(localStorage.getItem("crowrules-tv-state")||"null");return x?.channelId||null}catch{return null}}
-function popout(){if(!state.selectedChannel){toast("Select a channel first.");return}const url=new URL(location.href);url.searchParams.set("tvpopout","1");url.searchParams.set("channel",state.selectedChannel.id);const w=window.open(url.toString(),"CrowRulesTVPlayer","width=1100,height=760,resizable=yes,scrollbars=no");if(w)toast("TV opened in its own window. It can keep playing while you browse elsewhere.");else toast("Your browser blocked the TV window. Allow pop-ups for CrowRules TV.")}
-async function pip(){const v=$("video");if(v.classList.contains("active")&&document.pictureInPictureEnabled){try{if(document.pictureInPictureElement)await document.exitPictureInPicture();else await v.requestPictureInPicture()}catch{toast("Picture-in-picture is not available for this stream.")}}else toast("PIP is available for direct/HLS video; YouTube provides its own player PIP control.")}
-function filter(q){q=clean(q).toLowerCase();document.querySelectorAll("[data-search-card],#guideBody tr").forEach(e=>e.style.display=!q||e.textContent.toLowerCase().includes(q)?"":"none")}
 
-$("reloadBtn").onclick=()=>state.selectedChannel?loadChannel(state.selectedChannel,false):boot();
-$("watchLiveBtn").onclick=()=>{$("live").scrollIntoView({behavior:"smooth"});state.selectedChannel?refreshSelected(true):state.channels[0]&&loadChannel(state.channels[0],true)};
-$("popoutBtn").onclick=popout;$("pipBtn").onclick=pip;$("fullBtn").onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await $("screen").requestFullscreen()}catch{toast("Fullscreen is not available.")}};
-$("search").oninput=e=>filter(e.target.value);$("memberBtn").onclick=openMember;$("closeMember").onclick=closeMember;$("memberModal").onclick=e=>{if(e.target===$("memberModal"))closeMember()};$("channelSendBtn").onclick=sendChannelMessage;$("channelMessageInput").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChannelMessage()}};
-$("miniClose").onclick=()=>$("miniPlayer").classList.remove("show");
+let tvWindow=null;
+let tvBus=null;
+try{tvBus=new BroadcastChannel("crowrules-tv-window")}catch{}
+function broadcastTVState(){try{tvBus?.postMessage({type:"channel",channelId:state.selectedChannel?.id||null})}catch{}}
+function popout(){
+  if(!state.selectedChannel){toast("Select a channel first.");return}
+  const url=new URL(location.href);url.searchParams.set("tvpopout","1");url.searchParams.set("channel",String(state.selectedChannel.id));
+  const w=window.open(url.toString(),"CrowRulesTVPlayer","width=1200,height=800,resizable=yes,scrollbars=no");
+  if(!w){toast("Your browser blocked the TV Window. Allow pop-ups for CrowRules TV.");return}
+  tvWindow=w;try{w.focus()}catch{};setTimeout(broadcastTVState,300);toast("TV Window opened. Playback is now independent of this page.");
+}
 
-if(db)db.auth.onAuthStateChange((_event,session)=>{state.session=session;const signed=!!session;$("channelMessageInput").disabled=!signed;$("channelSendBtn").disabled=!signed;$("channelMessageInput").placeholder=signed?"Write a message…":"Sign in to chat…";$("memberBtn").textContent=signed?"👤 ACCOUNT":"👤 MEMBER";setTimeout(loadChannelMessages,0)});
+let pipWindow=null;
+async function pip(){
+  const video=$("video"),iframe=$("yt");
+  try{
+    if(video.classList.contains("active")&&document.pictureInPictureEnabled&&typeof video.requestPictureInPicture==="function"){
+      if(document.pictureInPictureElement)await document.exitPictureInPicture();else await video.requestPictureInPicture();return;
+    }
+    if(iframe.classList.contains("active")&&window.documentPictureInPicture?.requestWindow){
+      if(pipWindow&&!pipWindow.closed){pipWindow.close();pipWindow=null;return}
+      pipWindow=await window.documentPictureInPicture.requestWindow({width:480,height:270});
+      const d=pipWindow.document;d.title="CrowRules TV — PIP";d.body.style.cssText="margin:0;background:#000;overflow:hidden";
+      const f=d.createElement("iframe");f.src=iframe.src;f.allow=iframe.getAttribute("allow")||"autoplay; encrypted-media; fullscreen; picture-in-picture; web-share";f.allowFullscreen=true;f.style.cssText="width:100vw;height:100vh;border:0;display:block";d.body.appendChild(f);pipWindow.addEventListener("pagehide",()=>pipWindow=null,{once:true});return;
+    }
+    toast("PIP is unavailable here. Use TV WINDOW for uninterrupted playback.");
+  }catch(e){console.warn("PIP",e);toast("Picture-in-picture could not be opened.")}
+}
 
-let miniTimer=null;
-function miniOnScroll(){if(window.scrollY>700&&state.selectedChannel&&state.selectedProgram){$("miniPlayer").classList.add("show")}else if(window.scrollY<400){$("miniPlayer").classList.remove("show")}}
-window.addEventListener("scroll",miniOnScroll,{passive:true});
+const mini={anchor:null,active:false,closed:false,observer:null};
+function initMiniPlayer(){
+  if(location.search.includes("tvpopout=1"))return;
+  const screen=$("screen"),host=$("miniVideo"),box=$("miniPlayer"),live=$("live");if(!screen||!host||!box||!live)return;
+  mini.anchor=document.createElement("div");mini.anchor.className="mini-anchor";mini.anchor.setAttribute("aria-hidden","true");screen.parentNode.insertBefore(mini.anchor,screen);
+  function hide(){if(!mini.active)return;box.classList.remove("show");mini.anchor.parentNode.insertBefore(screen,mini.anchor.nextSibling);mini.active=false}
+  function show(){if(mini.closed||mini.active||!state.selectedProgram)return;setText("miniTitle",state.selectedProgram.title||state.selectedChannel?.name||"CrowRules TV");host.appendChild(screen);box.classList.add("show");mini.active=true}
+  $("miniClose").onclick=e=>{e.stopPropagation();mini.closed=true;hide()};
+  $("miniPlayer").addEventListener("click",e=>{if(e.target.id==="miniClose")return;$("live").scrollIntoView({behavior:"smooth"})});
+  mini.observer=new IntersectionObserver(entries=>{const e=entries[0];if(mini.closed)return;if(e.isIntersecting&&e.intersectionRatio>.35)hide();else if(window.scrollY>250)show()},{threshold:[0,.35,1]});
+  mini.observer.observe(live);
+  window.addEventListener("scroll",()=>{if(window.scrollY<250){mini.closed=false;hide()}},{passive:true});
+}
 
-async function boot(){if(!db){toast("Supabase client failed to initialize.");return}setText("year",new Date().getFullYear());const channels=await loadChannels();await Promise.all([loadShows(),loadEpisodes(),loadMembers(),loadGlobalGuide()]);renderGuide();await updateAuth();const saved=rememberedChannel();const c=channels.find(x=>String(x.id)===String(saved))||channels[0];if(c)await loadChannel(c,false);else{resetMedia();setText("playerStatus","OFFLINE");$("placeholderText").textContent="No active CrowRules TV channels are configured."}}
+if(tvBus)tvBus.onmessage=async e=>{const d=e.data||{};if(d.type==="channel"&&d.channelId&&state.channels.length){const c=state.channels.find(x=>String(x.id)===String(d.channelId));if(c&&String(state.selectedChannel?.id)!==String(c.id))await loadChannel(c,false)}};
+
+async function bootPopout(){document.body.classList.add("tv-popout-mode");document.title="CrowRules TV — TV Window";if(!db){setText("placeholderText","Supabase could not initialize.");return}const channels=await loadChannels();const requested=new URL(location.href).searchParams.get("channel");const c=channels.find(x=>String(x.id)===String(requested))||channels[0];if(!c){resetMedia();setText("playerStatus","OFFLINE");$("placeholderText").textContent="No active CrowRules TV channels are configured.";return}await loadChannel(c,false);setInterval(()=>refreshSelected(false).catch(e=>console.warn("TV Window refresh",e)),10000)}
+
+async function boot(){if(location.search.includes("tvpopout=1")){await bootPopout();return}if(!db){toast("Supabase client failed to initialize.");return}setText("year",new Date().getFullYear());const channels=await loadChannels();await Promise.all([loadShows(),loadEpisodes(),loadMembers(),loadGlobalGuide()]);renderGuide();await updateAuth();const saved=rememberedChannel();const c=channels.find(x=>String(x.id)===String(saved))||channels[0];if(c)await loadChannel(c,false);else{resetMedia();setText("playerStatus","OFFLINE");$("placeholderText").textContent="No active CrowRules TV channels are configured."}initMiniPlayer()}
 state.guideTimer=setInterval(async()=>{await loadGlobalGuide();renderGuide();if(state.selectedChannel)await refreshSelected(false)},10000);
 boot();
 })();
 </script>
-
 <script src="./crowrules-core.js"></script>
 </body>
 </html>
