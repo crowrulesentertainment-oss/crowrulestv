@@ -1,73 +1,164 @@
-name: Fix duplicate cards in tv.html
+name: Repair duplicate cards in tv.html
+
 on:
   push:
     branches: [main]
+
 permissions:
   contents: write
+
 jobs:
   fix:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Patch
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch current tv.html safely
+        shell: python
         run: |
-          python3 - <<'PY'
           from pathlib import Path
-          p=Path('tv.html')
-          s=p.read_text(encoding='utf-8')
-          if 'function uniqueCards(items,type)' not in s:
-              marker='function renderCards(container,items,type){'
-              dedupe='''function uniqueCards(items,type){
-  const seen=new Set();
-  return (items||[]).filter(item=>{
-    const key=type==="channel"
-      ? ["channel",String(item?.name||"").trim().toLowerCase(),String(item?.channel_number||"").trim()].join("|")
-      : type==="show"
-      ? ["show",String(item?.title||"").trim().toLowerCase()].join("|")
-      : ["episode",String(item?.show_id||item?.shows?.id||"").trim(),String(item?.season_number||"").trim(),String(item?.episode_number||"").trim(),String(item?.title||"").trim().toLowerCase()].join("|");
-    if(seen.has(key))return false;
+
+          p = Path("tv.html")
+          s = p.read_text(encoding="utf-8")
+
+          marker = "/* =========================================================\n   START\n========================================================= */"
+
+          patch = r'''/* =========================================================
+   DUPLICATE RENDER GUARD
+
+   Keeps the current tv.html architecture safe even when a
+   refresh, realtime update, or another script renders a rail
+   more than once. It works on the DOM actually used by this
+   version of CrowRules TV and does not depend on old function
+   names from previous tv.html versions.
+========================================================= */
+
+function dedupeRenderedContainer(container){
+  if(!container) return;
+
+  const seen = new Set();
+
+  Array.from(container.children).forEach(node => {
+    if(!node || node.nodeType !== 1) return;
+
+    const text = clean(node.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+    let key = text;
+
+    const button = node.querySelector("[data-channel],[data-show],[data-episode],[data-guide]");
+    if(button){
+      key = button.outerHTML
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    const image = node.querySelector("img[src]");
+    if(image){
+      key += "|img:" + String(image.getAttribute("src") || "").trim().toLowerCase();
+    }
+
+    if(!key) return;
+
+    if(seen.has(key)){
+      node.remove();
+      return;
+    }
+
     seen.add(key);
-    return true;
+  });
+}
+
+function dedupeAllTVCards(){
+  [
+    $("channelsRail"),
+    $("showsRail"),
+    $("episodesRail"),
+    $("membersGrid"),
+    $("allMembersGrid"),
+    $("guideBody")
+  ].forEach(dedupeRenderedContainer);
+}
+
+function initDuplicateRenderGuard(){
+  dedupeAllTVCards();
+
+  const targets = [
+    $("channelsRail"),
+    $("showsRail"),
+    $("episodesRail"),
+    $("membersGrid"),
+    $("allMembersGrid"),
+    $("guideBody")
+  ].filter(Boolean);
+
+  if(!targets.length || !window.MutationObserver) return;
+
+  let scheduled = false;
+
+  const run = () => {
+    scheduled = false;
+    dedupeAllTVCards();
+  };
+
+  const observer = new MutationObserver(() => {
+    if(scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(run);
+  });
+
+  targets.forEach(target => {
+    observer.observe(target, {
+      childList:true,
+      subtree:true
+    });
   });
 }
 
 '''
-              if marker not in s: raise SystemExit('renderCards marker not found')
-              s=s.replace(marker,dedupe+marker,1)
-              s=s.replace(marker+'\n\n  if(!container) return;',marker+'\n\n  items=uniqueCards(items,type);\n\n  if(!container) return;',1)
-          if 'const scheduleSeen=new Set();' not in s:
-              marker='  state.schedules = (result.data || [])\n    .filter(item => {'
-              if marker not in s: raise SystemExit('schedule marker not found')
-              s=s.replace(marker,'  const scheduleSeen=new Set();\n\n'+marker,1)
-              marker2='''    .filter(item => {
-      const start = new Date(item.starts_at).getTime();
-      const end = new Date(item.ends_at).getTime();
-      return end >= from && start <= to;
-    })
-    .sort('''
-              insert='''    .filter(item => {
-      const start = new Date(item.starts_at).getTime();
-      const end = new Date(item.ends_at).getTime();
-      return end >= from && start <= to;
-    })
-    .filter(item => {
-      const key=[String(item?.channel_id||""),String(item?.episode_id||item?.episode?.id||""),String(item?.show_id||item?.show?.id||""),String(item?.starts_at||""),String(item?.ends_at||""),String(item?.title||"").trim().toLowerCase()].join("|");
-      if(scheduleSeen.has(key))return false;
-      scheduleSeen.add(key);
-      return true;
-    })
-    .sort('''
-              if marker2 not in s: raise SystemExit('schedule filter marker not found')
-              s=s.replace(marker2,insert,1)
-          p.write_text(s,encoding='utf-8')
-          print('patched')
-          PY
-      - name: Commit
+
+          if "function dedupeRenderedContainer(container)" not in s:
+              if marker not in s:
+                  raise SystemExit("tv.html START marker not found")
+              s = s.replace(marker, patch + "\n" + marker, 1)
+
+          boot_marker = "boot();"
+          if "initDuplicateRenderGuard();" not in s:
+              if boot_marker not in s:
+                  raise SystemExit("tv.html boot marker not found")
+              s = s.replace(boot_marker, "initDuplicateRenderGuard();\n\n" + boot_marker, 1)
+
+          p.write_text(s, encoding="utf-8")
+          print("tv.html duplicate-render guard installed")
+
+      - name: Verify patched tv.html
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          rm -f .github/workflows/fix-duplicate-cards.yml .github/workflows/fix-duplicate-cards-v2.yml
+          grep -q "function dedupeRenderedContainer(container)" tv.html
+          grep -q "initDuplicateRenderGuard();" tv.html
+          grep -q "function loadChannels()" tv.html
+          grep -q "function loadShows()" tv.html
+          grep -q "function loadEpisodes()" tv.html
+          echo "tv.html verification passed"
+
+      - name: Commit tv.html and remove obsolete repair workflows
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          rm -f \
+            .github/workflows/fix-duplicate-cards.yml \
+            .github/workflows/fix-duplicate-cards-v2.yml
+
           git add tv.html .github/workflows
-          if git diff --cached --quiet; then exit 0; fi
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
           git commit -m "Fix duplicate cards in CrowRules TV"
           git push
