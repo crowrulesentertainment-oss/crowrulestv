@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050507">
@@ -11,26 +10,28 @@
 
 <meta
   name="description"
-  content="CrowRules Entertainment Admin Pro — centralized platform administration."
+  content="CrowRules Entertainment Admin Pro — centralized dashboard for CrowRules TV, members, shows, episodes, analytics and content."
 >
 
-<style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<style>
 :root{
   --bg:#050507;
-  --panel:#0c0c11;
-  --panel2:#111118;
-  --panel3:#181820;
-  --border:#292933;
-  --text:#f5f5f7;
-  --muted:#92929d;
-  --accent:#b7ff00;
-  --accent2:#7c3aed;
-  --success:#35d996;
-  --danger:#ff5069;
-  --warning:#ffb52e;
+  --panel:#0b0b10;
+  --panel2:#111119;
+  --panel3:#171721;
+  --border:#272735;
+  --text:#f4f4f7;
+  --muted:#9999aa;
+  --accent:#b000ff;
+  --accent2:#6d00ff;
+  --good:#00d68f;
+  --warn:#ffb020;
+  --bad:#ff4d67;
+  --cyan:#00d9ff;
+  --shadow:0 20px 60px rgba(0,0,0,.4);
   --radius:16px;
-  --shadow:0 20px 60px rgba(0,0,0,.38);
 }
 
 *{
@@ -43,28 +44,18 @@ html{
 
 body{
   margin:0;
-  min-height:100vh;
   background:
-    radial-gradient(
-      circle at 15% 0%,
-      rgba(124,58,237,.14),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 90% 0%,
-      rgba(183,255,0,.07),
-      transparent 25%
-    ),
+    radial-gradient(circle at 15% 0%,rgba(176,0,255,.10),transparent 30%),
+    radial-gradient(circle at 100% 20%,rgba(0,217,255,.06),transparent 30%),
     var(--bg);
   color:var(--text);
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
 button,
-input{
+input,
+select,
+textarea{
   font:inherit;
 }
 
@@ -77,143 +68,11 @@ a{
   text-decoration:none;
 }
 
-
-/* =========================================================
-   AUTH SCREEN
-========================================================= */
-
-.auth-screen{
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  display:grid;
-  place-items:center;
-  padding:20px;
-  background:
-    radial-gradient(
-      circle at 50% 20%,
-      rgba(124,58,237,.18),
-      transparent 38%
-    ),
-    #050507;
-}
-
-.auth-screen.hidden{
-  display:none;
-}
-
-.auth-box{
-  width:100%;
-  max-width:430px;
-  padding:30px;
-  border:1px solid var(--border);
-  border-radius:22px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.035),
-      rgba(255,255,255,.015)
-    ),
-    var(--panel);
-  box-shadow:var(--shadow);
-}
-
-.auth-logo{
-  width:58px;
-  height:58px;
-  display:grid;
-  place-items:center;
-  margin-bottom:18px;
-  border-radius:17px;
-  background:var(--accent);
-  color:#050507;
-  font-size:19px;
-  font-weight:900;
-}
-
-.auth-box h1{
-  margin:0;
-  font-size:24px;
-}
-
-.auth-box p{
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.6;
-}
-
-.auth-label{
-  display:block;
-  margin:16px 0 7px;
-  color:#aaaab4;
-  font-size:10px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-}
-
-.auth-input{
-  width:100%;
-  padding:12px 13px;
-  border:1px solid var(--border);
-  border-radius:11px;
-  outline:none;
-  background:#08080d;
-  color:#fff;
-}
-
-.auth-input:focus{
-  border-color:#575762;
-}
-
-.auth-button{
-  width:100%;
-  margin-top:18px;
-  padding:12px;
-  border:0;
-  border-radius:11px;
-  background:var(--accent);
-  color:#050507;
-  font-weight:900;
-}
-
-.auth-error{
-  display:none;
-  margin-top:14px;
-  padding:11px;
-  border:1px solid rgba(255,80,105,.28);
-  border-radius:10px;
-  background:rgba(255,80,105,.06);
-  color:#ff9baa;
-  font-size:11px;
-  line-height:1.5;
-}
-
-.auth-error.show{
-  display:block;
-}
-
-.auth-status{
-  margin-top:12px;
-  color:#666672;
-  font-size:9px;
-}
-
-
-/* =========================================================
-   APP
-========================================================= */
-
 .app{
   min-height:100vh;
   display:grid;
   grid-template-columns:260px 1fr;
 }
-
-.app.locked{
-  display:none;
-}
-
 
 /* =========================================================
    SIDEBAR
@@ -223,116 +82,117 @@ a{
   position:sticky;
   top:0;
   height:100vh;
-  overflow:auto;
-  padding:18px 14px;
+  overflow-y:auto;
   border-right:1px solid var(--border);
-  background:rgba(7,7,10,.96);
-  backdrop-filter:blur(18px);
-  z-index:50;
+  background:rgba(5,5,7,.96);
+  backdrop-filter:blur(20px);
+  padding:20px 14px;
+  z-index:100;
 }
 
 .brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  padding:8px 8px 20px;
+  padding:8px 12px 22px;
 }
 
-.brand-mark{
-  width:43px;
-  height:43px;
-  display:grid;
-  place-items:center;
-  border-radius:13px;
-  background:var(--accent);
-  color:#050507;
-  font-size:15px;
+.brand-title{
+  font-size:21px;
   font-weight:900;
+  letter-spacing:.08em;
 }
 
-.brand strong{
-  display:block;
-  font-size:13px;
-  letter-spacing:.07em;
-  text-transform:uppercase;
-}
-
-.brand span{
-  display:block;
-  margin-top:3px;
+.brand-sub{
+  margin-top:4px;
   color:var(--muted);
-  font-size:9px;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
 }
 
-.nav-title{
-  margin:17px 10px 7px;
-  color:#5f5f6a;
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.15em;
+.nav-section{
+  margin:20px 8px 8px;
+  color:#666675;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.16em;
   text-transform:uppercase;
 }
 
 .nav{
-  display:grid;
-  gap:3px;
-}
-
-.nav a{
   display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 11px;
-  border-radius:10px;
-  color:#bdbdc7;
-  font-size:11px;
+  flex-direction:column;
+  gap:5px;
 }
 
-.nav a:hover,
-.nav a.active{
-  background:#17171e;
+.nav button{
+  width:100%;
+  border:1px solid transparent;
+  background:transparent;
+  color:#b8b8c4;
+  border-radius:11px;
+  padding:11px 12px;
+  text-align:left;
+  transition:.2s;
+}
+
+.nav button:hover{
+  background:#11111a;
+  color:#fff;
+}
+
+.nav button.active{
+  background:linear-gradient(
+    135deg,
+    rgba(176,0,255,.22),
+    rgba(109,0,255,.10)
+  );
+  border-color:rgba(176,0,255,.35);
   color:#fff;
 }
 
 .nav-icon{
-  width:20px;
-  text-align:center;
+  width:25px;
+  display:inline-block;
 }
 
-.user-panel{
-  margin-top:20px;
+.sidebar-bottom{
+  margin-top:24px;
+  border-top:1px solid var(--border);
+  padding-top:18px;
+}
+
+.connection-mini{
+  border:1px solid var(--border);
+  background:#0b0b10;
+  border-radius:12px;
   padding:12px;
-  border:1px solid var(--border);
-  border-radius:13px;
-  background:#0d0d13;
+  font-size:12px;
 }
 
-.user-email{
-  overflow:hidden;
-  color:#bdbdc7;
-  font-size:9px;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+.status-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-.admin-role{
-  margin-top:5px;
-  color:var(--success);
-  font-size:9px;
-  font-weight:900;
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#777;
 }
 
-.logout-btn{
-  width:100%;
-  margin-top:9px;
-  padding:8px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:#14141b;
-  color:#aaaab4;
-  font-size:9px;
+.dot.good{
+  background:var(--good);
+  box-shadow:0 0 12px rgba(0,214,143,.6);
 }
 
+.dot.bad{
+  background:var(--bad);
+}
+
+.dot.warn{
+  background:var(--warn);
+}
 
 /* =========================================================
    MAIN
@@ -345,400 +205,463 @@ a{
 .topbar{
   position:sticky;
   top:0;
-  z-index:40;
-  min-height:72px;
+  z-index:90;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:14px;
-  padding:13px 28px;
+  align-items:center;
+  gap:16px;
+  padding:14px 22px;
   border-bottom:1px solid var(--border);
-  background:rgba(5,5,7,.87);
-  backdrop-filter:blur(18px);
+  background:rgba(5,5,7,.84);
+  backdrop-filter:blur(20px);
 }
 
-.page-title h1{
-  margin:0;
+.topbar-left{
+  min-width:0;
+}
+
+.page-title{
   font-size:20px;
+  font-weight:900;
 }
 
-.page-title p{
-  margin:5px 0 0;
+.page-subtitle{
   color:var(--muted);
-  font-size:10px;
+  font-size:12px;
+  margin-top:3px;
 }
 
 .top-actions{
   display:flex;
-  align-items:center;
-  gap:7px;
+  gap:8px;
+  flex-wrap:wrap;
 }
 
 .btn{
-  padding:9px 12px;
   border:1px solid var(--border);
   border-radius:10px;
-  background:#101017;
-  color:#eee;
-  font-size:10px;
+  background:#111119;
+  color:#fff;
+  padding:9px 13px;
+  transition:.2s;
 }
 
 .btn:hover{
-  background:#181820;
+  border-color:#444455;
+  transform:translateY(-1px);
 }
 
 .btn.primary{
-  border-color:var(--accent);
-  background:var(--accent);
-  color:#050507;
-  font-weight:900;
+  border-color:rgba(176,0,255,.45);
+  background:linear-gradient(135deg,#7200b8,#4700a8);
 }
 
-.mobile-menu{
-  display:none;
+.btn.danger{
+  border-color:rgba(255,77,103,.4);
+  color:#ff8b9c;
 }
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
 
 .content{
-  width:100%;
+  padding:22px;
   max-width:1800px;
   margin:auto;
-  padding:24px 28px 70px;
 }
-
 
 /* =========================================================
-   CONNECTION
+   ALERT
 ========================================================= */
 
-.connection{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:15px;
-  align-items:center;
-  padding:17px;
+.alert{
+  display:none;
+  margin-bottom:18px;
+  border-radius:14px;
+  padding:14px 16px;
   border:1px solid var(--border);
-  border-radius:var(--radius);
-  background:var(--panel);
-  box-shadow:var(--shadow);
+  background:#0e0e15;
 }
 
-.connection-main{
-  display:flex;
-  align-items:center;
-  gap:12px;
+.alert.show{
+  display:block;
 }
 
-.connection-icon{
-  width:43px;
-  height:43px;
-  display:grid;
-  place-items:center;
-  border:1px solid var(--border);
-  border-radius:13px;
-  background:#15151c;
+.alert.error{
+  border-color:rgba(255,77,103,.35);
 }
 
-.connection-title{
+.alert.success{
+  border-color:rgba(0,214,143,.35);
+}
+
+.alert-title{
   font-weight:900;
+  margin-bottom:5px;
 }
 
-.connection-detail{
-  margin-top:4px;
-  color:var(--muted);
-  font-size:9px;
-  word-break:break-all;
+.alert-text{
+  color:#b8b8c4;
+  font-size:13px;
+  line-height:1.5;
 }
-
-.connection-actions{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  padding:5px 8px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:#17171f;
-  color:#aaaab4;
-  font-size:8px;
-  font-weight:900;
-  letter-spacing:.08em;
-}
-
-.badge.ok{
-  color:var(--success);
-  border-color:rgba(53,217,150,.25);
-}
-
-.badge.error{
-  color:var(--danger);
-  border-color:rgba(255,80,105,.25);
-}
-
-.badge.warn{
-  color:var(--warning);
-}
-
 
 /* =========================================================
    SECTIONS
 ========================================================= */
 
 .section{
-  margin-top:27px;
-  scroll-margin-top:95px;
+  display:none;
 }
 
-.section-header{
+.section.active{
+  display:block;
+}
+
+.section-head{
   display:flex;
   justify-content:space-between;
-  align-items:end;
+  align-items:flex-end;
   gap:15px;
-  margin-bottom:11px;
+  margin-bottom:18px;
 }
 
-.section-header h2{
+.section-head h2{
   margin:0;
-  font-size:16px;
+  font-size:22px;
 }
 
-.section-header p{
-  margin:4px 0 0;
+.section-head p{
+  margin:5px 0 0;
   color:var(--muted);
-  font-size:9px;
+  font-size:13px;
 }
-
-.grid{
-  display:grid;
-  gap:11px;
-}
-
-.grid-4{
-  grid-template-columns:repeat(4,minmax(0,1fr));
-}
-
-.grid-3{
-  grid-template-columns:repeat(3,minmax(0,1fr));
-}
-
-.grid-2{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-}
-
 
 /* =========================================================
    STAT CARDS
 ========================================================= */
 
-.card{
-  min-width:0;
-  padding:16px;
+.stats{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.stat{
+  background:linear-gradient(180deg,#101017,#0a0a0f);
   border:1px solid var(--border);
-  border-radius:14px;
-  background:var(--panel);
-}
-
-.stat-card{
-  position:relative;
-  overflow:hidden;
-}
-
-.stat-card::after{
-  content:"";
-  position:absolute;
-  right:-40px;
-  bottom:-45px;
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  background:rgba(183,255,0,.035);
+  border-radius:var(--radius);
+  padding:17px;
+  box-shadow:var(--shadow);
+  min-width:0;
 }
 
 .stat-label{
   color:var(--muted);
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.08em;
+  font-size:11px;
   text-transform:uppercase;
+  letter-spacing:.08em;
 }
 
 .stat-value{
   margin-top:8px;
-  font-size:27px;
-  line-height:1;
+  font-size:28px;
   font-weight:900;
-  letter-spacing:-.04em;
-}
-
-.stat-value.live{
-  color:var(--success);
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .stat-meta{
-  margin-top:8px;
-  color:#62626d;
-  font-size:8px;
+  margin-top:6px;
+  color:#70707e;
+  font-size:11px;
 }
-
-.loading{
-  min-height:28px;
-  color:transparent!important;
-  border-radius:5px;
-  background:
-    linear-gradient(
-      90deg,
-      #15151c,
-      #2b2b35,
-      #15151c
-    );
-  background-size:200% 100%;
-  animation:skeleton 1.2s linear infinite;
-}
-
-@keyframes skeleton{
-  from{
-    background-position:200% 0;
-  }
-  to{
-    background-position:-200% 0;
-  }
-}
-
 
 /* =========================================================
-   SYSTEM
+   CARDS
 ========================================================= */
 
-.diagnostic{
-  border-left:3px solid var(--warning);
+.grid{
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:14px;
 }
 
-.diagnostic.ok{
-  border-left-color:var(--success);
+.card{
+  background:#0b0b10;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
 }
 
-.diagnostic.error{
-  border-left-color:var(--danger);
+.card.span-4{
+  grid-column:span 4;
 }
 
-.diagnostic-title{
+.card.span-6{
+  grid-column:span 6;
+}
+
+.card.span-8{
+  grid-column:span 8;
+}
+
+.card.span-12{
+  grid-column:span 12;
+}
+
+.card-head{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:15px 17px;
+  border-bottom:1px solid var(--border);
+}
+
+.card-title{
+  font-weight:800;
+}
+
+.card-body{
+  padding:17px;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrap{
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,
+td{
+  padding:12px 10px;
+  border-bottom:1px solid #1c1c25;
+  text-align:left;
+  white-space:nowrap;
+  font-size:12px;
+}
+
+th{
+  color:#777785;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+td{
+  color:#d8d8df;
+}
+
+tr:hover td{
+  background:#0e0e14;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  font-size:10px;
+  font-weight:800;
+}
+
+.badge.good{
+  color:#6dffc8;
+  background:rgba(0,214,143,.08);
+  border-color:rgba(0,214,143,.25);
+}
+
+.badge.bad{
+  color:#ff8797;
+  background:rgba(255,77,103,.08);
+  border-color:rgba(255,77,103,.25);
+}
+
+.badge.warn{
+  color:#ffd17b;
+  background:rgba(255,176,32,.08);
+  border-color:rgba(255,176,32,.25);
+}
+
+.badge.info{
+  color:#73e9ff;
+  background:rgba(0,217,255,.08);
+  border-color:rgba(0,217,255,.25);
+}
+
+/* =========================================================
+   LISTS
+========================================================= */
+
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.list-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:11px 12px;
+  border:1px solid #1d1d27;
+  border-radius:10px;
+  background:#0d0d13;
+}
+
+.list-main{
+  min-width:0;
+}
+
+.list-name{
+  font-weight:700;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.list-meta{
+  color:#777785;
+  font-size:11px;
+  margin-top:3px;
+}
+
+/* =========================================================
+   LINKS
+========================================================= */
+
+.quick-links{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
   gap:10px;
 }
 
-.diagnostic-message{
-  margin-top:8px;
-  color:#a3a3ad;
-  font-size:10px;
-  line-height:1.55;
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-
-
-/* =========================================================
-   PAGE LINKS
-========================================================= */
-
-.link-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:9px;
-}
-
-.page-link{
-  display:block;
-  padding:12px;
+.quick-link{
+  padding:14px;
   border:1px solid var(--border);
+  background:#0e0e14;
   border-radius:12px;
-  background:var(--panel);
-  transition:.18s ease;
+  transition:.2s;
 }
 
-.page-link:hover{
+.quick-link:hover{
+  border-color:#444455;
   transform:translateY(-2px);
-  border-color:#44444f;
-  background:#12121a;
 }
 
-.page-link strong{
-  display:block;
+.quick-link-title{
+  font-weight:800;
+}
+
+.quick-link-url{
+  margin-top:5px;
+  color:#777785;
   font-size:10px;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
-.page-link span{
-  display:block;
-  margin-top:4px;
+/* =========================================================
+   DIAGNOSTICS
+========================================================= */
+
+.diagnostic{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:11px 12px;
+  border:1px solid #1d1d27;
+  border-radius:10px;
+  margin-bottom:8px;
+}
+
+.diag-name{
+  font-weight:700;
+}
+
+.diag-detail{
+  color:#777785;
+  font-size:11px;
+  margin-top:3px;
+  white-space:normal;
+}
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.loading{
+  padding:35px;
+  text-align:center;
   color:var(--muted);
-  font-size:8px;
 }
 
+.spinner{
+  width:25px;
+  height:25px;
+  border:3px solid #292934;
+  border-top-color:#b000ff;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  margin:0 auto 10px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.empty{
+  padding:25px;
+  text-align:center;
+  color:#777785;
+}
 
 /* =========================================================
-   TOAST
+   SEARCH
 ========================================================= */
 
-.toast{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  z-index:10000;
-  max-width:390px;
-  padding:12px 14px;
+.search{
+  width:100%;
+  background:#08080d;
   border:1px solid var(--border);
-  border-radius:11px;
-  background:#121219;
-  box-shadow:var(--shadow);
-  color:#eee;
-  font-size:10px;
-  opacity:0;
-  transform:translateY(20px);
-  pointer-events:none;
-  transition:.2s ease;
+  border-radius:10px;
+  color:#fff;
+  padding:10px 12px;
+  outline:none;
 }
 
-.toast.show{
-  opacity:1;
-  transform:translateY(0);
+.search:focus{
+  border-color:rgba(176,0,255,.55);
 }
-
-.toast.success{
-  border-color:rgba(53,217,150,.3);
-}
-
-.toast.error{
-  border-color:rgba(255,80,105,.3);
-}
-
 
 /* =========================================================
-   MOBILE
+   RESPONSIVE
 ========================================================= */
 
-@media(max-width:1200px){
-
-  .grid-4{
-    grid-template-columns:repeat(2,minmax(0,1fr));
+@media(max-width:1250px){
+  .stats{
+    grid-template-columns:repeat(3,1fr);
   }
 
-  .link-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
+  .quick-links{
+    grid-template-columns:repeat(2,1fr);
   }
-
 }
 
-@media(max-width:850px){
-
+@media(max-width:900px){
   .app{
     grid-template-columns:1fr;
   }
@@ -746,4050 +669,3518 @@ a{
   .sidebar{
     position:fixed;
     left:-280px;
+    transition:.25s;
     width:260px;
-    transition:.25s ease;
   }
 
   .sidebar.open{
     left:0;
   }
 
-  .mobile-menu{
-    display:inline-flex;
+  .stats{
+    grid-template-columns:repeat(2,1fr);
   }
 
-  .connection{
+  .card.span-4,
+  .card.span-6,
+  .card.span-8{
+    grid-column:span 12;
+  }
+
+  .content{
+    padding:14px;
+  }
+
+  .topbar{
+    padding:12px 14px;
+  }
+}
+
+@media(max-width:550px){
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .quick-links{
     grid-template-columns:1fr;
   }
 
   .topbar{
-    padding:12px 15px;
+    align-items:flex-start;
   }
 
-  .content{
-    padding:19px 15px 60px;
+  .page-title{
+    font-size:17px;
   }
-
-  .grid-4,
-  .grid-3,
-  .grid-2{
-    grid-template-columns:1fr;
-  }
-
 }
-
-@media(max-width:500px){
-
-  .page-title h1{
-    font-size:16px;
-  }
-
-  .page-title p{
-    display:none;
-  }
-
-  .link-grid{
-    grid-template-columns:1fr;
-  }
-
-  .auth-box{
-    padding:23px;
-  }
-
-}
-
 </style>
 </head>
 
-
 <body>
 
+<div class="app">
 
-<!-- =======================================================
-     ADMIN AUTH
-======================================================== -->
+  <!-- =======================================================
+       SIDEBAR
+  ======================================================== -->
 
-<section
-  class="auth-screen"
-  id="authScreen"
->
+  <aside class="sidebar" id="sidebar">
 
-  <form
-    class="auth-box"
-    id="loginForm"
-  >
-
-    <div class="auth-logo">
-      CR
+    <div class="brand">
+      <div class="brand-title">CROWRULES</div>
+      <div class="brand-sub">Entertainment · Admin Pro</div>
     </div>
 
-    <h1>
-      CrowRules Admin Pro
-    </h1>
+    <div class="nav-section">Dashboard</div>
 
-    <p>
-      Sign in with your CrowRules Supabase account.
-      Admin Pro requires an authenticated administrator account.
-    </p>
+    <nav class="nav">
 
+      <button class="active" data-section="overview">
+        <span class="nav-icon">◈</span>
+        Overview
+      </button>
 
-    <label
-      class="auth-label"
-      for="email"
-    >
-      Email
-    </label>
-
-    <input
-      class="auth-input"
-      id="email"
-      type="email"
-      autocomplete="username"
-      required
-      placeholder="admin@example.com"
-    >
-
-
-    <label
-      class="auth-label"
-      for="password"
-    >
-      Password
-    </label>
-
-    <input
-      class="auth-input"
-      id="password"
-      type="password"
-      autocomplete="current-password"
-      required
-      placeholder="••••••••"
-    >
-
-
-    <button
-      class="auth-button"
-      id="loginButton"
-      type="submit"
-    >
-      Sign In
-    </button>
-
-
-    <div
-      class="auth-error"
-      id="authError"
-    ></div>
-
-
-    <div
-      class="auth-status"
-      id="authStatus"
-    >
-      Supabase authentication initializing…
-    </div>
-
-  </form>
-
-</section>
-
-
-<!-- =======================================================
-     APP
-======================================================== -->
-
-<div
-  class="app locked"
-  id="app"
->
-
-
-<!-- =======================================================
-     SIDEBAR
-======================================================== -->
-
-<aside
-  class="sidebar"
-  id="sidebar"
->
-
-  <div class="brand">
-
-    <div class="brand-mark">
-      CR
-    </div>
-
-    <div>
-
-      <strong>
-        CrowRules
-      </strong>
-
-      <span>
-        Admin Pro
-      </span>
-
-    </div>
-
-  </div>
-
-
-  <div class="nav-title">
-    Dashboard
-  </div>
-
-  <nav class="nav">
-
-    <a
-      href="#overview"
-      class="active"
-    >
-      <span class="nav-icon">⌂</span>
-      Overview
-    </a>
-
-    <a href="#television">
-      <span class="nav-icon">▣</span>
-      CrowRules TV
-    </a>
-
-    <a href="#content">
-      <span class="nav-icon">▶</span>
-      Content
-    </a>
-
-    <a href="#members">
-      <span class="nav-icon">♟</span>
-      Members
-    </a>
-
-    <a href="#analytics">
-      <span class="nav-icon">◒</span>
-      Analytics
-    </a>
-
-    <a href="#community">
-      <span class="nav-icon">☷</span>
-      Community
-    </a>
-
-    <a href="#diagnostics">
-      <span class="nav-icon">⚙</span>
-      Diagnostics
-    </a>
-
-  </nav>
-
-
-  <div class="nav-title">
-    CrowRules Apps
-  </div>
-
-  <nav class="nav">
-
-    <a href="index.html">
-      <span class="nav-icon">◆</span>
-      Entertainment
-    </a>
-
-    <a href="tv.html">
-      <span class="nav-icon">▣</span>
-      CrowRules TV
-    </a>
-
-    <a href="members.html">
-      <span class="nav-icon">♟</span>
-      Members
-    </a>
-
-    <a href="nest.html">
-      <span class="nav-icon">⌁</span>
-      Crow Nest
-    </a>
-
-    <a href="tacoma-nights.html">
-      <span class="nav-icon">◉</span>
-      Tacoma Nights
-    </a>
-
-    <a href="backdeck.html">
-      <span class="nav-icon">◌</span>
-      Back Deck Live
-    </a>
-
-    <a href="pnwm.html">
-      <span class="nav-icon">⌂</span>
-      PNW Mother's
-    </a>
-
-    <a href="yearbook.html">
-      <span class="nav-icon">▤</span>
-      Yearbook
-    </a>
-
-    <a href="awards.html">
-      <span class="nav-icon">★</span>
-      Awards
-    </a>
-
-    <a href="spectrum.html">
-      <span class="nav-icon">✦</span>
-      Spectrum
-    </a>
-
-    <a href="records.html">
-      <span class="nav-icon">♫</span>
-      Records
-    </a>
-
-  </nav>
-
-
-  <div class="user-panel">
-
-    <div
-      class="user-email"
-      id="userEmail"
-    >
-      —
-    </div>
-
-    <div
-      class="admin-role"
-      id="userRole"
-    >
-      ADMIN
-    </div>
-
-    <button
-      class="logout-btn"
-      id="logoutBtn"
-      type="button"
-    >
-      Sign Out
-    </button>
-
-  </div>
-
-</aside>
-
-
-<!-- =======================================================
-     MAIN
-======================================================== -->
-
-<main class="main">
-
-
-<header class="topbar">
-
-  <div class="page-title">
-
-    <h1>
-      CrowRules Entertainment — Admin Pro
-    </h1>
-
-    <p>
-      Centralized platform operations
-    </p>
-
-  </div>
-
-
-  <div class="top-actions">
-
-    <button
-      class="btn mobile-menu"
-      id="mobileMenu"
-      type="button"
-    >
-      ☰
-    </button>
-
-    <button
-      class="btn"
-      id="refreshBtn"
-      type="button"
-    >
-      ↻ Refresh
-    </button>
-
-    <button
-      class="btn primary"
-      id="databaseTestBtn"
-      type="button"
-    >
-      Database Test
-    </button>
-
-  </div>
-
-</header>
-
-
-<div class="content">
-
-
-<!-- =======================================================
-     CONNECTION
-======================================================== -->
-
-<section class="connection">
-
-  <div class="connection-main">
-
-    <div class="connection-icon">
-      ◉
-    </div>
-
-    <div>
-
-      <div class="connection-title">
-        Supabase Database
-      </div>
-
-      <div
-        class="connection-detail"
-        id="connectionDetail"
-      >
-        Authenticated session required
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div class="connection-actions">
-
-    <span
-      class="badge warn"
-      id="connectionBadge"
-    >
-      CHECKING
-    </span>
-
-    <span
-      class="badge"
-      id="authBadge"
-    >
-      AUTH
-    </span>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     OVERVIEW
-======================================================== -->
-
-<section
-  class="section"
-  id="overview"
->
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
-        Platform Overview
-      </h2>
-
-      <p>
-        Core CrowRules totals.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div class="grid grid-4">
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Members
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statMembers"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        member_profiles
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Shows
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statShows"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        shows
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Episodes
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statEpisodes"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        episodes
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Live Events
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statLiveEvents"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        live_events
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     TELEVISION
-======================================================== -->
-
-<section
-  class="section"
-  id="television"
->
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
-        CrowRules TV
-      </h2>
-
-      <p>
-        Television network and programming infrastructure.
-      </p>
-
-    </div>
-
-    <a
-      class="btn"
-      href="tv.html"
-    >
-      Open TV →
-    </a>
-
-  </div>
-
-
-  <div class="grid grid-4">
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        TV Channels
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statTvChannels"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        tv_channels
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Active Channels
-      </div>
-
-      <div
-        class="stat-value loading live"
-        id="statActiveTvChannels"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        tv_channels.is_active
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Schedule Items
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statSchedule"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        schedule_items
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Scheduled Items
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statScheduled"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        scheduled_items
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div
-    class="grid grid-3"
-    style="margin-top:11px"
-  >
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Channels
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statChannels"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        channels
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        TV Guide
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statTvGuide"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        tv_guide
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        On Demand
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statOnDemand"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        on_demand_library
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     CONTENT
-======================================================== -->
-
-<section
-  class="section"
-  id="content"
->
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
+      <button data-section="content">
+        <span class="nav-icon">▣</span>
         Content
-      </h2>
+      </button>
 
-      <p>
-        Programming and viewing data.
-      </p>
+      <button data-section="tv">
+        <span class="nav-icon">▣</span>
+        CrowRules TV
+      </button>
 
-    </div>
-
-  </div>
-
-
-  <div class="grid grid-4">
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Content Items
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statContent"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        content_items
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Content Views
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statContentViews"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        content_views
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Analytics Events
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statAnalytics"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        analytics_events
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Content Likes
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statLikes"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        content_likes
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     MEMBERS
-======================================================== -->
-
-<section
-  class="section"
-  id="members"
->
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
+      <button data-section="members">
+        <span class="nav-icon">♙</span>
         Members
-      </h2>
+      </button>
 
-      <p>
-        Membership and community activity.
-      </p>
-
-    </div>
-
-    <a
-      class="btn"
-      href="members.html"
-    >
-      Open Members →
-    </a>
-
-  </div>
-
-
-  <div class="grid grid-4">
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Profiles
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statMemberProfiles"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        member_profiles
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Memberships
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statMemberships"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        memberships
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Points
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statPoints"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        member_points
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Activity
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statActivity"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        member_activity
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div
-    class="grid grid-3"
-    style="margin-top:11px"
-  >
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Watch History
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statWatchHistory"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        member_watch_history
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Favorites
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statFavorites"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        member_favorite_channels
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Friends
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statFriends"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        member_friends
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     ANALYTICS
-======================================================== -->
-
-<section
-  class="section"
-  id="analytics"
->
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
+      <button data-section="analytics">
+        <span class="nav-icon">◫</span>
         Analytics
-      </h2>
+      </button>
 
-      <p>
-        Viewing and platform activity.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div class="grid grid-4">
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Daily Stats
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statDailyStats"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        content_daily_stats
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        View Stats
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statViewStats"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        content_view_stats
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Watch Progress
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statProgress"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        watch_progress
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Events
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statAnalytics2"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        analytics_events
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     COMMUNITY
-======================================================== -->
-
-<section
-  class="section"
-  id="community"
->
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
+      <button data-section="community">
+        <span class="nav-icon">☵</span>
         Community
-      </h2>
+      </button>
 
-      <p>
-        Chat, creators, polls and newsletter.
-      </p>
+      <button data-section="creators">
+        <span class="nav-icon">✦</span>
+        Creators
+      </button>
 
-    </div>
-
-    <a
-      class="btn"
-      href="nest.html"
-    >
-      Open Crow Nest →
-    </a>
-
-  </div>
-
-
-  <div class="grid grid-4">
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Chat Messages
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statChat"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        chat_messages
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Chat Rooms
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statChatRooms"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        chat_rooms
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Polls
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statPolls"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        polls
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
+      <button data-section="newsletter">
+        <span class="nav-icon">✉</span>
         Newsletter
-      </div>
+      </button>
 
-      <div
-        class="stat-value loading"
-        id="statNewsletter"
-      >
-        —
-      </div>
+      <button data-section="diagnostics">
+        <span class="nav-icon">⚙</span>
+        Diagnostics
+      </button>
 
-      <div class="stat-meta">
-        newsletter_subscribers
-      </div>
+    </nav>
 
-    </div>
+    <div class="nav-section">CrowRules Sites</div>
 
-  </div>
+    <nav class="nav">
 
+      <button data-link="tv.html">
+        <span class="nav-icon">▶</span>
+        CrowRules TV
+      </button>
 
-  <div
-    class="grid grid-4"
-    style="margin-top:11px"
-  >
+      <button data-link="members.html">
+        <span class="nav-icon">♙</span>
+        Members
+      </button>
 
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Creator Channels
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statCreators"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        creator_channels
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Applications
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statApplications"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        creator_applications
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
+      <button data-link="nest.html">
+        <span class="nav-icon">◉</span>
         Crow Nest
-      </div>
+      </button>
 
-      <div
-        class="stat-value loading"
-        id="statNest"
-      >
-        —
-      </div>
+      <button data-link="shop.html">
+        <span class="nav-icon">◆</span>
+        Shop
+      </button>
 
-      <div class="stat-meta">
-        crow_nest_creators
-      </div>
+      <button data-link="tacoma-nights.html">
+        <span class="nav-icon">☾</span>
+        Tacoma Nights
+      </button>
 
-    </div>
+    </nav>
 
+    <div class="sidebar-bottom">
 
-    <div class="card stat-card">
+      <div class="connection-mini">
 
-      <div class="stat-label">
-        Reports
-      </div>
+        <div class="status-row">
+          <span class="dot" id="miniDot"></span>
+          <strong id="miniStatus">Checking...</strong>
+        </div>
 
-      <div
-        class="stat-value loading"
-        id="statReports"
-      >
-        —
-      </div>
+        <div style="margin-top:7px;color:#777785;font-size:10px">
+          Central Supabase wrapper
+        </div>
 
-      <div class="stat-meta">
-        chat_reports
       </div>
 
     </div>
 
-  </div>
+  </aside>
 
-</section>
+  <!-- =======================================================
+       MAIN
+  ======================================================== -->
 
+  <main class="main">
 
-<!-- =======================================================
-     PNW MOTHER'S
-======================================================== -->
+    <header class="topbar">
 
-<section class="section">
+      <div class="topbar-left">
 
-  <div class="section-header">
+        <div class="page-title" id="pageTitle">
+          Admin Pro
+        </div>
 
-    <div>
+        <div class="page-subtitle">
+          CrowRules Entertainment command center
+        </div>
 
-      <h2>
-        Pacific Northwest Mother's
-      </h2>
+      </div>
 
-      <p>
-        Community initiative data.
-      </p>
+      <div class="top-actions">
+
+        <button class="btn" id="menuBtn">
+          ☰
+        </button>
+
+        <button class="btn" id="refreshBtn">
+          ↻ Refresh
+        </button>
+
+        <button class="btn primary" id="testBtn">
+          Test Supabase
+        </button>
+
+      </div>
+
+    </header>
+
+    <div class="content">
+
+      <div class="alert" id="alertBox">
+        <div class="alert-title" id="alertTitle"></div>
+        <div class="alert-text" id="alertText"></div>
+      </div>
+
+      <!-- ===================================================
+           OVERVIEW
+      ==================================================== -->
+
+      <section class="section active" id="section-overview">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Command Center</h2>
+            <p>
+              Live overview of the CrowRules Entertainment ecosystem.
+            </p>
+          </div>
+
+          <span class="badge info" id="lastUpdated">
+            Waiting for data
+          </span>
+
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Members</div>
+            <div class="stat-value" id="statMembers">—</div>
+            <div class="stat-meta">member profiles</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Shows</div>
+            <div class="stat-value" id="statShows">—</div>
+            <div class="stat-meta">show records</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Episodes</div>
+            <div class="stat-value" id="statEpisodes">—</div>
+            <div class="stat-meta">episode records</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">TV Channels</div>
+            <div class="stat-value" id="statChannels">—</div>
+            <div class="stat-meta">streaming channels</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Live Events</div>
+            <div class="stat-value" id="statLiveEvents">—</div>
+            <div class="stat-meta">live events</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Views</div>
+            <div class="stat-value" id="statViews">—</div>
+            <div class="stat-meta">content views</div>
+          </div>
+
+        </div>
+
+        <div class="grid">
+
+          <div class="card span-8">
+
+            <div class="card-head">
+              <div class="card-title">Platform Snapshot</div>
+              <span class="badge" id="overviewDbBadge">
+                Checking
+              </span>
+            </div>
+
+            <div class="card-body">
+
+              <div class="list">
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Supabase API</div>
+                    <div class="list-meta">
+                      Central database connection
+                    </div>
+                  </div>
+                  <span class="badge" id="overviewApi">Checking</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Content System</div>
+                    <div class="list-meta">
+                      Shows, episodes and library
+                    </div>
+                  </div>
+                  <span class="badge" id="overviewContent">Checking</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">TV System</div>
+                    <div class="list-meta">
+                      Channels and schedules
+                    </div>
+                  </div>
+                  <span class="badge" id="overviewTv">Checking</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Community</div>
+                    <div class="list-meta">
+                      Chat, polls and member activity
+                    </div>
+                  </div>
+                  <span class="badge" id="overviewCommunity">Checking</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="card span-4">
+
+            <div class="card-head">
+              <div class="card-title">Quick Actions</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="list">
+
+                <button class="btn" data-section-action="content">
+                  Manage Content
+                </button>
+
+                <button class="btn" data-section-action="tv">
+                  Manage CrowRules TV
+                </button>
+
+                <button class="btn" data-section-action="members">
+                  Manage Members
+                </button>
+
+                <button class="btn" data-section-action="diagnostics">
+                  Run Diagnostics
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="card span-12">
+
+            <div class="card-head">
+              <div class="card-title">CrowRules Pages</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="quick-links">
+
+                <a class="quick-link" href="tv.html">
+                  <div class="quick-link-title">
+                    📺 CrowRules TV
+                  </div>
+                  <div class="quick-link-url">
+                    tv.html
+                  </div>
+                </a>
+
+                <a class="quick-link" href="members.html">
+                  <div class="quick-link-title">
+                    ♙ Members
+                  </div>
+                  <div class="quick-link-url">
+                    members.html
+                  </div>
+                </a>
+
+                <a class="quick-link" href="nest.html">
+                  <div class="quick-link-title">
+                    🪶 Crow Nest
+                  </div>
+                  <div class="quick-link-url">
+                    nest.html
+                  </div>
+                </a>
+
+                <a class="quick-link" href="shop.html">
+                  <div class="quick-link-title">
+                    ◆ Shop
+                  </div>
+                  <div class="quick-link-url">
+                    shop.html
+                  </div>
+                </a>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           CONTENT
+      ==================================================== -->
+
+      <section class="section" id="section-content">
+
+        <div class="section-head">
+          <div>
+            <h2>Content Management</h2>
+            <p>
+              Shows, episodes, on-demand content and viewing activity.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Shows</div>
+            <div class="stat-value" id="contentShows">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Episodes</div>
+            <div class="stat-value" id="contentEpisodes">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Library</div>
+            <div class="stat-value" id="contentLibrary">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Content Items</div>
+            <div class="stat-value" id="contentItems">—</div>
+          </div>
+
+        </div>
+
+        <div class="grid">
+
+          <div class="card span-6">
+
+            <div class="card-head">
+              <div class="card-title">Shows</div>
+            </div>
+
+            <div class="card-body">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Title</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="showsTable">
+                    <tr>
+                      <td colspan="3">Loading...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card span-6">
+
+            <div class="card-head">
+              <div class="card-title">Episodes</div>
+            </div>
+
+            <div class="card-body">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Title</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="episodesTable">
+                    <tr>
+                      <td colspan="3">Loading...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           TV
+      ==================================================== -->
+
+      <section class="section" id="section-tv">
+
+        <div class="section-head">
+          <div>
+            <h2>CrowRules TV</h2>
+            <p>
+              Channels, live events, TV guide and scheduling.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Channels</div>
+            <div class="stat-value" id="tvChannels">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Schedules</div>
+            <div class="stat-value" id="tvSchedules">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Live Events</div>
+            <div class="stat-value" id="tvLiveEvents">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Guide Items</div>
+            <div class="stat-value" id="tvGuide">—</div>
+          </div>
+
+        </div>
+
+        <div class="grid">
+
+          <div class="card span-12">
+
+            <div class="card-head">
+              <div class="card-title">TV Channels</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="table-wrap">
+
+                <table>
+
+                  <thead>
+                    <tr>
+                      <th>Channel</th>
+                      <th>Status</th>
+                      <th>Viewers</th>
+                      <th>ID</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="channelsTable">
+                    <tr>
+                      <td colspan="4">Loading...</td>
+                    </tr>
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="card span-6">
+
+            <div class="card-head">
+              <div class="card-title">Schedule Items</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="table-wrap">
+
+                <table>
+
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Start</th>
+                      <th>Channel</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="scheduleTable">
+                    <tr>
+                      <td colspan="3">Loading...</td>
+                    </tr>
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="card span-6">
+
+            <div class="card-head">
+              <div class="card-title">Live Events</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="table-wrap">
+
+                <table>
+
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Status</th>
+                      <th>Start</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="liveEventsTable">
+                    <tr>
+                      <td colspan="3">Loading...</td>
+                    </tr>
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           MEMBERS
+      ==================================================== -->
+
+      <section class="section" id="section-members">
+
+        <div class="section-head">
+          <div>
+            <h2>Members</h2>
+            <p>
+              Member profiles, memberships, points and activity.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Profiles</div>
+            <div class="stat-value" id="memberProfiles">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Memberships</div>
+            <div class="stat-value" id="memberships">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Points</div>
+            <div class="stat-value" id="memberPoints">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Activity</div>
+            <div class="stat-value" id="memberActivity">—</div>
+          </div>
+
+        </div>
+
+        <div class="grid">
+
+          <div class="card span-8">
+
+            <div class="card-head">
+              <div class="card-title">Recent Members</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="table-wrap">
+
+                <table>
+
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th>Username</th>
+                      <th>Joined</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="membersTable">
+                    <tr>
+                      <td colspan="3">Loading...</td>
+                    </tr>
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="card span-4">
+
+            <div class="card-head">
+              <div class="card-title">Member Systems</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="list">
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Watch History</div>
+                  </div>
+                  <span class="badge" id="memberWatchHistory">—</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Favorites</div>
+                  </div>
+                  <span class="badge" id="memberFavorites">—</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Friends</div>
+                  </div>
+                  <span class="badge" id="memberFriends">—</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           ANALYTICS
+      ==================================================== -->
+
+      <section class="section" id="section-analytics">
+
+        <div class="section-head">
+          <div>
+            <h2>Analytics</h2>
+            <p>
+              Content views, events and daily statistics.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Content Views</div>
+            <div class="stat-value" id="analyticsViews">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Analytics Events</div>
+            <div class="stat-value" id="analyticsEvents">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">View Stats</div>
+            <div class="stat-value" id="viewStats">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Daily Stats</div>
+            <div class="stat-value" id="dailyStats">—</div>
+          </div>
+
+        </div>
+
+        <div class="grid">
+
+          <div class="card span-12">
+
+            <div class="card-head">
+              <div class="card-title">Analytics System Status</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="diagnostic">
+                <div>
+                  <div class="diag-name">content_views</div>
+                  <div class="diag-detail" id="diag-content_views">
+                    Waiting...
+                  </div>
+                </div>
+                <span class="badge" id="badge-content_views">—</span>
+              </div>
+
+              <div class="diagnostic">
+                <div>
+                  <div class="diag-name">analytics_events</div>
+                  <div class="diag-detail" id="diag-analytics_events">
+                    Waiting...
+                  </div>
+                </div>
+                <span class="badge" id="badge-analytics_events">—</span>
+              </div>
+
+              <div class="diagnostic">
+                <div>
+                  <div class="diag-name">content_view_stats</div>
+                  <div class="diag-detail" id="diag-content_view_stats">
+                    Waiting...
+                  </div>
+                </div>
+                <span class="badge" id="badge-content_view_stats">—</span>
+              </div>
+
+              <div class="diagnostic">
+                <div>
+                  <div class="diag-name">content_daily_stats</div>
+                  <div class="diag-detail" id="diag-content_daily_stats">
+                    Waiting...
+                  </div>
+                </div>
+                <span class="badge" id="badge-content_daily_stats">—</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           COMMUNITY
+      ==================================================== -->
+
+      <section class="section" id="section-community">
+
+        <div class="section-head">
+          <div>
+            <h2>Community</h2>
+            <p>
+              Chat, polls, likes, reports and member interaction.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Chat Rooms</div>
+            <div class="stat-value" id="chatRooms">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Messages</div>
+            <div class="stat-value" id="chatMessages">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Polls</div>
+            <div class="stat-value" id="polls">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Likes</div>
+            <div class="stat-value" id="contentLikes">—</div>
+          </div>
+
+        </div>
+
+        <div class="grid">
+
+          <div class="card span-12">
+
+            <div class="card-head">
+              <div class="card-title">Community Systems</div>
+            </div>
+
+            <div class="card-body">
+
+              <div class="list">
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Chat Rooms</div>
+                  </div>
+                  <span class="badge" id="community-chat_rooms">—</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Chat Messages</div>
+                  </div>
+                  <span class="badge" id="community-chat_messages">—</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Polls</div>
+                  </div>
+                  <span class="badge" id="community-polls">—</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Content Likes</div>
+                  </div>
+                  <span class="badge" id="community-content_likes">—</span>
+                </div>
+
+                <div class="list-item">
+                  <div class="list-main">
+                    <div class="list-name">Chat Reports</div>
+                  </div>
+                  <span class="badge" id="community-chat_reports">—</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           CREATORS
+      ==================================================== -->
+
+      <section class="section" id="section-creators">
+
+        <div class="section-head">
+          <div>
+            <h2>Creators</h2>
+            <p>
+              Creator channels, applications and Crow Nest creators.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Creator Channels</div>
+            <div class="stat-value" id="creatorChannels">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Applications</div>
+            <div class="stat-value" id="creatorApplications">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Crow Nest Creators</div>
+            <div class="stat-value" id="nestCreators">—</div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           NEWSLETTER
+      ==================================================== -->
+
+      <section class="section" id="section-newsletter">
+
+        <div class="section-head">
+          <div>
+            <h2>Newsletter</h2>
+            <p>
+              Newsletter subscriber management.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">Subscribers</div>
+            <div class="stat-value" id="newsletterSubscribers">—</div>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div class="card-title">Newsletter Subscribers</div>
+          </div>
+
+          <div class="card-body">
+
+            <div class="table-wrap">
+
+              <table>
+
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                  </tr>
+                </thead>
+
+                <tbody id="newsletterTable">
+                  <tr>
+                    <td colspan="3">Loading...</td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+           DIAGNOSTICS
+      ==================================================== -->
+
+      <section class="section" id="section-diagnostics">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Supabase Diagnostics</h2>
+            <p>
+              Every database request goes through one centralized wrapper.
+            </p>
+          </div>
+
+          <button class="btn primary" id="diagnosticRefresh">
+            Run Full Scan
+          </button>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+
+            <div class="card-title">
+              Connection
+            </div>
+
+            <span class="badge" id="connectionBadge">
+              Checking
+            </span>
+
+          </div>
+
+          <div class="card-body">
+
+            <div class="diagnostic">
+
+              <div>
+                <div class="diag-name">
+                  Supabase Project
+                </div>
+
+                <div class="diag-detail">
+                  zauxdqyssratvzmomozf.supabase.co
+                </div>
+              </div>
+
+              <span class="badge info">
+                Configured
+              </span>
+
+            </div>
+
+            <div class="diagnostic">
+
+              <div>
+                <div class="diag-name">
+                  API Key Type
+                </div>
+
+                <div class="diag-detail" id="keyType">
+                  Checking...
+                </div>
+
+              </div>
+
+              <span class="badge" id="keyBadge">
+                —
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <br>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div class="card-title">
+              Database Tables
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <div id="diagnosticsList">
+
+              <div class="loading">
+                <div class="spinner"></div>
+                Running diagnostics...
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
 
     </div>
 
-    <a
-      class="btn"
-      href="pnwm.html"
-    >
-      Open PNW Mother's →
-    </a>
-
-  </div>
-
-
-  <div class="grid grid-4">
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Events
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statMotherEvents"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        mother_events
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Fundraisers
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statMotherFundraisers"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        mother_fundraisers
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Resources
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statMotherResources"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        mother_resources
-      </div>
-
-    </div>
-
-
-    <div class="card stat-card">
-
-      <div class="stat-label">
-        Volunteers
-      </div>
-
-      <div
-        class="stat-value loading"
-        id="statMotherVolunteers"
-      >
-        —
-      </div>
-
-      <div class="stat-meta">
-        mother_volunteers
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     SYSTEM STATUS
-======================================================== -->
-
-<section class="section">
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
-        Database Systems
-      </h2>
-
-      <p>
-        Individual database subsystem health.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div
-    class="grid grid-3"
-    id="systemStatusGrid"
-  ></div>
-
-</section>
-
-
-<!-- =======================================================
-     PAGE LINKS
-======================================================== -->
-
-<section class="section">
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
-        Connected CrowRules Pages
-      </h2>
-
-      <p>
-        Central navigation to the CrowRules platform.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div class="link-grid">
-
-    <a class="page-link" href="index.html">
-      <strong>CrowRules Entertainment</strong>
-      <span>Main platform</span>
-    </a>
-
-    <a class="page-link" href="tv.html">
-      <strong>CrowRules TV</strong>
-      <span>24/7 streaming network</span>
-    </a>
-
-    <a class="page-link" href="members.html">
-      <strong>Members</strong>
-      <span>Member Hub</span>
-    </a>
-
-    <a class="page-link" href="nest.html">
-      <strong>Crow Nest</strong>
-      <span>Creator community</span>
-    </a>
-
-    <a class="page-link" href="tacoma-nights.html">
-      <strong>Tacoma Nights</strong>
-      <span>Weekly show</span>
-    </a>
-
-    <a class="page-link" href="backdeck.html">
-      <strong>Back Deck Live</strong>
-      <span>Live community show</span>
-    </a>
-
-    <a class="page-link" href="pnwm.html">
-      <strong>Pacific Northwest Mother's</strong>
-      <span>Community initiative</span>
-    </a>
-
-    <a class="page-link" href="yearbook.html">
-      <strong>CrowRules Yearbook</strong>
-      <span>Yearbook platform</span>
-    </a>
-
-    <a class="page-link" href="awards.html">
-      <strong>CrowRules Awards</strong>
-      <span>Awards platform</span>
-    </a>
-
-    <a class="page-link" href="spectrum.html">
-      <strong>Spectrum</strong>
-      <span>Awards and nominations</span>
-    </a>
-
-    <a class="page-link" href="records.html">
-      <strong>CrowRules Records</strong>
-      <span>Music platform</span>
-    </a>
-
-    <a
-      class="page-link"
-      href="https://www.youtube.com/@CrowRules_TV"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <strong>CrowRules TV YouTube</strong>
-      <span>Open YouTube ↗</span>
-    </a>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     DIAGNOSTICS
-======================================================== -->
-
-<section
-  class="section"
-  id="diagnostics"
->
-
-  <div class="section-header">
-
-    <div>
-
-      <h2>
-        Supabase Diagnostics
-      </h2>
-
-      <p>
-        Authentication, database and RLS diagnostics.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div
-    class="card diagnostic"
-    id="diagnosticCard"
-  >
-
-    <div class="diagnostic-title">
-
-      <strong id="diagnosticTitle">
-        Waiting for database test…
-      </strong>
-
-      <span
-        class="badge warn"
-        id="diagnosticBadge"
-      >
-        WAITING
-      </span>
-
-    </div>
-
-
-    <div
-      class="diagnostic-message"
-      id="diagnosticMessage"
-    >
-      Admin Pro will test the authenticated Supabase connection after login.
-    </div>
-
-  </div>
-
-</section>
-
+  </main>
 
 </div>
-
-</main>
-
-</div>
-
-
-<div
-  class="toast"
-  id="toast"
-></div>
-
-
-<!-- =======================================================
-     SUPABASE JS
-======================================================== -->
-
-<script
-  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-></script>
-
 
 <script>
-
 /* =========================================================
-   CROWRULES ADMIN PRO
-   VERSION 3.0
-
-   ARCHITECTURE:
-
-       Supabase Auth
-             │
-             ▼
-       authenticated
-             │
-             ▼
-       is_crowrules_admin()
-             │
-             ▼
-       CrowRulesDB
-             │
-             ▼
-       Supabase tables
-
-   IMPORTANT:
-   There is ONE Supabase client.
-   There is ONE database wrapper.
-   There are NO direct fetch() database calls.
+   CROWRULES ENTERTAINMENT
+   ADMIN PRO
+   SINGLE ROBUST SUPABASE WRAPPER
 ========================================================= */
-
 
 const CONFIG = Object.freeze({
 
+  /*
+   * YOUR SUPABASE PROJECT
+   */
   supabaseUrl:
     "https://zauxdqyssratvzmomozf.supabase.co",
 
-  supabaseKey:
-    "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9"
+  /*
+   * IMPORTANT:
+   *
+   * This MUST be your CURRENT SUPABASE
+   * PUBLISHABLE KEY.
+   *
+   * Do NOT put a sb_secret_ key here.
+   *
+   * If your current publishable key was revoked,
+   * replace this value from:
+   *
+   * Supabase Dashboard
+   * → Settings
+   * → API Keys
+   * → Publishable key
+   */
+  supabasePublishableKey:
+    "sb_publishable_-Z6wecSOxwOk6IBut2zLn_8DfRxnE9",
+
+  /*
+   * GitHub Pages / same-folder pages
+   */
+  pages: {
+    tv: "tv.html",
+    members: "members.html",
+    nest: "nest.html",
+    shop: "shop.html",
+    tacomaNights: "tacoma-nights.html"
+  },
+
+  /*
+   * How many rows Admin Pro requests
+   * for table previews.
+   */
+  previewLimit: 25,
+
+  /*
+   * Number of retry attempts for transient
+   * network failures.
+   */
+  retries: 2
 
 });
 
 
 /* =========================================================
-   SINGLE SUPABASE CLIENT
+   TABLE REGISTRY
 ========================================================= */
 
-const supabaseClient =
-  window.supabase.createClient(
-    CONFIG.supabaseUrl,
-    CONFIG.supabaseKey,
-    {
+const TABLES = Object.freeze([
 
-      auth:{
+  "member_profiles",
 
-        persistSession:true,
+  "episodes",
 
-        autoRefreshToken:true,
+  "live_events",
 
-        detectSessionInUrl:true
+  "shows",
 
+  "tv_channels",
+
+  "schedule_items",
+
+  "scheduled_items",
+
+  "channels",
+
+  "tv_guide",
+
+  "on_demand_library",
+
+  "content_items",
+
+  "content_views",
+
+  "analytics_events",
+
+  "memberships",
+
+  "content_likes",
+
+  "member_points",
+
+  "chat_rooms",
+
+  "watch_progress",
+
+  "creator_channels",
+
+  "member_watch_history",
+
+  "member_favorite_channels",
+
+  "content_view_stats",
+
+  "polls",
+
+  "content_daily_stats",
+
+  "chat_messages",
+
+  "newsletter_subscribers",
+
+  "creator_applications",
+
+  "chat_reports",
+
+  "member_friends",
+
+  "crow_nest_creators",
+
+  "member_activity"
+
+]);
+
+
+/* =========================================================
+   DOM HELPERS
+========================================================= */
+
+const $ = (selector) =>
+  document.querySelector(selector);
+
+const $$ = (selector) =>
+  [...document.querySelectorAll(selector)];
+
+
+/* =========================================================
+   FORMATTERS
+========================================================= */
+
+function number(value){
+
+  if(
+    value === null ||
+    value === undefined ||
+    Number.isNaN(Number(value))
+  ){
+    return "—";
+  }
+
+  return Number(value).toLocaleString();
+
+}
+
+
+function escapeHtml(value){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+function shortId(value){
+
+  if(!value) return "—";
+
+  const str = String(value);
+
+  if(str.length <= 12) return str;
+
+  return str.slice(0,8) + "…";
+
+}
+
+
+function formatDate(value){
+
+  if(!value) return "—";
+
+  const date = new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return String(value);
+  }
+
+  return date.toLocaleString();
+
+}
+
+
+/* =========================================================
+   ALERTS
+========================================================= */
+
+function showAlert(
+  title,
+  message,
+  type = "error"
+){
+
+  const box = $("#alertBox");
+
+  if(!box) return;
+
+  box.className = "alert show " + type;
+
+  $("#alertTitle").textContent = title;
+
+  $("#alertText").textContent = message;
+
+}
+
+
+function hideAlert(){
+
+  const box = $("#alertBox");
+
+  if(box){
+    box.className = "alert";
+  }
+
+}
+
+
+/* =========================================================
+   CENTRAL SUPABASE CLIENT
+========================================================= */
+
+let supabaseClient = null;
+
+let connectionState = {
+  online: false,
+  error: null,
+  keyType: "unknown"
+};
+
+
+/* =========================================================
+   KEY VALIDATION
+========================================================= */
+
+function detectKeyType(key){
+
+  if(!key){
+    return {
+      type:"missing",
+      label:"Missing API key"
+    };
+  }
+
+  if(key.startsWith("sb_publishable_")){
+    return {
+      type:"publishable",
+      label:"Publishable key"
+    };
+  }
+
+  if(key.startsWith("sb_secret_")){
+    return {
+      type:"secret",
+      label:"Secret key — NOT SAFE IN BROWSER"
+    };
+  }
+
+  if(key.split(".").length === 3){
+    return {
+      type:"legacy",
+      label:"Legacy JWT / anon key"
+    };
+  }
+
+  return {
+    type:"unknown",
+    label:"Unknown key format"
+  };
+
+}
+
+
+/* =========================================================
+   CREATE CLIENT
+========================================================= */
+
+function initializeSupabase(){
+
+  const keyInfo =
+    detectKeyType(CONFIG.supabasePublishableKey);
+
+  connectionState.keyType =
+    keyInfo.type;
+
+  $("#keyType").textContent =
+    keyInfo.label;
+
+  if(keyInfo.type === "secret"){
+
+    $("#keyBadge").className =
+      "badge bad";
+
+    $("#keyBadge").textContent =
+      "UNSAFE";
+
+    throw new Error(
+      "A Supabase secret key was supplied to browser code. Use the Publishable key instead."
+    );
+
+  }
+
+  if(keyInfo.type === "missing"){
+
+    $("#keyBadge").className =
+      "badge bad";
+
+    $("#keyBadge").textContent =
+      "MISSING";
+
+    throw new Error(
+      "Supabase publishable key is missing."
+    );
+
+  }
+
+  $("#keyBadge").className =
+    keyInfo.type === "publishable"
+      ? "badge good"
+      : "badge warn";
+
+  $("#keyBadge").textContent =
+    keyInfo.type === "publishable"
+      ? "OK"
+      : "LEGACY";
+
+  /*
+   * IMPORTANT:
+   *
+   * We use supabase-js here.
+   *
+   * Do NOT manually construct:
+   *
+   * Authorization: Bearer sb_publishable_...
+   *
+   * The client handles the API key correctly.
+   */
+
+  supabaseClient =
+    window.supabase.createClient(
+      CONFIG.supabaseUrl,
+      CONFIG.supabasePublishableKey,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+        },
+        global:{
+          headers:{
+            "x-client-info":
+              "crowrules-admin-pro"
+          }
+        }
       }
+    );
 
-    }
-  );
+}
 
 
 /* =========================================================
    CENTRAL DATABASE WRAPPER
 ========================================================= */
 
-const CrowRulesDB = (() => {
+const DB = {
 
-  const errors =
-    Object.create(null);
-
-
-  /* =======================================================
-     ERROR NORMALIZER
-  ====================================================== */
-
-  function normalizeError(
-    error,
-    table=""
+  async request(
+    table,
+    options = {}
   ){
 
-    if(!error){
+    if(!supabaseClient){
 
       return {
-
-        message:
-          "Unknown Supabase error.",
-
-        table
-
+        data:null,
+        error:{
+          message:"Supabase client is not initialized.",
+          code:"CLIENT_NOT_INITIALIZED"
+        }
       };
 
     }
 
+    if(!table){
+
+      return {
+        data:null,
+        error:{
+          message:"No table name supplied.",
+          code:"NO_TABLE"
+        }
+      };
+
+    }
+
+    const {
+      select = "*",
+      limit = CONFIG.previewLimit,
+      order,
+      ascending = false,
+      count = null
+    } = options;
+
+    let lastError = null;
+
+    for(
+      let attempt = 0;
+      attempt <= CONFIG.retries;
+      attempt++
+    ){
+
+      try{
+
+        let query =
+          supabaseClient
+            .from(table)
+            .select(
+              select,
+              count
+                ? { count }
+                : undefined
+            );
+
+        if(order){
+
+          query =
+            query.order(
+              order,
+              {
+                ascending
+              }
+            );
+
+        }
+
+        if(
+          Number.isFinite(limit) &&
+          limit > 0
+        ){
+
+          query =
+            query.limit(limit);
+
+        }
+
+        const result =
+          await query;
+
+        if(!result.error){
+
+          return {
+            data:result.data ?? [],
+            error:null,
+            count:result.count ?? null,
+            table,
+            ok:true
+          };
+
+        }
+
+        lastError =
+          this.normalizeError(
+            result.error,
+            table
+          );
+
+        /*
+         * Do not retry authentication /
+         * authorization failures.
+         */
+        if(
+          lastError.status === 401 ||
+          lastError.status === 403
+        ){
+          break;
+        }
+
+      }catch(error){
+
+        lastError =
+          this.normalizeError(
+            error,
+            table
+          );
+
+      }
+
+      if(
+        attempt < CONFIG.retries
+      ){
+
+        await this.sleep(
+          350 * (attempt + 1)
+        );
+
+      }
+
+    }
 
     return {
+      data:null,
+      error:lastError,
+      count:null,
+      table,
+      ok:false
+    };
 
-      message:
-        error.message ||
-        error.error_description ||
-        error.details ||
-        error.hint ||
-        "Unknown Supabase error.",
+  },
 
-      code:
-        error.code ||
-        null,
 
-      details:
-        error.details ||
-        null,
+  normalizeError(error,table){
 
-      hint:
-        error.hint ||
-        null,
+    const message =
+      error?.message ||
+      error?.error_description ||
+      error?.details ||
+      "Unknown Supabase error";
 
-      status:
-        error.status ||
-        null,
+    let status =
+      Number(
+        error?.status ||
+        error?.statusCode ||
+        0
+      );
 
+    /*
+     * Some Supabase/PostgREST errors
+     * expose status through code.
+     */
+    if(!status){
+
+      if(
+        error?.code === "PGRST301"
+      ){
+        status = 401;
+      }
+
+    }
+
+    let friendly =
+      message;
+
+    if(
+      status === 401 ||
+      /invalid api key/i.test(message) ||
+      /invalid jwt/i.test(message)
+    ){
+
+      friendly =
+        "Supabase rejected the API key. Verify that this page uses the CURRENT Publishable key from Supabase → Settings → API Keys. Do not use a secret key or manually send the publishable key as Authorization: Bearer.";
+
+    }else if(
+      status === 403
+    ){
+
+      friendly =
+        "Supabase returned 403 Forbidden. The API key is recognized, but Row Level Security or database permissions may prevent this request.";
+
+    }else if(
+      /relation .* does not exist/i.test(message) ||
+      /table .* does not exist/i.test(message)
+    ){
+
+      friendly =
+        `The table "${table}" does not exist in the exposed public schema.`;
+
+    }else if(
+      /schema cache/i.test(message)
+    ){
+
+      friendly =
+        `Supabase PostgREST schema cache could not resolve "${table}".`;
+
+    }
+
+    return {
+      message,
+      friendly,
+      status,
+      code:error?.code || "",
+      details:error?.details || "",
+      hint:error?.hint || "",
       table
-
     };
 
-  }
+  },
 
 
-  /* =======================================================
-     FORMAT ERROR
-  ====================================================== */
+  sleep(ms){
 
-  function formatError(
-    error
-  ){
-
-    const e =
-      normalizeError(error);
-
-
-    let message =
-      e.message;
-
-
-    if(e.code){
-
-      message +=
-        ` [${e.code}]`;
-
-    }
-
-
-    if(e.status){
-
-      message +=
-        ` (HTTP ${e.status})`;
-
-    }
-
-
-    if(e.hint){
-
-      message +=
-        ` — ${e.hint}`;
-
-    }
-
-
-    return message;
-
-  }
-
-
-  /* =======================================================
-     COUNT
-  ====================================================== */
-
-  async function count(
-    table,
-    options={}
-  ){
-
-    try{
-
-      let query =
-        supabaseClient
-          .from(table)
-          .select(
-            "*",
-            {
-              count:"exact",
-              head:true
-            }
-          );
-
-
-      if(
-        Array.isArray(
-          options.eq
-        )
-      ){
-
-        for(
-          const pair
-          of options.eq
-        ){
-
-          if(
-            Array.isArray(pair) &&
-            pair.length >= 2
-          ){
-
-            query =
-              query.eq(
-                pair[0],
-                pair[1]
-              );
-
-          }
-
-        }
-
-      }
-
-
-      const {
-        count,
-        error
-      } =
-        await query;
-
-
-      if(error){
-
-        const normalized =
-          normalizeError(
-            error,
-            table
-          );
-
-
-        errors[table] =
-          formatError(
-            normalized
-          );
-
-
-        return {
-
-          ok:false,
-
-          table,
-
-          value:null,
-
-          error:
-            normalized
-
-        };
-
-      }
-
-
-      delete errors[table];
-
-
-      return {
-
-        ok:true,
-
-        table,
-
-        value:
-          Number(
-            count || 0
-          ),
-
-        error:null
-
-      };
-
-    }
-    catch(error){
-
-      const normalized =
-        normalizeError(
-          error,
-          table
-        );
-
-
-      errors[table] =
-        formatError(
-          normalized
-        );
-
-
-      return {
-
-        ok:false,
-
-        table,
-
-        value:null,
-
-        error:
-          normalized
-
-      };
-
-    }
-
-  }
-
-
-  /* =======================================================
-     SELECT
-  ====================================================== */
-
-  async function select(
-    table,
-    columns="*",
-    options={}
-  ){
-
-    try{
-
-      let query =
-        supabaseClient
-          .from(table)
-          .select(columns);
-
-
-      if(
-        Number.isInteger(
-          options.limit
-        )
-      ){
-
-        query =
-          query.limit(
-            options.limit
-          );
-
-      }
-
-
-      if(
-        Number.isInteger(
-          options.offset
-        )
-      ){
-
-        query =
-          query.range(
-            options.offset,
-            options.offset +
-            options.limit -
-            1
-          );
-
-      }
-
-
-      if(
-        Array.isArray(
-          options.eq
-        )
-      ){
-
-        for(
-          const pair
-          of options.eq
-        ){
-
-          if(
-            Array.isArray(pair) &&
-            pair.length >= 2
-          ){
-
-            query =
-              query.eq(
-                pair[0],
-                pair[1]
-              );
-
-          }
-
-        }
-
-      }
-
-
-      if(options.order){
-
-        query =
-          query.order(
-            options.order.column,
-            {
-              ascending:
-                options.order.ascending !==
-                false
-            }
-          );
-
-      }
-
-
-      const {
-        data,
-        error
-      } =
-        await query;
-
-
-      if(error){
-
-        const normalized =
-          normalizeError(
-            error,
-            table
-          );
-
-
-        errors[table] =
-          formatError(
-            normalized
-          );
-
-
-        return {
-
-          ok:false,
-
-          data:null,
-
-          error:
-            normalized
-
-        };
-
-      }
-
-
-      delete errors[table];
-
-
-      return {
-
-        ok:true,
-
-        data:
-          data || [],
-
-        error:null
-
-      };
-
-    }
-    catch(error){
-
-      const normalized =
-        normalizeError(
-          error,
-          table
-        );
-
-
-      errors[table] =
-        formatError(
-          normalized
-        );
-
-
-      return {
-
-        ok:false,
-
-        data:null,
-
-        error:
-          normalized
-
-      };
-
-    }
-
-  }
-
-
-  /* =======================================================
-     INSERT
-  ====================================================== */
-
-  async function insert(
-    table,
-    values
-  ){
-
-    try{
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from(table)
-          .insert(values)
-          .select();
-
-
-      if(error){
-
-        const normalized =
-          normalizeError(
-            error,
-            table
-          );
-
-
-        errors[table] =
-          formatError(
-            normalized
-          );
-
-
-        return {
-
-          ok:false,
-
-          data:null,
-
-          error:
-            normalized
-
-        };
-
-      }
-
-
-      delete errors[table];
-
-
-      return {
-
-        ok:true,
-
-        data,
-
-        error:null
-
-      };
-
-    }
-    catch(error){
-
-      const normalized =
-        normalizeError(
-          error,
-          table
-        );
-
-
-      return {
-
-        ok:false,
-
-        data:null,
-
-        error:
-          normalized
-
-      };
-
-    }
-
-  }
-
-
-  /* =======================================================
-     UPDATE
-  ====================================================== */
-
-  async function update(
-    table,
-    values,
-    options={}
-  ){
-
-    try{
-
-      let query =
-        supabaseClient
-          .from(table)
-          .update(values);
-
-
-      if(
-        Array.isArray(
-          options.eq
-        )
-      ){
-
-        for(
-          const pair
-          of options.eq
-        ){
-
-          if(
-            Array.isArray(pair) &&
-            pair.length >= 2
-          ){
-
-            query =
-              query.eq(
-                pair[0],
-                pair[1]
-              );
-
-          }
-
-        }
-
-      }
-
-
-      const {
-        data,
-        error
-      } =
-        await query
-          .select();
-
-
-      if(error){
-
-        const normalized =
-          normalizeError(
-            error,
-            table
-          );
-
-
-        errors[table] =
-          formatError(
-            normalized
-          );
-
-
-        return {
-
-          ok:false,
-
-          data:null,
-
-          error:
-            normalized
-
-        };
-
-      }
-
-
-      return {
-
-        ok:true,
-
-        data,
-
-        error:null
-
-      };
-
-    }
-    catch(error){
-
-      return {
-
-        ok:false,
-
-        data:null,
-
-        error:
-          normalizeError(
-            error,
-            table
-          )
-
-      };
-
-    }
-
-  }
-
-
-  /* =======================================================
-     DELETE
-  ====================================================== */
-
-  async function remove(
-    table,
-    options={}
-  ){
-
-    try{
-
-      let query =
-        supabaseClient
-          .from(table)
-          .delete();
-
-
-      if(
-        Array.isArray(
-          options.eq
-        )
-      ){
-
-        for(
-          const pair
-          of options.eq
-        ){
-
-          if(
-            Array.isArray(pair) &&
-            pair.length >= 2
-          ){
-
-            query =
-              query.eq(
-                pair[0],
-                pair[1]
-              );
-
-          }
-
-        }
-
-      }
-
-
-      const {
-        data,
-        error
-      } =
-        await query
-          .select();
-
-
-      if(error){
-
-        return {
-
-          ok:false,
-
-          data:null,
-
-          error:
-            normalizeError(
-              error,
-              table
-            )
-
-        };
-
-      }
-
-
-      return {
-
-        ok:true,
-
-        data,
-
-        error:null
-
-      };
-
-    }
-    catch(error){
-
-      return {
-
-        ok:false,
-
-        data:null,
-
-        error:
-          normalizeError(
-            error,
-            table
-          )
-
-      };
-
-    }
-
-  }
-
-
-  /* =======================================================
-     GET ERRORS
-  ====================================================== */
-
-  function getErrors(){
-
-    return {
-
-      ...errors
-
-    };
-
-  }
-
-
-  /* =======================================================
-     CLEAR ERRORS
-  ====================================================== */
-
-  function clearErrors(){
-
-    Object.keys(
-      errors
-    ).forEach(
-      key =>
-        delete errors[key]
+    return new Promise(
+      resolve => setTimeout(resolve,ms)
     );
 
   }
 
-
-  return Object.freeze({
-
-    count,
-
-    select,
-
-    insert,
-
-    update,
-
-    remove,
-
-    getErrors,
-
-    clearErrors
-
-  });
-
-})();
+};
 
 
 /* =========================================================
-   ADMIN PRO
+   CONNECTION TEST
 ========================================================= */
 
-const AdminPro = (() => {
+async function testConnection(){
 
-  const $ =
-    id =>
-      document.getElementById(id);
+  hideAlert();
 
+  setMiniStatus(
+    "Checking...",
+    "warn"
+  );
 
-  let currentUser =
-    null;
+  $("#connectionBadge").className =
+    "badge warn";
 
+  $("#connectionBadge").textContent =
+    "Checking";
 
-  let refreshing =
-    false;
-
-
-  /* =======================================================
-     AUTH ERROR
-  ====================================================== */
-
-  function showAuthError(
-    message
-  ){
-
-    const element =
-      $("authError");
-
-
-    element.textContent =
-      message;
-
-
-    element.classList.add(
-      "show"
-    );
-
-  }
-
-
-  function clearAuthError(){
-
-    $("authError")
-      ?.classList.remove(
-        "show"
-      );
-
-  }
-
-
-  /* =======================================================
-     TOAST
-  ====================================================== */
-
-  function toast(
-    message,
-    type="success"
-  ){
-
-    const element =
-      $("toast");
-
-
-    element.textContent =
-      message;
-
-
-    element.className =
-      "toast show " +
-      type;
-
-
-    clearTimeout(
-      window.__crowToast
-    );
-
-
-    window.__crowToast =
-      setTimeout(
-        () => {
-
-          element.className =
-            "toast";
-
-        },
-        3500
-      );
-
-  }
-
-
-  /* =======================================================
-     AUTH STATE
-  ====================================================== */
-
-  function lockApp(){
-
-    $("app")
-      .classList.add(
-        "locked"
-      );
-
-    $("authScreen")
-      .classList.remove(
-        "hidden"
-      );
-
-  }
-
-
-  function unlockApp(){
-
-    $("authScreen")
-      .classList.add(
-        "hidden"
-      );
-
-    $("app")
-      .classList.remove(
-        "locked"
-      );
-
-  }
-
-
-  /* =======================================================
-     ADMIN ROLE CHECK
-  ====================================================== */
-
-  async function verifyAdmin(
-    user
-  ){
+  try{
 
     /*
-      We use profiles because the actual
-      database policies use the CrowRules
-      administrator function based on the
-      authenticated user.
+     * This is deliberately a tiny query.
+     *
+     * It proves:
+     * 1. API URL works
+     * 2. API key is accepted
+     * 3. PostgREST is reachable
+     *
+     * We use a known application table rather
+     * than inventing a health endpoint.
+     */
 
-      The profile table has public SELECT
-      enabled, so this check can safely
-      confirm the user's role.
-    */
+    const candidates = [
+      "member_profiles",
+      "shows",
+      "tv_channels"
+    ];
 
+    let success = null;
+    let firstError = null;
 
-    const result =
-      await CrowRulesDB.select(
-        "profiles",
-        "id,role",
-        {
-          eq:[
-            ["id",user.id]
-          ],
-          limit:1
-        }
+    for(const table of candidates){
+
+      const result =
+        await DB.request(
+          table,
+          {
+            select:"*",
+            limit:1
+          }
+        );
+
+      if(result.ok){
+
+        success = result;
+
+        break;
+
+      }
+
+      if(!firstError){
+        firstError = result.error;
+      }
+
+      /*
+       * 401 is global — do not continue.
+       */
+      if(
+        result.error?.status === 401
+      ){
+        break;
+      }
+
+    }
+
+    if(!success){
+
+      connectionState.online = false;
+
+      connectionState.error =
+        firstError;
+
+      setMiniStatus(
+        "Offline",
+        "bad"
       );
 
+      $("#connectionBadge").className =
+        "badge bad";
 
-    if(!result.ok){
+      $("#connectionBadge").textContent =
+        "ERROR";
 
-      return {
-
-        ok:false,
-
-        reason:
-          result.error?.message ||
-          "Unable to verify administrator role."
-
-      };
-
-    }
-
-
-    const profile =
-      result.data?.[0];
-
-
-    if(!profile){
-
-      return {
-
-        ok:false,
-
-        reason:
-          "No CrowRules profile was found for this account."
-
-      };
-
-    }
-
-
-    const role =
-      String(
-        profile.role ||
-        ""
-      )
-      .toLowerCase();
-
-
-    const allowed =
-      [
-        "admin",
-        "owner",
-        "super_admin"
-      ]
-      .includes(
-        role
+      showAlert(
+        "Supabase connection failed",
+        firstError?.friendly ||
+        "Unable to connect to Supabase."
       );
 
-
-    if(!allowed){
-
-      return {
-
-        ok:false,
-
-        reason:
-          "This account is authenticated but does not have a CrowRules administrator role."
-
-      };
+      return false;
 
     }
 
+    connectionState.online = true;
+    connectionState.error = null;
+
+    setMiniStatus(
+      "Online",
+      "good"
+    );
+
+    $("#connectionBadge").className =
+      "badge good";
+
+    $("#connectionBadge").textContent =
+      "ONLINE";
+
+    $("#overviewApi").className =
+      "badge good";
+
+    $("#overviewApi").textContent =
+      "ONLINE";
+
+    $("#overviewDbBadge").className =
+      "badge good";
+
+    $("#overviewDbBadge").textContent =
+      "CONNECTED";
+
+    $("#lastUpdated").textContent =
+      "Updated " +
+      new Date().toLocaleTimeString();
+
+    showAlert(
+      "Supabase connected",
+      "The central Supabase wrapper is online.",
+      "success"
+    );
+
+    setTimeout(
+      hideAlert,
+      3500
+    );
+
+    return true;
+
+  }catch(error){
+
+    connectionState.online = false;
+
+    setMiniStatus(
+      "Error",
+      "bad"
+    );
+
+    showAlert(
+      "Supabase initialization error",
+      error.message
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================================
+   MINI STATUS
+========================================================= */
+
+function setMiniStatus(
+  text,
+  type
+){
+
+  $("#miniStatus").textContent =
+    text;
+
+  $("#miniDot").className =
+    "dot " + type;
+
+}
+
+
+/* =========================================================
+   COUNT TABLE
+========================================================= */
+
+async function countTable(table){
+
+  const result =
+    await DB.request(
+      table,
+      {
+        select:"*",
+        limit:1,
+        count:"exact"
+      }
+    );
+
+  if(!result.ok){
 
     return {
-
-      ok:true,
-
-      role
-
+      ok:false,
+      count:null,
+      error:result.error
     };
 
   }
 
+  return {
+    ok:true,
+    count:
+      result.count ??
+      result.data?.length ??
+      0,
+    error:null
+  };
 
-  /* =======================================================
-     LOGIN
-  ====================================================== */
+}
 
-  async function login(
-    email,
-    password
-  ){
 
-    clearAuthError();
+/* =========================================================
+   UPDATE COUNT
+========================================================= */
 
+async function updateCount(
+  table,
+  elementId
+){
 
-    const button =
-      $("loginButton");
+  const result =
+    await countTable(table);
 
+  const element =
+    $("#" + elementId);
 
-    button.disabled =
-      true;
+  if(!element) return result;
 
-    button.textContent =
-      "Signing In…";
-
-
-    try{
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .auth
-          .signInWithPassword({
-            email,
-            password
-          });
-
-
-      if(error){
-
-        throw error;
-
-      }
-
-
-      if(!data?.user){
-
-        throw new Error(
-          "Supabase did not return an authenticated user."
-        );
-
-      }
-
-
-      const admin =
-        await verifyAdmin(
-          data.user
-        );
-
-
-      if(!admin.ok){
-
-        await supabaseClient
-          .auth
-          .signOut();
-
-
-        throw new Error(
-          admin.reason
-        );
-
-      }
-
-
-      currentUser =
-        data.user;
-
-
-      unlockApp();
-
-
-      setUser(
-        data.user,
-        admin.role
-      );
-
-
-      $("authBadge").textContent =
-        "AUTHENTICATED";
-
-      $("authBadge").className =
-        "badge ok";
-
-
-      toast(
-        "CrowRules Admin Pro authenticated.",
-        "success"
-      );
-
-
-      await refresh();
-
-
-    }
-    catch(error){
-
-      showAuthError(
-        error?.message ||
-        "Unable to sign in."
-      );
-
-      $("authStatus").textContent =
-        "Authentication failed.";
-
-    }
-    finally{
-
-      button.disabled =
-        false;
-
-      button.textContent =
-        "Sign In";
-
-    }
-
-  }
-
-
-  /* =======================================================
-     LOGOUT
-  ====================================================== */
-
-  async function logout(){
-
-    await supabaseClient
-      .auth
-      .signOut();
-
-
-    currentUser =
-      null;
-
-
-    lockApp();
-
-
-    $("authStatus").textContent =
-      "Signed out.";
-
-  }
-
-
-  /* =======================================================
-     USER UI
-  ====================================================== */
-
-  function setUser(
-    user,
-    role
-  ){
-
-    $("userEmail").textContent =
-      user.email ||
-      "Authenticated user";
-
-
-    $("userRole").textContent =
-      String(
-        role ||
-        "admin"
-      )
-      .toUpperCase();
-
-  }
-
-
-  /* =======================================================
-     CONNECTION UI
-  ====================================================== */
-
-  function connection(
-    online,
-    message
-  ){
-
-    const badge =
-      $("connectionBadge");
-
-
-    const detail =
-      $("connectionDetail");
-
-
-    if(online){
-
-      badge.textContent =
-        "CONNECTED";
-
-      badge.className =
-        "badge ok";
-
-      detail.textContent =
-        message ||
-        CONFIG.supabaseUrl;
-
-    }else{
-
-      badge.textContent =
-        "ERROR";
-
-      badge.className =
-        "badge error";
-
-      detail.textContent =
-        message ||
-        "Supabase database request failed.";
-
-    }
-
-  }
-
-
-  /* =======================================================
-     SET STAT
-  ====================================================== */
-
-  function setStat(
-    id,
-    value
-  ){
-
-    const element =
-      $(id);
-
-
-    if(!element){
-
-      return;
-
-    }
-
-
-    element.classList.remove(
-      "loading"
-    );
-
-
-    if(
-      value === null ||
-      value === undefined
-    ){
-
-      element.textContent =
-        "—";
-
-      return;
-
-    }
-
+  if(result.ok){
 
     element.textContent =
-      Number(
-        value
-      )
-      .toLocaleString();
+      number(result.count);
+
+  }else{
+
+    element.textContent =
+      "—";
 
   }
 
+  return result;
 
-  /* =======================================================
-     LOAD STAT
-  ====================================================== */
-
-  async function loadStat(
-    id,
-    table,
-    options={}
-  ){
-
-    const result =
-      await CrowRulesDB.count(
-        table,
-        options
-      );
+}
 
 
-    if(result.ok){
+/* =========================================================
+   LOAD OVERVIEW
+========================================================= */
 
-      setStat(
-        id,
-        result.value
-      );
+async function loadOverview(){
 
-    }else{
+  const [
+    members,
+    shows,
+    episodes,
+    channels,
+    liveEvents,
+    views
+  ] =
+  await Promise.all([
 
-      setStat(
-        id,
-        null
-      );
+    countTable("member_profiles"),
 
-    }
+    countTable("shows"),
+
+    countTable("episodes"),
+
+    countTable("tv_channels"),
+
+    countTable("live_events"),
+
+    countTable("content_views")
+
+  ]);
+
+  $("#statMembers").textContent =
+    members.ok
+      ? number(members.count)
+      : "—";
+
+  $("#statShows").textContent =
+    shows.ok
+      ? number(shows.count)
+      : "—";
+
+  $("#statEpisodes").textContent =
+    episodes.ok
+      ? number(episodes.count)
+      : "—";
+
+  $("#statChannels").textContent =
+    channels.ok
+      ? number(channels.count)
+      : "—";
+
+  $("#statLiveEvents").textContent =
+    liveEvents.ok
+      ? number(liveEvents.count)
+      : "—";
+
+  $("#statViews").textContent =
+    views.ok
+      ? number(views.count)
+      : "—";
+
+  $("#overviewContent").className =
+    shows.ok || episodes.ok
+      ? "badge good"
+      : "badge warn";
+
+  $("#overviewContent").textContent =
+    shows.ok || episodes.ok
+      ? "AVAILABLE"
+      : "CHECK";
+
+  $("#overviewTv").className =
+    channels.ok
+      ? "badge good"
+      : "badge warn";
+
+  $("#overviewTv").textContent =
+    channels.ok
+      ? "AVAILABLE"
+      : "CHECK";
+
+}
 
 
-    return result;
+/* =========================================================
+   LOAD CONTENT
+========================================================= */
+
+async function loadContent(){
+
+  const [
+    shows,
+    episodes,
+    library,
+    items
+  ] =
+  await Promise.all([
+
+    countTable("shows"),
+
+    countTable("episodes"),
+
+    countTable("on_demand_library"),
+
+    countTable("content_items")
+
+  ]);
+
+  $("#contentShows").textContent =
+    shows.ok
+      ? number(shows.count)
+      : "—";
+
+  $("#contentEpisodes").textContent =
+    episodes.ok
+      ? number(episodes.count)
+      : "—";
+
+  $("#contentLibrary").textContent =
+    library.ok
+      ? number(library.count)
+      : "—";
+
+  $("#contentItems").textContent =
+    items.ok
+      ? number(items.count)
+      : "—";
+
+
+  const showRows =
+    await DB.request(
+      "shows",
+      {
+        select:"*",
+        limit:CONFIG.previewLimit
+      }
+    );
+
+  renderShows(
+    showRows.ok
+      ? showRows.data
+      : []
+  );
+
+
+  const episodeRows =
+    await DB.request(
+      "episodes",
+      {
+        select:"*",
+        limit:CONFIG.previewLimit
+      }
+    );
+
+  renderEpisodes(
+    episodeRows.ok
+      ? episodeRows.data
+      : []
+  );
+
+}
+
+
+/* =========================================================
+   RENDER SHOWS
+========================================================= */
+
+function renderShows(rows){
+
+  const tbody =
+    $("#showsTable");
+
+  if(!rows.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="3">
+          No show records available.
+        </td>
+      </tr>`;
+
+    return;
 
   }
 
+  tbody.innerHTML =
+    rows.map(row => {
 
-  /* =======================================================
-     STAT DEFINITIONS
-  ====================================================== */
+      const title =
+        row.title ||
+        row.name ||
+        row.show_title ||
+        "Untitled";
 
-  const STATS = [
+      const status =
+        row.status ||
+        row.state ||
+        "—";
 
-    ["statMembers","member_profiles"],
+      return `
+        <tr>
+          <td>${escapeHtml(shortId(row.id))}</td>
+          <td>${escapeHtml(title)}</td>
+          <td>
+            <span class="badge info">
+              ${escapeHtml(status)}
+            </span>
+          </td>
+        </tr>
+      `;
 
-    ["statShows","shows"],
+    }).join("");
 
-    ["statEpisodes","episodes"],
+}
 
-    ["statLiveEvents","live_events"],
 
-    ["statTvChannels","tv_channels"],
+/* =========================================================
+   RENDER EPISODES
+========================================================= */
 
-    [
-      "statActiveTvChannels",
+function renderEpisodes(rows){
+
+  const tbody =
+    $("#episodesTable");
+
+  if(!rows.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="3">
+          No episode records available.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+  tbody.innerHTML =
+    rows.map(row => {
+
+      const title =
+        row.title ||
+        row.name ||
+        row.episode_title ||
+        "Untitled";
+
+      const status =
+        row.status ||
+        row.state ||
+        "—";
+
+      return `
+        <tr>
+          <td>${escapeHtml(shortId(row.id))}</td>
+          <td>${escapeHtml(title)}</td>
+          <td>
+            <span class="badge info">
+              ${escapeHtml(status)}
+            </span>
+          </td>
+        </tr>
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   LOAD TV
+========================================================= */
+
+async function loadTV(){
+
+  const [
+    channels,
+    schedule,
+    scheduled,
+    live,
+    guide
+  ] =
+  await Promise.all([
+
+    countTable("tv_channels"),
+
+    countTable("schedule_items"),
+
+    countTable("scheduled_items"),
+
+    countTable("live_events"),
+
+    countTable("tv_guide")
+
+  ]);
+
+  $("#tvChannels").textContent =
+    channels.ok
+      ? number(channels.count)
+      : "—";
+
+  $("#tvSchedules").textContent =
+    schedule.ok
+      ? number(schedule.count)
+      : scheduled.ok
+        ? number(scheduled.count)
+        : "—";
+
+  $("#tvLiveEvents").textContent =
+    live.ok
+      ? number(live.count)
+      : "—";
+
+  $("#tvGuide").textContent =
+    guide.ok
+      ? number(guide.count)
+      : "—";
+
+
+  const channelResult =
+    await DB.request(
       "tv_channels",
       {
-        eq:[
-          ["is_active",true]
-        ]
+        select:"*",
+        limit:CONFIG.previewLimit
       }
-    ],
-
-    ["statSchedule","schedule_items"],
-
-    ["statScheduled","scheduled_items"],
-
-    ["statChannels","channels"],
-
-    ["statTvGuide","tv_guide"],
-
-    ["statOnDemand","on_demand_library"],
-
-    ["statContent","content_items"],
-
-    ["statContentViews","content_views"],
-
-    ["statAnalytics","analytics_events"],
-
-    ["statAnalytics2","analytics_events"],
-
-    ["statLikes","content_likes"],
-
-    ["statMemberProfiles","member_profiles"],
-
-    ["statMemberships","memberships"],
-
-    ["statPoints","member_points"],
-
-    ["statActivity","member_activity"],
-
-    ["statWatchHistory","member_watch_history"],
-
-    ["statFavorites","member_favorite_channels"],
-
-    ["statFriends","member_friends"],
-
-    ["statDailyStats","content_daily_stats"],
-
-    ["statViewStats","content_view_stats"],
-
-    ["statProgress","watch_progress"],
-
-    ["statChat","chat_messages"],
-
-    ["statChatRooms","chat_rooms"],
-
-    ["statPolls","polls"],
-
-    ["statNewsletter","newsletter_subscribers"],
-
-    ["statCreators","creator_channels"],
-
-    ["statApplications","creator_applications"],
-
-    ["statNest","crow_nest_creators"],
-
-    ["statReports","chat_reports"],
-
-    ["statMotherEvents","mother_events"],
-
-    ["statMotherFundraisers","mother_fundraisers"],
-
-    ["statMotherResources","mother_resources"],
-
-    ["statMotherVolunteers","mother_volunteers"]
-
-  ];
-
-
-  /* =======================================================
-     LOAD STATS
-  ====================================================== */
-
-  async function loadStats(){
-
-    await Promise.allSettled(
-
-      STATS.map(
-        ([id,table,options]) =>
-          loadStat(
-            id,
-            table,
-            options || {}
-          )
-      )
-
     );
 
-  }
+  renderChannels(
+    channelResult.ok
+      ? channelResult.data
+      : []
+  );
 
 
-  /* =======================================================
-     SYSTEM DEFINITIONS
-  ====================================================== */
+  const scheduleResult =
+    await DB.request(
+      "schedule_items",
+      {
+        select:"*",
+        limit:CONFIG.previewLimit
+      }
+    );
 
-  const SYSTEMS = [
-
-    {
-      name:"CrowRules TV",
-
-      tables:[
-        "tv_channels",
-        "channels",
-        "schedule_items",
-        "scheduled_items",
-        "tv_guide",
-        "on_demand_library"
-      ]
-
-    },
-
-    {
-      name:"Content",
-
-      tables:[
-        "shows",
-        "episodes",
-        "live_events",
-        "content_items",
-        "content_views",
-        "content_likes"
-      ]
-
-    },
-
-    {
-      name:"Members",
-
-      tables:[
-        "member_profiles",
-        "member_points",
-        "member_activity",
-        "member_watch_history",
-        "member_favorite_channels",
-        "member_friends",
-        "memberships"
-      ]
-
-    },
-
-    {
-      name:"Analytics",
-
-      tables:[
-        "analytics_events",
-        "content_daily_stats",
-        "content_view_stats",
-        "watch_progress"
-      ]
-
-    },
-
-    {
-      name:"Community",
-
-      tables:[
-        "chat_messages",
-        "chat_rooms",
-        "chat_reports",
-        "polls",
-        "newsletter_subscribers"
-      ]
-
-    },
-
-    {
-      name:"Creators",
-
-      tables:[
-        "creator_channels",
-        "creator_applications",
-        "crow_nest_creators"
-      ]
-
-    },
-
-    {
-      name:"PNW Mother's",
-
-      tables:[
-        "mother_events",
-        "mother_fundraisers",
-        "mother_resources",
-        "mother_volunteers"
-      ]
-
-    }
-
-  ];
+  renderSchedules(
+    scheduleResult.ok
+      ? scheduleResult.data
+      : []
+  );
 
 
-  /* =======================================================
-     ESCAPE HTML
-  ====================================================== */
+  const liveResult =
+    await DB.request(
+      "live_events",
+      {
+        select:"*",
+        limit:CONFIG.previewLimit
+      }
+    );
 
-  function escapeHtml(
-    value
-  ){
+  renderLiveEvents(
+    liveResult.ok
+      ? liveResult.data
+      : []
+  );
 
-    return String(value)
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-      .replaceAll(
-        "'",
-        "&#039;"
-      );
+}
+
+
+/* =========================================================
+   RENDER CHANNELS
+========================================================= */
+
+function renderChannels(rows){
+
+  const tbody =
+    $("#channelsTable");
+
+  if(!rows.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="4">
+          No TV channel records available.
+        </td>
+      </tr>`;
+
+    return;
 
   }
 
+  tbody.innerHTML =
+    rows.map(row => {
 
-  /* =======================================================
-     SYSTEM DIAGNOSTICS
-  ====================================================== */
+      const name =
+        row.name ||
+        row.title ||
+        row.channel_name ||
+        "Unnamed Channel";
 
-  async function diagnostics(){
+      const status =
+        row.status ||
+        (
+          row.is_live === true
+            ? "LIVE"
+            : "OFFLINE"
+        );
 
-    const card =
-      $("diagnosticCard");
+      const viewers =
+        row.viewer_count ??
+        row.viewers ??
+        0;
 
-    const title =
-      $("diagnosticTitle");
+      return `
+        <tr>
 
-    const badge =
-      $("diagnosticBadge");
+          <td>
+            ${escapeHtml(name)}
+          </td>
 
-    const message =
-      $("diagnosticMessage");
+          <td>
+            <span class="badge ${
+              String(status).toLowerCase() === "live"
+                ? "good"
+                : "info"
+            }">
+              ${escapeHtml(status)}
+            </span>
+          </td>
+
+          <td>
+            ${number(viewers)}
+          </td>
+
+          <td>
+            ${escapeHtml(shortId(row.id))}
+          </td>
+
+        </tr>
+      `;
+
+    }).join("");
+
+}
 
 
-    title.textContent =
-      "Testing authenticated database access…";
+/* =========================================================
+   RENDER SCHEDULE
+========================================================= */
 
-    badge.textContent =
-      "TESTING";
+function renderSchedules(rows){
+
+  const tbody =
+    $("#scheduleTable");
+
+  if(!rows.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="3">
+          No schedule items available.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+  tbody.innerHTML =
+    rows.map(row => {
+
+      const title =
+        row.title ||
+        row.name ||
+        row.program_title ||
+        "Untitled";
+
+      const start =
+        row.start_time ||
+        row.starts_at ||
+        row.scheduled_start ||
+        row.start_at ||
+        "";
+
+      const channel =
+        row.channel_name ||
+        row.channel_id ||
+        "—";
+
+      return `
+        <tr>
+          <td>${escapeHtml(title)}</td>
+          <td>${escapeHtml(formatDate(start))}</td>
+          <td>${escapeHtml(shortId(channel))}</td>
+        </tr>
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   RENDER LIVE EVENTS
+========================================================= */
+
+function renderLiveEvents(rows){
+
+  const tbody =
+    $("#liveEventsTable");
+
+  if(!rows.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="3">
+          No live events available.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+  tbody.innerHTML =
+    rows.map(row => {
+
+      const title =
+        row.title ||
+        row.name ||
+        row.event_name ||
+        "Untitled Event";
+
+      const status =
+        row.status ||
+        (
+          row.is_live
+            ? "LIVE"
+            : "—"
+        );
+
+      const start =
+        row.start_time ||
+        row.starts_at ||
+        row.event_time ||
+        "";
+
+      return `
+        <tr>
+          <td>${escapeHtml(title)}</td>
+          <td>
+            <span class="badge ${
+              String(status).toLowerCase() === "live"
+                ? "good"
+                : "info"
+            }">
+              ${escapeHtml(status)}
+            </span>
+          </td>
+          <td>${escapeHtml(formatDate(start))}</td>
+        </tr>
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   LOAD MEMBERS
+========================================================= */
+
+async function loadMembers(){
+
+  const [
+    profiles,
+    memberships,
+    points,
+    activity,
+    history,
+    favorites,
+    friends
+  ] =
+  await Promise.all([
+
+    countTable("member_profiles"),
+
+    countTable("memberships"),
+
+    countTable("member_points"),
+
+    countTable("member_activity"),
+
+    countTable("member_watch_history"),
+
+    countTable("member_favorite_channels"),
+
+    countTable("member_friends")
+
+  ]);
+
+  $("#memberProfiles").textContent =
+    profiles.ok
+      ? number(profiles.count)
+      : "—";
+
+  $("#memberships").textContent =
+    memberships.ok
+      ? number(memberships.count)
+      : "—";
+
+  $("#memberPoints").textContent =
+    points.ok
+      ? number(points.count)
+      : "—";
+
+  $("#memberActivity").textContent =
+    activity.ok
+      ? number(activity.count)
+      : "—";
+
+  $("#memberWatchHistory").textContent =
+    history.ok
+      ? number(history.count)
+      : "—";
+
+  $("#memberFavorites").textContent =
+    favorites.ok
+      ? number(favorites.count)
+      : "—";
+
+  $("#memberFriends").textContent =
+    friends.ok
+      ? number(friends.count)
+      : "—";
+
+
+  const result =
+    await DB.request(
+      "member_profiles",
+      {
+        select:"*",
+        limit:CONFIG.previewLimit
+      }
+    );
+
+  renderMembers(
+    result.ok
+      ? result.data
+      : []
+  );
+
+}
+
+
+/* =========================================================
+   RENDER MEMBERS
+========================================================= */
+
+function renderMembers(rows){
+
+  const tbody =
+    $("#membersTable");
+
+  if(!rows.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="3">
+          No member profiles available.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+  tbody.innerHTML =
+    rows.map(row => {
+
+      const name =
+        row.full_name ||
+        row.display_name ||
+        row.name ||
+        "Member";
+
+      const username =
+        row.username ||
+        row.handle ||
+        "—";
+
+      const joined =
+        row.created_at ||
+        row.joined_at ||
+        row.created ||
+        "";
+
+      return `
+        <tr>
+          <td>${escapeHtml(name)}</td>
+          <td>${escapeHtml(username)}</td>
+          <td>${escapeHtml(formatDate(joined))}</td>
+        </tr>
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   LOAD ANALYTICS
+========================================================= */
+
+async function loadAnalytics(){
+
+  const [
+    views,
+    events,
+    viewStats,
+    dailyStats
+  ] =
+  await Promise.all([
+
+    countTable("content_views"),
+
+    countTable("analytics_events"),
+
+    countTable("content_view_stats"),
+
+    countTable("content_daily_stats")
+
+  ]);
+
+  $("#analyticsViews").textContent =
+    views.ok
+      ? number(views.count)
+      : "—";
+
+  $("#analyticsEvents").textContent =
+    events.ok
+      ? number(events.count)
+      : "—";
+
+  $("#viewStats").textContent =
+    viewStats.ok
+      ? number(viewStats.count)
+      : "—";
+
+  $("#dailyStats").textContent =
+    dailyStats.ok
+      ? number(dailyStats.count)
+      : "—";
+
+  setDiagnostic(
+    "content_views",
+    views
+  );
+
+  setDiagnostic(
+    "analytics_events",
+    events
+  );
+
+  setDiagnostic(
+    "content_view_stats",
+    viewStats
+  );
+
+  setDiagnostic(
+    "content_daily_stats",
+    dailyStats
+  );
+
+}
+
+
+/* =========================================================
+   LOAD COMMUNITY
+========================================================= */
+
+async function loadCommunity(){
+
+  const [
+    rooms,
+    messages,
+    polls,
+    likes,
+    reports
+  ] =
+  await Promise.all([
+
+    countTable("chat_rooms"),
+
+    countTable("chat_messages"),
+
+    countTable("polls"),
+
+    countTable("content_likes"),
+
+    countTable("chat_reports")
+
+  ]);
+
+  $("#chatRooms").textContent =
+    rooms.ok
+      ? number(rooms.count)
+      : "—";
+
+  $("#chatMessages").textContent =
+    messages.ok
+      ? number(messages.count)
+      : "—";
+
+  $("#polls").textContent =
+    polls.ok
+      ? number(polls.count)
+      : "—";
+
+  $("#contentLikes").textContent =
+    likes.ok
+      ? number(likes.count)
+      : "—";
+
+
+  setSimpleBadge(
+    "community-chat_rooms",
+    rooms
+  );
+
+  setSimpleBadge(
+    "community-chat_messages",
+    messages
+  );
+
+  setSimpleBadge(
+    "community-polls",
+    polls
+  );
+
+  setSimpleBadge(
+    "community-content_likes",
+    likes
+  );
+
+  setSimpleBadge(
+    "community-chat_reports",
+    reports
+  );
+
+  $("#overviewCommunity").className =
+    rooms.ok ||
+    messages.ok ||
+    polls.ok
+      ? "badge good"
+      : "badge warn";
+
+  $("#overviewCommunity").textContent =
+    rooms.ok ||
+    messages.ok ||
+    polls.ok
+      ? "AVAILABLE"
+      : "CHECK";
+
+}
+
+
+/* =========================================================
+   LOAD CREATORS
+========================================================= */
+
+async function loadCreators(){
+
+  const [
+    channels,
+    applications,
+    creators
+  ] =
+  await Promise.all([
+
+    countTable("creator_channels"),
+
+    countTable("creator_applications"),
+
+    countTable("crow_nest_creators")
+
+  ]);
+
+  $("#creatorChannels").textContent =
+    channels.ok
+      ? number(channels.count)
+      : "—";
+
+  $("#creatorApplications").textContent =
+    applications.ok
+      ? number(applications.count)
+      : "—";
+
+  $("#nestCreators").textContent =
+    creators.ok
+      ? number(creators.count)
+      : "—";
+
+}
+
+
+/* =========================================================
+   LOAD NEWSLETTER
+========================================================= */
+
+async function loadNewsletter(){
+
+  const result =
+    await countTable(
+      "newsletter_subscribers"
+    );
+
+  $("#newsletterSubscribers").textContent =
+    result.ok
+      ? number(result.count)
+      : "—";
+
+
+  const rows =
+    await DB.request(
+      "newsletter_subscribers",
+      {
+        select:"*",
+        limit:CONFIG.previewLimit
+      }
+    );
+
+  renderNewsletter(
+    rows.ok
+      ? rows.data
+      : []
+  );
+
+}
+
+
+/* =========================================================
+   RENDER NEWSLETTER
+========================================================= */
+
+function renderNewsletter(rows){
+
+  const tbody =
+    $("#newsletterTable");
+
+  if(!rows.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="3">
+          No newsletter subscribers available.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+  tbody.innerHTML =
+    rows.map(row => {
+
+      const email =
+        row.email ||
+        row.email_address ||
+        "—";
+
+      const status =
+        row.status ||
+        (
+          row.subscribed === false
+            ? "Unsubscribed"
+            : "Subscribed"
+        );
+
+      const joined =
+        row.created_at ||
+        row.subscribed_at ||
+        "";
+
+      return `
+        <tr>
+          <td>${escapeHtml(email)}</td>
+          <td>
+            <span class="badge ${
+              String(status).toLowerCase()
+                .includes("unsub")
+                  ? "warn"
+                  : "good"
+            }">
+              ${escapeHtml(status)}
+            </span>
+          </td>
+          <td>${escapeHtml(formatDate(joined))}</td>
+        </tr>
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   DIAGNOSTIC HELPERS
+========================================================= */
+
+function setSimpleBadge(
+  id,
+  result
+){
+
+  const el =
+    $("#" + id);
+
+  if(!el) return;
+
+  if(result.ok){
+
+    el.className =
+      "badge good";
+
+    el.textContent =
+      number(result.count);
+
+  }else{
+
+    el.className =
+      "badge bad";
+
+    el.textContent =
+      "ERROR";
+
+  }
+
+}
+
+
+function setDiagnostic(
+  table,
+  result
+){
+
+  const badge =
+    $("#badge-" + table);
+
+  const detail =
+    $("#diag-" + table);
+
+  if(!badge || !detail) return;
+
+  if(result.ok){
 
     badge.className =
-      "badge warn";
+      "badge good";
 
-    card.className =
-      "card diagnostic";
+    badge.textContent =
+      "OK";
 
+    detail.textContent =
+      `${number(result.count)} rows available.`;
 
-    CrowRulesDB.clearErrors();
+  }else{
 
+    badge.className =
+      "badge bad";
 
-    const tests = {};
+    badge.textContent =
+      "ERROR";
 
-
-    /*
-      Test representative tables first.
-    */
-
-    const representative =
-      [
-        "profiles",
-        "tv_channels",
-        "shows",
-        "episodes",
-        "member_profiles",
-        "schedule_items"
-      ];
-
-
-    await Promise.all(
-
-      representative.map(
-        async table => {
-
-          tests[table] =
-            await CrowRulesDB.select(
-              table,
-              "*",
-              {
-                limit:1
-              }
-            );
-
-        }
-      )
-
-    );
-
-
-    const failures =
-      Object.entries(
-        tests
-      )
-      .filter(
-        ([,result]) =>
-          !result.ok
-      );
-
-
-    if(
-      failures.length === 0
-    ){
-
-      card.className =
-        "card diagnostic ok";
-
-      title.textContent =
-        "Authenticated Supabase access is working";
-
-      badge.textContent =
-        "ONLINE";
-
-      badge.className =
-        "badge ok";
-
-      message.textContent =
-        "Admin Pro is authenticated and can access the protected CrowRules database through the existing RLS administrator policies.";
-
-    }else{
-
-      card.className =
-        "card diagnostic error";
-
-      title.textContent =
-        "Database access has errors";
-
-      badge.textContent =
-        `${failures.length} ERROR`;
-
-      badge.className =
-        "badge error";
-
-
-      message.textContent =
-        failures
-          .map(
-            ([table,result]) =>
-              `${table}: ${formatResultError(result)}`
-          )
-          .join("\n");
-
-    }
-
-
-    renderSystems();
+    detail.textContent =
+      result.error?.friendly ||
+      "Unknown error.";
 
   }
 
+}
 
-  /* =======================================================
-     FORMAT RESULT ERROR
-  ====================================================== */
 
-  function formatResultError(
-    result
+/* =========================================================
+   FULL DATABASE DIAGNOSTICS
+========================================================= */
+
+async function runDiagnostics(){
+
+  const container =
+    $("#diagnosticsList");
+
+  container.innerHTML =
+    `<div class="loading">
+      <div class="spinner"></div>
+      Testing ${TABLES.length} database tables...
+    </div>`;
+
+  const results = [];
+
+  /*
+   * Do this in small batches so the dashboard
+   * doesn't hammer PostgREST with 31 requests
+   * simultaneously.
+   */
+
+  const batchSize = 5;
+
+  for(
+    let i = 0;
+    i < TABLES.length;
+    i += batchSize
   ){
 
-    if(!result){
+    const batch =
+      TABLES.slice(
+        i,
+        i + batchSize
+      );
 
-      return "No result returned.";
+    const batchResults =
+      await Promise.all(
+        batch.map(
+          table =>
+            countTable(table)
+        )
+      );
 
-    }
-
-
-    const error =
-      result.error;
-
-
-    if(!error){
-
-      return "Unknown database error.";
-
-    }
-
-
-    let text =
-      error.message ||
-      "Unknown database error.";
-
-
-    if(error.code){
-
-      text +=
-        ` [${error.code}]`;
-
-    }
-
-
-    if(error.status){
-
-      text +=
-        ` (HTTP ${error.status})`;
-
-    }
-
-
-    if(error.hint){
-
-      text +=
-        ` — ${error.hint}`;
-
-    }
-
-
-    return text;
-
-  }
-
-
-  /* =======================================================
-     RENDER SYSTEMS
-  ====================================================== */
-
-  function renderSystems(){
-
-    const container =
-      $("systemStatusGrid");
-
-
-    container.innerHTML =
-      "";
-
-
-    const errors =
-      CrowRulesDB.getErrors();
-
-
-    SYSTEMS.forEach(
-      system => {
-
-        const failed =
-          system.tables.filter(
-            table =>
-              errors[table]
-          );
-
-
-        const element =
-          document.createElement(
-            "div"
-          );
-
-
-        if(failed.length){
-
-          element.className =
-            "card diagnostic error";
-
-
-          element.innerHTML = `
-
-            <div class="diagnostic-title">
-
-              <strong>
-                ${escapeHtml(system.name)}
-              </strong>
-
-              <span class="badge error">
-                ${failed.length}
-                ERROR${failed.length === 1 ? "" : "S"}
-              </span>
-
-            </div>
-
-            <div class="diagnostic-message">
-              ${failed
-                .map(
-                  table =>
-                    `${escapeHtml(table)}: ${escapeHtml(errors[table])}`
-                )
-                .join("\n")}
-            </div>
-
-          `;
-
-        }else{
-
-          element.className =
-            "card diagnostic ok";
-
-
-          element.innerHTML = `
-
-            <div class="diagnostic-title">
-
-              <strong>
-                ${escapeHtml(system.name)}
-              </strong>
-
-              <span class="badge ok">
-                OK
-              </span>
-
-            </div>
-
-            <div class="diagnostic-message">
-              Database access through the authenticated Admin Pro session is working.
-            </div>
-
-          `;
-
-        }
-
-
-        container.appendChild(
-          element
-        );
-
-      }
+    results.push(
+      ...batchResults.map(
+        (result,index) => ({
+          table:batch[index],
+          ...result
+        })
+      )
     );
 
   }
 
+  container.innerHTML =
+    results.map(result => {
 
-  /* =======================================================
-     REFRESH
-  ====================================================== */
+      if(result.ok){
 
-  async function refresh(){
+        return `
+          <div class="diagnostic">
 
-    if(refreshing){
+            <div>
 
-      return;
+              <div class="diag-name">
+                ${escapeHtml(result.table)}
+              </div>
 
-    }
+              <div class="diag-detail">
+                ${number(result.count)} rows accessible through the current browser key/RLS policies.
+              </div>
 
+            </div>
 
-    refreshing =
-      true;
+            <span class="badge good">
+              OK
+            </span>
 
-
-    try{
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .auth
-          .getSession();
-
-
-      if(error){
-
-        throw error;
+          </div>
+        `;
 
       }
 
+      const error =
+        result.error || {};
 
-      const session =
-        data?.session;
+      return `
+        <div class="diagnostic">
 
+          <div>
 
-      if(!session){
+            <div class="diag-name">
+              ${escapeHtml(result.table)}
+            </div>
 
-        lockApp();
-
-        return;
-
-      }
-
-
-      currentUser =
-        session.user;
-
-
-      connection(
-        true,
-        `Authenticated as ${currentUser.email || currentUser.id}`
-      );
-
-
-      await loadStats();
-
-
-      await diagnostics();
-
-
-    }
-    catch(error){
-
-      connection(
-        false,
-        error?.message ||
-        "Unable to refresh Supabase data."
-      );
-
-
-      $("diagnosticCard")
-        .className =
-        "card diagnostic error";
-
-
-      $("diagnosticTitle").textContent =
-        "Supabase refresh failed";
-
-
-      $("diagnosticBadge").textContent =
-        "ERROR";
-
-
-      $("diagnosticBadge").className =
-        "badge error";
-
-
-      $("diagnosticMessage").textContent =
-        error?.message ||
-        "Unknown error.";
-
-    }
-    finally{
-
-      refreshing =
-        false;
-
-    }
-
-  }
-
-
-  /* =======================================================
-     EVENTS
-  ====================================================== */
-
-  function bindEvents(){
-
-    $("loginForm")
-      .addEventListener(
-        "submit",
-        event => {
-
-          event.preventDefault();
-
-
-          login(
-            $("email").value.trim(),
-            $("password").value
-          );
-
-        }
-      );
-
-
-    $("logoutBtn")
-      .addEventListener(
-        "click",
-        logout
-      );
-
-
-    $("refreshBtn")
-      .addEventListener(
-        "click",
-        () => {
-
-          refresh();
-
-        }
-      );
-
-
-    $("databaseTestBtn")
-      .addEventListener(
-        "click",
-        () => {
-
-          $("diagnostics")
-            .scrollIntoView({
-              behavior:"smooth"
-            });
-
-
-          diagnostics();
-
-        }
-      );
-
-
-    $("mobileMenu")
-      .addEventListener(
-        "click",
-        () => {
-
-          $("sidebar")
-            .classList.toggle(
-              "open"
-            );
-
-        }
-      );
-
-
-    document
-      .querySelectorAll(
-        ".sidebar a"
-      )
-      .forEach(
-        link => {
-
-          link.addEventListener(
-            "click",
-            () => {
-
-              if(
-                window.innerWidth <=
-                850
-              ){
-
-                $("sidebar")
-                  .classList.remove(
-                    "open"
-                  );
-
+            <div class="diag-detail">
+              ${escapeHtml(
+                error.friendly ||
+                error.message ||
+                "Unknown error"
+              )}
+              ${
+                error.code
+                  ? " · Code: " +
+                    escapeHtml(error.code)
+                  : ""
               }
+              ${
+                error.status
+                  ? " · HTTP " +
+                    escapeHtml(error.status)
+                  : ""
+              }
+            </div>
 
-            }
-          );
+          </div>
 
-        }
-      );
+          <span class="badge bad">
+            ERROR
+          </span>
 
+        </div>
+      `;
 
-    supabaseClient
-      .auth
-      .onAuthStateChange(
-        async (
-          event,
-          session
-        ) => {
+    }).join("");
 
-          if(
-            event ===
-            "SIGNED_OUT"
-          ){
-
-            currentUser =
-              null;
-
-            lockApp();
-
-            return;
-
-          }
+}
 
 
-          if(
-            session?.user &&
-            !currentUser
-          ){
+/* =========================================================
+   LOAD ALL DASHBOARD DATA
+========================================================= */
 
-            const admin =
-              await verifyAdmin(
-                session.user
-              );
+async function loadAll(){
 
+  hideAlert();
 
-            if(admin.ok){
+  const connected =
+    await testConnection();
 
-              currentUser =
-                session.user;
+  if(!connected){
 
+    await runDiagnostics();
 
-              setUser(
-                session.user,
-                admin.role
-              );
-
-
-              unlockApp();
-
-
-              await refresh();
-
-            }else{
-
-              await supabaseClient
-                .auth
-                .signOut();
-
-
-              showAuthError(
-                admin.reason
-              );
-
-            }
-
-          }
-
-        }
-      );
+    return;
 
   }
 
+  await Promise.all([
 
-  /* =======================================================
-     START
-  ====================================================== */
+    loadOverview(),
 
-  async function start(){
+    loadContent(),
 
-    bindEvents();
+    loadTV(),
 
+    loadMembers(),
 
-    $("authStatus").textContent =
-      "Checking existing Supabase session…";
+    loadAnalytics(),
 
+    loadCommunity(),
 
-    try{
+    loadCreators(),
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .auth
-          .getSession();
+    loadNewsletter()
 
+  ]);
 
-      if(error){
+  await runDiagnostics();
 
-        throw error;
+  $("#lastUpdated").textContent =
+    "Updated " +
+    new Date().toLocaleTimeString();
 
-      }
+}
 
 
-      const session =
-        data?.session;
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function openSection(name){
+
+  $$(".section").forEach(
+    section =>
+      section.classList.remove("active")
+  );
+
+  const target =
+    $("#section-" + name);
+
+  if(target){
+    target.classList.add("active");
+  }
+
+  $$("[data-section]").forEach(
+    button =>
+      button.classList.toggle(
+        "active",
+        button.dataset.section === name
+      )
+  );
+
+  const titles = {
+
+    overview:
+      "Admin Pro",
+
+    content:
+      "Content Management",
+
+    tv:
+      "CrowRules TV",
+
+    members:
+      "Members",
+
+    analytics:
+      "Analytics",
+
+    community:
+      "Community",
+
+    creators:
+      "Creators",
+
+    newsletter:
+      "Newsletter",
+
+    diagnostics:
+      "Supabase Diagnostics"
+
+  };
+
+  $("#pageTitle").textContent =
+    titles[name] ||
+    "Admin Pro";
+
+  if(
+    window.innerWidth <= 900
+  ){
+
+    $("#sidebar")
+      .classList.remove("open");
+
+  }
+
+}
 
 
-      if(!session){
+/* =========================================================
+   EVENT HANDLERS
+========================================================= */
 
-        lockApp();
+$$("[data-section]").forEach(
+  button => {
 
-        $("authStatus").textContent =
-          "Please sign in.";
-
-        return;
-
-      }
-
-
-      const admin =
-        await verifyAdmin(
-          session.user
-        );
-
-
-      if(!admin.ok){
-
-        await supabaseClient
-          .auth
-          .signOut();
-
-
-        lockApp();
-
-
-        showAuthError(
-          admin.reason
-        );
-
-
-        return;
-
-      }
-
-
-      currentUser =
-        session.user;
-
-
-      setUser(
-        session.user,
-        admin.role
-      );
-
-
-      $("authBadge").textContent =
-        "AUTHENTICATED";
-
-      $("authBadge").className =
-        "badge ok";
-
-
-      unlockApp();
-
-
-      await refresh();
-
-
-    }
-    catch(error){
-
-      lockApp();
-
-
-      $("authStatus").textContent =
-        "Supabase initialization failed.";
-
-
-      showAuthError(
-        error?.message ||
-        "Unable to initialize Supabase authentication."
-      );
-
-    }
-
-
-    /*
-      Refresh every 60 seconds.
-    */
-
-    setInterval(
+    button.addEventListener(
+      "click",
       () => {
 
-        if(
-          document.visibilityState ===
-          "visible" &&
-          currentUser
-        ){
+        openSection(
+          button.dataset.section
+        );
 
-          refresh();
-
-        }
-
-      },
-      60000
+      }
     );
 
   }
+);
 
 
-  return Object.freeze({
+$$("[data-section-action]").forEach(
+  button => {
 
-    start,
+    button.addEventListener(
+      "click",
+      () => {
 
-    refresh,
+        openSection(
+          button.dataset.sectionAction
+        );
 
-    logout
+      }
+    );
 
-  });
+  }
+);
 
-})();
+
+$$("[data-link]").forEach(
+  button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const page =
+          button.dataset.link;
+
+        window.location.href =
+          page;
+
+      }
+    );
+
+  }
+);
+
+
+$("#refreshBtn")
+  .addEventListener(
+    "click",
+    loadAll
+  );
+
+
+$("#testBtn")
+  .addEventListener(
+    "click",
+    testConnection
+  );
+
+
+$("#diagnosticRefresh")
+  .addEventListener(
+    "click",
+    runDiagnostics
+  );
+
+
+$("#menuBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      $("#sidebar")
+        .classList.toggle("open");
+
+    }
+  );
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+async function boot(){
+
+  try{
+
+    initializeSupabase();
+
+  }catch(error){
+
+    setMiniStatus(
+      "Configuration Error",
+      "bad"
+    );
+
+    showAlert(
+      "Supabase configuration error",
+      error.message
+    );
+
+    await runDiagnostics();
+
+    return;
+
+  }
+
+  await loadAll();
+
+}
 
 
 /* =========================================================
@@ -4798,33 +4189,10 @@ const AdminPro = (() => {
 
 document.addEventListener(
   "DOMContentLoaded",
-  () => {
-
-    AdminPro.start();
-
-  }
+  boot
 );
 
 </script>
 
-
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
-})();
-</script>
 </body>
 </html>
