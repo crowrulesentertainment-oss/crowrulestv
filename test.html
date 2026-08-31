@@ -13,7 +13,7 @@
   content="CrowRules TV — independent streaming television from CrowRules Entertainment."
 >
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@Supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
@@ -61,6 +61,14 @@ body{
 
 body.modal-open{
   overflow:hidden;
+}
+
+body.popout-active .player-shell{
+  position:fixed;
+  inset:20px;
+  z-index:400;
+  min-height:0;
+  height:calc(100vh - 40px);
 }
 
 button,
@@ -1070,6 +1078,7 @@ footer{
 .footer-links{
   display:flex;
   gap:14px;
+  align-items:center;
 }
 
 .footer-links a{
@@ -1274,7 +1283,6 @@ footer{
 
     </a>
 
-
     <nav class="navlinks" id="navlinks">
 
       <a href="#liveSection">LIVE TV</a>
@@ -1286,11 +1294,10 @@ footer{
 
     </nav>
 
-
     <div class="header-actions">
 
       <button
-        class="icon-btn"
+        class="icon-btn menu-btn"
         id="menuBtn"
         aria-expanded="false"
         aria-label="Menu"
@@ -1623,8 +1630,6 @@ footer{
     </div>
 
 
-    <!-- CHAT -->
-
     <aside class="chat-panel">
 
       <div class="chat-head">
@@ -1700,7 +1705,7 @@ footer{
       </div>
 
       <div class="section-sub">
-        CrowRules TV programming channels.
+        Channels are automatically built from schedule_items.
       </div>
 
     </div>
@@ -2146,12 +2151,12 @@ const CONFIG = Object.freeze({
 
 let supabaseClient = null;
 
-try {
+try{
 
-  if (
+  if(
     window.supabase &&
     typeof window.supabase.createClient === "function"
-  ) {
+  ){
 
     supabaseClient =
       window.supabase.createClient(
@@ -2168,7 +2173,7 @@ try {
 
   }
 
-} catch(error) {
+}catch(error){
 
   console.error(
     "[CrowRules TV] Supabase initialization:",
@@ -2185,7 +2190,7 @@ try {
 const STATE = {
 
   channels:[],
-  guide:[],
+  scheduleItems:[],
   shows:[],
   episodes:[],
   members:[],
@@ -2212,8 +2217,9 @@ const STATE = {
    DOM
 ========================================================= */
 
-const $ = id =>
-  document.getElementById(id);
+const $ =
+  id =>
+    document.getElementById(id);
 
 
 /* =========================================================
@@ -2226,7 +2232,9 @@ function escapeHtml(value){
     value === null ||
     value === undefined
   ){
+
     return "";
+
   }
 
   return String(value)
@@ -2285,7 +2293,8 @@ function initials(name){
     .split(/\s+/)
     .slice(0,2)
     .map(
-      x => x.charAt(0)
+      x =>
+        x.charAt(0)
     )
     .join("")
     .toUpperCase() || "CR";
@@ -2570,15 +2579,14 @@ function updateAuthUI(){
   const chatSend =
     $("channelSendBtn");
 
-  const memberChatBtn =
-    $("memberChatBtn");
-
 
   if(STATE.user){
 
     if(memberBtn){
+
       memberBtn.textContent =
         "👤 ACCOUNT";
+
     }
 
     if(chatInput){
@@ -2595,13 +2603,6 @@ function updateAuthUI(){
 
       chatSend.disabled =
         !STATE.currentChatRoom;
-
-    }
-
-    if(memberChatBtn){
-
-      memberChatBtn.textContent =
-        "👤 ACCOUNT";
 
     }
 
@@ -2631,13 +2632,6 @@ function updateAuthUI(){
 
     }
 
-    if(memberChatBtn){
-
-      memberChatBtn.textContent =
-        "👤 SIGN IN TO CHAT";
-
-    }
-
   }
 
 }
@@ -2645,6 +2639,8 @@ function updateAuthUI(){
 
 /* =========================================================
    LOAD PROGRAMMING
+   schedule_items IS THE SINGLE SOURCE
+   FOR CHANNELS + TV GUIDE
 ========================================================= */
 
 async function loadProgramming(){
@@ -2670,16 +2666,13 @@ async function loadProgramming(){
       await Promise.all([
 
         safeFetchTable(
-          "tv_channels",
+          "schedule_items",
           {
-            limit:200
-          }
-        ),
-
-        safeFetchTable(
-          "tv_guide",
-          {
-            limit:500
+            limit:1000,
+            order:{
+              column:"start_time",
+              ascending:true
+            }
           }
         ),
 
@@ -2707,20 +2700,36 @@ async function loadProgramming(){
       ]);
 
 
-    STATE.channels =
+    /*
+      schedule_items replaces both:
+
+      tv_channels
+      tv_guide
+
+      It is now the single source of truth.
+    */
+
+    STATE.scheduleItems =
       results[0].data;
 
-    STATE.guide =
+    STATE.shows =
       results[1].data;
 
-    STATE.shows =
+    STATE.episodes =
       results[2].data;
 
-    STATE.episodes =
+    STATE.members =
       results[3].data;
 
-    STATE.members =
-      results[4].data;
+
+    /*
+      Build unique channels from schedule_items.
+    */
+
+    STATE.channels =
+      buildChannelsFromSchedule(
+        STATE.scheduleItems
+      );
 
 
     renderChannels();
@@ -2734,18 +2743,10 @@ async function loadProgramming(){
 
     const successful =
       results.filter(
-        result => result.ok
+        result =>
+          result.ok
       ).length;
 
-
-    /*
-      IMPORTANT:
-      Never display DATABASE ERROR.
-
-      Supabase itself can be connected while an individual
-      table is unavailable because of RLS, permissions, or
-      a missing table.
-    */
 
     if(successful > 0){
 
@@ -2773,6 +2774,36 @@ async function loadProgramming(){
         STATE.channels[0]
       );
 
+    }else if(
+      STATE.currentChannel
+    ){
+
+      /*
+        Refresh the currently selected channel
+        from the newly generated channel list.
+      */
+
+      const currentId =
+        String(
+          STATE.currentChannel.id || ""
+        );
+
+      const refreshed =
+        STATE.channels.find(
+          channel =>
+            String(channel.id || "") ===
+            currentId
+        );
+
+
+      if(refreshed){
+
+        selectChannel(
+          refreshed
+        );
+
+      }
+
     }
 
 
@@ -2796,6 +2827,337 @@ async function loadProgramming(){
 
 
 /* =========================================================
+   SCHEDULE ITEM NORMALIZATION
+========================================================= */
+
+function normalizeScheduleItem(item){
+
+  return {
+
+    raw:item,
+
+    id:firstValue(
+      item,
+      [
+        "id",
+        "schedule_item_id"
+      ]
+    ),
+
+    channelId:firstValue(
+      item,
+      [
+        "channel_id",
+        "tv_channel_id"
+      ]
+    ),
+
+    channelName:firstValue(
+      item,
+      [
+        "channel_name",
+        "channel",
+        "channel_title"
+      ]
+    ),
+
+    program:firstValue(
+      item,
+      [
+        "program",
+        "program_name",
+        "title",
+        "name"
+      ],
+      "Untitled Program"
+    ),
+
+    description:firstValue(
+      item,
+      [
+        "description",
+        "program_description",
+        "summary"
+      ]
+    ),
+
+    type:firstValue(
+      item,
+      [
+        "type",
+        "program_type",
+        "genre"
+      ],
+      "PROGRAM"
+    ),
+
+    start:firstValue(
+      item,
+      [
+        "start_time",
+        "starts_at",
+        "start",
+        "scheduled_start"
+      ]
+    ),
+
+    end:firstValue(
+      item,
+      [
+        "end_time",
+        "ends_at",
+        "end",
+        "scheduled_end"
+      ]
+    ),
+
+    streamUrl:firstValue(
+      item,
+      [
+        "stream_url",
+        "streamUrl",
+        "playback_url",
+        "playbackUrl",
+        "url",
+        "video_url",
+        "videoUrl"
+      ]
+    ),
+
+    youtubeUrl:firstValue(
+      item,
+      [
+        "youtube_url",
+        "youtubeUrl",
+        "youtube",
+        "youtube_live_url",
+        "youtube_video_url"
+      ]
+    ),
+
+    youtubeId:firstValue(
+      item,
+      [
+        "youtube_id",
+        "youtubeId",
+        "video_id",
+        "videoId"
+      ]
+    ),
+
+    thumbnail:firstValue(
+      item,
+      [
+        "thumbnail_url",
+        "thumbnail",
+        "image_url",
+        "image",
+        "logo_url",
+        "logo"
+      ]
+    ),
+
+    live:
+      Boolean(
+        firstValue(
+          item,
+          [
+            "is_live",
+            "live",
+            "currently_live"
+          ],
+          false
+        )
+      ),
+
+    viewers:
+      Number(
+        firstValue(
+          item,
+          [
+            "viewer_count",
+            "viewers",
+            "current_viewers"
+          ],
+          0
+        )
+      ) || 0
+
+  };
+
+}
+
+
+/* =========================================================
+   BUILD CHANNELS FROM schedule_items
+========================================================= */
+
+function buildChannelsFromSchedule(
+  rows
+){
+
+  const map =
+    new Map();
+
+
+  asArray(rows)
+    .map(normalizeScheduleItem)
+    .forEach(
+      item => {
+
+        /*
+          Prefer channel_id when available.
+
+          If channel_id doesn't exist,
+          use channel_name as the unique key.
+        */
+
+        const key =
+          item.channelId
+            ? `id:${String(item.channelId)}`
+            : `name:${String(
+                item.channelName ||
+                "CrowRules TV"
+              ).trim().toLowerCase()}`;
+
+
+        if(!map.has(key)){
+
+          map.set(
+            key,
+            {
+              id:
+                item.channelId ||
+                item.channelName ||
+                key,
+
+              name:
+                item.channelName ||
+                "CrowRules TV",
+
+              description:
+                item.description || "",
+
+              type:
+                item.type ||
+                "CHANNEL",
+
+              streamUrl:
+                item.streamUrl || "",
+
+              youtubeUrl:
+                item.youtubeUrl || "",
+
+              youtubeId:
+                item.youtubeId || "",
+
+              thumbnail:
+                item.thumbnail || "",
+
+              live:
+                item.live ||
+                isGuideNow(item),
+
+              viewers:
+                item.viewers || 0,
+
+              raw:item.raw
+
+            }
+          );
+
+          return;
+
+        }
+
+
+        /*
+          Merge additional stream metadata from later
+          schedule rows when the first row did not
+          contain it.
+        */
+
+        const channel =
+          map.get(key);
+
+
+        if(
+          !channel.streamUrl &&
+          item.streamUrl
+        ){
+
+          channel.streamUrl =
+            item.streamUrl;
+
+        }
+
+
+        if(
+          !channel.youtubeUrl &&
+          item.youtubeUrl
+        ){
+
+          channel.youtubeUrl =
+            item.youtubeUrl;
+
+        }
+
+
+        if(
+          !channel.youtubeId &&
+          item.youtubeId
+        ){
+
+          channel.youtubeId =
+            item.youtubeId;
+
+        }
+
+
+        if(
+          !channel.thumbnail &&
+          item.thumbnail
+        ){
+
+          channel.thumbnail =
+            item.thumbnail;
+
+        }
+
+
+        if(
+          item.live ||
+          isGuideNow(item)
+        ){
+
+          channel.live =
+            true;
+
+        }
+
+
+        if(
+          item.viewers >
+          channel.viewers
+        ){
+
+          channel.viewers =
+            item.viewers;
+
+        }
+
+      }
+    );
+
+
+  return Array.from(
+    map.values()
+  );
+
+}
+
+
+/* =========================================================
    CHANNELS
 ========================================================= */
 
@@ -2807,7 +3169,10 @@ function normalizeChannel(channel){
 
     id:firstValue(
       channel,
-      ["id","channel_id"]
+      [
+        "id",
+        "channel_id"
+      ]
     ),
 
     name:firstValue(
@@ -2843,9 +3208,9 @@ function normalizeChannel(channel){
       [
         "stream_url",
         "streamUrl",
-        "url",
         "playback_url",
         "playbackUrl",
+        "url",
         "video_url",
         "videoUrl"
       ]
@@ -3318,6 +3683,15 @@ function selectChannel(raw){
   }
 
 
+  if($("playerMeta")){
+
+    $("playerMeta").textContent =
+      channel.type ||
+      "CrowRules TV";
+
+  }
+
+
   if($("infoTitle")){
 
     $("infoTitle").textContent =
@@ -3441,7 +3815,7 @@ function renderChannels(){
           </div>
 
           <div class="meta">
-            Add channels to tv_channels in Supabase.
+            Add channel programming to schedule_items in Supabase.
           </div>
 
         </div>
@@ -3594,106 +3968,8 @@ function renderChannels(){
 
 
 /* =========================================================
-   GUIDE
+   DATES
 ========================================================= */
-
-function normalizeGuide(item){
-
-  return {
-
-    raw:item,
-
-    id:firstValue(
-      item,
-      ["id","guide_id"]
-    ),
-
-    channelId:firstValue(
-      item,
-      [
-        "channel_id",
-        "tv_channel_id"
-      ]
-    ),
-
-    channelName:firstValue(
-      item,
-      [
-        "channel_name",
-        "channel"
-      ]
-    ),
-
-    program:firstValue(
-      item,
-      [
-        "program",
-        "program_name",
-        "title",
-        "name"
-      ],
-      "Untitled Program"
-    ),
-
-    description:firstValue(
-      item,
-      [
-        "description",
-        "program_description"
-      ]
-    ),
-
-    type:firstValue(
-      item,
-      [
-        "type",
-        "program_type",
-        "genre"
-      ],
-      "PROGRAM"
-    ),
-
-    start:firstValue(
-      item,
-      [
-        "start_time",
-        "starts_at",
-        "start",
-        "scheduled_start"
-      ]
-    ),
-
-    end:firstValue(
-      item,
-      [
-        "end_time",
-        "ends_at",
-        "end",
-        "scheduled_end"
-      ]
-    ),
-
-    streamUrl:firstValue(
-      item,
-      [
-        "stream_url",
-        "url",
-        "video_url"
-      ]
-    ),
-
-    youtubeUrl:firstValue(
-      item,
-      [
-        "youtube_url",
-        "youtube"
-      ]
-    )
-
-  };
-
-}
-
 
 function parseDate(value){
 
@@ -3701,8 +3977,10 @@ function parseDate(value){
     return null;
   }
 
+
   const date =
     new Date(value);
+
 
   return Number.isNaN(
     date.getTime()
@@ -3718,9 +3996,11 @@ function formatTime(value){
   const date =
     parseDate(value);
 
+
   if(!date){
     return "—";
   }
+
 
   return date.toLocaleTimeString(
     [],
@@ -3741,6 +4021,7 @@ function isGuideNow(item){
   const end =
     parseDate(item.end);
 
+
   if(!start){
     return false;
   }
@@ -3758,6 +4039,10 @@ function isGuideNow(item){
 }
 
 
+/* =========================================================
+   CHANNEL NAME
+========================================================= */
+
 function findChannelName(id){
 
   if(!id){
@@ -3771,7 +4056,10 @@ function findChannelName(id){
         String(
           firstValue(
             raw,
-            ["id","channel_id"]
+            [
+              "id",
+              "channel_id"
+            ]
           )
         ) ===
         String(id)
@@ -3785,6 +4073,11 @@ function findChannelName(id){
 }
 
 
+/* =========================================================
+   TV GUIDE
+   schedule_items ONLY
+========================================================= */
+
 function renderGuide(){
 
   const body =
@@ -3795,7 +4088,7 @@ function renderGuide(){
   }
 
 
-  if(!STATE.guide.length){
+  if(!STATE.scheduleItems.length){
 
     body.innerHTML = `
 
@@ -3826,8 +4119,8 @@ function renderGuide(){
 
 
   const guide =
-    STATE.guide
-      .map(normalizeGuide)
+    STATE.scheduleItems
+      .map(normalizeScheduleItem)
       .sort(
         (a,b) => {
 
@@ -3837,9 +4130,11 @@ function renderGuide(){
           const db =
             parseDate(b.start);
 
+
           if(!da || !db){
             return 0;
           }
+
 
           return da-db;
 
@@ -3982,7 +4277,13 @@ function renderGuide(){
             }
 
 
-            if(item.youtubeUrl){
+            if(item.youtubeId){
+
+              playYoutube(
+                item.youtubeId
+              );
+
+            }else if(item.youtubeUrl){
 
               const id =
                 getYoutubeId(
@@ -3990,7 +4291,11 @@ function renderGuide(){
                 );
 
               if(id){
-                playYoutube(id);
+
+                playYoutube(
+                  id
+                );
+
               }
 
             }else if(item.streamUrl){
@@ -3998,6 +4303,30 @@ function renderGuide(){
               playStream(
                 item.streamUrl
               );
+
+            }
+
+
+            if(item.channelName){
+
+              const channel =
+                STATE.channels.find(
+                  c =>
+                    String(
+                      c.name
+                    ).toLowerCase() ===
+                    String(
+                      item.channelName
+                    ).toLowerCase()
+                );
+
+
+              if(channel){
+
+                STATE.currentChannel =
+                  normalizeChannel(channel);
+
+              }
 
             }
 
@@ -4010,11 +4339,15 @@ function renderGuide(){
 }
 
 
+/* =========================================================
+   UPDATE GUIDE FOR CHANNEL
+========================================================= */
+
 function updateGuideForChannel(channel){
 
   const items =
-    STATE.guide
-      .map(normalizeGuide)
+    STATE.scheduleItems
+      .map(normalizeScheduleItem)
       .filter(
         item => {
 
@@ -4059,6 +4392,17 @@ function updateGuideForChannel(channel){
 
   }
 
+
+  if(
+    items.length &&
+    $("playerMeta")
+  ){
+
+    $("playerMeta").textContent =
+      `${items[0].program} · ${channel.type}`;
+
+  }
+
 }
 
 
@@ -4074,7 +4418,10 @@ function normalizeShow(show){
 
     id:firstValue(
       show,
-      ["id","show_id"]
+      [
+        "id",
+        "show_id"
+      ]
     ),
 
     title:firstValue(
@@ -4262,7 +4609,10 @@ function normalizeEpisode(ep){
 
     id:firstValue(
       ep,
-      ["id","episode_id"]
+      [
+        "id",
+        "episode_id"
+      ]
     ),
 
     title:firstValue(
@@ -4306,7 +4656,9 @@ function normalizeEpisode(ep){
 
     showId:firstValue(
       ep,
-      ["show_id"]
+      [
+        "show_id"
+      ]
     )
 
   };
@@ -4370,7 +4722,7 @@ function renderEpisodes(){
     STATE.episodes
       .slice(0,12)
       .map(
-        (raw,index) => {
+        raw => {
 
           const ep =
             normalizeEpisode(raw);
@@ -4909,7 +5261,10 @@ async function loadMessages(room){
   const roomId =
     firstValue(
       room,
-      ["id","room_id"]
+      [
+        "id",
+        "room_id"
+      ]
     );
 
 
@@ -4961,7 +5316,10 @@ function normalizeMessage(msg){
 
     id:firstValue(
       msg,
-      ["id","message_id"]
+      [
+        "id",
+        "message_id"
+      ]
     ),
 
     text:firstValue(
@@ -5074,7 +5432,10 @@ function subscribeChat(room){
   const roomId =
     firstValue(
       room,
-      ["id","room_id"]
+      [
+        "id",
+        "room_id"
+      ]
     );
 
 
@@ -5242,7 +5603,10 @@ async function sendChatMessage(){
   const roomId =
     firstValue(
       STATE.currentChatRoom,
-      ["id","room_id"]
+      [
+        "id",
+        "room_id"
+      ]
     );
 
 
@@ -5315,13 +5679,18 @@ function buildSearchIndex(){
           normalizeChannel(raw);
 
         return {
+
           type:"CHANNEL",
+
           title:c.name,
+
           description:c.description
+
         };
 
       }
     ),
+
 
     ...STATE.shows.map(
       raw => {
@@ -5330,13 +5699,18 @@ function buildSearchIndex(){
           normalizeShow(raw);
 
         return {
+
           type:"SHOW",
+
           title:s.title,
+
           description:s.description
+
         };
 
       }
     ),
+
 
     ...STATE.episodes.map(
       raw => {
@@ -5345,28 +5719,40 @@ function buildSearchIndex(){
           normalizeEpisode(raw);
 
         return {
+
           type:"EPISODE",
+
           title:e.title,
+
           description:e.description
+
         };
 
       }
     ),
 
-    ...STATE.guide.map(
+
+    ...STATE.scheduleItems.map(
       raw => {
 
         const g =
-          normalizeGuide(raw);
+          normalizeScheduleItem(raw);
 
         return {
-          type:"GUIDE",
+
+          type:"PROGRAM",
+
           title:g.program,
-          description:g.channelName
+
+          description:
+            g.channelName ||
+            g.description
+
         };
 
       }
     ),
+
 
     ...STATE.members.map(
       raw => {
@@ -5375,9 +5761,13 @@ function buildSearchIndex(){
           normalizeMember(raw);
 
         return {
+
           type:"MEMBER",
+
           title:m.name,
+
           description:m.bio
+
         };
 
       }
@@ -5422,17 +5812,21 @@ function performSearch(){
     STATE.searchIndex
       .filter(
         item =>
+
           String(
             item.title || ""
           )
             .toLowerCase()
             .includes(term)
+
           ||
+
           String(
             item.description || ""
           )
             .toLowerCase()
             .includes(term)
+
       )
       .slice(0,20);
 
@@ -6234,6 +6628,7 @@ function setupEvents(){
 
 /* =========================================================
    PROGRAMMING REALTIME
+   schedule_items ONLY
 ========================================================= */
 
 function setupProgrammingRealtime(){
@@ -6254,20 +6649,7 @@ function setupProgrammingRealtime(){
         {
           event:"*",
           schema:"public",
-          table:"tv_channels"
-        },
-        () => {
-
-          loadProgramming();
-
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event:"*",
-          schema:"public",
-          table:"tv_guide"
+          table:"schedule_items"
         },
         () => {
 
@@ -6356,13 +6738,25 @@ document.addEventListener(
 setInterval(
   () => {
 
-    if(!STATE.guide.length){
+    if(!STATE.scheduleItems.length){
       return;
     }
 
 
     try{
 
+      /*
+        schedule_items drives both the guide
+        and live channel state.
+      */
+
+      STATE.channels =
+        buildChannelsFromSchedule(
+          STATE.scheduleItems
+        );
+
+
+      renderChannels();
       renderGuide();
 
 
