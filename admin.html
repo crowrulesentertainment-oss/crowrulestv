@@ -6,33 +6,32 @@
 <meta name="theme-color" content="#050507">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
-<title>CrowRules Entertainment — Admin Pro v1.2</title>
+<title>CrowRules Entertainment — Admin Pro v1.3</title>
 
 <meta
   name="description"
-  content="CrowRules Entertainment Admin Pro — database administration, TV channels, schedule, members, analytics and live viewer statistics."
+  content="CrowRules Entertainment Admin Pro — database administration, TV management, analytics, members and Spectrum Awards."
 >
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap');
-
 :root{
   --bg:#050507;
-  --panel:#0b0b10;
-  --panel2:#101017;
-  --panel3:#15151e;
-  --line:#272733;
-  --text:#f4f4f7;
-  --muted:#92929e;
-  --accent:#9d4edd;
-  --accent2:#c77dff;
-  --green:#38d996;
-  --yellow:#ffd166;
-  --red:#ff5c72;
-  --blue:#55aaff;
-  --shadow:0 18px 60px rgba(0,0,0,.35);
+  --panel:#0c0d12;
+  --panel2:#11131a;
+  --panel3:#171923;
+  --border:#272a35;
+  --text:#f5f7fb;
+  --muted:#9298a8;
+  --accent:#8b5cf6;
+  --accent2:#06b6d4;
+  --green:#22c55e;
+  --yellow:#f59e0b;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --shadow:0 20px 50px rgba(0,0,0,.35);
+  --radius:16px;
 }
 
 *{
@@ -46,17 +45,17 @@ html{
 body{
   margin:0;
   background:
-    radial-gradient(circle at top right,rgba(157,78,221,.12),transparent 30%),
-    radial-gradient(circle at bottom left,rgba(85,170,255,.06),transparent 25%),
+    radial-gradient(circle at top left,rgba(139,92,246,.12),transparent 30%),
+    radial-gradient(circle at top right,rgba(6,182,212,.08),transparent 25%),
     var(--bg);
   color:var(--text);
-  font-family:Montserrat,Arial,sans-serif;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
 button,
 input,
-select,
-textarea{
+textarea,
+select{
   font:inherit;
 }
 
@@ -72,7 +71,7 @@ a{
 .app{
   min-height:100vh;
   display:grid;
-  grid-template-columns:270px 1fr;
+  grid-template-columns:260px minmax(0,1fr);
 }
 
 .sidebar{
@@ -80,29 +79,28 @@ a{
   top:0;
   height:100vh;
   overflow:auto;
-  border-right:1px solid var(--line);
-  background:rgba(5,5,7,.94);
-  backdrop-filter:blur(20px);
-  padding:20px 14px;
-  z-index:20;
+  padding:22px 16px;
+  background:rgba(5,5,7,.96);
+  border-right:1px solid var(--border);
 }
 
-.logo{
-  padding:8px 12px 22px;
+.brand{
+  padding:10px 10px 22px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:14px;
 }
 
-.logo strong{
-  display:block;
-  font-family:Orbitron,sans-serif;
-  font-size:20px;
-  letter-spacing:1px;
+.brand h1{
+  margin:0;
+  font-size:21px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
 }
 
-.logo span{
-  color:var(--accent2);
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:2px;
+.brand p{
+  margin:7px 0 0;
+  color:var(--muted);
+  font-size:12px;
 }
 
 .nav{
@@ -112,83 +110,133 @@ a{
 
 .nav button{
   width:100%;
-  text-align:left;
   border:1px solid transparent;
   background:transparent;
-  color:var(--muted);
+  color:#b9bdc9;
+  text-align:left;
   padding:11px 12px;
-  border-radius:10px;
+  border-radius:11px;
   transition:.2s;
 }
 
 .nav button:hover,
 .nav button.active{
-  color:var(--text);
-  background:var(--panel2);
-  border-color:var(--line);
+  background:var(--panel3);
+  color:#fff;
+  border-color:var(--border);
 }
 
 .nav-section{
-  margin:22px 12px 7px;
-  color:#686875;
+  margin:18px 10px 7px;
+  color:#666c7b;
   font-size:10px;
-  font-weight:800;
-  letter-spacing:1.5px;
   text-transform:uppercase;
+  letter-spacing:.14em;
 }
 
-.main{
-  min-width:0;
+.connection{
+  margin-top:18px;
+  padding:13px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:13px;
 }
 
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:15;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  padding:14px 22px;
-  border-bottom:1px solid var(--line);
-  background:rgba(5,5,7,.82);
-  backdrop-filter:blur(18px);
-}
-
-.topbar h1{
-  margin:0;
-  font-family:Orbitron,sans-serif;
-  font-size:18px;
-}
-
-.status{
+.connection-status{
   display:flex;
   align-items:center;
   gap:8px;
-  color:var(--muted);
   font-size:12px;
+  font-weight:700;
 }
 
 .dot{
   width:9px;
   height:9px;
   border-radius:50%;
-  background:var(--yellow);
-  box-shadow:0 0 12px currentColor;
+  background:#666;
 }
 
 .dot.online{
   background:var(--green);
+  box-shadow:0 0 12px rgba(34,197,94,.7);
 }
 
 .dot.error{
   background:var(--red);
 }
 
-.content{
+.connection small{
+  display:block;
+  margin-top:7px;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+.main{
+  min-width:0;
   padding:24px;
-  max-width:1800px;
-  margin:auto;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:22px;
+}
+
+.page-title h2{
+  margin:0;
+  font-size:28px;
+}
+
+.page-title p{
+  margin:6px 0 0;
+  color:var(--muted);
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:#fff;
+  padding:9px 13px;
+  border-radius:10px;
+  font-weight:700;
+}
+
+.btn:hover{
+  border-color:#414553;
+  background:var(--panel3);
+}
+
+.btn.primary{
+  background:var(--accent);
+  border-color:var(--accent);
+}
+
+.btn.success{
+  background:rgba(34,197,94,.12);
+  border-color:rgba(34,197,94,.35);
+  color:#8af0aa;
+}
+
+.btn.danger{
+  background:rgba(239,68,68,.1);
+  border-color:rgba(239,68,68,.35);
+  color:#ff9b9b;
+}
+
+.btn.info{
+  background:rgba(6,182,212,.1);
+  border-color:rgba(6,182,212,.35);
+  color:#75e6f4;
 }
 
 .section{
@@ -197,57 +245,6 @@ a{
 
 .section.active{
   display:block;
-}
-
-.section-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.section-head h2{
-  margin:0 0 5px;
-  font-family:Orbitron,sans-serif;
-  font-size:22px;
-}
-
-.section-head p{
-  margin:0;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-.btn{
-  border:1px solid var(--line);
-  background:var(--panel2);
-  color:var(--text);
-  border-radius:9px;
-  padding:9px 13px;
-  font-size:12px;
-  font-weight:700;
-}
-
-.btn:hover{
-  border-color:var(--accent);
-}
-
-.btn.primary{
-  background:var(--accent);
-  border-color:var(--accent);
-}
-
-.btn.danger{
-  color:#fff;
-  border-color:rgba(255,92,114,.35);
-  background:rgba(255,92,114,.1);
 }
 
 .grid{
@@ -260,34 +257,34 @@ a{
 }
 
 .card{
-  background:linear-gradient(180deg,var(--panel2),var(--panel));
-  border:1px solid var(--line);
-  border-radius:14px;
+  background:linear-gradient(145deg,rgba(17,19,26,.98),rgba(10,11,16,.98));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
 
 .stat{
   padding:18px;
+  min-height:125px;
 }
 
 .stat-label{
   color:var(--muted);
-  font-size:11px;
-  font-weight:700;
+  font-size:12px;
   text-transform:uppercase;
-  letter-spacing:.8px;
+  letter-spacing:.08em;
 }
 
 .stat-value{
-  margin-top:8px;
-  font-family:Orbitron,sans-serif;
-  font-size:27px;
+  margin-top:13px;
+  font-size:29px;
+  font-weight:800;
 }
 
-.stat-sub{
+.stat-note{
   margin-top:5px;
-  color:var(--muted);
-  font-size:10px;
+  color:#747a89;
+  font-size:11px;
 }
 
 .two{
@@ -302,163 +299,164 @@ a{
   padding:18px;
 }
 
-.panel h3{
-  margin:0 0 14px;
-  font-size:14px;
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.panel-head h3{
+  margin:0;
+  font-size:17px;
+}
+
+.panel-head span{
+  color:var(--muted);
+  font-size:12px;
 }
 
 .table-wrap{
+  width:100%;
   overflow:auto;
-  border:1px solid var(--line);
-  border-radius:10px;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:700px;
+  min-width:650px;
 }
 
 th,
 td{
-  padding:10px 11px;
-  border-bottom:1px solid var(--line);
+  padding:11px 10px;
+  border-bottom:1px solid var(--border);
   text-align:left;
-  font-size:11px;
-  vertical-align:top;
+  vertical-align:middle;
 }
 
 th{
-  position:sticky;
-  top:0;
-  background:var(--panel3);
-  color:#bbb;
+  color:#858b9a;
   font-size:10px;
   text-transform:uppercase;
-  letter-spacing:.6px;
+  letter-spacing:.1em;
 }
 
-tr:last-child td{
-  border-bottom:0;
+td{
+  font-size:13px;
+}
+
+tr:hover td{
+  background:rgba(255,255,255,.015);
 }
 
 .badge{
   display:inline-flex;
   align-items:center;
-  gap:5px;
-  padding:4px 7px;
-  border-radius:99px;
-  font-size:9px;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:10px;
   font-weight:800;
-  border:1px solid var(--line);
+  border:1px solid var(--border);
+  color:#aeb3c0;
 }
 
 .badge.green{
-  color:var(--green);
-  background:rgba(56,217,150,.08);
+  color:#7ee69d;
+  border-color:rgba(34,197,94,.3);
+  background:rgba(34,197,94,.08);
 }
 
 .badge.red{
-  color:var(--red);
-  background:rgba(255,92,114,.08);
-}
-
-.badge.yellow{
-  color:var(--yellow);
-  background:rgba(255,209,102,.08);
+  color:#ff9a9a;
+  border-color:rgba(239,68,68,.3);
+  background:rgba(239,68,68,.08);
 }
 
 .badge.blue{
-  color:var(--blue);
-  background:rgba(85,170,255,.08);
+  color:#88b9ff;
+  border-color:rgba(59,130,246,.3);
+  background:rgba(59,130,246,.08);
 }
 
-.empty{
-  padding:30px;
-  text-align:center;
-  color:var(--muted);
-  font-size:12px;
+.badge.purple{
+  color:#c4a7ff;
+  border-color:rgba(139,92,246,.3);
+  background:rgba(139,92,246,.08);
 }
 
-.error{
-  padding:14px;
-  color:#ff9aaa;
-  background:rgba(255,92,114,.06);
-  border:1px solid rgba(255,92,114,.2);
-  border-radius:10px;
-  font-size:11px;
-  line-height:1.6;
-}
-
-.notice{
-  padding:12px 14px;
-  border:1px solid rgba(157,78,221,.25);
-  background:rgba(157,78,221,.06);
-  border-radius:10px;
-  color:#cdb3df;
-  font-size:11px;
-  line-height:1.5;
+.badge.yellow{
+  color:#fbd37b;
+  border-color:rgba(245,158,11,.3);
+  background:rgba(245,158,11,.08);
 }
 
 .channel-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:14px;
 }
 
-.channel{
-  padding:16px;
+.channel-card{
+  overflow:hidden;
 }
 
-.channel-top{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
+.channel-art{
+  height:130px;
+  background:
+    linear-gradient(135deg,rgba(139,92,246,.25),rgba(6,182,212,.1)),
+    #11131a;
+  background-size:cover;
+  background-position:center;
+  position:relative;
 }
 
-.channel-name{
+.channel-number{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:rgba(0,0,0,.7);
+  padding:5px 8px;
+  border-radius:7px;
+  font-size:11px;
   font-weight:800;
 }
 
-.channel-slug{
+.viewer-pill{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:rgba(0,0,0,.75);
+  padding:5px 8px;
+  border-radius:999px;
+  color:#7ee69d;
+  font-size:11px;
+  font-weight:800;
+}
+
+.channel-body{
+  padding:14px;
+}
+
+.channel-body h4{
+  margin:0 0 5px;
+}
+
+.channel-body p{
+  margin:0;
   color:var(--muted);
-  font-size:10px;
-  margin-top:3px;
+  font-size:12px;
 }
 
-.viewer{
-  margin:20px 0 12px;
+.channel-actions{
+  display:flex;
+  gap:7px;
+  margin-top:13px;
 }
 
-.viewer-number{
-  font-family:Orbitron,sans-serif;
-  font-size:30px;
-}
-
-.viewer-label{
-  color:var(--muted);
-  font-size:10px;
-  text-transform:uppercase;
-}
-
-.progress{
-  height:5px;
-  background:#1d1d25;
-  border-radius:99px;
-  overflow:hidden;
-  margin-top:14px;
-}
-
-.progress span{
-  display:block;
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-}
-
-.form-grid{
+.form{
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:12px;
 }
 
@@ -467,26 +465,23 @@ tr:last-child td{
   gap:6px;
 }
 
-.field.full{
-  grid-column:1/-1;
-}
-
 .field label{
-  color:var(--muted);
-  font-size:10px;
-  font-weight:800;
+  color:#a8adba;
+  font-size:11px;
+  font-weight:700;
   text-transform:uppercase;
+  letter-spacing:.07em;
 }
 
 .field input,
-.field select,
-.field textarea{
+.field textarea,
+.field select{
   width:100%;
-  border:1px solid var(--line);
-  background:#07070a;
-  color:var(--text);
-  border-radius:8px;
-  padding:10px;
+  border:1px solid var(--border);
+  background:#08090d;
+  color:#fff;
+  padding:10px 11px;
+  border-radius:9px;
   outline:none;
 }
 
@@ -495,15 +490,32 @@ tr:last-child td{
   resize:vertical;
 }
 
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:var(--accent);
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.form-grid.three{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
 .modal{
   position:fixed;
   inset:0;
+  z-index:100;
   display:none;
   align-items:center;
   justify-content:center;
   padding:20px;
-  background:rgba(0,0,0,.72);
-  z-index:100;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(7px);
 }
 
 .modal.open{
@@ -511,111 +523,224 @@ tr:last-child td{
 }
 
 .modal-box{
-  width:min(720px,100%);
+  width:min(760px,100%);
   max-height:90vh;
   overflow:auto;
-  padding:20px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:16px;
-  box-shadow:0 30px 100px #000;
+  background:#0b0c11;
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:0 30px 100px rgba(0,0,0,.65);
 }
 
 .modal-head{
+  padding:18px;
+  border-bottom:1px solid var(--border);
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  margin-bottom:18px;
+  justify-content:space-between;
 }
 
 .modal-head h3{
   margin:0;
-  font-family:Orbitron,sans-serif;
-  font-size:16px;
 }
 
-.close{
-  border:0;
-  background:none;
-  color:var(--muted);
-  font-size:22px;
+.modal-body{
+  padding:18px;
+}
+
+.modal-foot{
+  padding:15px 18px;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
 }
 
 .toast{
   position:fixed;
   right:20px;
   bottom:20px;
-  max-width:400px;
-  padding:13px 15px;
-  background:var(--panel3);
-  border:1px solid var(--line);
-  border-radius:10px;
+  z-index:300;
+  max-width:430px;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#11131a;
   box-shadow:var(--shadow);
-  font-size:12px;
-  z-index:200;
-  transform:translateY(130%);
-  transition:.25s;
-}
-
-.toast.show{
-  transform:translateY(0);
-}
-
-.toast.success{
-  border-color:rgba(56,217,150,.35);
-}
-
-.toast.error{
-  border-color:rgba(255,92,114,.35);
-}
-
-.mobile-toggle{
   display:none;
 }
 
-@media(max-width:1100px){
+.toast.show{
+  display:block;
+}
+
+.toast.success{
+  border-color:rgba(34,197,94,.4);
+}
+
+.toast.error{
+  border-color:rgba(239,68,68,.4);
+}
+
+.error-box{
+  padding:13px;
+  background:rgba(239,68,68,.07);
+  border:1px solid rgba(239,68,68,.25);
+  border-radius:11px;
+  color:#ffaaaa;
+  font-size:12px;
+  line-height:1.5;
+}
+
+.empty{
+  padding:30px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.loading{
+  padding:25px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.search{
+  width:260px;
+  max-width:100%;
+  border:1px solid var(--border);
+  background:#08090d;
+  color:#fff;
+  padding:9px 11px;
+  border-radius:9px;
+}
+
+.progress{
+  width:100%;
+  height:7px;
+  background:#1a1c25;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.progress span{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+
+.kpi-list{
+  display:grid;
+  gap:10px;
+}
+
+.kpi{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:11px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.kpi:last-child{
+  border-bottom:0;
+}
+
+.kpi strong{
+  font-size:14px;
+}
+
+.kpi span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.health-list{
+  display:grid;
+  gap:7px;
+}
+
+.health-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 10px;
+  background:#090a0f;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+
+.health-name{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;
+}
+
+.mobile-menu{
+  display:none;
+}
+
+@media(max-width:1200px){
   .stats{
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .channel-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
 
-@media(max-width:800px){
+@media(max-width:850px){
   .app{
     display:block;
   }
 
   .sidebar{
     position:fixed;
-    left:-290px;
-    width:270px;
+    z-index:80;
+    left:-280px;
+    width:260px;
     transition:.25s;
   }
 
-  body.menu-open .sidebar{
+  .sidebar.open{
     left:0;
   }
 
-  .mobile-toggle{
+  .mobile-menu{
     display:block;
-    border:1px solid var(--line);
-    background:var(--panel2);
-    color:var(--text);
-    border-radius:8px;
-    padding:7px 10px;
   }
 
-  .stats{
-    grid-template-columns:repeat(2,1fr);
+  .main{
+    padding:15px;
+  }
+
+  .topbar{
+    align-items:flex-start;
   }
 
   .two,
   .three,
-  .form-grid{
+  .form-grid,
+  .form-grid.three{
     grid-template-columns:1fr;
   }
 
-  .content{
-    padding:15px;
+  .stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .channel-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:520px){
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .page-title h2{
+    font-size:22px;
   }
 }
 </style>
@@ -625,59 +750,100 @@ tr:last-child td{
 
 <div class="app">
 
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
 
-    <div class="logo">
-      <strong>CROWRULES</strong>
-      <span>ADMIN PRO</span>
+    <div class="brand">
+      <h1>CrowRules</h1>
+      <p>Entertainment — Admin Pro</p>
     </div>
 
     <nav class="nav">
 
-      <button class="active" data-section="dashboard">Dashboard</button>
+      <div class="nav-section">Overview</div>
+
+      <button class="nav-btn active" data-section="dashboard">
+        Dashboard
+      </button>
+
+      <button class="nav-btn" data-section="analytics">
+        Analytics
+      </button>
 
       <div class="nav-section">CrowRules TV</div>
 
-      <button data-section="channels">TV Channels</button>
-      <button data-section="schedule">TV Guide</button>
-      <button data-section="live">Live Events</button>
-      <button data-section="shows">Shows</button>
-      <button data-section="episodes">Episodes</button>
-      <button data-section="content">Content</button>
+      <button class="nav-btn" data-section="channels">
+        TV Channels
+      </button>
+
+      <button class="nav-btn" data-section="schedule">
+        TV Schedule
+      </button>
+
+      <button class="nav-btn" data-section="shows">
+        Shows
+      </button>
+
+      <button class="nav-btn" data-section="episodes">
+        Episodes
+      </button>
 
       <div class="nav-section">Members</div>
 
-      <button data-section="members">Members</button>
-      <button data-section="points">Member Points</button>
-      <button data-section="watch">Watch Minutes</button>
-      <button data-section="activity">Member Activity</button>
+      <button class="nav-btn" data-section="members">
+        Members
+      </button>
 
-      <div class="nav-section">Analytics</div>
+      <button class="nav-btn" data-section="points">
+        Member Points
+      </button>
 
-      <button data-section="analytics">Analytics</button>
-      <button data-section="views">Content Views</button>
-      <button data-section="viewers">Active Viewers</button>
+      <button class="nav-btn" data-section="watch">
+        Watch Minutes
+      </button>
 
-      <div class="nav-section">Community</div>
+      <div class="nav-section">Spectrum Awards</div>
 
-      <button data-section="chat">Chat</button>
-      <button data-section="polls">Polls</button>
-      <button data-section="newsletter">Newsletter</button>
+      <button class="nav-btn" data-section="awards">
+        Awards Overview
+      </button>
 
-      <div class="nav-section">Creators</div>
+      <button class="nav-btn" data-section="award-seasons">
+        Seasons
+      </button>
 
-      <button data-section="creators">Creator Channels</button>
-      <button data-section="applications">Applications</button>
+      <button class="nav-btn" data-section="award-categories">
+        Categories
+      </button>
 
-      <div class="nav-section">Awards</div>
+      <button class="nav-btn" data-section="award-nominees">
+        Nominees
+      </button>
 
-      <button data-section="awards">Spectrum Awards</button>
+      <button class="nav-btn" data-section="award-winners">
+        Winners
+      </button>
 
-      <div class="nav-section">Pages</div>
+      <div class="nav-section">System</div>
 
-      <button data-section="links">CrowRules Pages</button>
+      <button class="nav-btn" data-section="database">
+        Database Health
+      </button>
+
+      <button class="nav-btn" data-section="links">
+        CrowRules Pages
+      </button>
 
     </nav>
+
+    <div class="connection">
+      <div class="connection-status">
+        <span class="dot" id="connectionDot"></span>
+        <span id="connectionText">Checking...</span>
+      </div>
+      <small id="connectionDetails">
+        Supabase connection status
+      </small>
+    </div>
 
   </aside>
 
@@ -685,762 +851,919 @@ tr:last-child td{
 
     <header class="topbar">
 
-      <div style="display:flex;align-items:center;gap:10px">
-
-        <button class="mobile-toggle" id="menuBtn">☰</button>
-
-        <h1 id="pageTitle">
-          Dashboard
-        </h1>
-
+      <div class="page-title">
+        <h2 id="pageHeading">Admin Dashboard</h2>
+        <p id="pageDescription">
+          CrowRules Entertainment control center
+        </p>
       </div>
 
-      <div class="status">
+      <div class="actions">
 
-        <span class="dot" id="connectionDot"></span>
+        <button
+          class="btn mobile-menu"
+          id="menuBtn"
+        >
+          ☰
+        </button>
 
-        <span id="connectionText">
-          Connecting…
-        </span>
+        <button
+          class="btn"
+          id="refreshBtn"
+        >
+          ↻ Refresh
+        </button>
 
       </div>
 
     </header>
 
-    <div class="content">
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
 
-      <!-- DASHBOARD -->
+    <section class="section active" id="section-dashboard">
 
-      <section class="section active" id="dashboard">
+      <div class="grid stats">
 
-        <div class="section-head">
-
-          <div>
-            <h2>Admin Pro</h2>
-            <p>
-              Live CrowRules Entertainment database control center.
-            </p>
-          </div>
-
-          <div class="actions">
-
-            <button class="btn" onclick="refreshAll()">
-              Refresh
-            </button>
-
-          </div>
-
+        <div class="card stat">
+          <div class="stat-label">Active Channels</div>
+          <div class="stat-value" id="statChannels">—</div>
+          <div class="stat-note">tv_channels.is_active</div>
         </div>
 
-        <div class="grid stats">
-
-          <div class="card stat">
-            <div class="stat-label">Active Channels</div>
-            <div class="stat-value" id="statChannels">—</div>
-            <div class="stat-sub">tv_channels</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Current Viewers</div>
-            <div class="stat-value" id="statViewers">—</div>
-            <div class="stat-sub">real active sessions</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Schedule Items</div>
-            <div class="stat-value" id="statSchedule">—</div>
-            <div class="stat-sub">schedule_items</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Members</div>
-            <div class="stat-value" id="statMembers">—</div>
-            <div class="stat-sub">member_profiles</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Content Views</div>
-            <div class="stat-value" id="statViews">—</div>
-            <div class="stat-sub">database events</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Watch Minutes</div>
-            <div class="stat-value" id="statMinutes">—</div>
-            <div class="stat-sub">verified minutes</div>
-          </div>
-
+        <div class="card stat">
+          <div class="stat-label">Current Viewers</div>
+          <div class="stat-value" id="statViewers">—</div>
+          <div class="stat-note">tv_active_viewers</div>
         </div>
 
-        <br>
-
-        <div class="grid two">
-
-          <div class="card panel">
-
-            <h3>Live Channel Viewers</h3>
-
-            <div id="dashboardChannels">
-              <div class="empty">Loading…</div>
-            </div>
-
-          </div>
-
-          <div class="card panel">
-
-            <h3>Database Health</h3>
-
-            <div id="healthList">
-              <div class="empty">Checking…</div>
-            </div>
-
-          </div>
-
+        <div class="card stat">
+          <div class="stat-label">Channel Views</div>
+          <div class="stat-value" id="statChannelViews">—</div>
+          <div class="stat-note">Accumulated channel views</div>
         </div>
 
-      </section>
-
-
-      <!-- CHANNELS -->
-
-      <section class="section" id="channels">
-
-        <div class="section-head">
-
-          <div>
-            <h2>TV Channels</h2>
-            <p>
-              Authoritative channel list: active rows from tv_channels only.
-            </p>
-          </div>
-
-          <div class="actions">
-            <button class="btn primary" onclick="openEditor('tv_channels')">
-              + Add Channel
-            </button>
-
-            <button class="btn" onclick="loadChannels()">
-              Refresh
-            </button>
-          </div>
-
+        <div class="card stat">
+          <div class="stat-label">Content Views</div>
+          <div class="stat-value" id="statContentViews">—</div>
+          <div class="stat-note">content_views records</div>
         </div>
 
-        <div class="notice">
-          Current viewers are read from the active viewer system. The
-          <strong>views</strong> column is accumulated channel views and is
-          not used as the live viewer count.
+        <div class="card stat">
+          <div class="stat-label">Members</div>
+          <div class="stat-value" id="statMembers">—</div>
+          <div class="stat-note">member_profiles</div>
         </div>
 
-        <br>
-
-        <div id="channelsGrid" class="channel-grid"></div>
-
-      </section>
-
-
-      <!-- SCHEDULE -->
-
-      <section class="section" id="schedule">
-
-        <div class="section-head">
-
-          <div>
-            <h2>TV Guide</h2>
-            <p>
-              Authoritative schedule: schedule_items.
-            </p>
-          </div>
-
-          <div class="actions">
-
-            <button class="btn primary"
-              onclick="openEditor('schedule_items')">
-              + Add Schedule Item
-            </button>
-
-            <button class="btn"
-              onclick="loadTableSection('schedule_items','scheduleTable')">
-              Refresh
-            </button>
-
-          </div>
-
+        <div class="card stat">
+          <div class="stat-label">Episodes</div>
+          <div class="stat-value" id="statEpisodes">—</div>
+          <div class="stat-note">episodes</div>
         </div>
 
-        <div id="scheduleTable"></div>
+      </div>
 
-      </section>
+      <div style="height:15px"></div>
 
-
-      <!-- LIVE EVENTS -->
-
-      <section class="section" id="live">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Live Events</h2>
-            <p>Live programming and events.</p>
-          </div>
-
-          <button class="btn primary"
-            onclick="openEditor('live_events')">
-            + Add Event
-          </button>
-
-        </div>
-
-        <div id="liveTable"></div>
-
-      </section>
-
-
-      <!-- SHOWS -->
-
-      <section class="section" id="shows">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Shows</h2>
-            <p>Show database.</p>
-          </div>
-
-          <button class="btn primary"
-            onclick="openEditor('shows')">
-            + Add Show
-          </button>
-
-        </div>
-
-        <div id="showsTable"></div>
-
-      </section>
-
-
-      <!-- EPISODES -->
-
-      <section class="section" id="episodes">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Episodes</h2>
-            <p>Episode database.</p>
-          </div>
-
-          <button class="btn primary"
-            onclick="openEditor('episodes')">
-            + Add Episode
-          </button>
-
-        </div>
-
-        <div id="episodesTable"></div>
-
-      </section>
-
-
-      <!-- CONTENT -->
-
-      <section class="section" id="content">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Content</h2>
-            <p>On-demand and content records.</p>
-          </div>
-
-          <button class="btn primary"
-            onclick="openEditor('content_items')">
-            + Add Content
-          </button>
-
-        </div>
-
-        <div id="contentTable"></div>
-
-      </section>
-
-
-      <!-- MEMBERS -->
-
-      <section class="section" id="members">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Members</h2>
-            <p>Member profiles and membership activity.</p>
-          </div>
-
-          <button class="btn" onclick="loadTableSection('member_profiles','membersTable')">
-            Refresh
-          </button>
-
-        </div>
-
-        <div id="membersTable"></div>
-
-      </section>
-
-
-      <!-- POINTS -->
-
-      <section class="section" id="points">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Member Points</h2>
-            <p>
-              Real member reward balances. Uses updated_at, not created_at.
-            </p>
-          </div>
-
-          <button class="btn" onclick="loadPoints()">
-            Refresh
-          </button>
-
-        </div>
-
-        <div id="pointsTable"></div>
-
-      </section>
-
-
-      <!-- WATCH -->
-
-      <section class="section" id="watch">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Watch Minutes</h2>
-            <p>
-              Verified member viewing activity. Uses watched_at.
-            </p>
-          </div>
-
-          <button class="btn" onclick="loadWatchMinutes()">
-            Refresh
-          </button>
-
-        </div>
-
-        <div id="watchTable"></div>
-
-      </section>
-
-
-      <!-- ACTIVITY -->
-
-      <section class="section" id="activity">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Member Activity</h2>
-            <p>Member activity records.</p>
-          </div>
-
-          <button class="btn"
-            onclick="loadTableSection('member_activity','activityTable')">
-            Refresh
-          </button>
-
-        </div>
-
-        <div id="activityTable"></div>
-
-      </section>
-
-
-      <!-- ANALYTICS -->
-
-      <section class="section" id="analytics">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Analytics</h2>
-            <p>Database-backed analytics rather than fabricated counters.</p>
-          </div>
-
-          <button class="btn" onclick="loadAnalytics()">
-            Refresh
-          </button>
-
-        </div>
-
-        <div class="grid stats">
-
-          <div class="card stat">
-            <div class="stat-label">Content Views</div>
-            <div class="stat-value" id="analyticsViews">—</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">View Events</div>
-            <div class="stat-value" id="analyticsViewEvents">—</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">View Sessions</div>
-            <div class="stat-value" id="analyticsSessions">—</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Analytics Events</div>
-            <div class="stat-value" id="analyticsEvents">—</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Watch History</div>
-            <div class="stat-value" id="analyticsHistory">—</div>
-          </div>
-
-          <div class="card stat">
-            <div class="stat-label">Active Viewers</div>
-            <div class="stat-value" id="analyticsActive">—</div>
-          </div>
-
-        </div>
-
-        <br>
+      <div class="grid two">
 
         <div class="card panel">
+
+          <div class="panel-head">
+            <h3>Live Channel Viewers</h3>
+            <span id="viewerUpdated">—</span>
+          </div>
+
+          <div id="dashboardViewerList">
+            <div class="loading">Loading live viewers...</div>
+          </div>
+
+        </div>
+
+        <div class="card panel">
+
+          <div class="panel-head">
+            <h3>Database Health</h3>
+            <span id="healthSummary">Checking...</span>
+          </div>
+
+          <div id="dashboardHealth" class="health-list">
+            <div class="loading">Checking database tables...</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div style="height:15px"></div>
+
+      <div class="grid two">
+
+        <div class="card panel">
+
+          <div class="panel-head">
+            <h3>Recent Analytics Events</h3>
+
+            <button
+              class="btn"
+              onclick="App.loadRecentAnalytics()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+          <div id="dashboardAnalytics">
+            <div class="loading">Loading...</div>
+          </div>
+
+        </div>
+
+        <div class="card panel">
+
+          <div class="panel-head">
+            <h3>Spectrum Awards</h3>
+            <span>Live database status</span>
+          </div>
+
+          <div class="kpi-list">
+
+            <div class="kpi">
+              <strong>Seasons</strong>
+              <span id="awardSeasonCount">—</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Categories</strong>
+              <span id="awardCategoryCount">—</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Nominees</strong>
+              <span id="awardNomineeCount">—</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Winners</strong>
+              <span id="awardWinnerCount">—</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Votes</strong>
+              <span id="awardVoteCount">—</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         ANALYTICS
+    ====================================================== -->
+
+    <section class="section" id="section-analytics">
+
+      <div class="grid stats">
+
+        <div class="card stat">
+          <div class="stat-label">Content Views</div>
+          <div class="stat-value" id="analyticsContentViews">—</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-label">View Events</div>
+          <div class="stat-value" id="analyticsEvents">—</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-label">Watch Sessions</div>
+          <div class="stat-value" id="analyticsSessions">—</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-label">Analytics Events</div>
+          <div class="stat-value" id="analyticsEventRows">—</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-label">Watch History</div>
+          <div class="stat-value" id="analyticsWatchHistory">—</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-label">Active Viewers</div>
+          <div class="stat-value" id="analyticsActiveViewers">—</div>
+        </div>
+
+      </div>
+
+      <div style="height:15px"></div>
+
+      <div class="card panel">
+
+        <div class="panel-head">
 
           <h3>Recent Analytics Events</h3>
 
-          <button class="btn" onclick="loadRecentAnalytics()">
+          <div class="actions">
+
+            <input
+              class="search"
+              id="analyticsSearch"
+              placeholder="Search events..."
+            >
+
+            <button
+              class="btn"
+              onclick="App.loadAnalytics()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="analyticsTable">
+          <div class="loading">Loading analytics...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         CHANNELS
+    ====================================================== -->
+
+    <section class="section" id="section-channels">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <div>
+            <h3>TV Channels</h3>
+            <span>
+              Authoritative source: tv_channels
+            </span>
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              onclick="App.openChannelModal()"
+            >
+              + Add Channel
+            </button>
+
+            <button
+              class="btn"
+              onclick="App.loadChannels()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="channelGrid" class="channel-grid">
+          <div class="loading">Loading channels...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         SCHEDULE
+    ====================================================== -->
+
+    <section class="section" id="section-schedule">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <div>
+            <h3>TV Schedule</h3>
+            <span>
+              Authoritative source: schedule_items
+            </span>
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              onclick="App.openScheduleModal()"
+            >
+              + Add Schedule Item
+            </button>
+
+            <button
+              class="btn"
+              onclick="App.loadSchedule()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="scheduleTable">
+          <div class="loading">Loading schedule...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         SHOWS
+    ====================================================== -->
+
+    <section class="section" id="section-shows">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <h3>Shows</h3>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              onclick="App.openShowModal()"
+            >
+              + Add Show
+            </button>
+
+            <button
+              class="btn"
+              onclick="App.loadShows()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="showsTable">
+          <div class="loading">Loading shows...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         EPISODES
+    ====================================================== -->
+
+    <section class="section" id="section-episodes">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <h3>Episodes</h3>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              onclick="App.openEpisodeModal()"
+            >
+              + Add Episode
+            </button>
+
+            <button
+              class="btn"
+              onclick="App.loadEpisodes()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="episodesTable">
+          <div class="loading">Loading episodes...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         MEMBERS
+    ====================================================== -->
+
+    <section class="section" id="section-members">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <h3>Members</h3>
+
+          <button
+            class="btn"
+            onclick="App.loadMembers()"
+          >
             Refresh
           </button>
 
-          <br><br>
-
-          <div id="recentAnalytics"></div>
-
         </div>
 
-      </section>
+        <div id="membersTable">
+          <div class="loading">Loading members...</div>
+        </div>
 
+      </div>
 
-      <!-- VIEWS -->
+    </section>
 
-      <section class="section" id="views">
+    <!-- =====================================================
+         POINTS
+    ====================================================== -->
 
-        <div class="section-head">
+    <section class="section" id="section-points">
 
-          <div>
-            <h2>Content Views</h2>
-            <p>Raw database-backed content view records.</p>
-          </div>
+      <div class="card panel">
 
-          <button class="btn"
-            onclick="loadTableSection('content_views','viewsTable')">
+        <div class="panel-head">
+
+          <h3>Member Points</h3>
+
+          <button
+            class="btn"
+            onclick="App.loadPoints()"
+          >
             Refresh
           </button>
 
         </div>
 
-        <div id="viewsTable"></div>
+        <div id="pointsTable">
+          <div class="loading">Loading member points...</div>
+        </div>
 
-      </section>
+      </div>
 
+    </section>
 
-      <!-- ACTIVE VIEWERS -->
+    <!-- =====================================================
+         WATCH MINUTES
+    ====================================================== -->
 
-      <section class="section" id="viewers">
+    <section class="section" id="section-watch">
 
-        <div class="section-head">
+      <div class="card panel">
+
+        <div class="panel-head">
 
           <div>
-            <h2>Active Viewers</h2>
-            <p>Current viewers from tv_active_viewers.</p>
+            <h3>Watch Minutes</h3>
+            <span>
+              crowrules_member_watch_minutes
+            </span>
           </div>
 
-          <button class="btn" onclick="loadActiveViewerSection()">
+          <button
+            class="btn"
+            onclick="App.loadWatchMinutes()"
+          >
             Refresh
           </button>
 
         </div>
 
-        <div id="viewersTable"></div>
-
-      </section>
-
-
-      <!-- CHAT -->
-
-      <section class="section" id="chat">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Chat</h2>
-            <p>Chat rooms and recent messages.</p>
-          </div>
-
-          <button class="btn primary"
-            onclick="openEditor('chat_rooms')">
-            + Add Room
-          </button>
-
+        <div id="watchTable">
+          <div class="loading">Loading watch minutes...</div>
         </div>
 
-        <div class="grid two">
+      </div>
 
-          <div class="card panel">
-            <h3>Chat Rooms</h3>
-            <div id="chatRooms"></div>
-          </div>
+    </section>
 
-          <div class="card panel">
-            <h3>Recent Messages</h3>
-            <div id="chatMessages"></div>
-          </div>
+    <!-- =====================================================
+         AWARDS OVERVIEW
+    ====================================================== -->
 
+    <section class="section" id="section-awards">
+
+      <div class="grid stats">
+
+        <div class="card stat">
+          <div class="stat-label">Seasons</div>
+          <div class="stat-value" id="awardsOverviewSeasons">—</div>
         </div>
 
-      </section>
-
-
-      <!-- POLLS -->
-
-      <section class="section" id="polls">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Polls</h2>
-            <p>Community polls.</p>
-          </div>
-
-          <button class="btn primary"
-            onclick="openEditor('polls')">
-            + Add Poll
-          </button>
-
+        <div class="card stat">
+          <div class="stat-label">Categories</div>
+          <div class="stat-value" id="awardsOverviewCategories">—</div>
         </div>
 
-        <div id="pollsTable"></div>
-
-      </section>
-
-
-      <!-- NEWSLETTER -->
-
-      <section class="section" id="newsletter">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Newsletter</h2>
-            <p>Newsletter subscribers.</p>
-          </div>
-
+        <div class="card stat">
+          <div class="stat-label">Nominees</div>
+          <div class="stat-value" id="awardsOverviewNominees">—</div>
         </div>
 
-        <div id="newsletterTable"></div>
-
-      </section>
-
-
-      <!-- CREATORS -->
-
-      <section class="section" id="creators">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Creator Channels</h2>
-            <p>CrowRules creator ecosystem.</p>
-          </div>
-
-          <button class="btn primary"
-            onclick="openEditor('creator_channels')">
-            + Add Creator
-          </button>
-
+        <div class="card stat">
+          <div class="stat-label">Votes</div>
+          <div class="stat-value" id="awardsOverviewVotes">—</div>
         </div>
 
-        <div id="creatorsTable"></div>
-
-      </section>
-
-
-      <!-- APPLICATIONS -->
-
-      <section class="section" id="applications">
-
-        <div class="section-head">
-
-          <div>
-            <h2>Creator Applications</h2>
-            <p>Creator application queue.</p>
-          </div>
-
+        <div class="card stat">
+          <div class="stat-label">Winners</div>
+          <div class="stat-value" id="awardsOverviewWinners">—</div>
         </div>
 
-        <div id="applicationsTable"></div>
+      </div>
 
-      </section>
+      <div style="height:15px"></div>
 
+      <div class="grid two">
 
-      <!-- AWARDS -->
+        <div class="card panel">
 
-      <section class="section" id="awards">
+          <div class="panel-head">
+            <h3>Spectrum Awards Settings</h3>
 
-        <div class="section-head">
+            <button
+              class="btn"
+              onclick="App.loadAwardSettings()"
+            >
+              Refresh
+            </button>
+          </div>
 
-          <div>
-            <h2>Spectrum Awards</h2>
-            <p>CrowRules Entertainment Spectrum Awards administration.</p>
+          <div id="awardSettings">
+            <div class="loading">Loading...</div>
           </div>
 
         </div>
 
         <div class="card panel">
 
-          <div class="notice">
+          <div class="panel-head">
+            <h3>Award System</h3>
+          </div>
 
-            Spectrum Awards replaces the former CROW Awards branding.
+          <div class="kpi-list">
 
-            Award-specific database tables can be connected here when
-            created in Supabase.
+            <div class="kpi">
+              <strong>Brand</strong>
+              <span>Spectrum Awards</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Seasons</strong>
+              <span>spectrum_awards_seasons</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Categories</strong>
+              <span>spectrum_awards_categories</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Nominees</strong>
+              <span>spectrum_awards_nominees</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Votes</strong>
+              <span>spectrum_awards_votes</span>
+            </div>
+
+            <div class="kpi">
+              <strong>Winners</strong>
+              <span>spectrum_awards_winners</span>
+            </div>
 
           </div>
 
         </div>
 
-      </section>
+      </div>
 
+    </section>
 
-      <!-- LINKS -->
+    <!-- =====================================================
+         AWARD SEASONS
+    ====================================================== -->
 
-      <section class="section" id="links">
+    <section class="section" id="section-award-seasons">
 
-        <div class="section-head">
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <h3>Spectrum Awards Seasons</h3>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              onclick="App.openSeasonModal()"
+            >
+              + Add Season
+            </button>
+
+            <button
+              class="btn"
+              onclick="App.loadAwardSeasons()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="awardSeasonsTable">
+          <div class="loading">Loading seasons...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         AWARD CATEGORIES
+    ====================================================== -->
+
+    <section class="section" id="section-award-categories">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <h3>Spectrum Award Categories</h3>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              onclick="App.openCategoryModal()"
+            >
+              + Add Category
+            </button>
+
+            <button
+              class="btn"
+              onclick="App.loadAwardCategories()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="awardCategoriesTable">
+          <div class="loading">Loading categories...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         AWARD NOMINEES
+    ====================================================== -->
+
+    <section class="section" id="section-award-nominees">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <h3>Spectrum Award Nominees</h3>
+
+          <div class="actions">
+
+            <button
+              class="btn primary"
+              onclick="App.openNomineeModal()"
+            >
+              + Add Nominee
+            </button>
+
+            <button
+              class="btn"
+              onclick="App.loadAwardNominees()"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="awardNomineesTable">
+          <div class="loading">Loading nominees...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         AWARD WINNERS
+    ====================================================== -->
+
+    <section class="section" id="section-award-winners">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+
+          <h3>Spectrum Award Winners</h3>
+
+          <button
+            class="btn"
+            onclick="App.loadAwardWinners()"
+          >
+            Refresh
+          </button>
+
+        </div>
+
+        <div id="awardWinnersTable">
+          <div class="loading">Loading winners...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         DATABASE
+    ====================================================== -->
+
+    <section class="section" id="section-database">
+
+      <div class="card panel">
+
+        <div class="panel-head">
 
           <div>
-            <h2>CrowRules Pages</h2>
-            <p>Quick access to the CrowRules Entertainment ecosystem.</p>
+            <h3>Supabase Database Health</h3>
+            <span>Every query runs through the same wrapper</span>
           </div>
+
+          <button
+            class="btn"
+            onclick="App.checkDatabase()"
+          >
+            Run Diagnostics
+          </button>
 
         </div>
 
-        <div class="channel-grid">
+        <div id="databaseHealth">
+          <div class="loading">Checking database...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+         PAGE LINKS
+    ====================================================== -->
+
+    <section class="section" id="section-links">
+
+      <div class="card panel">
+
+        <div class="panel-head">
+          <h3>CrowRules Entertainment Pages</h3>
+        </div>
+
+        <div class="grid three">
 
           <a class="card panel" href="index.html">
-            <h3>CrowRules Entertainment</h3>
-            <p>Home page</p>
+            <strong>CrowRules Entertainment</strong>
+            <p style="color:var(--muted)">Main site</p>
           </a>
 
           <a class="card panel" href="tv.html">
-            <h3>CrowRules TV</h3>
-            <p>24/7 streaming network</p>
+            <strong>CrowRules TV</strong>
+            <p style="color:var(--muted)">24/7 streaming network</p>
           </a>
 
           <a class="card panel" href="members.html">
-            <h3>Members</h3>
-            <p>Member Hub</p>
+            <strong>Members</strong>
+            <p style="color:var(--muted)">Member Hub</p>
           </a>
 
           <a class="card panel" href="nest.html">
-            <h3>Crow Nest</h3>
-            <p>Creator community</p>
+            <strong>The Nest</strong>
+            <p style="color:var(--muted)">Community</p>
+          </a>
+
+          <a class="card panel" href="spectrum-awards.html">
+            <strong>Spectrum Awards</strong>
+            <p style="color:var(--muted)">Awards portal</p>
           </a>
 
           <a class="card panel" href="tacoma-nights.html">
-            <h3>Tacoma Nights</h3>
-            <p>Show page</p>
+            <strong>Tacoma Nights</strong>
+            <p style="color:var(--muted)">Show page</p>
           </a>
 
-          <a class="card panel"
-             href="https://www.youtube.com/@CrowRules_TV"
-             target="_blank"
-             rel="noopener">
-            <h3>CrowRules TV YouTube</h3>
-            <p>Official YouTube channel</p>
+          <a class="card panel" href="shop.html">
+            <strong>CrowRules Shop</strong>
+            <p style="color:var(--muted)">Merchandise</p>
+          </a>
+
+          <a class="card panel" href="creator.html">
+            <strong>Creator Channels</strong>
+            <p style="color:var(--muted)">Creator portal</p>
+          </a>
+
+          <a class="card panel" href="live.html">
+            <strong>Live Events</strong>
+            <p style="color:var(--muted)">Live programming</p>
           </a>
 
         </div>
 
-      </section>
+      </div>
 
-    </div>
+    </section>
 
   </main>
 
 </div>
 
+<!-- =========================================================
+     MODAL
+========================================================== -->
 
-<!-- EDITOR -->
-
-<div class="modal" id="editorModal">
+<div class="modal" id="modal">
 
   <div class="modal-box">
 
     <div class="modal-head">
 
-      <h3 id="editorTitle">
-        Edit Record
-      </h3>
+      <h3 id="modalTitle">Edit</h3>
 
-      <button class="close"
-        onclick="closeEditor()">
-        ×
+      <button
+        class="btn"
+        onclick="App.closeModal()"
+      >
+        ✕
       </button>
 
     </div>
 
-    <form id="editorForm">
+    <div class="modal-body" id="modalBody"></div>
 
-      <div id="editorFields"
-           class="form-grid">
-      </div>
+    <div class="modal-foot">
 
-      <br>
+      <button
+        class="btn"
+        onclick="App.closeModal()"
+      >
+        Cancel
+      </button>
 
-      <div class="actions">
+      <button
+        class="btn primary"
+        id="modalSave"
+      >
+        Save
+      </button>
 
-        <button type="button"
-          class="btn"
-          onclick="closeEditor()">
-          Cancel
-        </button>
-
-        <button type="submit"
-          class="btn primary">
-          Save
-        </button>
-
-      </div>
-
-    </form>
+    </div>
 
   </div>
 
 </div>
 
-
 <div class="toast" id="toast"></div>
-
 
 <script>
 /* =========================================================
    CROWRULES ADMIN PRO
    SINGLE ROBUST SUPABASE WRAPPER
-========================================================= */
-
-"use strict";
-
-
-/* =========================================================
-   CONFIG
 ========================================================= */
 
 const CONFIG = Object.freeze({
@@ -1449,20 +1772,17 @@ const CONFIG = Object.freeze({
     "https://zauxdqyssratvzmomozf.supabase.co",
 
   /*
-    IMPORTANT:
-    Use ONLY your Supabase publishable/anon key here.
-
-    NEVER put a service_role or secret key in this file.
-  */
-
+   * IMPORTANT:
+   * Put your CURRENT Supabase publishable/anon key here.
+   *
+   * Do not use an expired service-role key.
+   */
   supabaseKey:
     "sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J",
 
-  refreshMs:
-    30000,
+  refreshMs: 30000,
 
-  viewerRefreshMs:
-    15000
+  staleViewerSeconds: 90
 
 });
 
@@ -1471,229 +1791,34 @@ const CONFIG = Object.freeze({
    SUPABASE CLIENT
 ========================================================= */
 
-const supabaseClient =
-  window.supabase.createClient(
-    CONFIG.supabaseUrl,
-    CONFIG.supabaseKey,
-    {
-      auth:{
-        persistSession:true,
-        autoRefreshToken:true,
-        detectSessionInUrl:true
+let supabaseClient = null;
+
+if (
+  window.supabase &&
+  CONFIG.supabaseUrl &&
+  CONFIG.supabaseKey &&
+  !CONFIG.supabaseKey.includes("PASTE_YOUR")
+) {
+
+  supabaseClient =
+    window.supabase.createClient(
+      CONFIG.supabaseUrl,
+      CONFIG.supabaseKey,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+        },
+        global:{
+          headers:{
+            "x-client-info":"crowrules-admin-pro"
+          }
+        }
       }
-    }
-  );
-
-
-/* =========================================================
-   DOM
-========================================================= */
-
-const $ =
-  id =>
-    document.getElementById(id);
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function escapeHTML(value){
-
-  if(value === null ||
-     value === undefined){
-
-    return "";
-
-  }
-
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-
-}
-
-
-function errorMessage(error){
-
-  if(!error){
-
-    return "Unknown Supabase error.";
-
-  }
-
-  return (
-    error.message ||
-    error.details ||
-    error.hint ||
-    String(error)
-  );
-
-}
-
-
-function toast(message,type=""){
-
-  const el =
-    $("toast");
-
-  el.textContent =
-    message;
-
-  el.className =
-    "toast show " +
-    type;
-
-  clearTimeout(
-    toast.timer
-  );
-
-  toast.timer =
-    setTimeout(
-      () => {
-        el.className =
-          "toast";
-      },
-      3500
     );
 
 }
-
-
-/* =========================================================
-   TABLE SCHEMA MAP
-
-   CRITICAL:
-   Never assume created_at exists.
-========================================================= */
-
-const TABLE_SCHEMA = Object.freeze({
-
-  member_points:{
-    order:"updated_at",
-    fields:[
-      "user_id",
-      "points",
-      "level",
-      "lifetime_points",
-      "updated_at"
-    ]
-  },
-
-  crowrules_member_watch_minutes:{
-    order:"watched_at",
-    fields:[
-      "id",
-      "user_id",
-      "channel_id",
-      "show_id",
-      "episode_id",
-      "minutes",
-      "points",
-      "watched_at"
-    ]
-  },
-
-  member_point_transactions:{
-    order:"created_at"
-  },
-
-  member_stats:{
-    order:"updated_at"
-  },
-
-  member_profiles:{
-    order:"created_at"
-  },
-
-  member_activity:{
-    order:"created_at"
-  },
-
-  member_watch_history:{
-    order:"created_at"
-  },
-
-  tv_channels:{
-    order:"created_at"
-  },
-
-  schedule_items:{
-    order:"start_time"
-  },
-
-  shows:{
-    order:"created_at"
-  },
-
-  episodes:{
-    order:"created_at"
-  },
-
-  live_events:{
-    order:"created_at"
-  },
-
-  content_items:{
-    order:"created_at"
-  },
-
-  content_views:{
-    order:"created_at"
-  },
-
-  content_view_stats:{
-    order:"updated_at"
-  },
-
-  analytics_events:{
-    order:"created_at"
-  },
-
-  chat_rooms:{
-    order:"created_at"
-  },
-
-  chat_messages:{
-    order:"created_at"
-  },
-
-  polls:{
-    order:"created_at"
-  },
-
-  newsletter_subscribers:{
-    order:"created_at"
-  },
-
-  creator_applications:{
-    order:"created_at"
-  },
-
-  creator_channels:{
-    order:"created_at"
-  },
-
-  crow_nest_creators:{
-    order:"created_at"
-  },
-
-  tv_active_viewers:{
-    order:null
-  },
-
-  active_viewers:{
-    order:null
-  },
-
-  crowrules_active_viewers:{
-    order:null
-  }
-
-});
 
 
 /* =========================================================
@@ -1702,141 +1827,63 @@ const TABLE_SCHEMA = Object.freeze({
 
 const DB = {
 
-  async select(
-    table,
-    {
-      columns="*",
-      limit=200,
-      order=null,
-      filters={}
-    }={}
-  ){
+  client(){
+    if(!supabaseClient){
 
-    try{
-
-      let query =
-        supabaseClient
-          .from(table)
-          .select(columns)
-          .limit(limit);
-
-
-      if(order){
-
-        query =
-          query.order(
-            order.column,
-            {
-              ascending:
-                order.ascending ??
-                false
-            }
-          );
-
-      }
-
-
-      for(
-        const [
-          column,
-          value
-        ]
-        of Object.entries(filters)
-      ){
-
-        if(value !== undefined &&
-           value !== null &&
-           value !== ""){
-
-          query =
-            query.eq(
-              column,
-              value
-            );
-
-        }
-
-      }
-
-
-      const {
-        data,
-        error
-      } =
-        await query;
-
-
-      if(error){
-
-        console.error(
-          `[Supabase SELECT] ${table}`,
-          error
-        );
-
-        return {
-          ok:false,
-          data:[],
-          error
-        };
-
-      }
-
-
-      return {
-        ok:true,
-        data:data || [],
-        error:null
-      };
-
-    }catch(error){
-
-      console.error(
-        `[Supabase SELECT EXCEPTION] ${table}`,
-        error
+      throw new Error(
+        "Supabase is not configured. Add your current publishable/anon key to CONFIG.supabaseKey."
       );
 
-      return {
-        ok:false,
-        data:[],
-        error
-      };
-
     }
 
+    return supabaseClient;
   },
 
 
-  async count(table){
+  async query(
+    table,
+    build,
+    options={}
+  ){
 
     try{
 
-      const {
-        count,
-        error
-      } =
-        await supabaseClient
+      const client = this.client();
+
+      let request =
+        client
           .from(table)
-          .select("*",{
-            count:"exact",
-            head:true
-          });
+          .select(
+            options.select || "*",
+            options.count
+              ? { count:"exact", head:false }
+              : undefined
+          );
 
+      if(typeof build === "function"){
+        request = build(request);
+      }
 
-      if(error){
+      const result =
+        await request;
+
+      if(result.error){
 
         return {
           ok:false,
-          count:0,
-          error
+          table,
+          data:null,
+          count:result.count ?? null,
+          error:result.error
         };
 
       }
 
-
       return {
         ok:true,
-        count:
-          Number(count || 0),
+        table,
+        data:result.data ?? [],
+        count:result.count ?? null,
         error:null
       };
 
@@ -1844,7 +1891,9 @@ const DB = {
 
       return {
         ok:false,
-        count:0,
+        table,
+        data:null,
+        count:null,
         error
       };
 
@@ -1853,45 +1902,59 @@ const DB = {
   },
 
 
-  async insert(
-    table,
-    payload
-  ){
+  async count(table, build){
+
+    const result =
+      await this.query(
+        table,
+        build,
+        {select:"*",count:true}
+      );
+
+    if(!result.ok){
+      return result;
+    }
+
+    return {
+      ...result,
+      value:result.count ?? result.data.length
+    };
+
+  },
+
+
+  async insert(table, payload){
 
     try{
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
+      const result =
+        await this.client()
           .from(table)
           .insert(payload)
-          .select();
+          .select()
+          .single();
 
-
-      if(error){
+      if(result.error){
 
         return {
           ok:false,
-          data:null,
-          error
+          table,
+          error:result.error
         };
 
       }
 
-
       return {
         ok:true,
-        data,
-        error:null
+        table,
+        data:result.data
       };
 
     }catch(error){
 
       return {
         ok:false,
-        data:null,
+        table,
         error
       };
 
@@ -1900,51 +1963,39 @@ const DB = {
   },
 
 
-  async update(
-    table,
-    idColumn,
-    idValue,
-    payload
-  ){
+  async update(table,id,payload){
 
     try{
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
+      const result =
+        await this.client()
           .from(table)
           .update(payload)
-          .eq(
-            idColumn,
-            idValue
-          )
-          .select();
+          .eq("id",id)
+          .select()
+          .single();
 
-
-      if(error){
+      if(result.error){
 
         return {
           ok:false,
-          data:null,
-          error
+          table,
+          error:result.error
         };
 
       }
 
-
       return {
         ok:true,
-        data,
-        error:null
+        table,
+        data:result.data
       };
 
     }catch(error){
 
       return {
         ok:false,
-        data:null,
+        table,
         error
       };
 
@@ -1953,50 +2004,36 @@ const DB = {
   },
 
 
-  async remove(
-    table,
-    idColumn,
-    idValue
-  ){
+  async remove(table,id){
 
     try{
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
+      const result =
+        await this.client()
           .from(table)
           .delete()
-          .eq(
-            idColumn,
-            idValue
-          )
-          .select();
+          .eq("id",id);
 
-
-      if(error){
+      if(result.error){
 
         return {
           ok:false,
-          data:null,
-          error
+          table,
+          error:result.error
         };
 
       }
 
-
       return {
         ok:true,
-        data,
-        error:null
+        table
       };
 
     }catch(error){
 
       return {
         ok:false,
-        data:null,
+        table,
         error
       };
 
@@ -2005,49 +2042,36 @@ const DB = {
   },
 
 
-  async rpc(
-    functionName,
-    args={}
-  ){
+  async rpc(name,args={}){
 
     try{
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.rpc(
-          functionName,
-          args
-        );
+      const result =
+        await this.client()
+          .rpc(name,args);
 
-
-      if(error){
-
-        console.error(
-          `[Supabase RPC] ${functionName}`,
-          error
-        );
+      if(result.error){
 
         return {
           ok:false,
+          rpc:name,
           data:null,
-          error
+          error:result.error
         };
 
       }
 
-
       return {
         ok:true,
-        data,
-        error:null
+        rpc:name,
+        data:result.data
       };
 
     }catch(error){
 
       return {
         ok:false,
+        rpc:name,
         data:null,
         error
       };
@@ -2060,2064 +2084,4500 @@ const DB = {
 
 
 /* =========================================================
-   CONNECTION TEST
+   UTILITIES
 ========================================================= */
 
-async function testConnection(){
+const U = {
 
-  $("connectionText")
-    .textContent =
-    "Connecting…";
+  esc(value){
 
-  $("connectionDot")
-    .className =
-    "dot";
+    return String(
+      value ??
+      ""
+    )
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+  },
 
 
-  const result =
-    await DB.count(
-      "tv_channels"
+  num(value){
+
+    if(
+      value === null ||
+      value === undefined ||
+      value === ""
+    ){
+      return "—";
+    }
+
+    return Number(value).toLocaleString();
+
+  },
+
+
+  date(value){
+
+    if(!value){
+      return "—";
+    }
+
+    const d =
+      new Date(value);
+
+    if(Number.isNaN(d.getTime())){
+      return "—";
+    }
+
+    return d.toLocaleString();
+
+  },
+
+
+  shortId(value){
+
+    if(!value){
+      return "—";
+    }
+
+    return String(value).slice(0,8);
+
+  },
+
+
+  error(error){
+
+    if(!error){
+      return "Unknown database error";
+    }
+
+    return (
+      error.message ||
+      error.details ||
+      error.hint ||
+      String(error)
     );
 
+  },
 
-  if(result.ok){
 
-    $("connectionText")
-      .textContent =
-      "Supabase ONLINE";
+  json(value){
 
-    $("connectionDot")
-      .className =
-      "dot online";
+    try{
+      return JSON.stringify(value ?? {});
+    }catch{
+      return "{}";
+    }
 
-    return true;
+  },
+
+
+  slug(value){
+
+    return String(value || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g,"-")
+      .replace(/^-+|-+$/g,"");
 
   }
 
-
-  $("connectionText")
-    .textContent =
-    "Supabase ERROR";
-
-  $("connectionDot")
-    .className =
-    "dot error";
-
-  return false;
-
-}
+};
 
 
 /* =========================================================
-   TABLE RENDERING
+   UI
 ========================================================= */
 
-function formatValue(
-  value,
-  column
-){
+const UI = {
 
-  if(
-    value === null ||
-    value === undefined
-  ){
+  toast(message,type="success"){
 
-    return "—";
+    const el =
+      document.getElementById("toast");
 
-  }
+    el.textContent =
+      message;
 
+    el.className =
+      `toast show ${type}`;
 
-  if(
-    typeof value === "boolean"
-  ){
+    clearTimeout(
+      UI.toastTimer
+    );
 
-    return value
-      ? `<span class="badge green">TRUE</span>`
-      : `<span class="badge red">FALSE</span>`;
-
-  }
-
-
-  if(
-    column.endsWith("_at") ||
-    column === "watched_at" ||
-    column === "updated_at"
-  ){
-
-    const date =
-      new Date(value);
-
-
-    if(!Number.isNaN(
-      date.getTime()
-    )){
-
-      return escapeHTML(
-        date.toLocaleString()
+    UI.toastTimer =
+      setTimeout(
+        ()=>{
+          el.className="toast";
+        },
+        4500
       );
+
+  },
+
+
+  loading(id,message="Loading..."){
+
+    const el =
+      document.getElementById(id);
+
+    if(el){
+      el.innerHTML =
+        `<div class="loading">${U.esc(message)}</div>`;
+    }
+
+  },
+
+
+  error(id,message){
+
+    const el =
+      document.getElementById(id);
+
+    if(el){
+
+      el.innerHTML =
+        `
+        <div class="error-box">
+          ${U.esc(message)}
+        </div>
+        `;
+
+    }
+
+  },
+
+
+  empty(id,message="No records found."){
+
+    const el =
+      document.getElementById(id);
+
+    if(el){
+
+      el.innerHTML =
+        `
+        <div class="empty">
+          ${U.esc(message)}
+        </div>
+        `;
 
     }
 
   }
 
-
-  if(
-    typeof value === "object"
-  ){
-
-    return `<code>${escapeHTML(
-      JSON.stringify(value)
-    )}</code>`;
-
-  }
+};
 
 
-  return escapeHTML(
-    value
-  );
+/* =========================================================
+   APPLICATION
+========================================================= */
 
-}
+const App = {
+
+  state:{
+    channels:[],
+    shows:[],
+    episodes:[],
+    members:[],
+    seasons:[],
+    categories:[],
+    nominees:[],
+    winners:[],
+    viewerCounts:{},
+    health:{}
+  },
 
 
-function makeTable(
-  rows,
-  columns,
-  tableName
-){
+  init(){
 
-  if(!rows.length){
+    App.bindNavigation();
 
-    return `
-      <div class="empty">
-        No records found.
+    document
+      .getElementById("refreshBtn")
+      .addEventListener(
+        "click",
+        ()=>App.refreshAll()
+      );
+
+    document
+      .getElementById("menuBtn")
+      ?.addEventListener(
+        "click",
+        ()=>{
+          document
+            .getElementById("sidebar")
+            .classList
+            .toggle("open");
+        }
+      );
+
+    document
+      .getElementById("analyticsSearch")
+      ?.addEventListener(
+        "input",
+        ()=>App.loadAnalytics()
+      );
+
+    App.checkConnection();
+
+    App.refreshAll();
+
+    setInterval(
+      ()=>App.loadViewerCounts(),
+      CONFIG.refreshMs
+    );
+
+  },
+
+
+  bindNavigation(){
+
+    document
+      .querySelectorAll(".nav-btn")
+      .forEach(button=>{
+
+        button.addEventListener(
+          "click",
+          ()=>{
+
+            const section =
+              button.dataset.section;
+
+            document
+              .querySelectorAll(".nav-btn")
+              .forEach(
+                x=>x.classList.remove("active")
+              );
+
+            button.classList.add("active");
+
+            document
+              .querySelectorAll(".section")
+              .forEach(
+                x=>x.classList.remove("active")
+              );
+
+            document
+              .getElementById(
+                `section-${section}`
+              )
+              ?.classList.add("active");
+
+            const titles = {
+
+              dashboard:[
+                "Admin Dashboard",
+                "CrowRules Entertainment control center"
+              ],
+
+              analytics:[
+                "Analytics",
+                "Database-backed CrowRules analytics"
+              ],
+
+              channels:[
+                "TV Channels",
+                "Authoritative channel management"
+              ],
+
+              schedule:[
+                "TV Schedule",
+                "Authoritative schedule_items management"
+              ],
+
+              shows:[
+                "Shows",
+                "CrowRules Entertainment shows"
+              ],
+
+              episodes:[
+                "Episodes",
+                "Episode management"
+              ],
+
+              members:[
+                "Members",
+                "Member profile management"
+              ],
+
+              points:[
+                "Member Points",
+                "Points and rewards"
+              ],
+
+              watch:[
+                "Watch Minutes",
+                "Verified member viewing"
+              ],
+
+              awards:[
+                "Spectrum Awards",
+                "Spectrum Awards administration"
+              ],
+
+              "award-seasons":[
+                "Spectrum Awards Seasons",
+                "Award season management"
+              ],
+
+              "award-categories":[
+                "Spectrum Award Categories",
+                "Award category management"
+              ],
+
+              "award-nominees":[
+                "Spectrum Award Nominees",
+                "Nominee management"
+              ],
+
+              "award-winners":[
+                "Spectrum Award Winners",
+                "Winner management"
+              ],
+
+              database:[
+                "Database Health",
+                "Supabase schema and availability"
+              ],
+
+              links:[
+                "CrowRules Pages",
+                "Connected CrowRules Entertainment pages"
+              ]
+
+            };
+
+            const title =
+              titles[section];
+
+            if(title){
+
+              document
+                .getElementById("pageHeading")
+                .textContent=title[0];
+
+              document
+                .getElementById("pageDescription")
+                .textContent=title[1];
+
+            }
+
+            if(
+              window.innerWidth <= 850
+            ){
+
+              document
+                .getElementById("sidebar")
+                .classList
+                .remove("open");
+
+            }
+
+          }
+        );
+
+      });
+
+  },
+
+
+  async checkConnection(){
+
+    const dot =
+      document.getElementById(
+        "connectionDot"
+      );
+
+    const text =
+      document.getElementById(
+        "connectionText"
+      );
+
+    const details =
+      document.getElementById(
+        "connectionDetails"
+      );
+
+    try{
+
+      const result =
+        await DB.query(
+          "tv_channels",
+          q=>q.select("id").limit(1)
+        );
+
+      if(result.ok){
+
+        dot.className =
+          "dot online";
+
+        text.textContent =
+          "ONLINE";
+
+        details.textContent =
+          "Supabase API is connected.";
+
+      }else{
+
+        dot.className =
+          "dot error";
+
+        text.textContent =
+          "DATABASE ERROR";
+
+        details.textContent =
+          U.error(result.error);
+
+      }
+
+    }catch(error){
+
+      dot.className =
+        "dot error";
+
+      text.textContent =
+        "NOT CONFIGURED";
+
+      details.textContent =
+        U.error(error);
+
+    }
+
+  },
+
+
+  async refreshAll(){
+
+    await App.checkConnection();
+
+    await Promise.allSettled([
+
+      App.loadDashboardStats(),
+
+      App.loadChannels(),
+
+      App.loadViewerCounts(),
+
+      App.loadRecentAnalytics(),
+
+      App.loadAnalytics(),
+
+      App.loadSchedule(),
+
+      App.loadShows(),
+
+      App.loadEpisodes(),
+
+      App.loadMembers(),
+
+      App.loadPoints(),
+
+      App.loadWatchMinutes(),
+
+      App.loadAwardStats(),
+
+      App.loadAwardSettings(),
+
+      App.loadAwardSeasons(),
+
+      App.loadAwardCategories(),
+
+      App.loadAwardNominees(),
+
+      App.loadAwardWinners(),
+
+      App.checkDatabase()
+
+    ]);
+
+  },
+
+
+  /* =======================================================
+     DASHBOARD
+  ====================================================== */
+
+  async loadDashboardStats(){
+
+    const results =
+      await Promise.all([
+
+        DB.count(
+          "tv_channels",
+          q=>q.eq("is_active",true)
+        ),
+
+        DB.count(
+          "content_views"
+        ),
+
+        DB.count(
+          "member_profiles"
+        ),
+
+        DB.count(
+          "episodes"
+        ),
+
+        DB.query(
+          "tv_channels",
+          q=>q
+            .select("views")
+            .eq("is_active",true)
+        )
+
+      ]);
+
+    const [
+      channels,
+      views,
+      members,
+      episodes,
+      channelViews
+    ]=results;
+
+    document
+      .getElementById("statChannels")
+      .textContent =
+      channels.ok
+        ? U.num(channels.value)
+        : "—";
+
+    document
+      .getElementById("statContentViews")
+      .textContent =
+      views.ok
+        ? U.num(views.value)
+        : "—";
+
+    document
+      .getElementById("statMembers")
+      .textContent =
+      members.ok
+        ? U.num(members.value)
+        : "—";
+
+    document
+      .getElementById("statEpisodes")
+      .textContent =
+      episodes.ok
+        ? U.num(episodes.value)
+        : "—";
+
+    if(channelViews.ok){
+
+      const total =
+        channelViews.data
+          .reduce(
+            (sum,row)=>
+              sum + Number(row.views || 0),
+            0
+          );
+
+      document
+        .getElementById("statChannelViews")
+        .textContent =
+        U.num(total);
+
+    }else{
+
+      document
+        .getElementById("statChannelViews")
+        .textContent="—";
+
+    }
+
+  },
+
+
+  /* =======================================================
+     CHANNELS
+  ====================================================== */
+
+  async loadChannels(){
+
+    UI.loading(
+      "channelGrid",
+      "Loading active channels..."
+    );
+
+    const result =
+      await DB.query(
+        "tv_channels",
+        q=>q
+          .select(`
+            id,
+            name,
+            title,
+            slug,
+            description,
+            logo_url,
+            banner_url,
+            stream_url,
+            youtube_url,
+            stream_type,
+            playback_mode,
+            autoplay,
+            loop_playlist,
+            channel_number,
+            is_active,
+            views,
+            sort_order,
+            created_at,
+            updated_at
+          `)
+          .eq("is_active",true)
+          .order("sort_order",{ascending:true})
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "channelGrid",
+        `Unable to load tv_channels: ${U.error(result.error)}`
+      );
+
+      return;
+
+    }
+
+    App.state.channels =
+      result.data || [];
+
+    document
+      .getElementById("statChannels")
+      .textContent =
+      U.num(App.state.channels.length);
+
+    if(!App.state.channels.length){
+
+      UI.empty(
+        "channelGrid",
+        "No active TV channels."
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById("channelGrid")
+      .innerHTML =
+      App.state.channels
+        .map(channel=>{
+
+          const displayName =
+            channel.title ||
+            channel.name ||
+            "Untitled Channel";
+
+          const viewers =
+            App.state.viewerCounts[
+              channel.id
+            ] ?? 0;
+
+          const image =
+            channel.banner_url ||
+            channel.logo_url ||
+            "";
+
+          return `
+            <article class="card channel-card">
+
+              <div
+                class="channel-art"
+                style="
+                  ${image
+                    ? `background-image:url('${U.esc(image)}')`
+                    : ""
+                  }
+                "
+              >
+
+                ${
+                  channel.channel_number !== null
+                    ? `
+                      <span class="channel-number">
+                        CH ${U.esc(channel.channel_number)}
+                      </span>
+                    `
+                    : ""
+                }
+
+                <span class="viewer-pill">
+                  ● ${U.num(viewers)} watching
+                </span>
+
+              </div>
+
+              <div class="channel-body">
+
+                <h4>
+                  ${U.esc(displayName)}
+                </h4>
+
+                <p>
+                  ${U.esc(
+                    channel.description ||
+                    "No description"
+                  )}
+                </p>
+
+                <div class="channel-actions">
+
+                  <button
+                    class="btn"
+                    onclick="App.editChannel('${channel.id}')"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteChannel('${channel.id}')"
+                  >
+                    Delete
+                  </button>
+
+                </div>
+
+              </div>
+
+            </article>
+          `;
+
+        })
+        .join("");
+
+  },
+
+
+  async loadViewerCounts(){
+
+    /*
+     * tv_active_viewers is authoritative.
+     *
+     * We intentionally do not use tv_channels.views
+     * for current viewers.
+     */
+
+    const result =
+      await DB.query(
+        "tv_active_viewers",
+        q=>q
+          .select(
+            "id,channel_id,last_seen_at"
+          )
+      );
+
+    if(!result.ok){
+
+      document
+        .getElementById("statViewers")
+        .textContent="—";
+
+      document
+        .getElementById("viewerUpdated")
+        .textContent =
+        "Unavailable";
+
+      return;
+
+    }
+
+    const now =
+      Date.now();
+
+    const counts={};
+
+    for(const row of result.data){
+
+      if(
+        row.last_seen_at &&
+        (
+          now -
+          new Date(
+            row.last_seen_at
+          ).getTime()
+        ) >
+        CONFIG.staleViewerSeconds * 1000
+      ){
+        continue;
+      }
+
+      const id =
+        row.channel_id;
+
+      if(!id){
+        continue;
+      }
+
+      counts[id] =
+        (counts[id] || 0) + 1;
+
+    }
+
+    App.state.viewerCounts =
+      counts;
+
+    const total =
+      Object.values(counts)
+        .reduce(
+          (sum,value)=>
+            sum + value,
+          0
+        );
+
+    document
+      .getElementById("statViewers")
+      .textContent =
+      U.num(total);
+
+    document
+      .getElementById("analyticsActiveViewers")
+      .textContent =
+      U.num(total);
+
+    document
+      .getElementById("viewerUpdated")
+      .textContent =
+      `Updated ${new Date().toLocaleTimeString()}`;
+
+    App.renderDashboardViewers();
+
+    if(
+      document
+        .getElementById("section-channels")
+        ?.classList.contains("active")
+    ){
+
+      App.renderChannels();
+
+    }
+
+  },
+
+
+  renderDashboardViewers(){
+
+    const target =
+      document.getElementById(
+        "dashboardViewerList"
+      );
+
+    if(!target){
+      return;
+    }
+
+    if(!App.state.channels.length){
+
+      target.innerHTML =
+        `<div class="empty">No active channels.</div>`;
+
+      return;
+
+    }
+
+    const rows =
+      App.state.channels
+        .map(channel=>{
+
+          const name =
+            channel.title ||
+            channel.name ||
+            "Untitled";
+
+          const viewers =
+            App.state.viewerCounts[
+              channel.id
+            ] ?? 0;
+
+          return {
+            name,
+            viewers
+          };
+
+        })
+        .sort(
+          (a,b)=>
+            b.viewers-a.viewers
+        );
+
+    target.innerHTML =
+      `
+      <div class="kpi-list">
+
+        ${rows.map(row=>`
+
+          <div class="kpi">
+
+            <strong>
+              ${U.esc(row.name)}
+            </strong>
+
+            <span>
+              ${U.num(row.viewers)} watching
+            </span>
+
+          </div>
+
+        `).join("")}
+
       </div>
-    `;
+      `;
 
-  }
+  },
 
 
-  return `
+  renderChannels(){
 
-    <div class="table-wrap">
+    App.loadChannels();
 
-      <table>
+  },
 
-        <thead>
 
-          <tr>
+  async openChannelModal(id=null){
 
-            ${columns.map(
-              column =>
-                `<th>${escapeHTML(column)}</th>`
-            ).join("")}
+    const channel =
+      id
+        ? App.state.channels.find(
+            x=>x.id===id
+          )
+        : null;
 
-            <th>Actions</th>
+    document
+      .getElementById("modalTitle")
+      .textContent =
+      channel
+        ? "Edit TV Channel"
+        : "Add TV Channel";
 
-          </tr>
+    document
+      .getElementById("modalBody")
+      .innerHTML =
+      `
 
-        </thead>
+      <div class="form">
 
-        <tbody>
+        <div class="form-grid">
 
-          ${rows.map(
-            row => `
+          <div class="field">
+            <label>Title</label>
+            <input
+              id="f_channel_title"
+              value="${U.esc(channel?.title || channel?.name || "")}"
+            >
+          </div>
+
+          <div class="field">
+            <label>Slug</label>
+            <input
+              id="f_channel_slug"
+              value="${U.esc(channel?.slug || "")}"
+            >
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label>Description</label>
+
+          <textarea id="f_channel_description">${U.esc(
+            channel?.description || ""
+          )}</textarea>
+
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Channel Number</label>
+            <input
+              type="number"
+              id="f_channel_number"
+              value="${channel?.channel_number ?? ""}"
+            >
+          </div>
+
+          <div class="field">
+            <label>Sort Order</label>
+            <input
+              type="number"
+              id="f_channel_sort"
+              value="${channel?.sort_order ?? 0}"
+            >
+          </div>
+
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Stream URL</label>
+            <input
+              id="f_channel_stream"
+              value="${U.esc(channel?.stream_url || "")}"
+            >
+          </div>
+
+          <div class="field">
+            <label>YouTube URL</label>
+            <input
+              id="f_channel_youtube"
+              value="${U.esc(channel?.youtube_url || "")}"
+            >
+          </div>
+
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Logo URL</label>
+            <input
+              id="f_channel_logo"
+              value="${U.esc(channel?.logo_url || "")}"
+            >
+          </div>
+
+          <div class="field">
+            <label>Banner URL</label>
+            <input
+              id="f_channel_banner"
+              value="${U.esc(channel?.banner_url || "")}"
+            >
+          </div>
+
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Stream Type</label>
+            <input
+              id="f_channel_stream_type"
+              value="${U.esc(channel?.stream_type || "")}"
+            >
+          </div>
+
+          <div class="field">
+            <label>Playback Mode</label>
+            <input
+              id="f_channel_playback"
+              value="${U.esc(channel?.playback_mode || "")}"
+            >
+          </div>
+
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Active</label>
+
+            <select id="f_channel_active">
+
+              <option
+                value="true"
+                ${channel?.is_active !== false ? "selected":""}
+              >
+                Active
+              </option>
+
+              <option
+                value="false"
+                ${channel?.is_active === false ? "selected":""}
+              >
+                Inactive
+              </option>
+
+            </select>
+
+          </div>
+
+          <div class="field">
+            <label>Autoplay</label>
+
+            <select id="f_channel_autoplay">
+
+              <option
+                value="true"
+                ${channel?.autoplay ? "selected":""}
+              >
+                Yes
+              </option>
+
+              <option
+                value="false"
+                ${!channel?.autoplay ? "selected":""}
+              >
+                No
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      `;
+
+    document
+      .getElementById("modalSave")
+      .onclick =
+      ()=>App.saveChannel(id);
+
+    App.openModal();
+
+  },
+
+
+  async saveChannel(id){
+
+    const title =
+      document
+        .getElementById(
+          "f_channel_title"
+        ).value.trim();
+
+    if(!title){
+
+      UI.toast(
+        "Channel title is required.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    const payload={
+
+      name:title,
+
+      title,
+
+      slug:
+        document
+          .getElementById(
+            "f_channel_slug"
+          ).value.trim()
+        ||
+        U.slug(title),
+
+      description:
+        document
+          .getElementById(
+            "f_channel_description"
+          ).value.trim(),
+
+      channel_number:
+        Number(
+          document
+            .getElementById(
+              "f_channel_number"
+            ).value
+        ) || null,
+
+      sort_order:
+        Number(
+          document
+            .getElementById(
+              "f_channel_sort"
+            ).value
+        ) || 0,
+
+      stream_url:
+        document
+          .getElementById(
+            "f_channel_stream"
+          ).value.trim() || null,
+
+      youtube_url:
+        document
+          .getElementById(
+            "f_channel_youtube"
+          ).value.trim() || null,
+
+      logo_url:
+        document
+          .getElementById(
+            "f_channel_logo"
+          ).value.trim() || null,
+
+      banner_url:
+        document
+          .getElementById(
+            "f_channel_banner"
+          ).value.trim() || null,
+
+      stream_type:
+        document
+          .getElementById(
+            "f_channel_stream_type"
+          ).value.trim() || null,
+
+      playback_mode:
+        document
+          .getElementById(
+            "f_channel_playback"
+          ).value.trim() || null,
+
+      is_active:
+        document
+          .getElementById(
+            "f_channel_active"
+          ).value === "true",
+
+      autoplay:
+        document
+          .getElementById(
+            "f_channel_autoplay"
+          ).value === "true"
+
+    };
+
+    const result =
+      id
+        ? await DB.update(
+            "tv_channels",
+            id,
+            payload
+          )
+        : await DB.insert(
+            "tv_channels",
+            payload
+          );
+
+    if(!result.ok){
+
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast(
+      id
+        ? "Channel updated."
+        : "Channel created."
+    );
+
+    App.closeModal();
+
+    await App.loadChannels();
+
+  },
+
+
+  editChannel(id){
+
+    App.openChannelModal(id);
+
+  },
+
+
+  async deleteChannel(id){
+
+    const channel =
+      App.state.channels.find(
+        x=>x.id===id
+      );
+
+    if(!confirm(
+      `Delete ${channel?.title || channel?.name || "this channel"}?`
+    )){
+      return;
+    }
+
+    const result =
+      await DB.remove(
+        "tv_channels",
+        id
+      );
+
+    if(!result.ok){
+
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast("Channel deleted.");
+
+    await App.loadChannels();
+
+  },
+
+
+  /* =======================================================
+     SCHEDULE
+  ====================================================== */
+
+  async loadSchedule(){
+
+    UI.loading(
+      "scheduleTable",
+      "Loading schedule_items..."
+    );
+
+    const result =
+      await DB.query(
+        "schedule_items",
+        q=>q
+          .select(`
+            id,
+            channel_id,
+            show_id,
+            episode_id,
+            title,
+            description,
+            starts_at,
+            ends_at,
+            start_time,
+            end_time,
+            item_type,
+            status,
+            is_active,
+            thumbnail_url,
+            video_url,
+            video_type,
+            youtube_url,
+            duration_seconds,
+            sort_order
+          `)
+          .order(
+            "starts_at",
+            {ascending:true}
+          )
+          .limit(250)
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "scheduleTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    if(!result.data.length){
+
+      UI.empty(
+        "scheduleTable",
+        "No schedule items."
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById("scheduleTable")
+      .innerHTML =
+      `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Channel</th>
+              <th>Starts</th>
+              <th>Ends</th>
+              <th>Status</th>
+              <th>Active</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(item=>`
 
               <tr>
 
-                ${columns.map(
-                  column => `
+                <td>
+                  <strong>
+                    ${U.esc(item.title || "Untitled")}
+                  </strong>
+                </td>
 
-                    <td>
-                      ${formatValue(
-                        row[column],
-                        column
-                      )}
-                    </td>
+                <td>
+                  ${U.esc(
+                    App.channelName(item.channel_id)
+                  )}
+                </td>
 
-                  `
-                ).join("")}
+                <td>
+                  ${U.date(
+                    item.starts_at ||
+                    item.start_time
+                  )}
+                </td>
+
+                <td>
+                  ${U.date(
+                    item.ends_at ||
+                    item.end_time
+                  )}
+                </td>
+
+                <td>
+                  <span class="badge blue">
+                    ${U.esc(item.status || "scheduled")}
+                  </span>
+                </td>
+
+                <td>
+                  ${
+                    item.is_active
+                      ? `<span class="badge green">YES</span>`
+                      : `<span class="badge red">NO</span>`
+                  }
+                </td>
 
                 <td>
 
-                  ${
-                    row.id
-                    ?
-
-                    `
-
-                    <div class="actions">
-
-                      <button
-                        class="btn"
-                        onclick='openEditRecord(
-                          ${JSON.stringify(
-                            tableName
-                          )},
-                          ${JSON.stringify(row)}
-                        )'
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        class="btn danger"
-                        onclick='deleteRecord(
-                          ${JSON.stringify(
-                            tableName
-                          )},
-                          ${JSON.stringify(row.id)}
-                        )'
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-
-                    `
-
-                    :
-
-                    "—"
-
-                  }
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteRecord('schedule_items','${item.id}',App.loadSchedule)"
+                  >
+                    Delete
+                  </button>
 
                 </td>
 
               </tr>
 
-            `
-          ).join("")}
+            `).join("")}
 
-        </tbody>
+          </tbody>
 
-      </table>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =========================================================
-   GENERIC TABLE LOADER
-========================================================= */
-
-async function loadTableSection(
-  table,
-  elementId
-){
-
-  const box =
-    $(elementId);
-
-
-  if(!box){
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    `<div class="empty">Loading ${escapeHTML(table)}…</div>`;
-
-
-  const schema =
-    TABLE_SCHEMA[table] ||
-    {order:null};
-
-
-  let result =
-    await DB.select(
-      table,
-      {
-        columns:"*",
-        limit:200,
-
-        order:
-          schema.order
-          ?
-          {
-            column:
-              schema.order,
-
-            ascending:false
-          }
-          :
-          null
-      }
-    );
-
-
-  /*
-    Robust fallback:
-    If the configured order column does not exist,
-    immediately retry without ordering.
-  */
-
-  if(
-    !result.ok &&
-    schema.order
-  ){
-
-    result =
-      await DB.select(
-        table,
-        {
-          columns:"*",
-          limit:200,
-          order:null
-        }
-      );
-
-  }
-
-
-  if(!result.ok){
-
-    box.innerHTML = `
-
-      <div class="error">
-
-        <strong>
-          ${escapeHTML(table)}
-          is unavailable.
-        </strong>
-
-        <br><br>
-
-        ${escapeHTML(
-          errorMessage(
-            result.error
-          )
-        )}
+        </table>
 
       </div>
+      `;
 
-    `;
-
-    return;
-
-  }
+  },
 
 
-  if(!result.data.length){
+  channelName(id){
 
-    box.innerHTML =
-      `<div class="empty">No records found.</div>`;
-
-    return;
-
-  }
-
-
-  const columns =
-    Object.keys(
-      result.data[0]
-    );
-
-
-  box.innerHTML =
-    makeTable(
-      result.data,
-      columns.slice(0,14),
-      table
-    );
-
-}
-
-
-/* =========================================================
-   CHANNELS
-========================================================= */
-
-async function loadChannels(){
-
-  const box =
-    $("channelsGrid");
-
-  box.innerHTML =
-    `<div class="empty">Loading channels…</div>`;
-
-
-  /*
-    AUTHORITATIVE:
-    Only active tv_channels rows.
-  */
-
-  const channels =
-    await DB.select(
-      "tv_channels",
-      {
-        columns:"*",
-        limit:100,
-        filters:{
-          is_active:true
-        }
-      }
-    );
-
-
-  if(!channels.ok){
-
-    box.innerHTML = `
-
-      <div class="error">
-
-        <strong>
-          tv_channels is unavailable.
-        </strong>
-
-        <br><br>
-
-        ${escapeHTML(
-          errorMessage(
-            channels.error
-          )
-        )}
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  const viewers =
-    await getActiveViewers();
-
-
-  const viewerMap =
-    new Map();
-
-
-  viewers.forEach(
-    viewer => {
-
-      const id =
-        viewer.channel_id;
-
-      if(!id){
-
-        return;
-
-      }
-
-      viewerMap.set(
-        String(id),
-        (viewerMap.get(
-          String(id)
-        ) || 0) + 1
+    const channel =
+      App.state.channels.find(
+        x=>x.id===id
       );
 
-    }
-  );
+    return (
+      channel?.title ||
+      channel?.name ||
+      U.shortId(id)
+    );
+
+  },
 
 
-  box.innerHTML =
-    channels.data.map(
-      channel => {
+  openScheduleModal(){
 
-        const id =
-          String(
-            channel.id
-          );
+    UI.toast(
+      "Schedule creation is enabled after selecting a channel.",
+      "success"
+    );
 
-        const count =
-          viewerMap.get(id) || 0;
+    /*
+     * Intentionally uses only schema fields known to exist.
+     */
 
+    document
+      .getElementById("modalTitle")
+      .textContent =
+      "Add Schedule Item";
 
-        return `
+    document
+      .getElementById("modalBody")
+      .innerHTML =
+      `
 
-          <div class="card channel">
+      <div class="form">
 
-            <div class="channel-top">
+        <div class="field">
+          <label>Title</label>
+          <input id="f_schedule_title">
+        </div>
 
-              <div>
+        <div class="field">
+          <label>Channel</label>
 
-                <div class="channel-name">
+          <select id="f_schedule_channel">
 
-                  ${escapeHTML(
-                    channel.name ||
-                    channel.title ||
-                    "Unnamed Channel"
-                  )}
+            <option value="">
+              Select channel
+            </option>
 
-                </div>
+            ${App.state.channels.map(c=>`
 
-                <div class="channel-slug">
+              <option value="${c.id}">
+                ${U.esc(c.title || c.name)}
+              </option>
 
-                  ${escapeHTML(
-                    channel.slug ||
-                    ""
-                  )}
+            `).join("")}
 
-                </div>
+          </select>
 
-              </div>
+        </div>
 
-              <span class="badge green">
-                ACTIVE
-              </span>
+        <div class="form-grid">
 
-            </div>
-
-            <div class="viewer">
-
-              <div class="viewer-number">
-                ${count}
-              </div>
-
-              <div class="viewer-label">
-                Current Viewers
-              </div>
-
-            </div>
-
-            <div class="progress">
-
-              <span
-                style="width:${Math.min(
-                  count * 10,
-                  100
-                )}%"
-              ></span>
-
-            </div>
-
-            <br>
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick='openEditRecord(
-                  "tv_channels",
-                  ${JSON.stringify(channel)}
-                )'
-              >
-                Edit
-              </button>
-
-              <button
-                class="btn danger"
-                onclick='deleteRecord(
-                  "tv_channels",
-                  ${JSON.stringify(channel.id)}
-                )'
-              >
-                Delete
-              </button>
-
-            </div>
-
+          <div class="field">
+            <label>Starts At</label>
+            <input
+              type="datetime-local"
+              id="f_schedule_start"
+            >
           </div>
 
-        `;
+          <div class="field">
+            <label>Ends At</label>
+            <input
+              type="datetime-local"
+              id="f_schedule_end"
+            >
+          </div>
 
-      }
-    ).join("");
+        </div>
+
+        <div class="field">
+          <label>YouTube URL</label>
+          <input id="f_schedule_youtube">
+        </div>
+
+        <div class="field">
+          <label>Thumbnail URL</label>
+          <input id="f_schedule_thumbnail">
+        </div>
+
+        <div class="field">
+          <label>Active</label>
+
+          <select id="f_schedule_active">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+
+        </div>
+
+      </div>
+
+      `;
+
+    document
+      .getElementById("modalSave")
+      .onclick =
+      App.saveSchedule;
+
+    App.openModal();
+
+  },
 
 
-  if(!channels.data.length){
+  async saveSchedule(){
 
-    box.innerHTML =
-      `<div class="empty">No active channels.</div>`;
+    const title =
+      document
+        .getElementById(
+          "f_schedule_title"
+        )
+        .value
+        .trim();
 
-  }
+    const channel_id =
+      document
+        .getElementById(
+          "f_schedule_channel"
+        )
+        .value;
 
-}
+    const starts =
+      document
+        .getElementById(
+          "f_schedule_start"
+        )
+        .value;
 
+    const ends =
+      document
+        .getElementById(
+          "f_schedule_end"
+        )
+        .value;
 
-/* =========================================================
-   ACTIVE VIEWERS
-========================================================= */
+    if(!title || !channel_id || !starts || !ends){
 
-async function getActiveViewers(){
+      UI.toast(
+        "Title, channel, start and end are required.",
+        "error"
+      );
 
-  /*
-    Preferred:
-    tv_active_viewers
+      return;
 
-    Fallback:
-    active_viewers
-
-    Fallback:
-    crowrules_active_viewers
-  */
-
-  const sources = [
-    "tv_active_viewers",
-    "active_viewers",
-    "crowrules_active_viewers"
-  ];
-
-
-  for(
-    const table
-    of sources
-  ){
+    }
 
     const result =
-      await DB.select(
-        table,
+      await DB.insert(
+        "schedule_items",
         {
-          columns:"*",
-          limit:1000
+          channel_id,
+          title,
+          starts_at:
+            new Date(starts).toISOString(),
+          ends_at:
+            new Date(ends).toISOString(),
+          status:"scheduled",
+          item_type:"program",
+          is_active:
+            document
+              .getElementById(
+                "f_schedule_active"
+              )
+              .value === "true",
+          youtube_url:
+            document
+              .getElementById(
+                "f_schedule_youtube"
+              )
+              .value.trim() || null,
+          thumbnail_url:
+            document
+              .getElementById(
+                "f_schedule_thumbnail"
+              )
+              .value.trim() || null
         }
       );
 
+    if(!result.ok){
 
-    if(result.ok){
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
 
-      return result.data;
+      return;
 
     }
 
-  }
+    UI.toast("Schedule item created.");
+
+    App.closeModal();
+
+    App.loadSchedule();
+
+  },
 
 
-  return [];
+  /* =======================================================
+     SHOWS
+  ====================================================== */
 
-}
+  async loadShows(){
 
-
-async function loadActiveViewerSection(){
-
-  const box =
-    $("viewersTable");
-
-
-  box.innerHTML =
-    `<div class="empty">Loading active viewers…</div>`;
-
-
-  const rows =
-    await getActiveViewers();
-
-
-  if(!rows.length){
-
-    box.innerHTML =
-      `<div class="empty">No active viewers detected.</div>`;
-
-    return;
-
-  }
-
-
-  const columns =
-    Object.keys(
-      rows[0]
+    UI.loading(
+      "showsTable",
+      "Loading shows..."
     );
 
-
-  box.innerHTML =
-    makeTable(
-      rows,
-      columns.slice(0,14),
-      "tv_active_viewers"
-    );
-
-}
-
-
-/* =========================================================
-   MEMBER POINTS
-========================================================= */
-
-async function loadPoints(){
-
-  const box =
-    $("pointsTable");
-
-
-  box.innerHTML =
-    `<div class="empty">Loading member points…</div>`;
-
-
-  /*
-    CORRECT SCHEMA:
-    member_points.updated_at
-  */
-
-  const result =
-    await DB.select(
-      "member_points",
-      {
-        columns:
-          "user_id,points,level,lifetime_points,updated_at",
-
-        limit:500,
-
-        order:{
-          column:
-            "updated_at",
-
-          ascending:false
-        }
-      }
-    );
-
-
-  if(!result.ok){
-
-    box.innerHTML = `
-
-      <div class="error">
-
-        <strong>
-          member_points is unavailable.
-        </strong>
-
-        <br><br>
-
-        ${escapeHTML(
-          errorMessage(
-            result.error
+    const result =
+      await DB.query(
+        "shows",
+        q=>q
+          .select(`
+            id,
+            title,
+            slug,
+            description,
+            category,
+            status,
+            is_active,
+            is_featured,
+            published,
+            is_published,
+            views,
+            created_at
+          `)
+          .order(
+            "sort_order",
+            {ascending:true}
           )
-        )}
+          .limit(250)
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "showsTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById("showsTable")
+      .innerHTML =
+      `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Views</th>
+              <th>Active</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(show=>`
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${U.esc(show.title)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.esc(show.category || "—")}
+                </td>
+
+                <td>
+                  ${U.esc(show.status || "—")}
+                </td>
+
+                <td>
+                  ${U.num(show.views)}
+                </td>
+
+                <td>
+                  ${
+                    show.is_active
+                      ? `<span class="badge green">ACTIVE</span>`
+                      : `<span class="badge red">OFF</span>`
+                  }
+                </td>
+
+                <td>
+
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteRecord('shows','${show.id}',App.loadShows)"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+      `;
+
+    App.state.shows =
+      result.data;
+
+  },
+
+
+  openShowModal(){
+
+    document
+      .getElementById("modalTitle")
+      .textContent =
+      "Add Show";
+
+    document
+      .getElementById("modalBody")
+      .innerHTML =
+      `
+
+      <div class="form">
+
+        <div class="field">
+          <label>Title</label>
+          <input id="f_show_title">
+        </div>
+
+        <div class="field">
+          <label>Slug</label>
+          <input id="f_show_slug">
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="f_show_description"></textarea>
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Category</label>
+            <input id="f_show_category">
+          </div>
+
+          <div class="field">
+            <label>Status</label>
+            <input id="f_show_status" value="active">
+          </div>
+
+        </div>
 
       </div>
 
-    `;
+      `;
 
-    return;
+    document
+      .getElementById("modalSave")
+      .onclick =
+      App.saveShow;
 
-  }
+    App.openModal();
 
+  },
 
-  box.innerHTML =
-    makeTable(
-      result.data,
-      [
-        "user_id",
-        "points",
-        "level",
-        "lifetime_points",
-        "updated_at"
-      ],
-      "member_points"
-    );
 
-}
+  async saveShow(){
 
-
-/* =========================================================
-   WATCH MINUTES
-========================================================= */
-
-async function loadWatchMinutes(){
-
-  const box =
-    $("watchTable");
-
-
-  box.innerHTML =
-    `<div class="empty">Loading watch minutes…</div>`;
-
-
-  /*
-    CORRECT SCHEMA:
-    crowrules_member_watch_minutes.watched_at
-  */
-
-  const result =
-    await DB.select(
-      "crowrules_member_watch_minutes",
-      {
-        columns:
-          "id,user_id,channel_id,show_id,episode_id,minutes,points,watched_at",
-
-        limit:500,
-
-        order:{
-          column:
-            "watched_at",
-
-          ascending:false
-        }
-      }
-    );
-
-
-  if(!result.ok){
-
-    box.innerHTML = `
-
-      <div class="error">
-
-        <strong>
-          crowrules_member_watch_minutes
-          is unavailable.
-        </strong>
-
-        <br><br>
-
-        ${escapeHTML(
-          errorMessage(
-            result.error
-          )
-        )}
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    makeTable(
-      result.data,
-      [
-        "id",
-        "user_id",
-        "channel_id",
-        "show_id",
-        "episode_id",
-        "minutes",
-        "points",
-        "watched_at"
-      ],
-      "crowrules_member_watch_minutes"
-    );
-
-}
-
-
-/* =========================================================
-   ANALYTICS
-========================================================= */
-
-async function countInto(
-  table,
-  elementId
-){
-
-  const result =
-    await DB.count(
-      table
-    );
-
-
-  $(elementId)
-    .textContent =
-      result.ok
-      ?
-      Number(
-        result.count
-      ).toLocaleString()
-      :
-      "—";
-
-}
-
-
-async function loadAnalytics(){
-
-  await Promise.all([
-
-    countInto(
-      "content_views",
-      "analyticsViews"
-    ),
-
-    countInto(
-      "content_views",
-      "analyticsViewEvents"
-    ),
-
-    countInto(
-      "member_watch_history",
-      "analyticsSessions"
-    ),
-
-    countInto(
-      "analytics_events",
-      "analyticsEvents"
-    ),
-
-    countInto(
-      "member_watch_history",
-      "analyticsHistory"
-    )
-
-  ]);
-
-
-  const viewers =
-    await getActiveViewers();
-
-
-  $("analyticsActive")
-    .textContent =
-      viewers.length
-      .toLocaleString();
-
-}
-
-
-async function loadRecentAnalytics(){
-
-  await loadTableSection(
-    "analytics_events",
-    "recentAnalytics"
-  );
-
-}
-
-
-/* =========================================================
-   DASHBOARD STATS
-========================================================= */
-
-async function loadDashboardStats(){
-
-  const [
-    channels,
-    schedule,
-    members,
-    views,
-    watch
-  ] =
-    await Promise.all([
-
-      DB.count(
-        "tv_channels"
-      ),
-
-      DB.count(
-        "schedule_items"
-      ),
-
-      DB.count(
-        "member_profiles"
-      ),
-
-      DB.count(
-        "content_views"
-      ),
-
-      DB.count(
-        "crowrules_member_watch_minutes"
-      )
-
-    ]);
-
-
-  $("statChannels")
-    .textContent =
-      channels.ok
-      ? channels.count
-      : "—";
-
-
-  $("statSchedule")
-    .textContent =
-      schedule.ok
-      ? schedule.count
-      : "—";
-
-
-  $("statMembers")
-    .textContent =
-      members.ok
-      ? members.count
-      : "—";
-
-
-  $("statViews")
-    .textContent =
-      views.ok
-      ? views.count
-      : "—";
-
-
-  /*
-    This is number of watch records,
-    not fabricated minutes.
-  */
-
-  $("statMinutes")
-    .textContent =
-      watch.ok
-      ? watch.count
-      : "—";
-
-
-  const viewers =
-    await getActiveViewers();
-
-
-  $("statViewers")
-    .textContent =
-      viewers.length;
-
-}
-
-
-/* =========================================================
-   DASHBOARD CHANNEL MINI VIEW
-========================================================= */
-
-async function loadDashboardChannels(){
-
-  const channels =
-    await DB.select(
-      "tv_channels",
-      {
-        columns:"id,name,title,slug,is_active",
-        limit:100,
-        filters:{
-          is_active:true
-        }
-      }
-    );
-
-
-  if(!channels.ok){
-
-    $("dashboardChannels").innerHTML =
-      `<div class="error">${escapeHTML(
-        errorMessage(
-          channels.error
+    const title =
+      document
+        .getElementById(
+          "f_show_title"
         )
-      )}</div>`;
+        .value
+        .trim();
 
-    return;
+    if(!title){
 
-  }
+      UI.toast(
+        "Show title is required.",
+        "error"
+      );
 
-
-  const viewers =
-    await getActiveViewers();
-
-
-  const counts =
-    {};
-
-
-  viewers.forEach(
-    viewer => {
-
-      if(
-        viewer.channel_id
-      ){
-
-        const key =
-          String(
-            viewer.channel_id
-          );
-
-        counts[key] =
-          (counts[key] || 0) + 1;
-
-      }
+      return;
 
     }
-  );
+
+    const result =
+      await DB.insert(
+        "shows",
+        {
+          title,
+          slug:
+            document
+              .getElementById(
+                "f_show_slug"
+              )
+              .value
+              .trim() ||
+            U.slug(title),
+
+          description:
+            document
+              .getElementById(
+                "f_show_description"
+              )
+              .value
+              .trim(),
+
+          category:
+            document
+              .getElementById(
+                "f_show_category"
+              )
+              .value
+              .trim(),
+
+          status:
+            document
+              .getElementById(
+                "f_show_status"
+              )
+              .value
+              .trim(),
+
+          is_active:true,
+          published:true,
+          is_published:true
+        }
+      );
+
+    if(!result.ok){
+
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast("Show created.");
+
+    App.closeModal();
+
+    App.loadShows();
+
+  },
 
 
-  $("dashboardChannels").innerHTML =
+  /* =======================================================
+     EPISODES
+  ====================================================== */
 
-    channels.data.map(
-      channel => {
+  async loadEpisodes(){
 
-        const count =
-          counts[
-            String(channel.id)
-          ] || 0;
+    UI.loading(
+      "episodesTable",
+      "Loading episodes..."
+    );
+
+    const result =
+      await DB.query(
+        "episodes",
+        q=>q
+          .select(`
+            id,
+            show_id,
+            title,
+            description,
+            episode_number,
+            season_number,
+            season,
+            status,
+            views,
+            is_active,
+            is_featured,
+            is_free,
+            is_published,
+            published_at,
+            release_date
+          `)
+          .order(
+            "sort_order",
+            {ascending:true}
+          )
+          .limit(250)
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "episodesTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    App.state.episodes =
+      result.data;
+
+    document
+      .getElementById("episodesTable")
+      .innerHTML =
+      `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Episode</th>
+              <th>Show</th>
+              <th>Season</th>
+              <th>Views</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(ep=>`
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${U.esc(ep.title)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.esc(
+                    App.showName(ep.show_id)
+                  )}
+                </td>
+
+                <td>
+                  ${U.esc(
+                    ep.season_number ??
+                    ep.season ??
+                    "—"
+                  )}
+                </td>
+
+                <td>
+                  ${U.num(ep.views)}
+                </td>
+
+                <td>
+                  ${U.esc(ep.status || "—")}
+                </td>
+
+                <td>
+
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteRecord('episodes','${ep.id}',App.loadEpisodes)"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+      `;
+
+  },
 
 
-        return `
+  showName(id){
 
-          <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:11px 0;
-            border-bottom:1px solid var(--line)
-          ">
+    const show =
+      App.state.shows.find(
+        x=>x.id===id
+      );
 
-            <div>
+    return show?.title || U.shortId(id);
 
-              <strong>
-                ${escapeHTML(
-                  channel.name ||
-                  channel.title ||
-                  "Channel"
-                )}
-              </strong>
+  },
 
-              <div style="
-                color:var(--muted);
-                font-size:10px;
-                margin-top:3px
-              ">
-                ${escapeHTML(
-                  channel.slug || ""
-                )}
-              </div>
 
-            </div>
+  openEpisodeModal(){
 
-            <span class="badge blue">
-              ${count} watching
+    document
+      .getElementById("modalTitle")
+      .textContent =
+      "Add Episode";
+
+    document
+      .getElementById("modalBody")
+      .innerHTML =
+      `
+
+      <div class="form">
+
+        <div class="field">
+          <label>Show</label>
+
+          <select id="f_episode_show">
+
+            <option value="">
+              Select show
+            </option>
+
+            ${App.state.shows.map(show=>`
+
+              <option value="${show.id}">
+                ${U.esc(show.title)}
+              </option>
+
+            `).join("")}
+
+          </select>
+
+        </div>
+
+        <div class="field">
+          <label>Title</label>
+          <input id="f_episode_title">
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="f_episode_description"></textarea>
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Episode Number</label>
+            <input
+              type="number"
+              id="f_episode_number"
+            >
+          </div>
+
+          <div class="field">
+            <label>Season Number</label>
+            <input
+              type="number"
+              id="f_episode_season"
+            >
+          </div>
+
+        </div>
+
+        <div class="field">
+          <label>YouTube URL</label>
+          <input id="f_episode_youtube">
+        </div>
+
+      </div>
+
+      `;
+
+    document
+      .getElementById("modalSave")
+      .onclick =
+      App.saveEpisode;
+
+    App.openModal();
+
+  },
+
+
+  async saveEpisode(){
+
+    const title =
+      document
+        .getElementById(
+          "f_episode_title"
+        )
+        .value
+        .trim();
+
+    const show_id =
+      document
+        .getElementById(
+          "f_episode_show"
+        )
+        .value;
+
+    if(!title){
+
+      UI.toast(
+        "Episode title is required.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    const result =
+      await DB.insert(
+        "episodes",
+        {
+          show_id:
+            show_id || null,
+
+          title,
+
+          description:
+            document
+              .getElementById(
+                "f_episode_description"
+              )
+              .value
+              .trim(),
+
+          episode_number:
+            Number(
+              document
+                .getElementById(
+                  "f_episode_number"
+                )
+                .value
+            ) || null,
+
+          season_number:
+            Number(
+              document
+                .getElementById(
+                  "f_episode_season"
+                )
+                .value
+            ) || null,
+
+          youtube_url:
+            document
+              .getElementById(
+                "f_episode_youtube"
+              )
+              .value
+              .trim() || null,
+
+          is_active:true,
+          is_published:true
+
+        }
+      );
+
+    if(!result.ok){
+
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast("Episode created.");
+
+    App.closeModal();
+
+    App.loadEpisodes();
+
+  },
+
+
+  /* =======================================================
+     MEMBERS
+  ====================================================== */
+
+  async loadMembers(){
+
+    UI.loading(
+      "membersTable",
+      "Loading members..."
+    );
+
+    const result =
+      await DB.query(
+        "member_profiles",
+        q=>q
+          .select(`
+            id,
+            display_name,
+            username,
+            membership_tier,
+            is_active,
+            is_creator,
+            created_at,
+            updated_at
+          `)
+          .order(
+            "created_at",
+            {ascending:false}
+          )
+          .limit(250)
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "membersTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById("membersTable")
+      .innerHTML =
+      `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Username</th>
+              <th>Tier</th>
+              <th>Creator</th>
+              <th>Active</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(member=>`
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${U.esc(
+                      member.display_name ||
+                      "Unnamed Member"
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.esc(
+                    member.username || "—"
+                  )}
+                </td>
+
+                <td>
+                  <span class="badge purple">
+                    ${U.esc(
+                      member.membership_tier || "Member"
+                    )}
+                  </span>
+                </td>
+
+                <td>
+                  ${
+                    member.is_creator
+                      ? `<span class="badge blue">CREATOR</span>`
+                      : "—"
+                  }
+                </td>
+
+                <td>
+                  ${
+                    member.is_active
+                      ? `<span class="badge green">ACTIVE</span>`
+                      : `<span class="badge red">OFF</span>`
+                  }
+                </td>
+
+                <td>
+                  ${U.date(member.created_at)}
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+      `;
+
+  },
+
+
+  /* =======================================================
+     MEMBER POINTS
+  ====================================================== */
+
+  async loadPoints(){
+
+    UI.loading(
+      "pointsTable",
+      "Loading member points..."
+    );
+
+    /*
+     * IMPORTANT:
+     * member_points DOES NOT HAVE created_at.
+     * Only query columns confirmed in the current schema.
+     */
+
+    const result =
+      await DB.query(
+        "member_points",
+        q=>q
+          .select(`
+            user_id,
+            points,
+            level,
+            lifetime_points,
+            updated_at
+          `)
+          .order(
+            "lifetime_points",
+            {ascending:false}
+          )
+          .limit(250)
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "pointsTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById("pointsTable")
+      .innerHTML =
+      `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>User</th>
+              <th>Points</th>
+              <th>Lifetime</th>
+              <th>Level</th>
+              <th>Updated</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(row=>`
+
+              <tr>
+
+                <td>
+                  <code>
+                    ${U.esc(row.user_id)}
+                  </code>
+                </td>
+
+                <td>
+                  <strong>
+                    ${U.num(row.points)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.num(row.lifetime_points)}
+                </td>
+
+                <td>
+                  <span class="badge purple">
+                    ${U.num(row.level)}
+                  </span>
+                </td>
+
+                <td>
+                  ${U.date(row.updated_at)}
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+      `;
+
+  },
+
+
+  /* =======================================================
+     WATCH MINUTES
+  ====================================================== */
+
+  async loadWatchMinutes(){
+
+    UI.loading(
+      "watchTable",
+      "Loading watch minutes..."
+    );
+
+    /*
+     * IMPORTANT:
+     * crowrules_member_watch_minutes DOES NOT HAVE
+     * created_at.
+     *
+     * watched_at is the correct timestamp.
+     */
+
+    const result =
+      await DB.query(
+        "crowrules_member_watch_minutes",
+        q=>q
+          .select(`
+            id,
+            user_id,
+            channel_id,
+            show_id,
+            episode_id,
+            minutes,
+            points,
+            watched_at
+          `)
+          .order(
+            "watched_at",
+            {ascending:false}
+          )
+          .limit(250)
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "watchTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById("watchTable")
+      .innerHTML =
+      `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>User</th>
+              <th>Channel</th>
+              <th>Minutes</th>
+              <th>Points</th>
+              <th>Watched</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(row=>`
+
+              <tr>
+
+                <td>
+                  ${U.shortId(row.user_id)}
+                </td>
+
+                <td>
+                  ${U.esc(
+                    App.channelName(row.channel_id)
+                  )}
+                </td>
+
+                <td>
+                  <strong>
+                    ${U.num(row.minutes)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.num(row.points)}
+                </td>
+
+                <td>
+                  ${U.date(row.watched_at)}
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+      `;
+
+  },
+
+
+  /* =======================================================
+     ANALYTICS
+  ====================================================== */
+
+  async loadAnalytics(){
+
+    const [
+      contentViews,
+      analyticsEvents,
+      activeViewers
+    ] =
+      await Promise.all([
+
+        DB.count(
+          "content_views"
+        ),
+
+        DB.count(
+          "analytics_events"
+        ),
+
+        DB.query(
+          "tv_active_viewers",
+          q=>q.select("id")
+        )
+
+      ]);
+
+    document
+      .getElementById(
+        "analyticsContentViews"
+      )
+      .textContent =
+      contentViews.ok
+        ? U.num(contentViews.value)
+        : "—";
+
+    document
+      .getElementById(
+        "analyticsEventRows"
+      )
+      .textContent =
+      analyticsEvents.ok
+        ? U.num(analyticsEvents.value)
+        : "—";
+
+    document
+      .getElementById(
+        "analyticsActiveViewers"
+      )
+      .textContent =
+      activeViewers.ok
+        ? U.num(activeViewers.data.length)
+        : "—";
+
+    if(!analyticsEvents.ok){
+
+      UI.error(
+        "analyticsTable",
+        U.error(analyticsEvents.error)
+      );
+
+      return;
+
+    }
+
+    const search =
+      document
+        .getElementById(
+          "analyticsSearch"
+        )
+        ?.value
+        .trim()
+        .toLowerCase();
+
+    const result =
+      await DB.query(
+        "analytics_events",
+        q=>{
+
+          let query =
+            q
+              .select(`
+                id,
+                event_type,
+                table_name,
+                record_id,
+                path,
+                referrer,
+                user_id,
+                session_id,
+                visitor_id,
+                metadata,
+                created_at
+              `)
+              .order(
+                "created_at",
+                {ascending:false}
+              )
+              .limit(100);
+
+          return query;
+
+        }
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "analyticsTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    const rows =
+      search
+        ? result.data.filter(row=>
+            JSON.stringify(row)
+              .toLowerCase()
+              .includes(search)
+          )
+        : result.data;
+
+    document
+      .getElementById(
+        "analyticsTable"
+      )
+      .innerHTML =
+      `
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Event</th>
+              <th>Table</th>
+              <th>Path</th>
+              <th>Session</th>
+              <th>Time</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${rows.map(row=>`
+
+              <tr>
+
+                <td>
+                  <span class="badge blue">
+                    ${U.esc(row.event_type)}
+                  </span>
+                </td>
+
+                <td>
+                  ${U.esc(row.table_name || "—")}
+                </td>
+
+                <td>
+                  ${U.esc(row.path || "—")}
+                </td>
+
+                <td>
+                  ${U.shortId(row.session_id)}
+                </td>
+
+                <td>
+                  ${U.date(row.created_at)}
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+      `;
+
+    /*
+     * content_views-specific session count.
+     */
+
+    const sessions =
+      await DB.query(
+        "content_views",
+        q=>q
+          .select("session_id")
+          .not("session_id","is",null)
+      );
+
+    if(sessions.ok){
+
+      const unique =
+        new Set(
+          sessions.data
+            .map(x=>x.session_id)
+            .filter(Boolean)
+        );
+
+      document
+        .getElementById(
+          "analyticsSessions"
+        )
+        .textContent =
+        U.num(unique.size);
+
+      document
+        .getElementById(
+          "analyticsEvents"
+        )
+        .textContent =
+        U.num(contentViews.value);
+
+    }else{
+
+      document
+        .getElementById(
+          "analyticsSessions"
+        )
+        .textContent="—";
+
+    }
+
+    /*
+     * There is no assumed watch-history table here.
+     * Use actual content_views rows instead.
+     */
+
+    document
+      .getElementById(
+        "analyticsWatchHistory"
+      )
+      .textContent =
+      contentViews.ok
+        ? U.num(contentViews.value)
+        : "—";
+
+  },
+
+
+  async loadRecentAnalytics(){
+
+    const result =
+      await DB.query(
+        "analytics_events",
+        q=>q
+          .select(`
+            id,
+            event_type,
+            path,
+            created_at
+          `)
+          .order(
+            "created_at",
+            {ascending:false}
+          )
+          .limit(10)
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "dashboardAnalytics",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    if(!result.data.length){
+
+      UI.empty(
+        "dashboardAnalytics",
+        "No analytics events."
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById(
+        "dashboardAnalytics"
+      )
+      .innerHTML =
+      `
+      <div class="kpi-list">
+
+        ${result.data.map(row=>`
+
+          <div class="kpi">
+
+            <strong>
+              ${U.esc(
+                row.event_type || "event"
+              )}
+            </strong>
+
+            <span>
+              ${U.esc(
+                row.path || ""
+              )}
+              ·
+              ${U.date(row.created_at)}
             </span>
 
           </div>
 
-        `;
+        `).join("")}
 
-      }
-    ).join("");
+      </div>
+      `;
 
-}
-
-
-/* =========================================================
-   DATABASE HEALTH
-========================================================= */
-
-const HEALTH_TABLES = [
-
-  "tv_channels",
-  "schedule_items",
-  "shows",
-  "episodes",
-  "live_events",
-  "member_profiles",
-  "member_points",
-  "crowrules_member_watch_minutes",
-  "content_views",
-  "analytics_events",
-  "tv_active_viewers",
-  "chat_rooms",
-  "chat_messages",
-  "polls",
-  "newsletter_subscribers",
-  "creator_channels",
-  "creator_applications"
-
-];
+  },
 
 
-async function loadHealth(){
+  /* =======================================================
+     SPECTRUM AWARDS
+  ====================================================== */
 
-  $("healthList").innerHTML =
-    `<div class="empty">Checking database…</div>`;
+  async loadAwardStats(){
+
+    const [
+      seasons,
+      categories,
+      nominees,
+      votes,
+      winners
+    ] =
+      await Promise.all([
+
+        DB.count(
+          "spectrum_awards_seasons"
+        ),
+
+        DB.count(
+          "spectrum_awards_categories"
+        ),
+
+        DB.count(
+          "spectrum_awards_nominees"
+        ),
+
+        DB.count(
+          "spectrum_awards_votes"
+        ),
+
+        DB.count(
+          "spectrum_awards_winners"
+        )
+
+      ]);
+
+    const set=(id,result)=>{
+
+      document
+        .getElementById(id)
+        .textContent =
+        result.ok
+          ? U.num(result.value)
+          : "—";
+
+    };
+
+    set("awardSeasonCount",seasons);
+    set("awardCategoryCount",categories);
+    set("awardNomineeCount",nominees);
+    set("awardVoteCount",votes);
+    set("awardWinnerCount",winners);
+
+    set("awardsOverviewSeasons",seasons);
+    set("awardsOverviewCategories",categories);
+    set("awardsOverviewNominees",nominees);
+    set("awardsOverviewVotes",votes);
+    set("awardsOverviewWinners",winners);
+
+  },
 
 
-  const results =
-    await Promise.all(
-      HEALTH_TABLES.map(
-        async table => [
+  async loadAwardSettings(){
 
-          table,
-
-          await DB.count(
-            table
-          )
-
-        ]
-      )
+    UI.loading(
+      "awardSettings",
+      "Loading Spectrum Awards settings..."
     );
 
+    const result =
+      await DB.query(
+        "crowrules_awards_settings",
+        q=>q
+          .select(`
+            id,
+            season_id,
+            site_title,
+            enabled,
+            voting_enabled,
+            hero_title,
+            hero_description,
+            updated_at,
+            created_at
+          `)
+          .order(
+            "updated_at",
+            {ascending:false}
+          )
+          .limit(1)
+      );
 
-  $("healthList").innerHTML =
+    if(!result.ok){
 
-    results.map(
-      ([table,result]) => `
+      UI.error(
+        "awardSettings",
+        U.error(result.error)
+      );
 
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          padding:9px 0;
-          border-bottom:1px solid var(--line)
-        ">
+      return;
 
+    }
+
+    if(!result.data.length){
+
+      UI.empty(
+        "awardSettings",
+        "No Spectrum Awards settings record."
+      );
+
+      return;
+
+    }
+
+    const row =
+      result.data[0];
+
+    document
+      .getElementById(
+        "awardSettings"
+      )
+      .innerHTML =
+      `
+
+      <div class="kpi-list">
+
+        <div class="kpi">
+          <strong>Site Title</strong>
+          <span>${U.esc(row.site_title || "Spectrum Awards")}</span>
+        </div>
+
+        <div class="kpi">
+          <strong>Enabled</strong>
           <span>
-            ${escapeHTML(table)}
+            ${
+              row.enabled
+                ? "YES"
+                : "NO"
+            }
           </span>
+        </div>
 
-          ${
-            result.ok
+        <div class="kpi">
+          <strong>Voting</strong>
+          <span>
+            ${
+              row.voting_enabled
+                ? "OPEN"
+                : "CLOSED"
+            }
+          </span>
+        </div>
 
-            ?
+        <div class="kpi">
+          <strong>Hero</strong>
+          <span>
+            ${U.esc(row.hero_title || "—")}
+          </span>
+        </div>
 
-            `<span class="badge green">
-              ONLINE · ${result.count}
-            </span>`
+        <div class="kpi">
+          <strong>Updated</strong>
+          <span>
+            ${U.date(row.updated_at)}
+          </span>
+        </div>
 
-            :
+      </div>
 
-            `<span class="badge red">
-              ERROR
-            </span>`
-          }
+      `;
+
+  },
+
+
+  async loadAwardSeasons(){
+
+    UI.loading(
+      "awardSeasonsTable",
+      "Loading seasons..."
+    );
+
+    const result =
+      await DB.query(
+        "spectrum_awards_seasons",
+        q=>q
+          .select(`
+            id,
+            name,
+            year,
+            description,
+            status,
+            ceremony_date,
+            nominations_open_at,
+            nominations_close_at,
+            voting_open_at,
+            voting_close_at,
+            published,
+            created_at,
+            updated_at
+          `)
+          .order(
+            "year",
+            {ascending:false}
+          )
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "awardSeasonsTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    App.state.seasons =
+      result.data;
+
+    document
+      .getElementById(
+        "awardSeasonsTable"
+      )
+      .innerHTML =
+      `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Year</th>
+              <th>Status</th>
+              <th>Ceremony</th>
+              <th>Published</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(row=>`
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${U.esc(row.name)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.esc(row.year)}
+                </td>
+
+                <td>
+                  <span class="badge purple">
+                    ${U.esc(row.status || "—")}
+                  </span>
+                </td>
+
+                <td>
+                  ${U.date(row.ceremony_date)}
+                </td>
+
+                <td>
+                  ${
+                    row.published
+                      ? `<span class="badge green">YES</span>`
+                      : `<span class="badge red">NO</span>`
+                  }
+                </td>
+
+                <td>
+
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteRecord('spectrum_awards_seasons','${row.id}',App.loadAwardSeasons)"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+      `;
+
+  },
+
+
+  openSeasonModal(){
+
+    document
+      .getElementById("modalTitle")
+      .textContent =
+      "Add Spectrum Awards Season";
+
+    document
+      .getElementById("modalBody")
+      .innerHTML =
+      `
+
+      <div class="form">
+
+        <div class="field">
+          <label>Name</label>
+          <input id="f_season_name">
+        </div>
+
+        <div class="field">
+          <label>Year</label>
+          <input
+            type="number"
+            id="f_season_year"
+            value="${new Date().getFullYear()}"
+          >
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="f_season_description"></textarea>
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <input
+            id="f_season_status"
+            value="upcoming"
+          >
+        </div>
+
+        <div class="field">
+          <label>Ceremony Date</label>
+          <input
+            type="datetime-local"
+            id="f_season_ceremony"
+          >
+        </div>
+
+      </div>
+
+      `;
+
+    document
+      .getElementById("modalSave")
+      .onclick =
+      App.saveSeason;
+
+    App.openModal();
+
+  },
+
+
+  async saveSeason(){
+
+    const name =
+      document
+        .getElementById(
+          "f_season_name"
+        )
+        .value
+        .trim();
+
+    if(!name){
+
+      UI.toast(
+        "Season name is required.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    const ceremony =
+      document
+        .getElementById(
+          "f_season_ceremony"
+        )
+        .value;
+
+    const result =
+      await DB.insert(
+        "spectrum_awards_seasons",
+        {
+          name,
+          year:
+            Number(
+              document
+                .getElementById(
+                  "f_season_year"
+                ).value
+            ),
+
+          description:
+            document
+              .getElementById(
+                "f_season_description"
+              )
+              .value
+              .trim(),
+
+          status:
+            document
+              .getElementById(
+                "f_season_status"
+              )
+              .value
+              .trim(),
+
+          ceremony_date:
+            ceremony
+              ? new Date(
+                  ceremony
+                ).toISOString()
+              : null,
+
+          published:false
+
+        }
+      );
+
+    if(!result.ok){
+
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast("Spectrum Awards season created.");
+
+    App.closeModal();
+
+    App.loadAwardSeasons();
+
+    App.loadAwardStats();
+
+  },
+
+
+  async loadAwardCategories(){
+
+    UI.loading(
+      "awardCategoriesTable",
+      "Loading categories..."
+    );
+
+    const result =
+      await DB.query(
+        "spectrum_awards_categories",
+        q=>q
+          .select(`
+            id,
+            season_id,
+            name,
+            slug,
+            description,
+            sort_order,
+            voting_enabled,
+            published,
+            created_at,
+            award_group
+          `)
+          .order(
+            "sort_order",
+            {ascending:true}
+          )
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "awardCategoriesTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    App.state.categories =
+      result.data;
+
+    document
+      .getElementById(
+        "awardCategoriesTable"
+      )
+      .innerHTML =
+      `
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Name</th>
+              <th>Group</th>
+              <th>Season</th>
+              <th>Voting</th>
+              <th>Published</th>
+              <th>Actions</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(row=>`
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${U.esc(row.name)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.esc(row.award_group || "—")}
+                </td>
+
+                <td>
+                  ${U.shortId(row.season_id)}
+                </td>
+
+                <td>
+                  ${
+                    row.voting_enabled
+                      ? `<span class="badge green">OPEN</span>`
+                      : `<span class="badge red">OFF</span>`
+                  }
+                </td>
+
+                <td>
+                  ${
+                    row.published
+                      ? `<span class="badge green">YES</span>`
+                      : `<span class="badge red">NO</span>`
+                  }
+                </td>
+
+                <td>
+
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteRecord('spectrum_awards_categories','${row.id}',App.loadAwardCategories)"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      `;
+
+  },
+
+
+  openCategoryModal(){
+
+    document
+      .getElementById("modalTitle")
+      .textContent =
+      "Add Spectrum Award Category";
+
+    document
+      .getElementById("modalBody")
+      .innerHTML =
+      `
+
+      <div class="form">
+
+        <div class="field">
+          <label>Season</label>
+
+          <select id="f_category_season">
+
+            <option value="">
+              Select season
+            </option>
+
+            ${App.state.seasons.map(row=>`
+
+              <option value="${row.id}">
+                ${U.esc(row.name)}
+              </option>
+
+            `).join("")}
+
+          </select>
 
         </div>
 
-      `
-    ).join("");
+        <div class="field">
+          <label>Name</label>
+          <input id="f_category_name">
+        </div>
 
-}
+        <div class="field">
+          <label>Slug</label>
+          <input id="f_category_slug">
+        </div>
 
+        <div class="field">
+          <label>Award Group</label>
+          <input id="f_category_group">
+        </div>
 
-/* =========================================================
-   EDITOR
-========================================================= */
+        <div class="field">
+          <label>Description</label>
+          <textarea id="f_category_description"></textarea>
+        </div>
 
-let editorTable =
-  null;
+      </div>
 
-let editorRecord =
-  null;
+      `;
 
+    document
+      .getElementById("modalSave")
+      .onclick =
+      App.saveCategory;
 
-function openEditor(
-  table
-){
+    App.openModal();
 
-  editorTable =
-    table;
-
-  editorRecord =
-    null;
-
-  $("editorTitle")
-    .textContent =
-      `Add ${table}`;
-
-  buildEditorFields(
-    table,
-    {}
-  );
-
-  $("editorModal")
-    .classList
-    .add("open");
-
-}
+  },
 
 
-function openEditRecord(
-  table,
-  record
-){
+  async saveCategory(){
 
-  editorTable =
-    table;
+    const name =
+      document
+        .getElementById(
+          "f_category_name"
+        )
+        .value
+        .trim();
 
-  editorRecord =
-    record;
+    if(!name){
 
-  $("editorTitle")
-    .textContent =
-      `Edit ${table}`;
+      UI.toast(
+        "Category name is required.",
+        "error"
+      );
 
-  buildEditorFields(
-    table,
-    record
-  );
+      return;
 
-  $("editorModal")
-    .classList
-    .add("open");
+    }
 
-}
+    const result =
+      await DB.insert(
+        "spectrum_awards_categories",
+        {
+          season_id:
+            document
+              .getElementById(
+                "f_category_season"
+              )
+              .value || null,
+
+          name,
+
+          slug:
+            document
+              .getElementById(
+                "f_category_slug"
+              )
+              .value
+              .trim() ||
+            U.slug(name),
+
+          award_group:
+            document
+              .getElementById(
+                "f_category_group"
+              )
+              .value
+              .trim(),
+
+          description:
+            document
+              .getElementById(
+                "f_category_description"
+              )
+              .value
+              .trim(),
+
+          sort_order:0,
+
+          voting_enabled:true,
+
+          published:false
+
+        }
+      );
+
+    if(!result.ok){
+
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast("Award category created.");
+
+    App.closeModal();
+
+    App.loadAwardCategories();
+
+    App.loadAwardStats();
+
+  },
 
 
-function closeEditor(){
+  async loadAwardNominees(){
 
-  $("editorModal")
-    .classList
-    .remove("open");
-
-  editorTable =
-    null;
-
-  editorRecord =
-    null;
-
-}
-
-
-function buildEditorFields(
-  table,
-  record
-){
-
-  const fields =
-    Object.keys(
-      record || {}
-    ).filter(
-      key =>
-        key !== "created_at" &&
-        key !== "updated_at" &&
-        key !== "watched_at"
+    UI.loading(
+      "awardNomineesTable",
+      "Loading nominees..."
     );
 
+    const result =
+      await DB.query(
+        "spectrum_awards_nominees",
+        q=>q
+          .select(`
+            id,
+            category_id,
+            nominee_name,
+            nominee_type,
+            description,
+            image_url,
+            website_url,
+            youtube_url,
+            published,
+            winner,
+            sort_order,
+            created_at,
+            updated_at
+          `)
+          .order(
+            "sort_order",
+            {ascending:true}
+          )
+          .limit(500)
+      );
 
-  /*
-    For new records we don't know the
-    schema completely. Use common fields.
-  */
+    if(!result.ok){
 
-  const finalFields =
-    fields.length
-    ?
-    fields
-    :
-    [
-      "name",
-      "title",
-      "description",
-      "slug",
-      "url",
-      "youtube_url",
-      "is_active"
+      UI.error(
+        "awardNomineesTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    App.state.nominees =
+      result.data;
+
+    document
+      .getElementById(
+        "awardNomineesTable"
+      )
+      .innerHTML =
+      `
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Nominee</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Winner</th>
+              <th>Published</th>
+              <th>Actions</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(row=>`
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${U.esc(row.nominee_name)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${U.shortId(row.category_id)}
+                </td>
+
+                <td>
+                  ${U.esc(row.nominee_type || "—")}
+                </td>
+
+                <td>
+                  ${
+                    row.winner
+                      ? `<span class="badge yellow">WINNER</span>`
+                      : "—"
+                  }
+                </td>
+
+                <td>
+                  ${
+                    row.published
+                      ? `<span class="badge green">YES</span>`
+                      : `<span class="badge red">NO</span>`
+                  }
+                </td>
+
+                <td>
+
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteRecord('spectrum_awards_nominees','${row.id}',App.loadAwardNominees)"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      `;
+
+  },
+
+
+  openNomineeModal(){
+
+    document
+      .getElementById("modalTitle")
+      .textContent =
+      "Add Spectrum Awards Nominee";
+
+    document
+      .getElementById("modalBody")
+      .innerHTML =
+      `
+
+      <div class="form">
+
+        <div class="field">
+
+          <label>Category</label>
+
+          <select id="f_nominee_category">
+
+            <option value="">
+              Select category
+            </option>
+
+            ${App.state.categories.map(row=>`
+
+              <option value="${row.id}">
+                ${U.esc(row.name)}
+              </option>
+
+            `).join("")}
+
+          </select>
+
+        </div>
+
+        <div class="field">
+          <label>Nominee Name</label>
+          <input id="f_nominee_name">
+        </div>
+
+        <div class="field">
+          <label>Nominee Type</label>
+          <input
+            id="f_nominee_type"
+            placeholder="Show, Episode, Creator, Person..."
+          >
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="f_nominee_description"></textarea>
+        </div>
+
+        <div class="field">
+          <label>Image URL</label>
+          <input id="f_nominee_image">
+        </div>
+
+        <div class="field">
+          <label>Website URL</label>
+          <input id="f_nominee_website">
+        </div>
+
+        <div class="field">
+          <label>YouTube URL</label>
+          <input id="f_nominee_youtube">
+        </div>
+
+      </div>
+
+      `;
+
+    document
+      .getElementById("modalSave")
+      .onclick =
+      App.saveNominee;
+
+    App.openModal();
+
+  },
+
+
+  async saveNominee(){
+
+    const name =
+      document
+        .getElementById(
+          "f_nominee_name"
+        )
+        .value
+        .trim();
+
+    if(!name){
+
+      UI.toast(
+        "Nominee name is required.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    const result =
+      await DB.insert(
+        "spectrum_awards_nominees",
+        {
+
+          category_id:
+            document
+              .getElementById(
+                "f_nominee_category"
+              )
+              .value || null,
+
+          nominee_name:name,
+
+          nominee_type:
+            document
+              .getElementById(
+                "f_nominee_type"
+              )
+              .value
+              .trim(),
+
+          description:
+            document
+              .getElementById(
+                "f_nominee_description"
+              )
+              .value
+              .trim(),
+
+          image_url:
+            document
+              .getElementById(
+                "f_nominee_image"
+              )
+              .value
+              .trim() || null,
+
+          website_url:
+            document
+              .getElementById(
+                "f_nominee_website"
+              )
+              .value
+              .trim() || null,
+
+          youtube_url:
+            document
+              .getElementById(
+                "f_nominee_youtube"
+              )
+              .value
+              .trim() || null,
+
+          published:false,
+
+          winner:false,
+
+          sort_order:0
+
+        }
+      );
+
+    if(!result.ok){
+
+      UI.toast(
+        U.error(result.error),
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast("Nominee created.");
+
+    App.closeModal();
+
+    App.loadAwardNominees();
+
+    App.loadAwardStats();
+
+  },
+
+
+  async loadAwardWinners(){
+
+    UI.loading(
+      "awardWinnersTable",
+      "Loading winners..."
+    );
+
+    const result =
+      await DB.query(
+        "spectrum_awards_winners",
+        q=>q
+          .select(`
+            id,
+            category_id,
+            nominee_id,
+            announced_at,
+            published,
+            created_at
+          `)
+          .order(
+            "announced_at",
+            {ascending:false}
+          )
+      );
+
+    if(!result.ok){
+
+      UI.error(
+        "awardWinnersTable",
+        U.error(result.error)
+      );
+
+      return;
+
+    }
+
+    document
+      .getElementById(
+        "awardWinnersTable"
+      )
+      .innerHTML =
+      `
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Nominee</th>
+              <th>Category</th>
+              <th>Announced</th>
+              <th>Published</th>
+              <th>Actions</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${result.data.map(row=>`
+
+              <tr>
+
+                <td>
+                  ${U.esc(
+                    App.nomineeName(
+                      row.nominee_id
+                    )
+                  )}
+                </td>
+
+                <td>
+                  ${U.esc(
+                    App.categoryName(
+                      row.category_id
+                    )
+                  )}
+                </td>
+
+                <td>
+                  ${U.date(row.announced_at)}
+                </td>
+
+                <td>
+                  ${
+                    row.published
+                      ? `<span class="badge green">YES</span>`
+                      : `<span class="badge red">NO</span>`
+                  }
+                </td>
+
+                <td>
+
+                  <button
+                    class="btn danger"
+                    onclick="App.deleteRecord('spectrum_awards_winners','${row.id}',App.loadAwardWinners)"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      `;
+
+  },
+
+
+  nomineeName(id){
+
+    return (
+      App.state.nominees.find(
+        x=>x.id===id
+      )?.nominee_name ||
+      U.shortId(id)
+    );
+
+  },
+
+
+  categoryName(id){
+
+    return (
+      App.state.categories.find(
+        x=>x.id===id
+      )?.name ||
+      U.shortId(id)
+    );
+
+  },
+
+
+  /* =======================================================
+     DATABASE HEALTH
+  ====================================================== */
+
+  async checkDatabase(){
+
+    const tables=[
+
+      "tv_channels",
+      "schedule_items",
+      "shows",
+      "episodes",
+
+      "member_profiles",
+      "member_points",
+      "crowrules_member_watch_minutes",
+
+      "content_views",
+      "analytics_events",
+      "tv_active_viewers",
+
+      "spectrum_awards_seasons",
+      "spectrum_awards_categories",
+      "spectrum_awards_nominees",
+      "spectrum_awards_votes",
+      "spectrum_awards_winners",
+      "crowrules_awards_settings"
+
     ];
 
+    const results =
+      await Promise.all(
+        tables.map(
+          table=>
+            DB.query(
+              table,
+              q=>q
+                .select("*")
+                .limit(1)
+            )
+        )
+      );
 
-  $("editorFields").innerHTML =
+    App.state.health={};
 
-    finalFields.map(
-      field => {
+    for(const result of results){
 
-        const value =
-          record[field] ?? "";
+      App.state.health[
+        result.table
+      ] =
+        result.ok;
 
+    }
 
-        const isBool =
-          typeof value === "boolean";
+    const working =
+      results.filter(
+        x=>x.ok
+      ).length;
 
+    const failed =
+      results.length-working;
+
+    document
+      .getElementById(
+        "healthSummary"
+      )
+      .textContent =
+      `${working}/${results.length} available`;
+
+    const html =
+      results.map(result=>{
+
+        if(result.ok){
+
+          return `
+            <div class="health-row">
+
+              <span class="health-name">
+                ${U.esc(result.table)}
+              </span>
+
+              <span class="badge green">
+                ONLINE
+              </span>
+
+            </div>
+          `;
+
+        }
 
         return `
+          <div class="health-row">
 
-          <div class="field">
+            <span class="health-name">
+              ${U.esc(result.table)}
+            </span>
 
-            <label>
-              ${escapeHTML(field)}
-            </label>
+            <span
+              class="badge red"
+              title="${U.esc(
+                U.error(result.error)
+              )}"
+            >
+              ERROR
+            </span>
+
+          </div>
+        `;
+
+      }).join("");
+
+    document
+      .getElementById(
+        "dashboardHealth"
+      )
+      .innerHTML =
+      html;
+
+    document
+      .getElementById(
+        "databaseHealth"
+      )
+      .innerHTML =
+      `
+
+      <div style="margin-bottom:15px">
+
+        ${
+          failed === 0
+            ? `
+              <div class="badge green">
+                ALL CHECKED TABLES AVAILABLE
+              </div>
+            `
+            : `
+              <div class="badge yellow">
+                ${working} AVAILABLE · ${failed} UNAVAILABLE
+              </div>
+            `
+        }
+
+      </div>
+
+      <div class="health-list">
+
+        ${results.map(result=>`
+
+          <div class="health-row">
+
+            <span class="health-name">
+              ${U.esc(result.table)}
+            </span>
 
             ${
-              isBool
-
-              ?
-
-              `
-              <select
-                name="${escapeHTML(field)}"
-              >
-
-                <option
-                  value="true"
-                  ${value ? "selected" : ""}
-                >
-                  true
-                </option>
-
-                <option
-                  value="false"
-                  ${!value ? "selected" : ""}
-                >
-                  false
-                </option>
-
-              </select>
-              `
-
-              :
-
-              `
-
-              <input
-                name="${escapeHTML(field)}"
-                value="${escapeHTML(value)}"
-                ${field === "id" ? "readonly" : ""}
-              >
-
-              `
-
+              result.ok
+                ? `
+                  <span class="badge green">
+                    ONLINE
+                  </span>
+                `
+                : `
+                  <span
+                    class="badge red"
+                    title="${U.esc(
+                      U.error(result.error)
+                    )}"
+                  >
+                    ERROR
+                  </span>
+                `
             }
 
           </div>
 
-        `;
+        `).join("")}
 
-      }
-    ).join("");
+      </div>
 
-}
+      `;
 
-
-$("editorForm")
-  .addEventListener(
-    "submit",
-    async event => {
-
-      event.preventDefault();
+  },
 
 
-      if(!editorTable){
+  /* =======================================================
+     GENERIC DELETE
+  ====================================================== */
 
-        return;
+  async deleteRecord(
+    table,
+    id,
+    reload
+  ){
 
-      }
+    if(!confirm(
+      `Delete this record from ${table}?`
+    )){
+      return;
+    }
 
-
-      const form =
-        new FormData(
-          event.target
-        );
-
-
-      const payload =
-        {};
-
-
-      for(
-        const [
-          key,
-          value
-        ]
-        of form.entries()
-      ){
-
-        if(
-          key === "id"
-        ){
-
-          continue;
-
-        }
-
-
-        let parsed =
-          value;
-
-
-        if(
-          value === "true"
-        ){
-
-          parsed = true;
-
-        }else if(
-          value === "false"
-        ){
-
-          parsed = false;
-
-        }
-
-
-        if(
-          String(parsed)
-            .trim() !== ""
-        ){
-
-          payload[key] =
-            parsed;
-
-        }
-
-      }
-
-
-      let result;
-
-
-      if(
-        editorRecord &&
-        editorRecord.id
-      ){
-
-        result =
-          await DB.update(
-            editorTable,
-            "id",
-            editorRecord.id,
-            payload
-          );
-
-      }else{
-
-        result =
-          await DB.insert(
-            editorTable,
-            payload
-          );
-
-      }
-
-
-      if(!result.ok){
-
-        toast(
-          errorMessage(
-            result.error
-          ),
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      closeEditor();
-
-      toast(
-        "Database record saved.",
-        "success"
+    const result =
+      await DB.remove(
+        table,
+        id
       );
 
+    if(!result.ok){
 
-      await refreshCurrentSection();
+      UI.toast(
+        `${table}: ${U.error(result.error)}`,
+        "error"
+      );
+
+      return;
+
+    }
+
+    UI.toast(
+      `Record deleted from ${table}.`
+    );
+
+    if(typeof reload==="function"){
+      await reload();
+    }
+
+    App.loadAwardStats();
+
+  },
+
+
+  /* =======================================================
+     MODAL
+  ====================================================== */
+
+  openModal(){
+
+    document
+      .getElementById("modal")
+      .classList
+      .add("open");
+
+  },
+
+
+  closeModal(){
+
+    document
+      .getElementById("modal")
+      .classList
+      .remove("open");
+
+  }
+
+};
+
+
+/* =========================================================
+   MODAL BACKDROP
+========================================================= */
+
+document
+  .getElementById("modal")
+  .addEventListener(
+    "click",
+    event=>{
+
+      if(
+        event.target.id === "modal"
+      ){
+
+        App.closeModal();
+
+      }
 
     }
   );
 
 
 /* =========================================================
-   DELETE
+   KEYBOARD
 ========================================================= */
 
-async function deleteRecord(
-  table,
-  id
-){
-
-  if(!id){
-
-    toast(
-      "This record does not have an id.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if(
-    !confirm(
-      `Delete this ${table} record?`
-    )
-  ){
-
-    return;
-
-  }
-
-
-  const result =
-    await DB.remove(
-      table,
-      "id",
-      id
-    );
-
-
-  if(!result.ok){
-
-    toast(
-      errorMessage(
-        result.error
-      ),
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  toast(
-    "Record deleted.",
-    "success"
-  );
-
-
-  await refreshCurrentSection();
-
-}
-
-
-/* =========================================================
-   SECTION LOADING
-========================================================= */
-
-const SECTION_LOADERS = {
-
-  dashboard:
-    async () => {
-
-      await Promise.all([
-        loadDashboardStats(),
-        loadDashboardChannels(),
-        loadHealth()
-      ]);
-
-    },
-
-  channels:
-    loadChannels,
-
-  schedule:
-    () =>
-      loadTableSection(
-        "schedule_items",
-        "scheduleTable"
-      ),
-
-  live:
-    () =>
-      loadTableSection(
-        "live_events",
-        "liveTable"
-      ),
-
-  shows:
-    () =>
-      loadTableSection(
-        "shows",
-        "showsTable"
-      ),
-
-  episodes:
-    () =>
-      loadTableSection(
-        "episodes",
-        "episodesTable"
-      ),
-
-  content:
-    () =>
-      loadTableSection(
-        "content_items",
-        "contentTable"
-      ),
-
-  members:
-    () =>
-      loadTableSection(
-        "member_profiles",
-        "membersTable"
-      ),
-
-  points:
-    loadPoints,
-
-  watch:
-    loadWatchMinutes,
-
-  activity:
-    () =>
-      loadTableSection(
-        "member_activity",
-        "activityTable"
-      ),
-
-  analytics:
-    loadAnalytics,
-
-  views:
-    () =>
-      loadTableSection(
-        "content_views",
-        "viewsTable"
-      ),
-
-  viewers:
-    loadActiveViewerSection,
-
-  chat:
-    async () => {
-
-      await Promise.all([
-
-        loadTableSection(
-          "chat_rooms",
-          "chatRooms"
-        ),
-
-        loadTableSection(
-          "chat_messages",
-          "chatMessages"
-        )
-
-      ]);
-
-    },
-
-  polls:
-    () =>
-      loadTableSection(
-        "polls",
-        "pollsTable"
-      ),
-
-  newsletter:
-    () =>
-      loadTableSection(
-        "newsletter_subscribers",
-        "newsletterTable"
-      ),
-
-  creators:
-    () =>
-      loadTableSection(
-        "creator_channels",
-        "creatorsTable"
-      ),
-
-  applications:
-    () =>
-      loadTableSection(
-        "creator_applications",
-        "applicationsTable"
-      ),
-
-  awards:
-    async () => {},
-
-  links:
-    async () => {}
-
-};
-
-
-async function refreshCurrentSection(){
-
-  const active =
-    document.querySelector(
-      ".section.active"
-    );
-
-
-  if(!active){
-
-    return;
-
-  }
-
-
-  const loader =
-    SECTION_LOADERS[
-      active.id
-    ];
-
-
-  if(loader){
-
-    await loader();
-
-  }
-
-}
-
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-document.querySelectorAll(
-  ".nav button[data-section]"
-)
-.forEach(
-  button => {
-
-    button.addEventListener(
-      "click",
-      async () => {
-
-        const target =
-          button.dataset.section;
-
-
-        document
-          .querySelectorAll(
-            ".nav button"
-          )
-          .forEach(
-            item =>
-              item.classList.remove(
-                "active"
-              )
-          );
-
-
-        button.classList.add(
-          "active"
-        );
-
-
-        document
-          .querySelectorAll(
-            ".section"
-          )
-          .forEach(
-            section =>
-              section.classList.remove(
-                "active"
-              )
-          );
-
-
-        const section =
-          $(target);
-
-
-        if(section){
-
-          section.classList.add(
-            "active"
-          );
-
-        }
-
-
-        $("pageTitle")
-          .textContent =
-          button.textContent.trim();
-
-
-        document.body
-          .classList
-          .remove(
-            "menu-open"
-          );
-
-
-        await refreshCurrentSection();
-
-      }
-    );
+document.addEventListener(
+  "keydown",
+  event=>{
+
+    if(event.key==="Escape"){
+      App.closeModal();
+    }
 
   }
 );
 
 
 /* =========================================================
-   MOBILE MENU
+   START
 ========================================================= */
 
-$("menuBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      document.body
-        .classList
-        .toggle(
-          "menu-open"
-        );
-
-    }
-  );
-
-
-/* =========================================================
-   GLOBAL REFRESH
-========================================================= */
-
-async function refreshAll(){
-
-  toast(
-    "Refreshing Admin Pro…"
-  );
-
-
-  const online =
-    await testConnection();
-
-
-  if(!online){
-
-    toast(
-      "Supabase connection failed.",
-      "error"
-    );
-
-    return;
-
+document.addEventListener(
+  "DOMContentLoaded",
+  ()=>{
+    App.init();
   }
-
-
-  await refreshCurrentSection();
-
-  toast(
-    "Dashboard refreshed.",
-    "success"
-  );
-
-}
-
-
-/* =========================================================
-   REALTIME VIEWER REFRESH
-========================================================= */
-
-let viewerTimer =
-  null;
-
-
-async function refreshViewerStats(){
-
-  const viewers =
-    await getActiveViewers();
-
-
-  $("statViewers")
-    .textContent =
-    viewers.length
-    .toLocaleString();
-
-
-  $("analyticsActive")
-    .textContent =
-    viewers.length
-    .toLocaleString();
-
-
-  const active =
-    document.querySelector(
-      ".section.active"
-    );
-
-
-  if(
-    active &&
-    (
-      active.id === "channels" ||
-      active.id === "viewers" ||
-      active.id === "dashboard"
-    )
-  ){
-
-    await Promise.all([
-      loadDashboardChannels(),
-      loadChannels()
-    ]);
-
-  }
-
-}
-
-
-/* =========================================================
-   AUTH STATE
-========================================================= */
-
-supabaseClient.auth
-  .onAuthStateChange(
-    (
-      event,
-      session
-    ) => {
-
-      console.log(
-        "Auth:",
-        event,
-        Boolean(session)
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-async function init(){
-
-  const online =
-    await testConnection();
-
-
-  if(!online){
-
-    $("healthList").innerHTML = `
-
-      <div class="error">
-
-        <strong>
-          Supabase connection failed.
-        </strong>
-
-        <br><br>
-
-        ${escapeHTML(
-          "Check the Supabase project URL, publishable key, Data API exposure and RLS policies."
-        )}
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  await refreshCurrentSection();
-
-
-  /*
-    Live viewer counts refresh separately
-    so the entire dashboard doesn't reload
-    every 15 seconds.
-  */
-
-  viewerTimer =
-    setInterval(
-      refreshViewerStats,
-      CONFIG.viewerRefreshMs
-    );
-
-
-  /*
-    General dashboard refresh.
-  */
-
-  setInterval(
-    async () => {
-
-      const active =
-        document.querySelector(
-          ".section.active"
-        );
-
-
-      if(
-        active &&
-        active.id === "dashboard"
-      ){
-
-        await loadDashboardStats();
-        await loadHealth();
-
-      }
-
-    },
-    CONFIG.refreshMs
-  );
-
-}
-
-
-init();
+);
 
 </script>
 
