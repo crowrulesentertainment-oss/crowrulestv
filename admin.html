@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#050507">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
-<title>CrowRules Entertainment — Admin Pro v1.1</title>
+<title>CrowRules Entertainment — Admin Pro v1.0</title>
 
 <meta
   name="description"
-  content="CrowRules Entertainment Admin Pro — centralized management, live TV statistics, members, programming, analytics and Supabase administration."
+  content="CrowRules Entertainment Admin Pro — unified Supabase administration dashboard."
 >
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,20 +18,19 @@
 <style>
 :root{
   --bg:#050507;
-  --bg2:#0a0a0e;
-  --panel:#101016;
-  --panel2:#15151d;
-  --line:#282832;
-  --text:#f5f5f7;
-  --muted:#92929d;
-  --accent:#9b5cff;
-  --accent2:#d35cff;
-  --good:#36d399;
-  --warn:#f6c85f;
-  --bad:#ff5c72;
-  --cyan:#48d7ff;
-  --shadow:0 18px 50px rgba(0,0,0,.35);
-  --radius:18px;
+  --panel:#0b0d12;
+  --panel2:#10131a;
+  --panel3:#151923;
+  --line:#242936;
+  --text:#f4f6fb;
+  --muted:#8f98aa;
+  --accent:#7c5cff;
+  --accent2:#00d4ff;
+  --green:#35d07f;
+  --yellow:#f4c95d;
+  --red:#ff5d73;
+  --shadow:0 18px 60px rgba(0,0,0,.35);
+  --radius:16px;
 }
 
 *{
@@ -45,8 +44,8 @@ html{
 body{
   margin:0;
   background:
-    radial-gradient(circle at 15% 0%,rgba(155,92,255,.13),transparent 30%),
-    radial-gradient(circle at 85% 0%,rgba(72,215,255,.08),transparent 25%),
+    radial-gradient(circle at 10% 0%,rgba(124,92,255,.13),transparent 30%),
+    radial-gradient(circle at 90% 10%,rgba(0,212,255,.08),transparent 28%),
     var(--bg);
   color:var(--text);
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -54,7 +53,8 @@ body{
 
 button,
 input,
-select{
+select,
+textarea{
   font:inherit;
 }
 
@@ -69,6 +69,8 @@ a{
 
 .app{
   min-height:100vh;
+  display:grid;
+  grid-template-columns:270px 1fr;
 }
 
 /* =========================================================
@@ -76,90 +78,105 @@ a{
 ========================================================= */
 
 .sidebar{
-  position:fixed;
-  left:0;
+  position:sticky;
   top:0;
-  bottom:0;
-  width:270px;
-  background:rgba(7,7,10,.94);
+  height:100vh;
+  overflow:auto;
   border-right:1px solid var(--line);
-  backdrop-filter:blur(18px);
-  z-index:100;
-  overflow-y:auto;
+  background:rgba(5,5,7,.94);
+  backdrop-filter:blur(20px);
+  padding:22px 16px;
 }
 
 .brand{
-  padding:24px 20px;
-  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:24px;
+}
+
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;
+  font-weight:900;
+  box-shadow:0 8px 30px rgba(124,92,255,.25);
 }
 
 .brand-title{
   font-weight:900;
-  letter-spacing:.08em;
-  font-size:20px;
+  letter-spacing:.04em;
 }
 
 .brand-sub{
   color:var(--muted);
   font-size:11px;
-  margin-top:5px;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-}
-
-.nav{
-  padding:14px;
+  margin-top:2px;
 }
 
 .nav-group{
-  margin:18px 0 8px;
-  padding:0 10px;
-  color:#686873;
-  font-size:10px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:.15em;
+  margin:20px 0;
 }
 
-.nav button{
-  display:flex;
+.nav-label{
+  color:#687184;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  padding:0 10px 8px;
+}
+
+.nav-btn{
   width:100%;
-  align-items:center;
-  gap:11px;
   border:0;
   background:transparent;
-  color:#aaaab4;
+  color:#aeb6c7;
+  text-align:left;
   padding:11px 12px;
   border-radius:11px;
-  text-align:left;
   margin:2px 0;
   transition:.18s;
 }
 
-.nav button:hover{
-  background:#15151c;
-  color:#fff;
-}
-
-.nav button.active{
+.nav-btn:hover,
+.nav-btn.active{
   background:linear-gradient(
     90deg,
-    rgba(155,92,255,.22),
-    rgba(155,92,255,.07)
+    rgba(124,92,255,.18),
+    rgba(124,92,255,.04)
   );
   color:#fff;
-  box-shadow:inset 3px 0 var(--accent);
 }
 
-.nav-icon{
-  width:20px;
-  text-align:center;
+.sidebar-footer{
+  margin-top:30px;
+  border-top:1px solid var(--line);
+  padding-top:16px;
 }
 
-.nav-count{
-  margin-left:auto;
-  font-size:11px;
+.connection-mini{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
   color:var(--muted);
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 12px currentColor;
+}
+
+.dot.online{
+  background:var(--green);
 }
 
 /* =========================================================
@@ -167,176 +184,85 @@ a{
 ========================================================= */
 
 .main{
-  margin-left:270px;
-  min-height:100vh;
+  min-width:0;
 }
 
 .topbar{
   position:sticky;
   top:0;
-  z-index:80;
+  z-index:20;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:15px 24px;
+  border-bottom:1px solid var(--line);
+  background:rgba(5,5,7,.82);
+  backdrop-filter:blur(18px);
+}
+
+.topbar-left{
   display:flex;
   align-items:center;
-  gap:15px;
-  padding:14px 24px;
-  background:rgba(5,5,7,.86);
-  border-bottom:1px solid var(--line);
-  backdrop-filter:blur(20px);
+  gap:12px;
 }
 
 .mobile-menu{
   display:none;
 }
 
-.search{
-  flex:1;
-  position:relative;
+.page-title{
+  font-size:19px;
+  font-weight:900;
 }
 
-.search input{
-  width:100%;
-  background:#101016;
-  border:1px solid var(--line);
-  border-radius:12px;
-  color:#fff;
-  padding:11px 14px;
-  outline:none;
-}
-
-.search input:focus{
-  border-color:rgba(155,92,255,.7);
+.page-subtitle{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
 }
 
 .top-actions{
   display:flex;
   align-items:center;
-  gap:9px;
+  gap:8px;
 }
 
-.btn{
+.status-pill{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 11px;
   border:1px solid var(--line);
-  background:#111118;
-  color:#eee;
-  border-radius:11px;
-  padding:10px 13px;
-  transition:.18s;
-}
-
-.btn:hover{
-  border-color:#4b4b58;
-  background:#191920;
-}
-
-.btn.primary{
-  background:linear-gradient(135deg,#8e4fff,#c14fff);
-  border-color:transparent;
-  color:#fff;
-}
-
-.btn.good{
-  border-color:rgba(54,211,153,.3);
-  color:#7ff0bd;
-}
-
-.btn.danger{
-  border-color:rgba(255,92,114,.3);
-  color:#ff8090;
+  border-radius:999px;
+  color:var(--muted);
+  font-size:11px;
 }
 
 .content{
-  padding:26px;
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-.page-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  gap:20px;
-  margin-bottom:24px;
-}
-
-.page-title{
-  font-size:30px;
-  font-weight:900;
-  letter-spacing:-.03em;
-}
-
-.page-description{
-  color:var(--muted);
-  margin-top:5px;
-  font-size:14px;
-}
-
-.page-actions{
-  display:flex;
-  gap:9px;
-  flex-wrap:wrap;
+  padding:24px;
+  max-width:1800px;
+  margin:auto;
 }
 
 /* =========================================================
-   STATUS
+   CARDS / STATS
 ========================================================= */
 
-.connection{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:10px 13px;
-  border-radius:12px;
-  border:1px solid var(--line);
-  background:#0e0e14;
-  font-size:12px;
-}
-
-.status-dot{
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  background:#777;
-  box-shadow:0 0 10px rgba(255,255,255,.1);
-}
-
-.status-dot.online{
-  background:var(--good);
-  box-shadow:0 0 12px rgba(54,211,153,.8);
-}
-
-.status-dot.offline{
-  background:var(--bad);
-  box-shadow:0 0 12px rgba(255,92,114,.7);
-}
-
-.status-dot.loading{
-  background:var(--warn);
-  box-shadow:0 0 12px rgba(246,200,95,.7);
-}
-
-/* =========================================================
-   CARDS
-========================================================= */
-
-.stats-grid{
+.grid{
   display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:14px;
-  margin-bottom:20px;
+}
+
+.stats{
+  grid-template-columns:repeat(6,minmax(0,1fr));
 }
 
 .stat{
-  background:
-    linear-gradient(145deg,rgba(255,255,255,.025),transparent),
-    var(--panel);
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
   border:1px solid var(--line);
   border-radius:var(--radius);
-  padding:18px;
+  padding:17px;
   box-shadow:var(--shadow);
 }
 
@@ -345,156 +271,136 @@ a{
   font-size:11px;
   font-weight:700;
   text-transform:uppercase;
-  letter-spacing:.1em;
+  letter-spacing:.08em;
 }
 
 .stat-value{
   font-size:30px;
-  font-weight:900;
-  margin-top:8px;
+  line-height:1;
+  margin-top:9px;
+  font-weight:950;
 }
 
-.stat-meta{
-  color:#74747f;
+.stat-foot{
+  margin-top:9px;
   font-size:11px;
-  margin-top:5px;
+  color:var(--muted);
 }
 
-.stat.live .stat-value{
-  color:var(--good);
+.green{
+  color:var(--green);
 }
 
-.stat.accent .stat-value{
-  color:#c493ff;
+.red{
+  color:var(--red);
 }
 
-.stat.cyan .stat-value{
-  color:var(--cyan);
+.yellow{
+  color:var(--yellow);
 }
 
-.stat.warn .stat-value{
-  color:var(--warn);
+.cyan{
+  color:var(--accent2);
+}
+
+.purple{
+  color:#a997ff;
+}
+
+.section{
+  margin-top:22px;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin-bottom:12px;
+}
+
+.section-title{
+  font-size:16px;
+  font-weight:900;
+}
+
+.section-description{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
 }
 
 /* =========================================================
    PANELS
 ========================================================= */
 
-.grid-2{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:18px;
-}
-
-.grid-3{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:18px;
-}
-
 .panel{
-  background:rgba(15,15,21,.9);
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
   border:1px solid var(--line);
   border-radius:var(--radius);
   overflow:hidden;
   box-shadow:var(--shadow);
-  margin-bottom:18px;
 }
 
-.panel-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  padding:16px 18px;
-  border-bottom:1px solid var(--line);
-}
-
-.panel-title{
-  font-size:14px;
-  font-weight:800;
-}
-
-.panel-subtitle{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:3px;
-}
-
-.panel-body{
+.panel-pad{
   padding:18px;
 }
 
+.two-col{
+  grid-template-columns:minmax(0,1.6fr) minmax(320px,.8fr);
+}
+
 /* =========================================================
-   LIVE CHANNELS
+   BUTTONS
 ========================================================= */
 
-.channel-list{
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}
-
-.channel-row{
-  display:grid;
-  grid-template-columns:42px 1fr auto auto;
-  align-items:center;
-  gap:12px;
-  background:#111118;
-  border:1px solid #202029;
-  padding:10px;
-  border-radius:12px;
-}
-
-.channel-logo{
-  width:42px;
-  height:42px;
+.btn{
+  border:1px solid var(--line);
+  background:var(--panel3);
+  color:#fff;
   border-radius:10px;
-  object-fit:cover;
-  background:#20202a;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-}
-
-.channel-name{
-  font-weight:800;
-  font-size:13px;
-}
-
-.channel-slug{
-  color:#666672;
-  font-size:10px;
-  margin-top:3px;
-}
-
-.viewer-pill{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  color:#72edb5;
+  padding:9px 13px;
   font-weight:800;
   font-size:12px;
+  transition:.18s;
 }
 
-.viewer-pill::before{
-  content:"";
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:var(--good);
-  box-shadow:0 0 8px var(--good);
+.btn:hover{
+  transform:translateY(-1px);
+  border-color:#3c4352;
 }
 
-.live-badge{
-  font-size:9px;
-  font-weight:900;
-  padding:4px 7px;
-  border-radius:6px;
-  background:rgba(255,92,114,.12);
-  color:#ff7b8c;
-  border:1px solid rgba(255,92,114,.2);
+.btn-primary{
+  border-color:transparent;
+  background:linear-gradient(135deg,var(--accent),#5d43e8);
+}
+
+.btn-success{
+  background:rgba(53,208,127,.12);
+  border-color:rgba(53,208,127,.3);
+  color:var(--green);
+}
+
+.btn-danger{
+  background:rgba(255,93,115,.09);
+  border-color:rgba(255,93,115,.3);
+  color:var(--red);
+}
+
+.btn-small{
+  padding:6px 9px;
+  font-size:11px;
+}
+
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+}
+
+.spacer{
+  flex:1;
 }
 
 /* =========================================================
@@ -503,184 +409,285 @@ a{
 
 .table-wrap{
   overflow:auto;
+  max-height:650px;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:680px;
+  min-width:800px;
 }
 
-th{
-  color:#777783;
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.1em;
-  text-align:left;
-  padding:11px 15px;
-  border-bottom:1px solid var(--line);
-}
-
+th,
 td{
-  padding:13px 15px;
-  border-bottom:1px solid #1d1d25;
+  padding:11px 13px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  vertical-align:middle;
   font-size:12px;
 }
 
-tr:last-child td{
-  border-bottom:0;
+th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#0e1117;
+  color:#8e97aa;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+td{
+  color:#dce1eb;
 }
 
 tr:hover td{
-  background:rgba(255,255,255,.015);
+  background:rgba(255,255,255,.018);
+}
+
+.actions{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
 }
 
 .badge{
   display:inline-flex;
   align-items:center;
+  border-radius:999px;
   padding:4px 8px;
-  border-radius:7px;
   font-size:10px;
-  font-weight:800;
-  border:1px solid var(--line);
+  font-weight:900;
 }
 
-.badge.good{
-  color:#72edb5;
-  background:rgba(54,211,153,.07);
+.badge-green{
+  background:rgba(53,208,127,.12);
+  color:var(--green);
 }
 
-.badge.warn{
-  color:#f6d26f;
-  background:rgba(246,200,95,.07);
+.badge-red{
+  background:rgba(255,93,115,.12);
+  color:var(--red);
 }
 
-.badge.bad{
-  color:#ff8291;
-  background:rgba(255,92,114,.07);
+.badge-blue{
+  background:rgba(0,212,255,.1);
+  color:var(--accent2);
 }
 
-.badge.info{
-  color:#72dfff;
-  background:rgba(72,215,255,.07);
+.badge-purple{
+  background:rgba(124,92,255,.14);
+  color:#a997ff;
 }
 
 /* =========================================================
-   BARS
+   CHANNELS
 ========================================================= */
 
-.bar-list{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+.channel-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:12px;
 }
 
-.bar-item{
-  display:grid;
-  grid-template-columns:150px 1fr 60px;
-  align-items:center;
+.channel-card{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.018);
+  border-radius:14px;
+  padding:14px;
+}
+
+.channel-head{
+  display:flex;
+  justify-content:space-between;
   gap:10px;
+}
+
+.channel-name{
+  font-weight:900;
+}
+
+.channel-meta{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+
+.viewer{
+  font-size:28px;
+  font-weight:950;
+  margin:15px 0 4px;
+}
+
+.viewer-label{
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   FORMS
+========================================================= */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+.field label{
+  color:#aeb6c7;
+  font-size:11px;
+  font-weight:800;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  background:#080a0e;
+  color:#fff;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px 11px;
+  outline:none;
+}
+
+.field textarea{
+  min-height:130px;
+  resize:vertical;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
   font-size:12px;
 }
 
-.bar-track{
-  height:8px;
-  border-radius:20px;
-  background:#22222a;
-  overflow:hidden;
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(124,92,255,.1);
 }
 
-.bar-fill{
-  height:100%;
-  border-radius:20px;
-  background:linear-gradient(90deg,#8d4dff,#d357ff);
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);
 }
 
-/* =========================================================
-   PAGE CARDS
-========================================================= */
-
-.page-links{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
+.modal.open{
+  display:flex;
 }
 
-.page-link{
-  display:block;
-  background:#101016;
+.modal-card{
+  width:min(850px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#0b0d12;
   border:1px solid var(--line);
-  border-radius:15px;
-  padding:17px;
-  transition:.18s;
+  border-radius:18px;
+  box-shadow:0 30px 100px rgba(0,0,0,.55);
 }
 
-.page-link:hover{
-  transform:translateY(-2px);
-  border-color:#494956;
-  background:#15151d;
-}
-
-.page-link-icon{
-  font-size:23px;
-}
-
-.page-link-title{
-  margin-top:10px;
-  font-weight:800;
-}
-
-.page-link-url{
-  margin-top:4px;
-  color:#777783;
-  font-size:10px;
-  word-break:break-all;
-}
-
-/* =========================================================
-   DATABASE MATRIX
-========================================================= */
-
-.db-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
-
-.db-item{
+.modal-head{
+  position:sticky;
+  top:0;
+  z-index:2;
   display:flex;
   align-items:center;
+  justify-content:space-between;
+  padding:16px 18px;
+  background:#0b0d12;
+  border-bottom:1px solid var(--line);
+}
+
+.modal-body{
+  padding:18px;
+}
+
+.modal-foot{
+  display:flex;
+  justify-content:flex-end;
   gap:8px;
+  padding:14px 18px;
+  border-top:1px solid var(--line);
+}
+
+/* =========================================================
+   TOAST / LOG
+========================================================= */
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:200;
+  min-width:280px;
+  max-width:500px;
+  padding:13px 15px;
   border:1px solid var(--line);
+  border-radius:12px;
+  background:#10131a;
+  box-shadow:var(--shadow);
+  display:none;
+}
+
+.toast.show{
+  display:block;
+}
+
+.toast-title{
+  font-weight:900;
+  margin-bottom:4px;
+}
+
+.toast-message{
+  color:var(--muted);
+  font-size:12px;
+  white-space:pre-wrap;
+}
+
+.log{
+  background:#050608;
+  color:#aeb6c7;
+  padding:12px;
   border-radius:10px;
-  padding:10px;
-  background:#0e0e14;
+  font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
+  max-height:260px;
+  overflow:auto;
 }
 
-.db-status{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  flex:none;
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search{
+  min-width:220px;
+  background:#080a0e;
+  border:1px solid var(--line);
+  color:#fff;
+  border-radius:10px;
+  padding:9px 11px;
+  outline:none;
 }
 
-.db-status.ok{
-  background:var(--good);
-}
-
-.db-status.fail{
-  background:var(--bad);
-}
-
-.db-status.skip{
-  background:#656570;
-}
-
-.db-name{
-  font-size:11px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  overflow:hidden;
-  text-overflow:ellipsis;
+.search:focus{
+  border-color:var(--accent);
 }
 
 /* =========================================================
@@ -688,58 +695,23 @@ tr:hover td{
 ========================================================= */
 
 .empty{
+  padding:35px;
   text-align:center;
-  color:#686873;
-  padding:35px 15px;
-  font-size:13px;
+  color:var(--muted);
 }
 
-.loading{
-  color:#777783;
+.spinner{
+  width:18px;
+  height:18px;
+  border:2px solid #333846;
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  display:inline-block;
 }
 
-.error-box{
-  border:1px solid rgba(255,92,114,.3);
-  background:rgba(255,92,114,.06);
-  color:#ff9ba7;
-  border-radius:12px;
-  padding:13px;
-  font-size:12px;
-}
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-#toast{
-  position:fixed;
-  right:22px;
-  bottom:22px;
-  z-index:9999;
-  max-width:420px;
-  padding:13px 16px;
-  border-radius:12px;
-  background:#17171f;
-  border:1px solid #34343e;
-  box-shadow:0 15px 45px rgba(0,0,0,.5);
-  transform:translateY(20px);
-  opacity:0;
-  pointer-events:none;
-  transition:.22s;
-  font-size:12px;
-}
-
-#toast.show{
-  transform:translateY(0);
-  opacity:1;
-}
-
-#toast.good{
-  border-color:rgba(54,211,153,.4);
-}
-
-#toast.bad{
-  border-color:rgba(255,92,114,.4);
+@keyframes spin{
+  to{transform:rotate(360deg)}
 }
 
 /* =========================================================
@@ -747,71 +719,59 @@ tr:hover td{
 ========================================================= */
 
 @media(max-width:1250px){
-  .stats-grid{
-    grid-template-columns:repeat(3,1fr);
+  .stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
   }
 
-  .page-links{
-    grid-template-columns:repeat(3,1fr);
-  }
-
-  .db-grid{
-    grid-template-columns:repeat(3,1fr);
+  .two-col{
+    grid-template-columns:1fr;
   }
 }
 
-@media(max-width:950px){
+@media(max-width:900px){
+  .app{
+    grid-template-columns:1fr;
+  }
+
   .sidebar{
-    transform:translateX(-100%);
-    transition:.2s;
+    position:fixed;
+    left:-290px;
+    z-index:80;
+    width:270px;
+    transition:.25s;
   }
 
   .sidebar.open{
-    transform:translateX(0);
-  }
-
-  .main{
-    margin-left:0;
+    left:0;
   }
 
   .mobile-menu{
     display:block;
   }
 
-  .grid-2,
-  .grid-3{
-    grid-template-columns:1fr;
+  .stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 
-  .page-links{
-    grid-template-columns:repeat(2,1fr);
+  .content{
+    padding:15px;
   }
 }
 
-@media(max-width:650px){
-  .content{
-    padding:16px;
-  }
-
-  .topbar{
-    padding:10px 12px;
-  }
-
-  .stats-grid{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .page-links,
-  .db-grid{
+@media(max-width:550px){
+  .stats{
     grid-template-columns:1fr;
   }
 
-  .page-head{
-    align-items:flex-start;
-    flex-direction:column;
+  .form-grid{
+    grid-template-columns:1fr;
   }
 
-  .top-actions .btn span{
+  .topbar{
+    padding:12px 15px;
+  }
+
+  .status-pill{
     display:none;
   }
 }
@@ -822,1326 +782,1433 @@ tr:hover td{
 
 <div class="app">
 
-<!-- =======================================================
-     SIDEBAR
-======================================================= -->
+  <!-- =====================================================
+       SIDEBAR
+  ====================================================== -->
 
-<aside class="sidebar" id="sidebar">
+  <aside class="sidebar" id="sidebar">
 
-  <div class="brand">
-    <div class="brand-title">CROWRULES</div>
-    <div class="brand-sub">Entertainment · Admin Pro</div>
-  </div>
+    <div class="brand">
+      <div class="logo">CR</div>
+      <div>
+        <div class="brand-title">CROWRULES</div>
+        <div class="brand-sub">ADMIN PRO</div>
+      </div>
+    </div>
 
-  <nav class="nav">
+    <div class="nav-group">
 
-    <div class="nav-group">Overview</div>
+      <div class="nav-label">Dashboard</div>
 
-    <button class="nav-btn active" data-page="dashboard">
-      <span class="nav-icon">⌂</span>
-      Dashboard
-    </button>
+      <button class="nav-btn active" data-section="dashboard">
+        Overview
+      </button>
 
-    <button class="nav-btn" data-page="live">
-      <span class="nav-icon">●</span>
-      Live TV
-      <span class="nav-count" id="navViewers">0</span>
-    </button>
+      <button class="nav-btn" data-section="analytics">
+        Analytics
+      </button>
 
-    <button class="nav-btn" data-page="analytics">
-      <span class="nav-icon">◈</span>
-      Analytics
-    </button>
+      <button class="nav-btn" data-section="viewers">
+        Live Viewers
+      </button>
 
-    <div class="nav-group">Programming</div>
+    </div>
 
-    <button class="nav-btn" data-page="channels">
-      <span class="nav-icon">▣</span>
-      TV Channels
-    </button>
+    <div class="nav-group">
 
-    <button class="nav-btn" data-page="schedule">
-      <span class="nav-icon">☷</span>
-      TV Guide
-    </button>
+      <div class="nav-label">CrowRules TV</div>
 
-    <button class="nav-btn" data-page="shows">
-      <span class="nav-icon">▶</span>
-      Shows
-    </button>
+      <button class="nav-btn" data-section="channels">
+        TV Channels
+      </button>
 
-    <button class="nav-btn" data-page="episodes">
-      <span class="nav-icon">▤</span>
-      Episodes
-    </button>
+      <button class="nav-btn" data-section="schedule">
+        TV Schedule
+      </button>
 
-    <button class="nav-btn" data-page="events">
-      <span class="nav-icon">★</span>
-      Live Events
-    </button>
+      <button class="nav-btn" data-section="shows">
+        Shows
+      </button>
 
-    <div class="nav-group">Members</div>
+      <button class="nav-btn" data-section="episodes">
+        Episodes
+      </button>
 
-    <button class="nav-btn" data-page="members">
-      <span class="nav-icon">♙</span>
-      Members
-    </button>
+      <button class="nav-btn" data-section="live-events">
+        Live Events
+      </button>
 
-    <button class="nav-btn" data-page="activity">
-      <span class="nav-icon">◷</span>
-      Member Activity
-    </button>
+      <button class="nav-btn" data-section="ondemand">
+        On Demand
+      </button>
 
-    <button class="nav-btn" data-page="rewards">
-      <span class="nav-icon">✦</span>
-      Rewards
-    </button>
+      <button class="nav-btn" data-section="creators">
+        Creator Channels
+      </button>
 
-    <div class="nav-group">Content</div>
+    </div>
 
-    <button class="nav-btn" data-page="content">
-      <span class="nav-icon">▤</span>
-      Content
-    </button>
+    <div class="nav-group">
 
-    <button class="nav-btn" data-page="chat">
-      <span class="nav-icon">☵</span>
-      Chat
-    </button>
+      <div class="nav-label">Members</div>
 
-    <button class="nav-btn" data-page="polls">
-      <span class="nav-icon">?</span>
-      Polls
-    </button>
+      <button class="nav-btn" data-section="members">
+        Members
+      </button>
 
-    <div class="nav-group">Community</div>
+      <button class="nav-btn" data-section="memberships">
+        Memberships
+      </button>
 
-    <button class="nav-btn" data-page="creators">
-      <span class="nav-icon">♛</span>
-      Crow Nest Creators
-    </button>
+      <button class="nav-btn" data-section="points">
+        Member Points
+      </button>
 
-    <button class="nav-btn" data-page="applications">
-      <span class="nav-icon">✉</span>
-      Creator Applications
-    </button>
+      <button class="nav-btn" data-section="activity">
+        Member Activity
+      </button>
 
-    <button class="nav-btn" data-page="newsletter">
-      <span class="nav-icon">✉</span>
-      Newsletter
-    </button>
+    </div>
 
-    <button class="nav-btn" data-page="awards">
-      <span class="nav-icon">◆</span>
-      Spectrum Awards
-    </button>
+    <div class="nav-group">
 
-    <div class="nav-group">System</div>
+      <div class="nav-label">Community</div>
 
-    <button class="nav-btn" data-page="database">
-      <span class="nav-icon">⬡</span>
-      Database
-    </button>
+      <button class="nav-btn" data-section="chat">
+        Chat
+      </button>
 
-    <button class="nav-btn" data-page="pages">
-      <span class="nav-icon">↗</span>
-      CrowRules Pages
-    </button>
+      <button class="nav-btn" data-section="polls">
+        Polls
+      </button>
 
-  </nav>
+      <button class="nav-btn" data-section="friends">
+        Friends
+      </button>
 
-</aside>
+      <button class="nav-btn" data-section="reports">
+        Reports
+      </button>
 
-<!-- =======================================================
-     MAIN
-======================================================= -->
+    </div>
 
-<main class="main">
+    <div class="nav-group">
 
-  <header class="topbar">
+      <div class="nav-label">Database</div>
 
-    <button class="btn mobile-menu" id="mobileMenu">☰</button>
+      <button class="nav-btn" data-section="database">
+        All Tables
+      </button>
 
-    <div class="search">
-      <input
-        id="globalSearch"
-        type="search"
-        placeholder="Search dashboard..."
-        autocomplete="off"
+      <button class="nav-btn" data-section="diagnostics">
+        Diagnostics
+      </button>
+
+    </div>
+
+    <div class="nav-group">
+
+      <div class="nav-label">CrowRules</div>
+
+      <a class="nav-btn" href="index.html">
+        Main Site
+      </a>
+
+      <a class="nav-btn" href="tv.html">
+        CrowRules TV
+      </a>
+
+      <a class="nav-btn" href="members.html">
+        Members
+      </a>
+
+      <a class="nav-btn" href="nest.html">
+        Crow Nest
+      </a>
+
+      <a class="nav-btn" href="spectrum-awards.html">
+        Spectrum Awards
+      </a>
+
+    </div>
+
+    <div class="sidebar-footer">
+
+      <div class="connection-mini">
+        <span class="dot" id="sidebarDot"></span>
+        <span id="sidebarStatus">Checking Supabase…</span>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main class="main">
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+
+        <button
+          class="btn mobile-menu"
+          id="mobileMenu"
+          type="button"
+        >
+          ☰
+        </button>
+
+        <div>
+          <div class="page-title" id="pageTitle">
+            Admin Pro
+          </div>
+
+          <div class="page-subtitle" id="pageSubtitle">
+            CrowRules Entertainment control center
+          </div>
+        </div>
+
+      </div>
+
+      <div class="top-actions">
+
+        <div class="status-pill">
+          <span class="dot" id="topDot"></span>
+          <span id="topStatus">
+            Connecting…
+          </span>
+        </div>
+
+        <button
+          class="btn"
+          id="refreshAll"
+          type="button"
+        >
+          ↻ Refresh
+        </button>
+
+      </div>
+
+    </header>
+
+    <div class="content">
+
+      <!-- =================================================
+           DASHBOARD
+      ================================================== -->
+
+      <section id="section-dashboard">
+
+        <div class="grid stats">
+
+          <div class="stat">
+            <div class="stat-label">Active Channels</div>
+            <div class="stat-value cyan" id="statChannels">—</div>
+            <div class="stat-foot">tv_channels.is_active = true</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Current Viewers</div>
+            <div class="stat-value green" id="statViewers">—</div>
+            <div class="stat-foot">Live active viewer presence</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Channel Views</div>
+            <div class="stat-value purple" id="statChannelViews">—</div>
+            <div class="stat-foot">Accumulated views</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Members</div>
+            <div class="stat-value" id="statMembers">—</div>
+            <div class="stat-foot">member_profiles</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Shows</div>
+            <div class="stat-value yellow" id="statShows">—</div>
+            <div class="stat-foot">Published / stored shows</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Episodes</div>
+            <div class="stat-value" id="statEpisodes">—</div>
+            <div class="stat-foot">Episodes in database</div>
+          </div>
+
+        </div>
+
+        <div class="section">
+
+          <div class="section-head">
+
+            <div>
+              <div class="section-title">
+                CrowRules TV — Live Channels
+              </div>
+
+              <div class="section-description">
+                Authoritative source: tv_channels
+              </div>
+            </div>
+
+            <div class="toolbar">
+
+              <button
+                class="btn btn-primary"
+                onclick="openAdd('tv_channels')"
+              >
+                + Add Channel
+              </button>
+
+              <button
+                class="btn"
+                onclick="navigate('channels')"
+              >
+                Manage Channels
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="panel">
+
+            <div
+              class="channel-grid panel-pad"
+              id="dashboardChannels"
+            >
+              <div class="empty">
+                <span class="spinner"></span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="section grid two-col">
+
+          <div class="panel">
+
+            <div class="panel-pad">
+
+              <div class="section-head">
+
+                <div>
+                  <div class="section-title">
+                    Current Schedule
+                  </div>
+
+                  <div class="section-description">
+                    Authoritative source: schedule_items
+                  </div>
+                </div>
+
+                <button
+                  class="btn btn-small"
+                  onclick="navigate('schedule')"
+                >
+                  Manage
+                </button>
+
+              </div>
+
+              <div
+                class="table-wrap"
+                id="dashboardSchedule"
+              >
+                <div class="empty">
+                  Loading…
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="panel">
+
+            <div class="panel-pad">
+
+              <div class="section-head">
+
+                <div>
+                  <div class="section-title">
+                    System Status
+                  </div>
+
+                  <div class="section-description">
+                    Unified Supabase wrapper
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="log" id="dashboardLog">
+                Starting Admin Pro…
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           ANALYTICS
+      ================================================== -->
+
+      <section
+        id="section-analytics"
+        hidden
       >
-    </div>
 
-    <div class="connection">
-      <span class="status-dot loading" id="connectionDot"></span>
-      <span id="connectionText">Connecting…</span>
-    </div>
+        <div class="section-head">
 
-    <div class="top-actions">
-      <button class="btn" id="refreshBtn">↻ <span>Refresh</span></button>
-      <button class="btn primary" id="exportBtn">⇩ <span>Export</span></button>
-    </div>
+          <div>
+            <div class="section-title">
+              Analytics
+            </div>
 
-  </header>
-
-  <div class="content">
-
-<!-- =======================================================
-     DASHBOARD
-======================================================= -->
-
-<section class="page active" id="page-dashboard">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Admin Pro</div>
-      <div class="page-description">
-        CrowRules Entertainment central operations dashboard.
-      </div>
-    </div>
-
-    <div class="page-actions">
-      <button class="btn" data-page-jump="live">Live TV</button>
-      <button class="btn" data-page-jump="members">Members</button>
-      <button class="btn primary" data-page-jump="pages">Open Pages</button>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat live">
-      <div class="stat-label">Current Viewers</div>
-      <div class="stat-value" id="statViewers">0</div>
-      <div class="stat-meta">Active viewers right now</div>
-    </div>
-
-    <div class="stat accent">
-      <div class="stat-label">Active Channels</div>
-      <div class="stat-value" id="statChannels">0</div>
-      <div class="stat-meta">tv_channels · is_active=true</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Schedule Items</div>
-      <div class="stat-value" id="statSchedule">0</div>
-      <div class="stat-meta">Authoritative TV schedule</div>
-    </div>
-
-    <div class="stat cyan">
-      <div class="stat-label">Members</div>
-      <div class="stat-value" id="statMembers">0</div>
-      <div class="stat-meta">Member profiles</div>
-    </div>
-
-    <div class="stat warn">
-      <div class="stat-label">Watch Minutes</div>
-      <div class="stat-value" id="statWatchMinutes">0</div>
-      <div class="stat-meta">Tracked member minutes</div>
-    </div>
-
-  </div>
-
-  <div class="grid-2">
-
-    <div class="panel">
-
-      <div class="panel-head">
-        <div>
-          <div class="panel-title">Live Channel Viewers</div>
-          <div class="panel-subtitle">
-            Real-time counts from active viewer tracking.
+            <div class="section-description">
+              Database-backed CrowRules performance statistics.
+            </div>
           </div>
+
+          <button
+            class="btn"
+            onclick="loadAnalytics()"
+          >
+            ↻ Refresh
+          </button>
+
         </div>
 
-        <button class="btn" id="refreshViewers">Refresh</button>
-      </div>
+        <div class="grid stats">
 
-      <div class="panel-body">
-        <div class="channel-list" id="dashboardChannels">
-          <div class="empty loading">Loading channels…</div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="panel">
-
-      <div class="panel-head">
-        <div>
-          <div class="panel-title">Database Health</div>
-          <div class="panel-subtitle">
-            Tables are checked independently.
+          <div class="stat">
+            <div class="stat-label">Content Views</div>
+            <div class="stat-value" id="analyticsViews">—</div>
           </div>
+
+          <div class="stat">
+            <div class="stat-label">Analytics Events</div>
+            <div class="stat-value" id="analyticsEvents">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Likes</div>
+            <div class="stat-value" id="analyticsLikes">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Watch Progress</div>
+            <div class="stat-value" id="analyticsProgress">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Watch History</div>
+            <div class="stat-value" id="analyticsHistory">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Daily Stats</div>
+            <div class="stat-value" id="analyticsDaily">—</div>
+          </div>
+
         </div>
-      </div>
 
-      <div class="panel-body">
-        <div class="db-grid" id="dashboardDb">
-          <div class="empty loading">Checking database…</div>
+        <div class="section">
+
+          <div class="panel">
+
+            <div class="panel-pad">
+
+              <div class="section-title">
+                Analytics Events
+              </div>
+
+              <div
+                class="table-wrap"
+                id="analyticsTable"
+              >
+                <div class="empty">
+                  Loading…
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
-      </div>
 
-    </div>
+      </section>
 
-  </div>
+      <!-- =================================================
+           VIEWERS
+      ================================================== -->
 
-  <div class="grid-3">
+      <section
+        id="section-viewers"
+        hidden
+      >
 
-    <div class="panel">
+        <div class="section-head">
 
-      <div class="panel-head">
-        <div>
-          <div class="panel-title">Top Channels</div>
+          <div>
+            <div class="section-title">
+              Live Viewer Statistics
+            </div>
+
+            <div class="section-description">
+              Current viewers are NOT read from tv_channels.views.
+              Active presence is authoritative.
+            </div>
+          </div>
+
+          <button
+            class="btn btn-success"
+            onclick="loadViewerStats()"
+          >
+            ↻ Refresh Viewers
+          </button>
+
         </div>
-      </div>
 
-      <div class="panel-body">
-        <div class="bar-list" id="topChannels">
-          <div class="empty">Loading…</div>
+        <div class="panel">
+
+          <div
+            class="channel-grid panel-pad"
+            id="viewerGrid"
+          >
+            <div class="empty">
+              Loading live viewer data…
+            </div>
+          </div>
+
         </div>
-      </div>
 
-    </div>
+      </section>
 
-    <div class="panel">
+      <!-- =================================================
+           CHANNELS
+      ================================================== -->
 
-      <div class="panel-head">
-        <div>
-          <div class="panel-title">Member Statistics</div>
+      <section
+        id="section-channels"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              TV Channels
+            </div>
+
+            <div class="section-description">
+              <strong>tv_channels</strong> is the authoritative channel
+              list. Only active channels appear on the public TV page.
+            </div>
+
+          </div>
+
+          <div class="toolbar">
+
+            <input
+              class="search"
+              id="channelSearch"
+              placeholder="Search channels…"
+            >
+
+            <button
+              class="btn btn-primary"
+              onclick="openAdd('tv_channels')"
+            >
+              + Add Channel
+            </button>
+
+            <button
+              class="btn"
+              onclick="loadChannels()"
+            >
+              ↻
+            </button>
+
+          </div>
+
         </div>
-      </div>
 
-      <div class="panel-body">
-        <div class="bar-list" id="memberStats">
-          <div class="empty">Loading…</div>
+        <div class="panel">
+
+          <div
+            class="table-wrap"
+            id="channelsTable"
+          >
+            <div class="empty">
+              Loading…
+            </div>
+          </div>
+
         </div>
-      </div>
 
-    </div>
+      </section>
 
-    <div class="panel">
+      <!-- =================================================
+           SCHEDULE
+      ================================================== -->
 
-      <div class="panel-head">
-        <div>
-          <div class="panel-title">System</div>
+      <section
+        id="section-schedule"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              TV Schedule
+            </div>
+
+            <div class="section-description">
+              <strong>schedule_items</strong> is the authoritative
+              schedule table. Legacy schedule tables are not used.
+            </div>
+
+          </div>
+
+          <div class="toolbar">
+
+            <input
+              class="search"
+              id="scheduleSearch"
+              placeholder="Search schedule…"
+            >
+
+            <button
+              class="btn btn-primary"
+              onclick="openAdd('schedule_items')"
+            >
+              + Add Schedule Item
+            </button>
+
+            <button
+              class="btn"
+              onclick="loadSchedule()"
+            >
+              ↻
+            </button>
+
+          </div>
+
         </div>
-      </div>
 
-      <div class="panel-body" id="systemInfo">
-        <div class="empty">Loading…</div>
-      </div>
+        <div class="panel">
 
-    </div>
+          <div
+            class="table-wrap"
+            id="scheduleTable"
+          >
+            <div class="empty">
+              Loading…
+            </div>
+          </div>
 
-  </div>
-
-</section>
-
-<!-- =======================================================
-     LIVE
-======================================================= -->
-
-<section class="page" id="page-live">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Live TV</div>
-      <div class="page-description">
-        Current viewers by active CrowRules TV channel.
-      </div>
-    </div>
-
-    <div class="page-actions">
-      <button class="btn primary" id="liveRefresh">Refresh Viewers</button>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat live">
-      <div class="stat-label">Total Current Viewers</div>
-      <div class="stat-value" id="liveTotalViewers">0</div>
-      <div class="stat-meta">tv_active_viewers</div>
-    </div>
-
-    <div class="stat accent">
-      <div class="stat-label">Active Channels</div>
-      <div class="stat-value" id="liveActiveChannels">0</div>
-      <div class="stat-meta">tv_channels</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Channels With Viewers</div>
-      <div class="stat-value" id="liveChannelsWatching">0</div>
-      <div class="stat-meta">Current audience</div>
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">Channel Viewer Monitor</div>
-        <div class="panel-subtitle">
-          Current viewers are never calculated from tv_channels.views.
         </div>
-      </div>
-    </div>
 
-    <div class="panel-body">
-      <div class="channel-list" id="liveChannels">
-        <div class="empty loading">Loading…</div>
-      </div>
-    </div>
+      </section>
 
-  </div>
+      <!-- =================================================
+           SHOWS
+      ================================================== -->
 
-</section>
+      <section
+        id="section-shows"
+        hidden
+      >
 
-<!-- =======================================================
-     CHANNELS
-======================================================= -->
+        <div class="section-head">
 
-<section class="page" id="page-channels">
+          <div>
+            <div class="section-title">
+              Shows
+            </div>
+            <div class="section-description">
+              Add, edit and delete show records.
+            </div>
+          </div>
 
-  <div class="page-head">
-    <div>
-      <div class="page-title">TV Channels</div>
-      <div class="page-description">
-        Authoritative source: tv_channels. Only active channels are shown.
-      </div>
-    </div>
-  </div>
+          <div class="toolbar">
 
-  <div class="panel">
+            <input
+              class="search"
+              id="showsSearch"
+              placeholder="Search shows…"
+            >
 
-    <div class="panel-head">
-      <div class="panel-title">Active Channels</div>
-      <button class="btn" data-refresh-section="channels">Refresh</button>
-    </div>
+            <button
+              class="btn btn-primary"
+              onclick="openAdd('shows')"
+            >
+              + Add Show
+            </button>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Channel</th>
-            <th>Slug</th>
-            <th>Status</th>
-            <th>Current Viewers</th>
-            <th>Accumulated Views</th>
-            <th>Updated</th>
-          </tr>
-        </thead>
-        <tbody id="channelsTable">
-          <tr>
-            <td colspan="6" class="empty">Loading…</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          </div>
 
-  </div>
-
-</section>
-
-<!-- =======================================================
-     SCHEDULE
-======================================================= -->
-
-<section class="page" id="page-schedule">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">TV Guide</div>
-      <div class="page-description">
-        Authoritative schedule source: schedule_items.
-      </div>
-    </div>
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Schedule Items</div>
-      <button class="btn" data-refresh-section="schedule">Refresh</button>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Channel</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody id="scheduleTable">
-          <tr>
-            <td colspan="5" class="empty">Loading…</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     SHOWS
-======================================================= -->
-
-<section class="page" id="page-shows">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Shows</div>
-      <div class="page-description">CrowRules programming library.</div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-head">
-      <div class="panel-title">Shows</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>ID</th>
-          </tr>
-        </thead>
-        <tbody id="showsTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</section>
-
-<!-- =======================================================
-     EPISODES
-======================================================= -->
-
-<section class="page" id="page-episodes">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Episodes</div>
-      <div class="page-description">Episode catalog and publishing data.</div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-head">
-      <div class="panel-title">Episodes</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Show</th>
-            <th>Episode</th>
-            <th>Status</th>
-            <th>Published</th>
-          </tr>
-        </thead>
-        <tbody id="episodesTable">
-          <tr><td colspan="5" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</section>
-
-<!-- =======================================================
-     EVENTS
-======================================================= -->
-
-<section class="page" id="page-events">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Live Events</div>
-      <div class="page-description">Upcoming and active live events.</div>
-    </div>
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Live Events</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Status</th>
-            <th>Start</th>
-            <th>End</th>
-          </tr>
-        </thead>
-
-        <tbody id="eventsTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     MEMBERS
-======================================================= -->
-
-<section class="page" id="page-members">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Members</div>
-      <div class="page-description">Member profiles, activity and engagement.</div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat cyan">
-      <div class="stat-label">Member Profiles</div>
-      <div class="stat-value" id="memberCount">0</div>
-    </div>
-
-    <div class="stat accent">
-      <div class="stat-label">Membership Records</div>
-      <div class="stat-value" id="membershipCount">0</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Friends</div>
-      <div class="stat-value" id="friendsCount">0</div>
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Recent Members</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Email / Identity</th>
-            <th>Joined</th>
-            <th>Updated</th>
-          </tr>
-        </thead>
-
-        <tbody id="membersTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     ACTIVITY
-======================================================= -->
-
-<section class="page" id="page-activity">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Member Activity</div>
-      <div class="page-description">Recent member actions and engagement.</div>
-    </div>
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Recent Activity</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Activity</th>
-            <th>Type</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-
-        <tbody id="activityTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     REWARDS
-======================================================= -->
-
-<section class="page" id="page-rewards">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Member Rewards</div>
-      <div class="page-description">
-        Watch rewards and member point accounting.
-      </div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat accent">
-      <div class="stat-label">Total Points</div>
-      <div class="stat-value" id="totalPoints">0</div>
-    </div>
-
-    <div class="stat cyan">
-      <div class="stat-label">Tracked Minutes</div>
-      <div class="stat-value" id="rewardMinutes">0</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Point Transactions</div>
-      <div class="stat-value" id="pointTransactions">0</div>
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Top Members By Points</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Points</th>
-            <th>Watch Minutes</th>
-            <th>Updated</th>
-          </tr>
-        </thead>
-
-        <tbody id="rewardsTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     ANALYTICS
-======================================================= -->
-
-<section class="page" id="page-analytics">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Analytics</div>
-      <div class="page-description">
-        Content views, analytics events and engagement statistics.
-      </div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat">
-      <div class="stat-label">Content Views</div>
-      <div class="stat-value" id="analyticsViews">0</div>
-    </div>
-
-    <div class="stat accent">
-      <div class="stat-label">Analytics Events</div>
-      <div class="stat-value" id="analyticsEvents">0</div>
-    </div>
-
-    <div class="stat cyan">
-      <div class="stat-label">Likes</div>
-      <div class="stat-value" id="analyticsLikes">0</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Watch History</div>
-      <div class="stat-value" id="analyticsHistory">0</div>
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Content View Statistics</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Content</th>
-            <th>Views</th>
-            <th>Unique Viewers</th>
-            <th>Updated</th>
-          </tr>
-        </thead>
-
-        <tbody id="analyticsTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     CONTENT
-======================================================= -->
-
-<section class="page" id="page-content">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Content</div>
-      <div class="page-description">On-demand and content library.</div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat">
-      <div class="stat-label">Content Items</div>
-      <div class="stat-value" id="contentCount">0</div>
-    </div>
-
-    <div class="stat accent">
-      <div class="stat-label">On-Demand Library</div>
-      <div class="stat-value" id="ondemandCount">0</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Favorites</div>
-      <div class="stat-value" id="favoritesCount">0</div>
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Content Items</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-
-        <tbody id="contentTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     CHAT
-======================================================= -->
-
-<section class="page" id="page-chat">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Chat</div>
-      <div class="page-description">Chat rooms, messages and reports.</div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat">
-      <div class="stat-label">Chat Rooms</div>
-      <div class="stat-value" id="chatRoomsCount">0</div>
-    </div>
-
-    <div class="stat cyan">
-      <div class="stat-label">Messages</div>
-      <div class="stat-value" id="chatMessagesCount">0</div>
-    </div>
-
-    <div class="stat warn">
-      <div class="stat-label">Reports</div>
-      <div class="stat-value" id="chatReportsCount">0</div>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     POLLS
-======================================================= -->
-
-<section class="page" id="page-polls">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Polls</div>
-      <div class="page-description">Community and programming polls.</div>
-    </div>
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Polls</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Question</th>
-            <th>Status</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-
-        <tbody id="pollsTable">
-          <tr><td colspan="3" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     CREATORS
-======================================================= -->
-
-<section class="page" id="page-creators">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Crow Nest Creators</div>
-      <div class="page-description">Creator channels and creator ecosystem.</div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat accent">
-      <div class="stat-label">Creator Channels</div>
-      <div class="stat-value" id="creatorChannelsCount">0</div>
-    </div>
-
-    <div class="stat cyan">
-      <div class="stat-label">Crow Nest Creators</div>
-      <div class="stat-value" id="nestCreatorsCount">0</div>
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Creators</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Channel</th>
-            <th>Status</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-
-        <tbody id="creatorsTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     APPLICATIONS
-======================================================= -->
-
-<section class="page" id="page-applications">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Creator Applications</div>
-      <div class="page-description">Incoming creator applications.</div>
-    </div>
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Applications</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Applicant</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Updated</th>
-          </tr>
-        </thead>
-
-        <tbody id="applicationsTable">
-          <tr><td colspan="4" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     NEWSLETTER
-======================================================= -->
-
-<section class="page" id="page-newsletter">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Newsletter</div>
-      <div class="page-description">Newsletter subscriber statistics.</div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-
-    <div class="stat cyan">
-      <div class="stat-label">Subscribers</div>
-      <div class="stat-value" id="newsletterCount">0</div>
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Recent Subscribers</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Joined</th>
-          </tr>
-        </thead>
-
-        <tbody id="newsletterTable">
-          <tr><td colspan="3" class="empty">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     AWARDS
-======================================================= -->
-
-<section class="page" id="page-awards">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Spectrum Awards</div>
-      <div class="page-description">
-        CrowRules Entertainment Spectrum Awards administration.
-      </div>
-    </div>
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div class="panel-title">Spectrum Awards</div>
-    </div>
-
-    <div class="panel-body">
-
-      <div class="error-box" style="border-color:rgba(155,92,255,.3);background:rgba(155,92,255,.05);color:#d4b9ff;">
-        Spectrum Awards is intentionally kept separate from the legacy
-        CROW Awards naming. This dashboard does not query a legacy
-        CROW Awards table.
-      </div>
-
-      <div class="empty">
-        Connect your Spectrum Awards tables here when their final schema
-        is established.
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     DATABASE
-======================================================= -->
-
-<section class="page" id="page-database">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">Database</div>
-      <div class="page-description">
-        Independent Supabase table health monitoring.
-      </div>
-    </div>
-
-    <div class="page-actions">
-      <button class="btn primary" id="databaseRefresh">Run Health Check</button>
-    </div>
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">Supabase Connection</div>
-        <div class="panel-subtitle" id="databaseConnectionDetail">
-          Checking…
         </div>
-      </div>
-    </div>
 
-    <div class="panel-body">
-
-      <div class="connection">
-        <span class="status-dot loading" id="databaseDot"></span>
-        <span id="databaseStatus">Checking Supabase…</span>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="panel">
-
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">Table Availability</div>
-        <div class="panel-subtitle">
-          A failed optional table never takes down the dashboard.
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="showsTable"
+          ></div>
         </div>
-      </div>
+
+      </section>
+
+      <!-- =================================================
+           EPISODES
+      ================================================== -->
+
+      <section
+        id="section-episodes"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Episodes
+            </div>
+            <div class="section-description">
+              Manage CrowRules episodes.
+            </div>
+          </div>
+
+          <div class="toolbar">
+
+            <input
+              class="search"
+              id="episodesSearch"
+              placeholder="Search episodes…"
+            >
+
+            <button
+              class="btn btn-primary"
+              onclick="openAdd('episodes')"
+            >
+              + Add Episode
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="episodesTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           LIVE EVENTS
+      ================================================== -->
+
+      <section
+        id="section-live-events"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Live Events
+            </div>
+            <div class="section-description">
+              Manage scheduled and live event records.
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openAdd('live_events')"
+          >
+            + Add Live Event
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="live-eventsTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           ON DEMAND
+      ================================================== -->
+
+      <section
+        id="section-ondemand"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              On Demand Library
+            </div>
+
+            <div class="section-description">
+              Manage content available outside the live schedule.
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openAdd('on_demand_library')"
+          >
+            + Add Content
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="ondemandTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           CREATORS
+      ================================================== -->
+
+      <section
+        id="section-creators"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Creator Channels
+            </div>
+
+            <div class="section-description">
+              Crow Nest creator/channel management.
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openAdd('creator_channels')"
+          >
+            + Add Creator Channel
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="creatorsTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           MEMBERS
+      ================================================== -->
+
+      <section
+        id="section-members"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Member Profiles
+            </div>
+
+            <div class="section-description">
+              Member profile administration.
+            </div>
+
+          </div>
+
+          <button
+            class="btn"
+            onclick="loadMembers()"
+          >
+            ↻ Refresh
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="membersTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           MEMBERSHIPS
+      ================================================== -->
+
+      <section
+        id="section-memberships"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Memberships
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openAdd('memberships')"
+          >
+            + Add Membership
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="membershipsTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           POINTS
+      ================================================== -->
+
+      <section
+        id="section-points"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Member Points
+            </div>
+
+            <div class="section-description">
+              Rewards and verified viewing points.
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openAdd('member_points')"
+          >
+            + Add Point Record
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="pointsTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           ACTIVITY
+      ================================================== -->
+
+      <section
+        id="section-activity"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Member Activity
+            </div>
+
+          </div>
+
+          <button
+            class="btn"
+            onclick="loadActivity()"
+          >
+            ↻ Refresh
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="activityTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           CHAT
+      ================================================== -->
+
+      <section
+        id="section-chat"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Chat Rooms & Messages
+            </div>
+
+          </div>
+
+          <div class="toolbar">
+
+            <button
+              class="btn btn-primary"
+              onclick="openAdd('chat_rooms')"
+            >
+              + Chat Room
+            </button>
+
+            <button
+              class="btn btn-primary"
+              onclick="openAdd('chat_messages')"
+            >
+              + Message
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="grid two-col">
+
+          <div class="panel">
+            <div
+              class="table-wrap"
+              id="chatRoomsTable"
+            ></div>
+          </div>
+
+          <div class="panel">
+            <div
+              class="table-wrap"
+              id="chatMessagesTable"
+            ></div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           POLLS
+      ================================================== -->
+
+      <section
+        id="section-polls"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Polls
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openAdd('polls')"
+          >
+            + Add Poll
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="pollsTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           FRIENDS
+      ================================================== -->
+
+      <section
+        id="section-friends"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Member Friends
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openAdd('member_friends')"
+          >
+            + Add Friendship
+          </button>
+
+        </div>
+
+        <div class="panel">
+          <div
+            class="table-wrap"
+            id="friendsTable"
+          ></div>
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           REPORTS
+      ================================================== -->
+
+      <section
+        id="section-reports"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Reports
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="grid two-col">
+
+          <div class="panel">
+
+            <div class="panel-pad">
+
+              <div class="section-title">
+                Chat Reports
+              </div>
+
+              <div
+                class="table-wrap"
+                id="reportsTable"
+              ></div>
+
+            </div>
+
+          </div>
+
+          <div class="panel">
+
+            <div class="panel-pad">
+
+              <div class="section-title">
+                Creator Applications
+              </div>
+
+              <div
+                class="table-wrap"
+                id="applicationsTable"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           DATABASE
+      ================================================== -->
+
+      <section
+        id="section-database"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Database Manager
+            </div>
+
+            <div class="section-description">
+              Unified CRUD interface for CrowRules tables.
+            </div>
+
+          </div>
+
+          <div class="toolbar">
+
+            <select
+              class="search"
+              id="databaseTableSelect"
+            ></select>
+
+            <button
+              class="btn"
+              onclick="loadSelectedDatabaseTable()"
+            >
+              Load
+            </button>
+
+            <button
+              class="btn btn-primary"
+              onclick="openAddSelectedTable()"
+            >
+              + Add
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div
+            class="table-wrap"
+            id="databaseTable"
+          >
+            <div class="empty">
+              Select a table.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =================================================
+           DIAGNOSTICS
+      ================================================== -->
+
+      <section
+        id="section-diagnostics"
+        hidden
+      >
+
+        <div class="section-head">
+
+          <div>
+            <div class="section-title">
+              Supabase Diagnostics
+            </div>
+
+            <div class="section-description">
+              Test the connection and individual tables without
+              hiding actual database errors.
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-success"
+            onclick="runDiagnostics()"
+          >
+            Run Diagnostics
+          </button>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-pad">
+
+            <div
+              class="log"
+              id="diagnosticsLog"
+            >
+              Click Run Diagnostics.
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
     </div>
 
-    <div class="panel-body">
-      <div class="db-grid" id="databaseGrid">
-        <div class="empty">Run health check.</div>
-      </div>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =======================================================
-     PAGES
-======================================================= -->
-
-<section class="page" id="page-pages">
-
-  <div class="page-head">
-    <div>
-      <div class="page-title">CrowRules Entertainment Pages</div>
-      <div class="page-description">
-        Central launcher for the CrowRules ecosystem.
-      </div>
-    </div>
-  </div>
-
-  <div class="page-links">
-
-    <a
-      class="page-link"
-      href="index.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">⌂</div>
-      <div class="page-link-title">CrowRules Entertainment</div>
-      <div class="page-link-url">index.html</div>
-    </a>
-
-    <a
-      class="page-link"
-      href="tv.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">▶</div>
-      <div class="page-link-title">CrowRules TV</div>
-      <div class="page-link-url">tv.html</div>
-    </a>
-
-    <a
-      class="page-link"
-      href="members.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">♙</div>
-      <div class="page-link-title">Members</div>
-      <div class="page-link-url">members.html</div>
-    </a>
-
-    <a
-      class="page-link"
-      href="nest.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">♛</div>
-      <div class="page-link-title">Crow Nest</div>
-      <div class="page-link-url">nest.html</div>
-    </a>
-
-    <a
-      class="page-link"
-      href="tacoma-nights.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">🌙</div>
-      <div class="page-link-title">Tacoma Nights</div>
-      <div class="page-link-url">tacoma-nights.html</div>
-    </a>
-
-    <a
-      class="page-link"
-      href="shop.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">◇</div>
-      <div class="page-link-title">Shop</div>
-      <div class="page-link-url">shop.html</div>
-    </a>
-
-    <a
-      class="page-link"
-      href="spectrum-awards.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">◆</div>
-      <div class="page-link-title">Spectrum Awards</div>
-      <div class="page-link-url">spectrum-awards.html</div>
-    </a>
-
-    <a
-      class="page-link"
-      href="admin.html"
-      target="_blank"
-      rel="noopener"
-    >
-      <div class="page-link-icon">⚙</div>
-      <div class="page-link-title">Admin Pro</div>
-      <div class="page-link-url">admin.html</div>
-    </a>
-
-  </div>
-
-</section>
-
-  </div>
-</main>
+  </main>
 
 </div>
 
-<div id="toast"></div>
+<!-- =======================================================
+     CRUD MODAL
+======================================================== -->
+
+<div
+  class="modal"
+  id="crudModal"
+>
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+
+      <div>
+        <div
+          class="section-title"
+          id="modalTitle"
+        >
+          Add Record
+        </div>
+
+        <div
+          class="section-description"
+          id="modalSubtitle"
+        >
+          Supabase
+        </div>
+      </div>
+
+      <button
+        class="btn"
+        onclick="closeModal()"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div
+      class="modal-body"
+      id="modalBody"
+    ></div>
+
+    <div class="modal-foot">
+
+      <button
+        class="btn"
+        onclick="closeModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="btn btn-primary"
+        id="saveRecordButton"
+        onclick="saveRecord()"
+      >
+        Save
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =======================================================
+     TOAST
+======================================================== -->
+
+<div
+  class="toast"
+  id="toast"
+>
+
+  <div
+    class="toast-title"
+    id="toastTitle"
+  >
+    Notice
+  </div>
+
+  <div
+    class="toast-message"
+    id="toastMessage"
+  ></div>
+
+</div>
 
 <script>
-/* =========================================================
-   CROWRULES ENTERTAINMENT
-   ADMIN PRO
-   SINGLE SUPABASE WRAPPER
-========================================================= */
-
-(() => {
 "use strict";
 
 /* =========================================================
-   CONFIGURATION
-
-   IMPORTANT:
-   Use the PUBLIC / PUBLISHABLE Supabase key here.
-   NEVER place a service_role key in browser HTML.
+   CROWRULES ADMIN PRO
+   SINGLE SUPABASE WRAPPER
 ========================================================= */
 
 const CONFIG = Object.freeze({
+
+  /*
+   * IMPORTANT:
+   *
+   * Use the CURRENT Supabase Publishable Key.
+   *
+   * DO NOT put service_role or sb_secret here.
+   *
+   * If your current publishable key is different,
+   * replace the value below.
+   */
 
   supabaseUrl:
     "https://zauxdqyssratvzmomozf.supabase.co",
@@ -2149,1054 +2216,1738 @@ const CONFIG = Object.freeze({
   supabaseKey:
     "sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J",
 
-  viewerRefreshMs: 15000,
+  /*
+   * Set this to your actual administrator email(s).
+   *
+   * This frontend check is only a UI gate.
+   * Real administrator authorization should also
+   * be enforced by Supabase RLS.
+   */
 
-  realtime: true,
+  adminEmails: [
 
-  /* -------------------------------------------------------
-     AUTHORITATIVE TABLES
-  ------------------------------------------------------- */
+    /*
+     * "your-admin-email@example.com"
 
-  authoritative: {
-    channels: "tv_channels",
-    schedule: "schedule_items",
-    viewers: "tv_active_viewers"
-  },
+     */
 
-  /* -------------------------------------------------------
-     TABLE INVENTORY
+  ],
 
-     The wrapper probes each independently.
-     A missing/restricted table does not crash the app.
-  ------------------------------------------------------- */
+  refreshInterval:
+    30000,
 
-  tables: [
-
-    "member_profiles",
-
-    "episodes",
-    "live_events",
-    "shows",
-
-    "tv_channels",
-    "schedule_items",
-
-    "on_demand_library",
-    "content_items",
-    "content_views",
-    "analytics_events",
-
-    "memberships",
-    "content_likes",
-
-    "member_points",
-    "member_point_transactions",
-    "member_stats",
-    "crowrules_member_watch_minutes",
-
-    "chat_rooms",
-    "chat_messages",
-
-    "watch_progress",
-    "creator_channels",
-
-    "member_watch_history",
-    "member_favorite_channels",
-
-    "content_view_stats",
-
-    "polls",
-    "content_daily_stats",
-
-    "newsletter_subscribers",
-    "creator_applications",
-
-    "chat_reports",
-    "member_friends",
-
-    "crow_nest_creators",
-    "member_activity",
-
-    "tv_active_viewers"
-  ]
+  viewerRefreshInterval:
+    10000
 
 });
 
+
 /* =========================================================
-   SUPABASE CLIENT
+   AUTHORITATIVE TABLES
 ========================================================= */
 
-const SUPABASE = window.supabase.createClient(
-  CONFIG.supabaseUrl,
-  CONFIG.supabaseKey,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
+const TABLES = Object.freeze({
+
+  tv_channels: {
+    label:"TV Channels",
+    section:"channels",
+    orderBy:"created_at"
+  },
+
+  schedule_items: {
+    label:"Schedule Items",
+    section:"schedule",
+    orderBy:"start_time"
+  },
+
+  member_profiles: {
+    label:"Member Profiles",
+    section:"members",
+    orderBy:"created_at"
+  },
+
+  episodes: {
+    label:"Episodes",
+    section:"episodes",
+    orderBy:"created_at"
+  },
+
+  live_events: {
+    label:"Live Events",
+    section:"live-events",
+    orderBy:"created_at"
+  },
+
+  shows: {
+    label:"Shows",
+    section:"shows",
+    orderBy:"created_at"
+  },
+
+  on_demand_library: {
+    label:"On Demand Library",
+    section:"ondemand",
+    orderBy:"created_at"
+  },
+
+  content_items: {
+    label:"Content Items",
+    section:"database",
+    orderBy:"created_at"
+  },
+
+  content_views: {
+    label:"Content Views",
+    section:"analytics",
+    orderBy:"created_at"
+  },
+
+  analytics_events: {
+    label:"Analytics Events",
+    section:"analytics",
+    orderBy:"created_at"
+  },
+
+  memberships: {
+    label:"Memberships",
+    section:"memberships",
+    orderBy:"created_at"
+  },
+
+  content_likes: {
+    label:"Content Likes",
+    section:"analytics",
+    orderBy:"created_at"
+  },
+
+  member_points: {
+    label:"Member Points",
+    section:"points",
+    orderBy:"created_at"
+  },
+
+  member_point_transactions: {
+    label:"Point Transactions",
+    section:"points",
+    orderBy:"created_at"
+  },
+
+  member_stats: {
+    label:"Member Stats",
+    section:"members",
+    orderBy:"created_at"
+  },
+
+  chat_rooms: {
+    label:"Chat Rooms",
+    section:"chat",
+    orderBy:"created_at"
+  },
+
+  chat_messages: {
+    label:"Chat Messages",
+    section:"chat",
+    orderBy:"created_at"
+  },
+
+  watch_progress: {
+    label:"Watch Progress",
+    section:"analytics",
+    orderBy:"updated_at"
+  },
+
+  creator_channels: {
+    label:"Creator Channels",
+    section:"creators",
+    orderBy:"created_at"
+  },
+
+  member_watch_history: {
+    label:"Member Watch History",
+    section:"analytics",
+    orderBy:"created_at"
+  },
+
+  member_favorite_channels: {
+    label:"Favorite Channels",
+    section:"members",
+    orderBy:"created_at"
+  },
+
+  content_view_stats: {
+    label:"Content View Stats",
+    section:"analytics",
+    orderBy:"created_at"
+  },
+
+  polls: {
+    label:"Polls",
+    section:"polls",
+    orderBy:"created_at"
+  },
+
+  content_daily_stats: {
+    label:"Content Daily Stats",
+    section:"analytics",
+    orderBy:"stat_date"
+  },
+
+  newsletter_subscribers: {
+    label:"Newsletter Subscribers",
+    section:"database",
+    orderBy:"created_at"
+  },
+
+  creator_applications: {
+    label:"Creator Applications",
+    section:"reports",
+    orderBy:"created_at"
+  },
+
+  chat_reports: {
+    label:"Chat Reports",
+    section:"reports",
+    orderBy:"created_at"
+  },
+
+  member_friends: {
+    label:"Member Friends",
+    section:"friends",
+    orderBy:"created_at"
+  },
+
+  crow_nest_creators: {
+    label:"Crow Nest Creators",
+    section:"database",
+    orderBy:"created_at"
+  },
+
+  member_activity: {
+    label:"Member Activity",
+    section:"activity",
+    orderBy:"created_at"
+  },
+
+  crowrules_member_watch_minutes: {
+    label:"Member Watch Minutes",
+    section:"analytics",
+    orderBy:"created_at"
+  },
+
+  tv_active_viewers: {
+    label:"Active Viewers",
+    section:"viewers",
+    orderBy:"last_seen_at"
   }
-);
+
+});
+
 
 /* =========================================================
-   CENTRAL DATABASE WRAPPER
-========================================================= */
-
-const DB = (() => {
-
-  const health = new Map();
-
-  async function select(
-    table,
-    columns = "*",
-    options = {}
-  ){
-
-    if(!table){
-      return {
-        data:null,
-        error:new Error("Missing table name"),
-        count:0
-      };
-    }
-
-    try{
-
-      let query = SUPABASE
-        .from(table)
-        .select(
-          columns,
-          {
-            count: options.count === false
-              ? undefined
-              : "exact",
-            head: options.head === true
-          }
-        );
-
-      if(typeof options.eq === "object"){
-        for(const [column,value] of Object.entries(options.eq)){
-          query = query.eq(column,value);
-        }
-      }
-
-      if(options.notNull){
-        for(const column of options.notNull){
-          query = query.not(column,"is",null);
-        }
-      }
-
-      if(options.order){
-        query = query.order(
-          options.order.column,
-          {
-            ascending:
-              options.order.ascending !== false,
-            nullsFirst:false
-          }
-        );
-      }
-
-      if(Number.isInteger(options.limit)){
-        query = query.limit(options.limit);
-      }
-
-      if(Number.isInteger(options.rangeFrom)){
-        query = query.range(
-          options.rangeFrom,
-          Number.isInteger(options.rangeTo)
-            ? options.rangeTo
-            : options.rangeFrom + 99
-        );
-      }
-
-      const result = await query;
-
-      health.set(table,{
-        ok:!result.error,
-        error:result.error || null,
-        checkedAt:new Date().toISOString()
-      });
-
-      return {
-        data:result.data || [],
-        error:result.error || null,
-        count:result.count || 0
-      };
-
-    }catch(error){
-
-      health.set(table,{
-        ok:false,
-        error,
-        checkedAt:new Date().toISOString()
-      });
-
-      return {
-        data:[],
-        error,
-        count:0
-      };
-    }
-  }
-
-  async function count(table,options={}){
-    const result = await select(
-      table,
-      "id",
-      {
-        ...options,
-        head:true
-      }
-    );
-
-    return {
-      count:result.count || 0,
-      error:result.error
-    };
-  }
-
-  async function rpc(fn,args={}){
-    try{
-
-      const result = await SUPABASE.rpc(
-        fn,
-        args
-      );
-
-      return {
-        data:result.data,
-        error:result.error || null
-      };
-
-    }catch(error){
-
-      return {
-        data:null,
-        error
-      };
-    }
-  }
-
-  async function auth(){
-    try{
-      return await SUPABASE.auth.getSession();
-    }catch(error){
-      return {
-        data:{session:null},
-        error
-      };
-    }
-  }
-
-  async function probe(table){
-
-    const result = await select(
-      table,
-      "*",
-      {
-        limit:1,
-        count:true
-      }
-    );
-
-    return {
-      table,
-      ok:!result.error,
-      count:result.count || 0,
-      error:result.error || null
-    };
-  }
-
-  async function probeAll(){
-
-    const results = [];
-
-    for(const table of CONFIG.tables){
-
-      const result = await probe(table);
-
-      results.push(result);
-    }
-
-    return results;
-  }
-
-  function getHealth(){
-    return new Map(health);
-  }
-
-  return Object.freeze({
-    select,
-    count,
-    rpc,
-    auth,
-    probe,
-    probeAll,
-    getHealth
-  });
-
-})();
-
-/* =========================================================
-   STATE
+   GLOBAL STATE
 ========================================================= */
 
 const STATE = {
-  channels:[],
-  viewers:[],
-  viewerMap:new Map(),
-  schedule:[],
-  tables:new Map(),
-  loaded:false,
-  lastViewerRefresh:null,
-  realtimeChannel:null
+
+  supabase:null,
+
+  connected:false,
+
+  currentSection:"dashboard",
+
+  currentTable:null,
+
+  currentRecord:null,
+
+  currentColumns:[],
+
+  data:{},
+
+  timers:[]
+
 };
 
-/* =========================================================
-   DOM HELPERS
-========================================================= */
-
-const $ = selector =>
-  document.querySelector(selector);
-
-const $$ = selector =>
-  [...document.querySelectorAll(selector)];
-
-function escapeHTML(value){
-
-  if(value === null || value === undefined){
-    return "";
-  }
-
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function number(value){
-  const n = Number(value);
-  return Number.isFinite(n)
-    ? n.toLocaleString()
-    : "0";
-}
-
-function date(value){
-
-  if(!value){
-    return "—";
-  }
-
-  const d = new Date(value);
-
-  if(Number.isNaN(d.getTime())){
-    return escapeHTML(value);
-  }
-
-  return d.toLocaleString(
-    undefined,
-    {
-      dateStyle:"medium",
-      timeStyle:"short"
-    }
-  );
-}
-
-function relative(value){
-
-  if(!value){
-    return "—";
-  }
-
-  const d = new Date(value);
-
-  if(Number.isNaN(d.getTime())){
-    return "—";
-  }
-
-  const seconds =
-    Math.floor(
-      (Date.now()-d.getTime())/1000
-    );
-
-  if(seconds < 60){
-    return `${Math.max(0,seconds)}s ago`;
-  }
-
-  const minutes =
-    Math.floor(seconds/60);
-
-  if(minutes < 60){
-    return `${minutes}m ago`;
-  }
-
-  const hours =
-    Math.floor(minutes/60);
-
-  if(hours < 24){
-    return `${hours}h ago`;
-  }
-
-  return `${Math.floor(hours/24)}d ago`;
-}
-
-function first(row,keys, fallback="—"){
-
-  for(const key of keys){
-
-    if(
-      row &&
-      row[key] !== undefined &&
-      row[key] !== null &&
-      row[key] !== ""
-    ){
-      return row[key];
-    }
-  }
-
-  return fallback;
-}
-
-function showToast(message,type=""){
-
-  const toast = $("#toast");
-
-  toast.textContent = message;
-  toast.className = "";
-
-  if(type){
-    toast.classList.add(type);
-  }
-
-  requestAnimationFrame(() => {
-    toast.classList.add("show");
-  });
-
-  clearTimeout(showToast.timer);
-
-  showToast.timer = setTimeout(() => {
-    toast.classList.remove("show");
-  },3500);
-}
 
 /* =========================================================
-   CONNECTION
+   SINGLE SUPABASE WRAPPER
 ========================================================= */
 
-function setConnection(
-  status,
-  text
-){
+const DB = {
 
-  const dot = $("#connectionDot");
-  const label = $("#connectionText");
+  client(){
 
-  dot.className = "status-dot";
+    if(!STATE.supabase){
 
-  if(status === "online"){
-    dot.classList.add("online");
-  }else if(status === "offline"){
-    dot.classList.add("offline");
-  }else{
-    dot.classList.add("loading");
-  }
-
-  label.textContent = text;
-}
-
-async function testConnection(){
-
-  setConnection(
-    "loading",
-    "Connecting…"
-  );
-
-  try{
-
-    const result =
-      await DB.select(
-        "tv_channels",
-        "id",
-        {
-          limit:1,
-          count:true
-        }
+      throw new Error(
+        "Supabase client has not been initialized."
       );
 
-    /*
-      A table/RLS error does not necessarily mean
-      Supabase itself is offline.
-
-      We separately test auth/session below and use
-      the REST response to determine actual connectivity.
-    */
-
-    if(
-      result.error &&
-      result.error.message &&
-      /fetch|network|failed to fetch|networkerror/i.test(
-        result.error.message
-      )
-    ){
-      throw result.error;
     }
 
-    setConnection(
-      "online",
-      "Supabase ONLINE"
-    );
+    return STATE.supabase;
 
-    return true;
+  },
 
-  }catch(error){
+
+  async select(
+    table,
+    {
+      columns="*",
+      filters=[],
+      order=null,
+      limit=100
+    }={}
+  ){
+
+    try{
+
+      let query =
+        this.client()
+          .from(table)
+          .select(columns);
+
+      for(const filter of filters){
+
+        if(filter.type === "eq"){
+          query =
+            query.eq(
+              filter.column,
+              filter.value
+            );
+        }
+
+        if(filter.type === "neq"){
+          query =
+            query.neq(
+              filter.column,
+              filter.value
+            );
+        }
+
+        if(filter.type === "is"){
+          query =
+            query.is(
+              filter.column,
+              filter.value
+            );
+        }
+
+        if(filter.type === "gte"){
+          query =
+            query.gte(
+              filter.column,
+              filter.value
+            );
+        }
+
+        if(filter.type === "lte"){
+          query =
+            query.lte(
+              filter.column,
+              filter.value
+            );
+        }
+
+        if(filter.type === "ilike"){
+          query =
+            query.ilike(
+              filter.column,
+              filter.value
+            );
+        }
+
+      }
+
+      if(order){
+
+        query =
+          query.order(
+            order.column,
+            {
+              ascending:
+                order.ascending !== false
+            }
+          );
+
+      }
+
+      if(limit){
+
+        query =
+          query.limit(limit);
+
+      }
+
+      const result =
+        await query;
+
+      if(result.error){
+
+        throw result.error;
+
+      }
+
+      return {
+
+        data:result.data || [],
+
+        error:null
+
+      };
+
+    }catch(error){
+
+      this.report(
+        "SELECT",
+        table,
+        error
+      );
+
+      return {
+
+        data:null,
+
+        error
+
+      };
+
+    }
+
+  },
+
+
+  async insert(
+    table,
+    payload
+  ){
+
+    try{
+
+      const result =
+        await this.client()
+          .from(table)
+          .insert(payload)
+          .select();
+
+      if(result.error){
+
+        throw result.error;
+
+      }
+
+      return {
+
+        data:result.data || [],
+
+        error:null
+
+      };
+
+    }catch(error){
+
+      this.report(
+        "INSERT",
+        table,
+        error
+      );
+
+      return {
+
+        data:null,
+
+        error
+
+      };
+
+    }
+
+  },
+
+
+  async update(
+    table,
+    keyColumn,
+    keyValue,
+    payload
+  ){
+
+    try{
+
+      const result =
+        await this.client()
+          .from(table)
+          .update(payload)
+          .eq(
+            keyColumn,
+            keyValue
+          )
+          .select();
+
+      if(result.error){
+
+        throw result.error;
+
+      }
+
+      return {
+
+        data:result.data || [],
+
+        error:null
+
+      };
+
+    }catch(error){
+
+      this.report(
+        "UPDATE",
+        table,
+        error
+      );
+
+      return {
+
+        data:null,
+
+        error
+
+      };
+
+    }
+
+  },
+
+
+  async delete(
+    table,
+    keyColumn,
+    keyValue
+  ){
+
+    try{
+
+      const result =
+        await this.client()
+          .from(table)
+          .delete()
+          .eq(
+            keyColumn,
+            keyValue
+          )
+          .select();
+
+      if(result.error){
+
+        throw result.error;
+
+      }
+
+      return {
+
+        data:result.data || [],
+
+        error:null
+
+      };
+
+    }catch(error){
+
+      this.report(
+        "DELETE",
+        table,
+        error
+      );
+
+      return {
+
+        data:null,
+
+        error
+
+      };
+
+    }
+
+  },
+
+
+  async rpc(
+    functionName,
+    params={}
+  ){
+
+    try{
+
+      const result =
+        await this.client()
+          .rpc(
+            functionName,
+            params
+          );
+
+      if(result.error){
+
+        throw result.error;
+
+      }
+
+      return {
+
+        data:result.data,
+
+        error:null
+
+      };
+
+    }catch(error){
+
+      this.report(
+        "RPC",
+        functionName,
+        error
+      );
+
+      return {
+
+        data:null,
+
+        error
+
+      };
+
+    }
+
+  },
+
+
+  report(
+    operation,
+    target,
+    error
+  ){
+
+    const message =
+      [
+        operation,
+        target,
+        error?.message || "Unknown Supabase error",
+        error?.code
+          ? `Code: ${error.code}`
+          : "",
+        error?.details
+          ? `Details: ${error.details}`
+          : "",
+        error?.hint
+          ? `Hint: ${error.hint}`
+          : ""
+      ]
+      .filter(Boolean)
+      .join(" | ");
+
+    log(message);
 
     console.error(
-      "Supabase connection error:",
+      "[CrowRules Supabase]",
+      operation,
+      target,
       error
     );
 
-    setConnection(
-      "offline",
-      "Supabase OFFLINE"
-    );
-
-    return false;
   }
-}
+
+};
+
 
 /* =========================================================
-   AUTHORITATIVE CHANNEL LOADING
+   INITIALIZATION
+========================================================= */
+
+async function init(){
+
+  try{
+
+    if(
+      !CONFIG.supabaseUrl ||
+      !CONFIG.supabaseKey
+    ){
+
+      throw new Error(
+        "Supabase URL or Publishable Key is missing."
+      );
+
+    }
+
+    if(
+      !window.supabase ||
+      !window.supabase.createClient
+    ){
+
+      throw new Error(
+        "Supabase JavaScript library failed to load."
+      );
+
+    }
+
+    STATE.supabase =
+      window.supabase.createClient(
+        CONFIG.supabaseUrl,
+        CONFIG.supabaseKey,
+        {
+          auth:{
+            persistSession:true,
+            autoRefreshToken:true,
+            detectSessionInUrl:true
+          }
+        }
+      );
+
+    await testConnection();
+
+    setupNavigation();
+
+    setupSearch();
+
+    populateDatabaseSelector();
+
+    await loadDashboard();
+
+    startTimers();
+
+  }catch(error){
+
+    STATE.connected=false;
+
+    setConnectionStatus(
+      false,
+      error.message
+    );
+
+    toast(
+      "Supabase connection error",
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CONNECTION TEST
+========================================================= */
+
+async function testConnection(){
+
+  /*
+   * We intentionally use the authoritative
+   * tv_channels table as the primary test.
+   */
+
+  const result =
+    await DB.select(
+      "tv_channels",
+      {
+        columns:"*",
+        limit:1
+      }
+    );
+
+  if(result.error){
+
+    setConnectionStatus(
+      false,
+      result.error.message
+    );
+
+    throw result.error;
+
+  }
+
+  STATE.connected=true;
+
+  setConnectionStatus(
+    true,
+    "Supabase connected"
+  );
+
+  log(
+    "Supabase API connection ONLINE."
+  );
+
+}
+
+
+/* =========================================================
+   CONNECTION STATUS
+========================================================= */
+
+function setConnectionStatus(
+  online,
+  message
+){
+
+  const dots =
+    [
+      document.getElementById("sidebarDot"),
+      document.getElementById("topDot")
+    ];
+
+  const labels =
+    [
+      document.getElementById("sidebarStatus"),
+      document.getElementById("topStatus")
+    ];
+
+  dots.forEach(
+    dot => {
+
+      if(!dot) return;
+
+      dot.classList.toggle(
+        "online",
+        online
+      );
+
+    }
+  );
+
+  labels.forEach(
+    label => {
+
+      if(!label) return;
+
+      label.textContent =
+        online
+          ? "ONLINE"
+          : message || "OFFLINE";
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function setupNavigation(){
+
+  document
+    .querySelectorAll(".nav-btn[data-section]")
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            navigate(
+              button.dataset.section
+            );
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+async function navigate(section){
+
+  STATE.currentSection=section;
+
+  document
+    .querySelectorAll(
+      ".nav-btn[data-section]"
+    )
+    .forEach(
+      button => {
+
+        button.classList.toggle(
+          "active",
+          button.dataset.section === section
+        );
+
+      }
+    );
+
+  document
+    .querySelectorAll(
+      "[id^='section-']"
+    )
+    .forEach(
+      element => {
+
+        element.hidden =
+          element.id !==
+          `section-${section}`;
+
+      }
+    );
+
+  const names = {
+
+    dashboard:
+      [
+        "Admin Pro",
+        "CrowRules Entertainment control center"
+      ],
+
+    analytics:
+      [
+        "Analytics",
+        "CrowRules performance data"
+      ],
+
+    viewers:
+      [
+        "Live Viewers",
+        "Current viewers by active channel"
+      ],
+
+    channels:
+      [
+        "TV Channels",
+        "Authoritative tv_channels manager"
+      ],
+
+    schedule:
+      [
+        "TV Schedule",
+        "Authoritative schedule_items manager"
+      ],
+
+    shows:
+      [
+        "Shows",
+        "Show management"
+      ],
+
+    episodes:
+      [
+        "Episodes",
+        "Episode management"
+      ],
+
+    "live-events":
+      [
+        "Live Events",
+        "Live event management"
+      ],
+
+    ondemand:
+      [
+        "On Demand",
+        "On demand library"
+      ],
+
+    creators:
+      [
+        "Creator Channels",
+        "Crow Nest creator management"
+      ],
+
+    members:
+      [
+        "Members",
+        "Member profiles"
+      ],
+
+    memberships:
+      [
+        "Memberships",
+        "Membership management"
+      ],
+
+    points:
+      [
+        "Member Points",
+        "Member rewards"
+      ],
+
+    activity:
+      [
+        "Member Activity",
+        "Member activity"
+      ],
+
+    chat:
+      [
+        "Community Chat",
+        "Rooms and messages"
+      ],
+
+    polls:
+      [
+        "Polls",
+        "Community polls"
+      ],
+
+    friends:
+      [
+        "Member Friends",
+        "Member connections"
+      ],
+
+    reports:
+      [
+        "Reports",
+        "Moderation and applications"
+      ],
+
+    database:
+      [
+        "Database Manager",
+        "Unified CRUD"
+      ],
+
+    diagnostics:
+      [
+        "Diagnostics",
+        "Supabase connection and table diagnostics"
+      ]
+
+  };
+
+  const title =
+    names[section] ||
+    ["Admin Pro","CrowRules"];
+
+  document.getElementById(
+    "pageTitle"
+  ).textContent=title[0];
+
+  document.getElementById(
+    "pageSubtitle"
+  ).textContent=title[1];
+
+  document
+    .getElementById("sidebar")
+    .classList.remove("open");
+
+  try{
+
+    switch(section){
+
+      case "dashboard":
+        await loadDashboard();
+        break;
+
+      case "analytics":
+        await loadAnalytics();
+        break;
+
+      case "viewers":
+        await loadViewerStats();
+        break;
+
+      case "channels":
+        await loadChannels();
+        break;
+
+      case "schedule":
+        await loadSchedule();
+        break;
+
+      case "shows":
+        await loadGenericSection(
+          "shows",
+          "showsTable"
+        );
+        break;
+
+      case "episodes":
+        await loadGenericSection(
+          "episodes",
+          "episodesTable"
+        );
+        break;
+
+      case "live-events":
+        await loadGenericSection(
+          "live_events",
+          "live-eventsTable"
+        );
+        break;
+
+      case "ondemand":
+        await loadGenericSection(
+          "on_demand_library",
+          "ondemandTable"
+        );
+        break;
+
+      case "creators":
+        await loadGenericSection(
+          "creator_channels",
+          "creatorsTable"
+        );
+        break;
+
+      case "members":
+        await loadMembers();
+        break;
+
+      case "memberships":
+        await loadGenericSection(
+          "memberships",
+          "membershipsTable"
+        );
+        break;
+
+      case "points":
+        await loadGenericSection(
+          "member_points",
+          "pointsTable"
+        );
+        break;
+
+      case "activity":
+        await loadActivity();
+        break;
+
+      case "chat":
+        await loadChat();
+        break;
+
+      case "polls":
+        await loadGenericSection(
+          "polls",
+          "pollsTable"
+        );
+        break;
+
+      case "friends":
+        await loadGenericSection(
+          "member_friends",
+          "friendsTable"
+        );
+        break;
+
+      case "reports":
+        await loadReports();
+        break;
+
+      case "database":
+        await loadSelectedDatabaseTable();
+        break;
+
+      case "diagnostics":
+        await runDiagnostics();
+        break;
+
+    }
+
+  }catch(error){
+
+    toast(
+      "Section error",
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+async function loadDashboard(){
+
+  await Promise.allSettled([
+
+    loadDashboardStats(),
+
+    loadChannels(),
+
+    loadDashboardSchedule(),
+
+    loadViewerStats()
+
+  ]);
+
+}
+
+
+async function loadDashboardStats(){
+
+  const results =
+    await Promise.all([
+
+      DB.select(
+        "tv_channels",
+        {
+          columns:"*",
+          filters:[
+            {
+              type:"eq",
+              column:"is_active",
+              value:true
+            }
+          ],
+          limit:1000
+        }
+      ),
+
+      DB.select(
+        "member_profiles",
+        {
+          columns:"*",
+          limit:1
+        }
+      ),
+
+      DB.select(
+        "shows",
+        {
+          columns:"*",
+          limit:1
+        }
+      ),
+
+      DB.select(
+        "episodes",
+        {
+          columns:"*",
+          limit:1
+        }
+      )
+
+    ]);
+
+  const channels =
+    results[0].data || [];
+
+  document.getElementById(
+    "statChannels"
+  ).textContent =
+    results[0].error
+      ? "ERR"
+      : channels.length;
+
+  document.getElementById(
+    "statMembers"
+  ).textContent =
+    await safeCount(
+      "member_profiles"
+    );
+
+  document.getElementById(
+    "statShows"
+  ).textContent =
+    await safeCount(
+      "shows"
+    );
+
+  document.getElementById(
+    "statEpisodes"
+  ).textContent =
+    await safeCount(
+      "episodes"
+    );
+
+  /*
+   * Accumulated channel views.
+   *
+   * This is deliberately separate from
+   * current_viewers.
+   */
+
+  let accumulated=0;
+
+  channels.forEach(
+    row => {
+
+      const value =
+        Number(
+          row.views ??
+          row.total_views ??
+          0
+        );
+
+      if(
+        Number.isFinite(value)
+      ){
+        accumulated += value;
+      }
+
+    }
+  );
+
+  document.getElementById(
+    "statChannelViews"
+  ).textContent =
+    formatNumber(accumulated);
+
+}
+
+
+async function safeCount(table){
+
+  const result =
+    await DB.select(
+      table,
+      {
+        columns:"*",
+        limit:1000
+      }
+    );
+
+  if(result.error){
+
+    return "ERR";
+
+  }
+
+  return result.data.length;
+
+}
+
+
+/* =========================================================
+   CHANNELS
 ========================================================= */
 
 async function loadChannels(){
 
-  /*
-    IMPORTANT:
-    tv_channels is the ONLY authoritative channel source.
-
-    Only:
-      is_active = true
-
-    are displayed.
-  */
-
-  const result = await DB.select(
-    CONFIG.authoritative.channels,
-    "*",
-    {
-      eq:{
-        is_active:true
-      },
-      order:{
-        column:"sort_order",
-        ascending:true
+  const result =
+    await DB.select(
+      "tv_channels",
+      {
+        columns:"*",
+        order:{
+          column:"created_at",
+          ascending:false
+        },
+        limit:1000
       }
-    }
-  );
+    );
 
   if(result.error){
 
-    /*
-      Some schemas may not contain sort_order.
-      Retry without assuming that column.
-    */
-
-    const retry = await DB.select(
-      CONFIG.authoritative.channels,
-      "*",
-      {
-        eq:{
-          is_active:true
-        },
-        limit:500
-      }
+    renderError(
+      "channelsTable",
+      result.error
     );
-
-    STATE.channels =
-      retry.error
-        ? []
-        : retry.data;
 
     return;
+
   }
 
-  STATE.channels = result.data || [];
-}
+  STATE.data.tv_channels =
+    result.data || [];
 
-/* =========================================================
-   CURRENT VIEWER DATA
-========================================================= */
-
-function extractChannelId(row){
-
-  return first(
-    row,
-    [
-      "channel_id",
-      "tv_channel_id",
-      "channel",
-      "channel_uuid"
-    ],
-    null
+  renderChannels(
+    result.data || []
   );
-}
 
-function extractViewerCount(row){
-
-  const direct =
-    first(
-      row,
-      [
-        "current_viewers",
-        "viewer_count",
-        "viewers",
-        "active_viewers"
-      ],
-      null
-    );
-
-  if(direct !== null){
-    return Math.max(
-      0,
-      Number(direct) || 0
-    );
-  }
-
-  return 1;
-}
-
-async function loadViewerData(){
-
-  STATE.viewerMap = new Map();
-
-  /*
-    First preference:
-    RPCs if available.
-
-    Different CrowRules database revisions may use
-    different RPC names, so each is attempted safely.
-  */
-
-  const rpcNames = [
-    "crowrules_get_current_viewers",
-    "crowrules_get_tv_current_viewers",
-    "get_current_tv_viewers"
-  ];
-
-  let rpcWorked = false;
-
-  for(const rpcName of rpcNames){
-
-    const rpc =
-      await DB.rpc(
-        rpcName
-      );
-
-    if(
-      !rpc.error &&
-      Array.isArray(rpc.data)
-    ){
-
-      STATE.viewers = rpc.data;
-
-      rpcWorked = true;
-
-      break;
-    }
-  }
-
-  /*
-    If an RPC isn't installed yet, read the active-viewer
-    table directly and aggregate rows.
-
-    This keeps the dashboard compatible with a table where
-    each active viewer is represented by one row.
-  */
-
-  if(!rpcWorked){
-
-    const result =
-      await DB.select(
-        CONFIG.authoritative.viewers,
-        "*",
-        {
-          limit:5000
-        }
-      );
-
-    STATE.viewers =
-      result.error
-        ? []
-        : result.data || [];
-  }
-
-  /*
-    Aggregate viewer rows by channel.
-  */
-
-  for(const row of STATE.viewers){
-
-    const channelId =
-      extractChannelId(row);
-
-    if(!channelId){
-      continue;
-    }
-
-    const count =
-      extractViewerCount(row);
-
-    STATE.viewerMap.set(
-      String(channelId),
-      (
-        STATE.viewerMap.get(
-          String(channelId)
-        ) || 0
-      ) + count
-    );
-  }
-
-  /*
-    Some RPCs may already return one row per channel
-    with current_viewers. Ensure those are honored.
-  */
-
-  for(const row of STATE.viewers){
-
-    const channelId =
-      extractChannelId(row);
-
-    if(!channelId){
-      continue;
-    }
-
-    const direct =
-      first(
-        row,
-        [
-          "current_viewers",
-          "viewer_count",
-          "viewers",
-          "active_viewers"
-        ],
-        null
-      );
-
-    if(direct !== null){
-
-      STATE.viewerMap.set(
-        String(channelId),
-        Math.max(
-          0,
-          Number(direct) || 0
-        )
-      );
-    }
-  }
-
-  STATE.lastViewerRefresh =
-    new Date().toISOString();
-
-  renderViewerStats();
-}
-
-/* =========================================================
-   VIEWER HELPERS
-========================================================= */
-
-function channelViewerCount(channel){
-
-  const id =
-    first(
-      channel,
-      ["id","channel_id"],
-      null
-    );
-
-  if(id === null){
-    return 0;
-  }
-
-  return (
-    STATE.viewerMap.get(
-      String(id)
-    ) || 0
+  renderDashboardChannels(
+    result.data || []
   );
+
 }
 
-function totalCurrentViewers(){
 
-  let total = 0;
+function renderChannels(rows){
 
-  for(const channel of STATE.channels){
-    total += channelViewerCount(channel);
+  const container =
+    document.getElementById(
+      "channelsTable"
+    );
+
+  if(!rows.length){
+
+    container.innerHTML =
+      `<div class="empty">
+        No channel records found.
+       </div>`;
+
+    return;
+
   }
 
-  return total;
+  const search =
+    (
+      document.getElementById(
+        "channelSearch"
+      )?.value ||
+      ""
+    )
+    .toLowerCase();
+
+  const filtered =
+    rows.filter(
+      row =>
+        JSON.stringify(row)
+          .toLowerCase()
+          .includes(search)
+    );
+
+  container.innerHTML =
+    createTable(
+      "tv_channels",
+      filtered
+    );
+
 }
 
-/* =========================================================
-   RENDER VIEWER STATS
-========================================================= */
 
-function renderViewerStats(){
-
-  const total =
-    totalCurrentViewers();
+function renderDashboardChannels(rows){
 
   const active =
-    STATE.channels.length;
+    rows.filter(
+      row =>
+        row.is_active === true
+    );
 
-  const watching =
-    STATE.channels.filter(
-      channel =>
-        channelViewerCount(channel) > 0
-    ).length;
+  const container =
+    document.getElementById(
+      "dashboardChannels"
+    );
 
-  $("#statViewers").textContent =
-    number(total);
+  if(!active.length){
 
-  $("#liveTotalViewers").textContent =
-    number(total);
-
-  $("#liveActiveChannels").textContent =
-    number(active);
-
-  $("#liveChannelsWatching").textContent =
-    number(watching);
-
-  $("#navViewers").textContent =
-    number(total);
-
-  renderChannelLists();
-
-  renderChannelsTable();
-}
-
-/* =========================================================
-   CHANNEL LISTS
-========================================================= */
-
-function renderChannelLists(){
-
-  const containers = [
-    $("#dashboardChannels"),
-    $("#liveChannels")
-  ];
-
-  if(!STATE.channels.length){
-
-    containers.forEach(container => {
-
-      if(container){
-        container.innerHTML =
-          `<div class="empty">
-             No active channels were returned from tv_channels.
-           </div>`;
-      }
-
-    });
+    container.innerHTML =
+      `<div class="empty">
+        No active TV channels.
+       </div>`;
 
     return;
+
   }
 
-  const html =
-    STATE.channels
-      .map(channel => {
+  container.innerHTML =
+    active.map(
+      channel => {
 
         const viewers =
-          channelViewerCount(channel);
-
-        const name =
-          first(
-            channel,
-            [
-              "name",
-              "title",
-              "channel_name"
-            ],
-            "Unnamed Channel"
+          Number(
+            channel.current_viewers || 0
           );
 
-        const slug =
-          first(
-            channel,
-            [
-              "slug",
-              "channel_slug"
-            ],
-            ""
-          );
-
-        const logo =
-          first(
-            channel,
-            [
-              "logo_url",
-              "image_url",
-              "thumbnail_url",
-              "thumbnail"
-            ],
-            ""
+        const views =
+          Number(
+            channel.views || 0
           );
 
         return `
-          <div class="channel-row">
+          <div class="channel-card">
 
-            ${
-              logo
-              ? `
-                <img
-                  class="channel-logo"
-                  src="${escapeHTML(logo)}"
-                  alt=""
-                  loading="lazy"
-                >
-              `
-              : `
-                <div class="channel-logo">
-                  ${escapeHTML(
-                    String(name).slice(0,2).toUpperCase()
+            <div class="channel-head">
+
+              <div>
+                <div class="channel-name">
+                  ${escapeHtml(
+                    channel.name ||
+                    channel.title ||
+                    "Unnamed Channel"
                   )}
                 </div>
-              `
-            }
 
-            <div>
-              <div class="channel-name">
-                ${escapeHTML(name)}
+                <div class="channel-meta">
+                  ${escapeHtml(
+                    channel.slug ||
+                    channel.channel_slug ||
+                    ""
+                  )}
+                </div>
               </div>
 
-              <div class="channel-slug">
-                ${escapeHTML(slug)}
-              </div>
+              <span class="badge badge-green">
+                LIVE
+              </span>
+
             </div>
 
-            <div class="viewer-pill">
-              ${number(viewers)}
+            <div class="viewer green">
+              ${formatNumber(viewers)}
             </div>
 
-            <div class="live-badge">
-              ${viewers > 0 ? "LIVE" : "READY"}
+            <div class="viewer-label">
+              Current viewers
+            </div>
+
+            <div
+              style="
+                margin-top:12px;
+                color:var(--muted);
+                font-size:11px;
+              "
+            >
+              ${formatNumber(views)}
+              accumulated views
+            </div>
+
+            <div class="actions" style="margin-top:12px">
+
+              <button
+                class="btn btn-small"
+                onclick="openEdit('tv_channels',${safeJson(rowId(channel))})"
+              >
+                Edit
+              </button>
+
+              <button
+                class="btn btn-small"
+                onclick="navigate('viewers')"
+              >
+                View Stats
+              </button>
+
             </div>
 
           </div>
         `;
-      })
-      .join("");
 
-  containers.forEach(container => {
+      }
+    )
+    .join("");
 
-    if(container){
-      container.innerHTML = html;
-    }
-
-  });
 }
+
+
+function rowId(row){
+
+  return row.id ??
+    row.channel_id ??
+    row.uuid ??
+    "";
+
+}
+
+
+async function loadDashboardSchedule(){
+
+  const container =
+    document.getElementById(
+      "dashboardSchedule"
+    );
+
+  const result =
+    await DB.select(
+      "schedule_items",
+      {
+        columns:"*",
+        order:{
+          column:"start_time",
+          ascending:true
+        },
+        limit:10
+      }
+    );
+
+  if(result.error){
+
+    renderError(
+      "dashboardSchedule",
+      result.error
+    );
+
+    return;
+
+  }
+
+  if(!result.data.length){
+
+    container.innerHTML =
+      `<div class="empty">
+        No schedule items found.
+       </div>`;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    createTable(
+      "schedule_items",
+      result.data,
+      {
+        compact:true
+      }
+    );
+
+}
+
 
 /* =========================================================
-   CHANNEL TABLE
+   LIVE VIEWERS
 ========================================================= */
 
-function renderChannelsTable(){
+async function loadViewerStats(){
 
-  const body =
-    $("#channelsTable");
+  const channelsResult =
+    await DB.select(
+      "tv_channels",
+      {
+        columns:"*",
+        filters:[
+          {
+            type:"eq",
+            column:"is_active",
+            value:true
+          }
+        ],
+        limit:1000
+      }
+    );
 
-  if(!body){
+  if(channelsResult.error){
+
+    renderError(
+      "viewerGrid",
+      channelsResult.error
+    );
+
     return;
+
   }
 
-  if(!STATE.channels.length){
+  const activeChannels =
+    channelsResult.data || [];
 
-    body.innerHTML =
-      `<tr>
-        <td colspan="6" class="empty">
-          No active channels found.
-        </td>
-      </tr>`;
+  /*
+   * Preferred method:
+   *
+   * 1. crowrules_get_channel_viewers RPC
+   * 2. tv_active_viewers table
+   *
+   * This means we do NOT treat views as viewers.
+   */
 
-    return;
+  let activeViewerRows=[];
+
+  const tableResult =
+    await DB.select(
+      "tv_active_viewers",
+      {
+        columns:"*",
+        limit:5000
+      }
+    );
+
+  if(!tableResult.error){
+
+    activeViewerRows =
+      tableResult.data || [];
+
   }
 
-  body.innerHTML =
-    STATE.channels
-      .map(channel => {
+  const grid =
+    document.getElementById(
+      "viewerGrid"
+    );
 
-        const name =
-          first(
-            channel,
-            ["name","title","channel_name"],
-            "Unnamed"
+  grid.innerHTML =
+    activeChannels.map(
+      channel => {
+
+        const id =
+          rowId(channel);
+
+        const matches =
+          activeViewerRows.filter(
+            viewer => {
+
+              return (
+
+                viewer.channel_id === id ||
+
+                viewer.tv_channel_id === id ||
+
+                viewer.channel === id ||
+
+                viewer.channel_id === channel.channel_id
+
+              );
+
+            }
           );
 
-        const slug =
-          first(
-            channel,
-            ["slug","channel_slug"],
-            "—"
-          );
-
-        const viewers =
-          channelViewerCount(channel);
-
-        const accumulatedViews =
-          first(
-            channel,
-            ["views","view_count","total_views"],
-            0
-          );
-
-        const updated =
-          first(
-            channel,
-            ["updated_at","created_at"],
-            null
-          );
+        const count =
+          matches.length;
 
         return `
-          <tr>
+          <div class="channel-card">
 
-            <td>
-              <strong>
-                ${escapeHTML(name)}
-              </strong>
-            </td>
+            <div class="channel-head">
 
-            <td>
-              <code>
-                ${escapeHTML(slug)}
-              </code>
-            </td>
+              <div>
 
-            <td>
-              <span class="badge good">
-                ACTIVE
+                <div class="channel-name">
+                  ${escapeHtml(
+                    channel.name ||
+                    channel.title ||
+                    "Unnamed Channel"
+                  )}
+                </div>
+
+                <div class="channel-meta">
+                  Active channel
+                </div>
+
+              </div>
+
+              <span class="badge badge-green">
+                ONLINE
               </span>
-            </td>
 
-            <td>
-              <strong style="color:#72edb5">
-                ${number(viewers)}
-              </strong>
-            </td>
+            </div>
 
-            <td>
-              ${number(accumulatedViews)}
-            </td>
+            <div class="viewer green">
+              ${formatNumber(count)}
+            </div>
 
-            <td>
-              ${date(updated)}
-            </td>
+            <div class="viewer-label">
+              Current viewers
+            </div>
 
-          </tr>
+            <div style="
+              margin-top:12px;
+              color:var(--muted);
+              font-size:11px;
+            ">
+              Active presence records:
+              ${matches.length}
+            </div>
+
+          </div>
         `;
-      })
-      .join("");
+
+      }
+    )
+    .join("");
+
+  const total =
+    activeChannels.reduce(
+      (sum,channel) => {
+
+        const id =
+          rowId(channel);
+
+        return sum +
+          activeViewerRows.filter(
+            viewer =>
+              viewer.channel_id === id ||
+              viewer.tv_channel_id === id
+          ).length;
+
+      },
+      0
+    );
+
+  document.getElementById(
+    "statViewers"
+  ).textContent =
+    formatNumber(total);
+
 }
+
 
 /* =========================================================
    SCHEDULE
@@ -3206,384 +3957,112 @@ async function loadSchedule(){
 
   const result =
     await DB.select(
-      CONFIG.authoritative.schedule,
-      "*",
+      "schedule_items",
       {
+        columns:"*",
         order:{
           column:"start_time",
           ascending:true
         },
-        limit:500
+        limit:1000
       }
     );
 
-  let data =
-    result.data || [];
-
   if(result.error){
 
-    const retry =
-      await DB.select(
-        CONFIG.authoritative.schedule,
-        "*",
-        {
-          limit:500
-        }
-      );
-
-    data =
-      retry.error
-        ? []
-        : retry.data || [];
-  }
-
-  STATE.schedule = data;
-
-  $("#statSchedule").textContent =
-    number(data.length);
-
-  renderScheduleTable();
-}
-
-function renderScheduleTable(){
-
-  const body =
-    $("#scheduleTable");
-
-  if(!body){
-    return;
-  }
-
-  if(!STATE.schedule.length){
-
-    body.innerHTML =
-      `<tr>
-        <td colspan="5" class="empty">
-          No schedule_items records returned.
-        </td>
-      </tr>`;
+    renderError(
+      "scheduleTable",
+      result.error
+    );
 
     return;
+
   }
 
-  body.innerHTML =
-    STATE.schedule
-      .map(row => {
+  STATE.data.schedule_items =
+    result.data || [];
 
-        const title =
-          first(
-            row,
-            [
-              "title",
-              "program_title",
-              "name"
-            ],
-            "Untitled"
-          );
+  const search =
+    (
+      document.getElementById(
+        "scheduleSearch"
+      )?.value ||
+      ""
+    )
+    .toLowerCase();
 
-        const channel =
-          first(
-            row,
-            [
-              "channel_name",
-              "channel_title",
-              "channel_id",
-              "tv_channel_id"
-            ],
-            "—"
-          );
+  const rows =
+    result.data.filter(
+      row =>
+        JSON.stringify(row)
+          .toLowerCase()
+          .includes(search)
+    );
 
-        const start =
-          first(
-            row,
-            [
-              "start_time",
-              "starts_at",
-              "scheduled_start"
-            ],
-            null
-          );
+  document.getElementById(
+    "scheduleTable"
+  ).innerHTML =
+    createTable(
+      "schedule_items",
+      rows
+    );
 
-        const end =
-          first(
-            row,
-            [
-              "end_time",
-              "ends_at",
-              "scheduled_end"
-            ],
-            null
-          );
-
-        const status =
-          first(
-            row,
-            ["status"],
-            "scheduled"
-          );
-
-        return `
-          <tr>
-
-            <td>
-              <strong>
-                ${escapeHTML(title)}
-              </strong>
-            </td>
-
-            <td>
-              ${escapeHTML(channel)}
-            </td>
-
-            <td>
-              ${date(start)}
-            </td>
-
-            <td>
-              ${date(end)}
-            </td>
-
-            <td>
-              <span class="badge info">
-                ${escapeHTML(status)}
-              </span>
-            </td>
-
-          </tr>
-        `;
-      })
-      .join("");
 }
+
 
 /* =========================================================
-   GENERIC TABLE LOADER
+   GENERIC SECTIONS
 ========================================================= */
 
-async function renderGenericTable({
+async function loadGenericSection(
   table,
-  element,
-  columns,
-  limit=50
-}){
-
-  const body =
-    $(element);
-
-  if(!body){
-    return [];
-  }
+  containerId
+){
 
   const result =
     await DB.select(
       table,
-      "*",
       {
-        limit,
+        columns:"*",
         order:{
-          column:"created_at",
+          column:
+            TABLES[table]?.orderBy ||
+            "created_at",
           ascending:false
-        }
+        },
+        limit:1000
       }
     );
 
+  const container =
+    document.getElementById(
+      containerId
+    );
+
+  if(!container) return;
+
   if(result.error){
 
-    const retry =
-      await DB.select(
-        table,
-        "*",
-        {
-          limit
-        }
-      );
+    renderError(
+      containerId,
+      result.error
+    );
 
-    if(retry.error){
+    return;
 
-      body.innerHTML =
-        `<tr>
-          <td colspan="${columns.length}" class="empty">
-            Table unavailable.
-          </td>
-        </tr>`;
-
-      return [];
-    }
-
-    result.data =
-      retry.data;
   }
 
-  const data =
+  STATE.data[table] =
     result.data || [];
 
-  if(!data.length){
+  container.innerHTML =
+    createTable(
+      table,
+      result.data || []
+    );
 
-    body.innerHTML =
-      `<tr>
-        <td colspan="${columns.length}" class="empty">
-          No records.
-        </td>
-      </tr>`;
-
-    return data;
-  }
-
-  body.innerHTML =
-    data
-      .map(row => {
-
-        return `
-          <tr>
-            ${
-              columns
-                .map(column => {
-
-                  let value =
-                    typeof column.value === "function"
-                      ? column.value(row)
-                      : first(
-                          row,
-                          column.keys || [],
-                          "—"
-                        );
-
-                  return `
-                    <td>
-                      ${
-                        column.render
-                          ? column.render(
-                              value,
-                              row
-                            )
-                          : escapeHTML(value)
-                      }
-                    </td>
-                  `;
-                })
-                .join("")
-            }
-          </tr>
-        `;
-      })
-      .join("");
-
-  return data;
 }
 
-/* =========================================================
-   LOAD CORE TABLES
-========================================================= */
-
-async function loadShows(){
-
-  return renderGenericTable({
-    table:"shows",
-    element:"#showsTable",
-    columns:[
-      {
-        keys:["title","name"],
-        value:r =>
-          first(r,["title","name"],"Untitled")
-      },
-      {
-        keys:["status","state"]
-      },
-      {
-        keys:["created_at"]
-        ,
-        value:r =>
-          date(first(r,["created_at"],null))
-      },
-      {
-        keys:["id"]
-      }
-    ]
-  });
-}
-
-async function loadEpisodes(){
-
-  return renderGenericTable({
-    table:"episodes",
-    element:"#episodesTable",
-    columns:[
-      {
-        value:r =>
-          first(r,["title","name"],"Untitled")
-      },
-      {
-        value:r =>
-          first(
-            r,
-            ["show_title","show_name","show_id"],
-            "—"
-          )
-      },
-      {
-        value:r =>
-          first(
-            r,
-            ["episode_number","number","episode"],
-            "—"
-          )
-      },
-      {
-        keys:["status","state"]
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["published_at","release_date"],
-              null
-            )
-          )
-      }
-    ]
-  });
-}
-
-async function loadEvents(){
-
-  return renderGenericTable({
-    table:"live_events",
-    element:"#eventsTable",
-    columns:[
-      {
-        value:r =>
-          first(
-            r,
-            ["title","name","event_name"],
-            "Untitled"
-          )
-      },
-      {
-        keys:["status","state"]
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["start_time","starts_at"],
-              null
-            )
-          )
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["end_time","ends_at"],
-              null
-            )
-          )
-      }
-    ]
-  });
-}
 
 /* =========================================================
    MEMBERS
@@ -3591,450 +4070,23 @@ async function loadEvents(){
 
 async function loadMembers(){
 
-  const result =
-    await DB.select(
-      "member_profiles",
-      "*",
-      {
-        limit:100,
-        order:{
-          column:"created_at",
-          ascending:false
-        }
-      }
-    );
+  await loadGenericSection(
+    "member_profiles",
+    "membersTable"
+  );
 
-  const data =
-    result.error
-      ? []
-      : result.data || [];
-
-  $("#statMembers").textContent =
-    number(result.count || data.length);
-
-  $("#memberCount").textContent =
-    number(result.count || data.length);
-
-  const body =
-    $("#membersTable");
-
-  if(!data.length){
-
-    body.innerHTML =
-      `<tr>
-        <td colspan="4" class="empty">
-          No member profile records available.
-        </td>
-      </tr>`;
-
-    return;
-  }
-
-  body.innerHTML =
-    data
-      .map(row => {
-
-        const name =
-          first(
-            row,
-            [
-              "display_name",
-              "username",
-              "full_name",
-              "name"
-            ],
-            "Member"
-          );
-
-        const email =
-          first(
-            row,
-            ["email","user_email"],
-            "—"
-          );
-
-        return `
-          <tr>
-            <td>
-              <strong>${escapeHTML(name)}</strong>
-            </td>
-            <td>${escapeHTML(email)}</td>
-            <td>${date(first(row,["created_at"],null))}</td>
-            <td>${date(first(row,["updated_at"],null))}</td>
-          </tr>
-        `;
-      })
-      .join("");
 }
 
-/* =========================================================
-   REWARDS
-========================================================= */
 
-async function loadRewards(){
+async function loadActivity(){
 
-  const points =
-    await DB.select(
-      "member_points",
-      "*",
-      {
-        limit:500
-      }
-    );
+  await loadGenericSection(
+    "member_activity",
+    "activityTable"
+  );
 
-  const transactions =
-    await DB.count(
-      "member_point_transactions"
-    );
-
-  const watch =
-    await DB.select(
-      "crowrules_member_watch_minutes",
-      "*",
-      {
-        limit:500
-      }
-    );
-
-  const stats =
-    await DB.select(
-      "member_stats",
-      "*",
-      {
-        limit:500
-      }
-    );
-
-  const pointsRows =
-    points.error
-      ? []
-      : points.data || [];
-
-  const watchRows =
-    watch.error
-      ? []
-      : watch.data || [];
-
-  let totalPoints = 0;
-
-  for(const row of pointsRows){
-
-    totalPoints +=
-      Number(
-        first(
-          row,
-          ["points","total_points","balance"],
-          0
-        )
-      ) || 0;
-  }
-
-  let totalMinutes = 0;
-
-  for(const row of watchRows){
-
-    totalMinutes +=
-      Number(
-        first(
-          row,
-          [
-            "watch_minutes",
-            "minutes",
-            "total_minutes"
-          ],
-          0
-        )
-      ) || 0;
-  }
-
-  $("#totalPoints").textContent =
-    number(totalPoints);
-
-  $("#rewardMinutes").textContent =
-    number(totalMinutes);
-
-  $("#statWatchMinutes").textContent =
-    number(totalMinutes);
-
-  $("#pointTransactions").textContent =
-    number(transactions.count);
-
-  /*
-    member_stats is preferred for the leaderboard.
-  */
-
-  const leaderboard =
-    !stats.error && stats.data.length
-      ? stats.data
-      : pointsRows;
-
-  const body =
-    $("#rewardsTable");
-
-  if(!leaderboard.length){
-
-    body.innerHTML =
-      `<tr>
-        <td colspan="4" class="empty">
-          No reward statistics available.
-        </td>
-      </tr>`;
-
-    return;
-  }
-
-  body.innerHTML =
-    leaderboard
-      .slice(0,50)
-      .sort(
-        (a,b) =>
-          Number(
-            first(
-              b,
-              [
-                "points",
-                "total_points",
-                "balance"
-              ],
-              0
-            )
-          )
-          -
-          Number(
-            first(
-              a,
-              [
-                "points",
-                "total_points",
-                "balance"
-              ],
-              0
-            )
-          )
-      )
-      .map(row => {
-
-        return `
-          <tr>
-
-            <td>
-              ${escapeHTML(
-                first(
-                  row,
-                  [
-                    "display_name",
-                    "username",
-                    "member_name",
-                    "user_id"
-                  ],
-                  "Member"
-                )
-              )}
-            </td>
-
-            <td>
-              <strong>
-                ${number(
-                  first(
-                    row,
-                    [
-                      "points",
-                      "total_points",
-                      "balance"
-                    ],
-                    0
-                  )
-                )}
-              </strong>
-            </td>
-
-            <td>
-              ${number(
-                first(
-                  row,
-                  [
-                    "watch_minutes",
-                    "minutes",
-                    "total_minutes"
-                  ],
-                  0
-                )
-              )}
-            </td>
-
-            <td>
-              ${date(
-                first(
-                  row,
-                  ["updated_at","created_at"],
-                  null
-                )
-              )}
-            </td>
-
-          </tr>
-        `;
-      })
-      .join("");
 }
 
-/* =========================================================
-   ANALYTICS
-========================================================= */
-
-async function loadAnalytics(){
-
-  const views =
-    await DB.count(
-      "content_views"
-    );
-
-  const events =
-    await DB.count(
-      "analytics_events"
-    );
-
-  const likes =
-    await DB.count(
-      "content_likes"
-    );
-
-  const history =
-    await DB.count(
-      "member_watch_history"
-    );
-
-  $("#analyticsViews").textContent =
-    number(views.count);
-
-  $("#analyticsEvents").textContent =
-    number(events.count);
-
-  $("#analyticsLikes").textContent =
-    number(likes.count);
-
-  $("#analyticsHistory").textContent =
-    number(history.count);
-
-  await renderGenericTable({
-    table:"content_view_stats",
-    element:"#analyticsTable",
-    columns:[
-      {
-        value:r =>
-          first(
-            r,
-            [
-              "content_title",
-              "title",
-              "content_id"
-            ],
-            "Content"
-          )
-      },
-      {
-        value:r =>
-          number(
-            first(
-              r,
-              [
-                "views",
-                "view_count",
-                "total_views"
-              ],
-              0
-            )
-          )
-      },
-      {
-        value:r =>
-          number(
-            first(
-              r,
-              [
-                "unique_viewers",
-                "unique_views",
-                "unique_users"
-              ],
-              0
-            )
-          )
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["updated_at","created_at"],
-              null
-            )
-          )
-      }
-    ]
-  });
-}
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
-async function loadContent(){
-
-  const items =
-    await DB.count(
-      "content_items"
-    );
-
-  const library =
-    await DB.count(
-      "on_demand_library"
-    );
-
-  const favorites =
-    await DB.count(
-      "member_favorite_channels"
-    );
-
-  $("#contentCount").textContent =
-    number(items.count);
-
-  $("#ondemandCount").textContent =
-    number(library.count);
-
-  $("#favoritesCount").textContent =
-    number(favorites.count);
-
-  await renderGenericTable({
-    table:"content_items",
-    element:"#contentTable",
-    columns:[
-      {
-        value:r =>
-          first(
-            r,
-            ["title","name"],
-            "Untitled"
-          )
-      },
-      {
-        keys:["content_type","type","kind"]
-      },
-      {
-        keys:["status","state"]
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["created_at"],
-              null
-            )
-          )
-      }
-    ]
-  });
-}
 
 /* =========================================================
    CHAT
@@ -4042,916 +4094,1143 @@ async function loadContent(){
 
 async function loadChat(){
 
-  const rooms =
-    await DB.count(
-      "chat_rooms"
-    );
+  await Promise.all([
 
-  const messages =
-    await DB.count(
-      "chat_messages"
-    );
+    loadGenericSection(
+      "chat_rooms",
+      "chatRoomsTable"
+    ),
 
-  const reports =
-    await DB.count(
-      "chat_reports"
-    );
+    loadGenericSection(
+      "chat_messages",
+      "chatMessagesTable"
+    )
 
-  $("#chatRoomsCount").textContent =
-    number(rooms.count);
+  ]);
 
-  $("#chatMessagesCount").textContent =
-    number(messages.count);
-
-  $("#chatReportsCount").textContent =
-    number(reports.count);
 }
 
+
 /* =========================================================
-   POLLS
+   REPORTS
 ========================================================= */
 
-async function loadPolls(){
+async function loadReports(){
 
-  await renderGenericTable({
-    table:"polls",
-    element:"#pollsTable",
-    columns:[
-      {
-        value:r =>
-          first(
-            r,
-            [
-              "question",
-              "title",
-              "name"
-            ],
-            "Untitled Poll"
-          )
-      },
-      {
-        keys:["status","state"]
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["created_at"],
-              null
-            )
-          )
-      }
-    ]
-  });
+  await Promise.all([
+
+    loadGenericSection(
+      "chat_reports",
+      "reportsTable"
+    ),
+
+    loadGenericSection(
+      "creator_applications",
+      "applicationsTable"
+    )
+
+  ]);
+
 }
 
-/* =========================================================
-   CREATORS
-========================================================= */
-
-async function loadCreators(){
-
-  const channels =
-    await DB.count(
-      "creator_channels"
-    );
-
-  const nest =
-    await DB.count(
-      "crow_nest_creators"
-    );
-
-  $("#creatorChannelsCount").textContent =
-    number(channels.count);
-
-  $("#nestCreatorsCount").textContent =
-    number(nest.count);
-
-  await renderGenericTable({
-    table:"crow_nest_creators",
-    element:"#creatorsTable",
-    columns:[
-      {
-        value:r =>
-          first(
-            r,
-            [
-              "display_name",
-              "name",
-              "creator_name"
-            ],
-            "Creator"
-          )
-      },
-      {
-        value:r =>
-          first(
-            r,
-            [
-              "channel_name",
-              "channel_id",
-              "creator_channel_id"
-            ],
-            "—"
-          )
-      },
-      {
-        keys:["status","state"]
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["created_at"],
-              null
-            )
-          )
-      }
-    ]
-  });
-
-  await renderGenericTable({
-    table:"creator_applications",
-    element:"#applicationsTable",
-    columns:[
-      {
-        value:r =>
-          first(
-            r,
-            [
-              "display_name",
-              "name",
-              "applicant_name",
-              "user_id"
-            ],
-            "Applicant"
-          )
-      },
-      {
-        keys:["status","state"]
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["created_at"],
-              null
-            )
-          )
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["updated_at"],
-              null
-            )
-          )
-      }
-    ]
-  });
-}
 
 /* =========================================================
-   NEWSLETTER
+   ANALYTICS
 ========================================================= */
 
-async function loadNewsletter(){
+async function loadAnalytics(){
+
+  const names = [
+
+    ["content_views","analyticsViews"],
+
+    ["analytics_events","analyticsEvents"],
+
+    ["content_likes","analyticsLikes"],
+
+    ["watch_progress","analyticsProgress"],
+
+    ["member_watch_history","analyticsHistory"],
+
+    ["content_daily_stats","analyticsDaily"]
+
+  ];
+
+  await Promise.all(
+
+    names.map(
+      async ([table,id]) => {
+
+        const count =
+          await safeCount(table);
+
+        document.getElementById(
+          id
+        ).textContent =
+          count;
+
+      }
+    )
+
+  );
 
   const result =
     await DB.select(
-      "newsletter_subscribers",
-      "*",
+      "analytics_events",
       {
+        columns:"*",
+        order:{
+          column:"created_at",
+          ascending:false
+        },
         limit:100
       }
     );
 
-  $("#newsletterCount").textContent =
-    number(result.count);
+  if(result.error){
 
-  const body =
-    $("#newsletterTable");
-
-  if(result.error || !result.data.length){
-
-    body.innerHTML =
-      `<tr>
-        <td colspan="3" class="empty">
-          No subscribers available.
-        </td>
-      </tr>`;
+    renderError(
+      "analyticsTable",
+      result.error
+    );
 
     return;
+
   }
 
-  body.innerHTML =
-    result.data
-      .map(row => {
+  document.getElementById(
+    "analyticsTable"
+  ).innerHTML =
+    createTable(
+      "analytics_events",
+      result.data || []
+    );
+
+}
+
+
+/* =========================================================
+   DATABASE SELECTOR
+========================================================= */
+
+function populateDatabaseSelector(){
+
+  const select =
+    document.getElementById(
+      "databaseTableSelect"
+    );
+
+  if(!select) return;
+
+  select.innerHTML =
+    Object.keys(TABLES)
+      .map(
+        table =>
+          `<option value="${escapeAttr(table)}">
+            ${escapeHtml(TABLES[table].label)}
+          </option>`
+      )
+      .join("");
+
+}
+
+
+async function loadSelectedDatabaseTable(){
+
+  const select =
+    document.getElementById(
+      "databaseTableSelect"
+    );
+
+  const table =
+    select.value;
+
+  if(!table){
+
+    return;
+
+  }
+
+  STATE.currentTable=table;
+
+  const container =
+    document.getElementById(
+      "databaseTable"
+    );
+
+  container.innerHTML =
+    `<div class="empty">
+      <span class="spinner"></span>
+      Loading ${escapeHtml(table)}…
+     </div>`;
+
+  const result =
+    await DB.select(
+      table,
+      {
+        columns:"*",
+        order:{
+          column:
+            TABLES[table]?.orderBy ||
+            "created_at",
+          ascending:false
+        },
+        limit:1000
+      }
+    );
+
+  if(result.error){
+
+    renderError(
+      "databaseTable",
+      result.error
+    );
+
+    return;
+
+  }
+
+  STATE.data[table] =
+    result.data || [];
+
+  container.innerHTML =
+    createTable(
+      table,
+      result.data || []
+    );
+
+}
+
+
+function openAddSelectedTable(){
+
+  const table =
+    document.getElementById(
+      "databaseTableSelect"
+    ).value;
+
+  if(!table){
+
+    toast(
+      "Choose a table",
+      "Select a database table first."
+    );
+
+    return;
+
+  }
+
+  openAdd(table);
+
+}
+
+
+/* =========================================================
+   CRUD TABLE RENDERER
+========================================================= */
+
+function createTable(
+  table,
+  rows,
+  options={}
+){
+
+  if(!rows.length){
+
+    return `
+      <div class="empty">
+        No records found in
+        <strong>${escapeHtml(table)}</strong>.
+      </div>
+    `;
+
+  }
+
+  const keys =
+    getDisplayColumns(
+      rows
+    );
+
+  const head =
+    keys.map(
+      key =>
+        `<th>${escapeHtml(key)}</th>`
+    )
+    .join("");
+
+  const body =
+    rows.map(
+      row => {
+
+        const key =
+          rowId(row);
+
+        const cells =
+          keys.map(
+            keyName => {
+
+              return `
+                <td>
+                  ${formatCell(
+                    row[keyName],
+                    keyName
+                  )}
+                </td>
+              `;
+
+            }
+          )
+          .join("");
 
         return `
           <tr>
 
-            <td>
-              ${escapeHTML(
-                first(
-                  row,
-                  ["email","subscriber_email"],
-                  "—"
-                )
-              )}
-            </td>
+            ${cells}
 
             <td>
-              <span class="badge good">
-                ${escapeHTML(
-                  first(
-                    row,
-                    ["status","state"],
-                    "active"
-                  )
-                )}
-              </span>
-            </td>
 
-            <td>
-              ${date(
-                first(
-                  row,
-                  ["created_at","subscribed_at"],
-                  null
-                )
-              )}
+              <div class="actions">
+
+                <button
+                  class="btn btn-small"
+                  onclick="openEdit(
+                    '${escapeJs(table)}',
+                    '${escapeJs(String(key))}'
+                  )"
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="btn btn-danger btn-small"
+                  onclick="confirmDelete(
+                    '${escapeJs(table)}',
+                    '${escapeJs(String(key))}'
+                  )"
+                >
+                  Delete
+                </button>
+
+              </div>
+
             </td>
 
           </tr>
         `;
-      })
-      .join("");
-}
 
-/* =========================================================
-   ACTIVITY
-========================================================= */
-
-async function loadActivity(){
-
-  await renderGenericTable({
-    table:"member_activity",
-    element:"#activityTable",
-    columns:[
-      {
-        value:r =>
-          first(
-            r,
-            [
-              "display_name",
-              "username",
-              "member_name",
-              "user_id"
-            ],
-            "Member"
-          )
-      },
-      {
-        value:r =>
-          first(
-            r,
-            [
-              "activity",
-              "description",
-              "action"
-            ],
-            "—"
-          )
-      },
-      {
-        keys:["activity_type","type","action_type"]
-      },
-      {
-        value:r =>
-          date(
-            first(
-              r,
-              ["created_at"],
-              null
-            )
-          )
       }
-    ]
-  });
-}
-
-/* =========================================================
-   DATABASE HEALTH
-========================================================= */
-
-function renderDatabaseGrid(){
-
-  const targets = [
-    $("#dashboardDb"),
-    $("#databaseGrid")
-  ];
-
-  const entries =
-    CONFIG.tables.map(table => {
-
-      const state =
-        STATE.tables.get(table);
-
-      const ok =
-        state &&
-        state.ok === true;
-
-      return `
-        <div class="db-item">
-
-          <span class="db-status ${
-            ok
-              ? "ok"
-              : state
-                ? "fail"
-                : "skip"
-          }"></span>
-
-          <span class="db-name">
-            ${escapeHTML(table)}
-          </span>
-
-        </div>
-      `;
-    })
+    )
     .join("");
 
-  targets.forEach(target => {
+  return `
+    <table>
 
-    if(target){
-      target.innerHTML = entries;
+      <thead>
+
+        <tr>
+
+          ${head}
+
+          <th>
+            Actions
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        ${body}
+
+      </tbody>
+
+    </table>
+  `;
+
+}
+
+
+function getDisplayColumns(rows){
+
+  const preferred = [
+
+    "id",
+
+    "name",
+
+    "title",
+
+    "slug",
+
+    "channel_id",
+
+    "show_id",
+
+    "episode_id",
+
+    "member_id",
+
+    "user_id",
+
+    "is_active",
+
+    "status",
+
+    "start_time",
+
+    "end_time",
+
+    "views",
+
+    "current_viewers",
+
+    "created_at",
+
+    "updated_at"
+
+  ];
+
+  const keys =
+    Object.keys(
+      rows[0] || {}
+    );
+
+  const ordered=[];
+
+  preferred.forEach(
+    key => {
+
+      if(
+        keys.includes(key) &&
+        !ordered.includes(key)
+      ){
+
+        ordered.push(key);
+
+      }
+
     }
+  );
 
-  });
+  keys.forEach(
+    key => {
+
+      if(
+        !ordered.includes(key)
+      ){
+
+        ordered.push(key);
+
+      }
+
+    }
+  );
+
+  return ordered.slice(0,18);
+
 }
 
-async function runDatabaseHealth(){
-
-  const grid =
-    $("#databaseGrid");
-
-  if(grid){
-    grid.innerHTML =
-      `<div class="empty loading">
-        Checking Supabase tables…
-      </div>`;
-  }
-
-  const results =
-    await DB.probeAll();
-
-  STATE.tables =
-    new Map(
-      results.map(
-        result =>
-          [
-            result.table,
-            result
-          ]
-      )
-    );
-
-  renderDatabaseGrid();
-
-  const working =
-    results.filter(
-      result => result.ok
-    ).length;
-
-  const failed =
-    results.filter(
-      result => !result.ok
-    ).length;
-
-  $("#databaseStatus").textContent =
-    `${working} available · ${failed} unavailable`;
-
-  $("#databaseConnectionDetail").textContent =
-    `Checked ${results.length} configured tables.`;
-
-  $("#databaseDot").className =
-    "status-dot " +
-    (
-      working
-        ? "online"
-        : "offline"
-    );
-
-  return results;
-}
 
 /* =========================================================
-   SYSTEM INFO
+   CELL FORMATTING
 ========================================================= */
 
-function renderSystemInfo(){
+function formatCell(
+  value,
+  key
+){
 
-  const el =
-    $("#systemInfo");
+  if(value === null ||
+     value === undefined){
 
-  el.innerHTML = `
-    <div style="display:grid;gap:11px;font-size:12px">
+    return `<span style="color:#555d6d">NULL</span>`;
 
-      <div>
-        <span style="color:#777783">Supabase</span><br>
-        <strong>Connected client</strong>
-      </div>
+  }
 
-      <div>
-        <span style="color:#777783">Channel Source</span><br>
-        <strong>tv_channels</strong>
-      </div>
+  if(
+    typeof value === "boolean"
+  ){
 
-      <div>
-        <span style="color:#777783">Schedule Source</span><br>
-        <strong>schedule_items</strong>
-      </div>
+    return value
+      ? `<span class="badge badge-green">TRUE</span>`
+      : `<span class="badge badge-red">FALSE</span>`;
 
-      <div>
-        <span style="color:#777783">Viewer Source</span><br>
-        <strong>tv_active_viewers / viewer RPC</strong>
-      </div>
+  }
 
-      <div>
-        <span style="color:#777783">Viewer Refresh</span><br>
-        <strong>${CONFIG.viewerRefreshMs / 1000}s</strong>
-      </div>
+  if(
+    key === "views" ||
+    key === "current_viewers" ||
+    key === "points" ||
+    key === "total_points" ||
+    key === "watch_minutes"
+  ){
 
-      <div>
-        <span style="color:#777783">Last Viewer Update</span><br>
-        <strong>
-          ${
-            STATE.lastViewerRefresh
-              ? relative(STATE.lastViewerRefresh)
-              : "Never"
+    return formatNumber(value);
+
+  }
+
+  if(
+    key.includes("url") ||
+    key.includes("youtube") ||
+    key.includes("thumbnail")
+  ){
+
+    const stringValue =
+      String(value);
+
+    if(
+      /^https?:\/\//i.test(
+        stringValue
+      )
+    ){
+
+      return `
+        <a
+          href="${escapeAttr(stringValue)}"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="color:var(--accent2)"
+        >
+          Open
+        </a>
+      `;
+
+    }
+
+  }
+
+  const stringValue =
+    typeof value === "object"
+      ? JSON.stringify(value)
+      : String(value);
+
+  return escapeHtml(
+    truncate(
+      stringValue,
+      160
+    )
+  );
+
+}
+
+
+/* =========================================================
+   CRUD MODAL
+========================================================= */
+
+async function openAdd(table){
+
+  STATE.currentTable=table;
+
+  STATE.currentRecord=null;
+
+  document.getElementById(
+    "modalTitle"
+  ).textContent =
+    `Add ${TABLES[table]?.label || table}`;
+
+  document.getElementById(
+    "modalSubtitle"
+  ).textContent =
+    table;
+
+  document.getElementById(
+    "saveRecordButton"
+  ).textContent =
+    "Create";
+
+  document.getElementById(
+    "modalBody"
+  ).innerHTML =
+    await buildForm(
+      table,
+      {}
+    );
+
+  document
+    .getElementById("crudModal")
+    .classList.add("open");
+
+}
+
+
+async function openEdit(
+  table,
+  id
+){
+
+  STATE.currentTable=table;
+
+  const result =
+    await DB.select(
+      table,
+      {
+        columns:"*",
+        filters:[
+          {
+            type:"eq",
+            column:guessPrimaryKey(table),
+            value:id
           }
-        </strong>
+        ],
+        limit:1
+      }
+    );
+
+  if(result.error){
+
+    toast(
+      "Unable to load record",
+      result.error.message
+    );
+
+    return;
+
+  }
+
+  if(!result.data?.length){
+
+    /*
+     * Fallback for tables whose primary key
+     * is not named id.
+     */
+
+    const all =
+      await DB.select(
+        table,
+        {
+          columns:"*",
+          limit:1000
+        }
+      );
+
+    if(all.error){
+
+      toast(
+        "Unable to load record",
+        all.error.message
+      );
+
+      return;
+
+    }
+
+    const record =
+      all.data.find(
+        row =>
+          String(rowId(row)) ===
+          String(id)
+      );
+
+    if(!record){
+
+      toast(
+        "Record not found",
+        `Could not find ${table} record ${id}.`
+      );
+
+      return;
+
+    }
+
+    STATE.currentRecord=record;
+
+  }else{
+
+    STATE.currentRecord =
+      result.data[0];
+
+  }
+
+  document.getElementById(
+    "modalTitle"
+  ).textContent =
+    `Edit ${TABLES[table]?.label || table}`;
+
+  document.getElementById(
+    "modalSubtitle"
+  ).textContent =
+    table;
+
+  document.getElementById(
+    "saveRecordButton"
+  ).textContent =
+    "Save Changes";
+
+  document.getElementById(
+    "modalBody"
+  ).innerHTML =
+    await buildForm(
+      table,
+      STATE.currentRecord
+    );
+
+  document
+    .getElementById("crudModal")
+    .classList.add("open");
+
+}
+
+
+function guessPrimaryKey(table){
+
+  return "id";
+
+}
+
+
+async function buildForm(
+  table,
+  record
+){
+
+  let columns =
+    Object.keys(
+      record || {}
+    );
+
+  /*
+   * If adding a record, attempt to obtain
+   * an existing row so the form can discover
+   * actual columns.
+   */
+
+  if(!columns.length){
+
+    const result =
+      await DB.select(
+        table,
+        {
+          columns:"*",
+          limit:1
+        }
+      );
+
+    if(!result.error &&
+       result.data?.length){
+
+      columns =
+        Object.keys(
+          result.data[0]
+        );
+
+    }
+
+  }
+
+  if(!columns.length){
+
+    return `
+      <div class="field full">
+
+        <label>
+          JSON Record
+        </label>
+
+        <textarea
+          id="jsonRecord"
+          spellcheck="false"
+        >{}</textarea>
+
       </div>
+
+      <div style="
+        margin-top:12px;
+        color:var(--muted);
+        font-size:11px;
+      ">
+        This table returned no sample rows.
+        Enter a valid JSON object matching
+        the table schema.
+      </div>
+    `;
+
+  }
+
+  STATE.currentColumns =
+    columns;
+
+  return `
+    <div class="form-grid">
+
+      ${columns.map(
+        column =>
+          buildField(
+            column,
+            record[column]
+          )
+      ).join("")}
 
     </div>
   `;
+
 }
 
-/* =========================================================
-   TOP CHANNELS
-========================================================= */
 
-function renderTopChannels(){
+function buildField(
+  column,
+  value
+){
 
-  const el =
-    $("#topChannels");
+  const isId =
+    column === "id" ||
+    column.endsWith("_id") &&
+    column === "id";
 
-  if(!el){
-    return;
-  }
+  const isBoolean =
+    typeof value === "boolean";
 
-  const rows =
-    [...STATE.channels]
-      .map(channel => ({
-        channel,
-        views:Number(
-          first(
-            channel,
-            [
-              "views",
-              "view_count",
-              "total_views"
-            ],
-            0
-          )
-        ) || 0
-      }))
-      .sort(
-        (a,b) =>
-          b.views-a.views
-      )
-      .slice(0,5);
+  const isObject =
+    value !== null &&
+    typeof value === "object";
 
-  const max =
-    Math.max(
-      1,
-      ...rows.map(
-        row => row.views
-      )
+  const isLong =
+    isObject ||
+    (
+      typeof value === "string" &&
+      value.length > 160
     );
 
-  if(!rows.length){
+  let input;
 
-    el.innerHTML =
-      `<div class="empty">
-        No active channels.
-      </div>`;
+  if(isBoolean){
 
-    return;
+    input = `
+      <select
+        data-field="${escapeAttr(column)}"
+      >
+        <option
+          value="true"
+          ${value === true ? "selected" : ""}
+        >
+          TRUE
+        </option>
+
+        <option
+          value="false"
+          ${value === false ? "selected" : ""}
+        >
+          FALSE
+        </option>
+
+      </select>
+    `;
+
+  }else if(isLong){
+
+    input = `
+      <textarea
+        data-field="${escapeAttr(column)}"
+        spellcheck="false"
+      >${escapeHtml(
+        isObject
+          ? JSON.stringify(value,null,2)
+          : value ?? ""
+      )}</textarea>
+    `;
+
+  }else{
+
+    input = `
+      <input
+        data-field="${escapeAttr(column)}"
+        value="${escapeAttr(
+          value ?? ""
+        )}"
+        ${column === "id" && STATE.currentRecord ? "readonly" : ""}
+      >
+    `;
+
   }
 
-  el.innerHTML =
-    rows.map(row => {
+  return `
+    <div class="field">
 
-      const name =
-        first(
-          row.channel,
-          ["name","title","channel_name"],
-          "Channel"
-        );
+      <label>
+        ${escapeHtml(column)}
+      </label>
 
-      const percent =
-        Math.max(
-          3,
-          (row.views/max)*100
-        );
+      ${input}
 
-      return `
-        <div class="bar-item">
+    </div>
+  `;
 
-          <div>
-            ${escapeHTML(name)}
-          </div>
-
-          <div class="bar-track">
-            <div
-              class="bar-fill"
-              style="width:${percent}%"
-            ></div>
-          </div>
-
-          <div>
-            ${number(row.views)}
-          </div>
-
-        </div>
-      `;
-    }).join("");
 }
 
+
 /* =========================================================
-   MEMBER STATS
+   SAVE
 ========================================================= */
 
-async function renderMemberStats(){
+async function saveRecord(){
 
-  const el =
-    $("#memberStats");
+  const table =
+    STATE.currentTable;
 
-  if(!el){
+  if(!table){
+
     return;
+
   }
 
-  const stats =
-    await DB.select(
-      "member_stats",
-      "*",
-      {
-        limit:5
+  const payload={};
+
+  document
+    .querySelectorAll(
+      "#modalBody [data-field]"
+    )
+    .forEach(
+      element => {
+
+        const field =
+          element.dataset.field;
+
+        let value =
+          element.value;
+
+        if(
+          value === ""
+        ){
+
+          /*
+           * Do not automatically convert every
+           * empty field to null because some schemas
+           * use empty strings intentionally.
+           */
+
+          payload[field]="";
+
+          return;
+
+        }
+
+        if(
+          element.tagName === "SELECT" &&
+          (
+            value === "true" ||
+            value === "false"
+          )
+        ){
+
+          payload[field] =
+            value === "true";
+
+          return;
+
+        }
+
+        if(
+          element.tagName === "TEXTAREA"
+        ){
+
+          try{
+
+            payload[field] =
+              JSON.parse(value);
+
+            return;
+
+          }catch{
+
+            payload[field]=value;
+
+            return;
+
+          }
+
+        }
+
+        payload[field]=value;
+
       }
     );
 
-  if(stats.error || !stats.data.length){
-
-    el.innerHTML =
-      `<div class="empty">
-        Member statistics unavailable.
-      </div>`;
-
-    return;
-  }
-
-  const rows =
-    stats.data.slice(0,5);
-
-  const max =
-    Math.max(
-      1,
-      ...rows.map(
-        row =>
-          Number(
-            first(
-              row,
-              [
-                "watch_minutes",
-                "total_watch_minutes",
-                "minutes"
-              ],
-              0
-            )
-          ) || 0
-      )
-    );
-
-  el.innerHTML =
-    rows.map(row => {
-
-      const name =
-        first(
-          row,
-          [
-            "display_name",
-            "username",
-            "member_name",
-            "user_id"
-          ],
-          "Member"
-        );
-
-      const minutes =
-        Number(
-          first(
-            row,
-            [
-              "watch_minutes",
-              "total_watch_minutes",
-              "minutes"
-            ],
-            0
-          )
-        ) || 0;
-
-      return `
-        <div class="bar-item">
-
-          <div>
-            ${escapeHTML(name)}
-          </div>
-
-          <div class="bar-track">
-            <div
-              class="bar-fill"
-              style="width:${Math.max(
-                3,
-                minutes/max*100
-              )}%"
-            ></div>
-          </div>
-
-          <div>
-            ${number(minutes)}
-          </div>
-
-        </div>
-      `;
-    }).join("");
-}
-
-/* =========================================================
-   DASHBOARD LOAD
-========================================================= */
-
-async function loadDashboard(){
-
-  await loadChannels();
-
-  await loadViewerData();
-
-  await loadSchedule();
-
-  await loadMembers();
-
-  await loadRewards();
-
-  await runDatabaseHealth();
-
-  renderTopChannels();
-
-  await renderMemberStats();
-
-  renderSystemInfo();
-
-  STATE.loaded = true;
-}
-
-/* =========================================================
-   LOAD ALL OPTIONAL SECTIONS
-========================================================= */
-
-async function loadEverything(){
-
-  try{
-    await loadDashboard();
-  }catch(error){
-    console.error(
-      "Dashboard load:",
-      error
-    );
-  }
-
   /*
-    These are intentionally independent.
-    One unavailable table cannot stop the others.
-  */
+   * Don't send primary key on INSERT if it is
+   * empty. Let Postgres generate it.
+   */
 
-  const tasks = [
+  if(
+    !STATE.currentRecord &&
+    payload.id === ""
+  ){
 
-    loadShows(),
-    loadEpisodes(),
-    loadEvents(),
+    delete payload.id;
 
-    loadAnalytics(),
-    loadContent(),
-
-    loadChat(),
-    loadPolls(),
-
-    loadCreators(),
-    loadNewsletter(),
-
-    loadActivity()
-  ];
-
-  await Promise.allSettled(tasks);
-}
-
-/* =========================================================
-   REALTIME
-========================================================= */
-
-function setupRealtime(){
-
-  if(!CONFIG.realtime){
-    return;
   }
 
-  try{
+  let result;
 
-    if(STATE.realtimeChannel){
-      SUPABASE.removeChannel(
-        STATE.realtimeChannel
+  if(STATE.currentRecord){
+
+    const key =
+      guessPrimaryKey(table);
+
+    const keyValue =
+      STATE.currentRecord[key] ??
+      rowId(
+        STATE.currentRecord
       );
+
+    if(
+      keyValue === undefined ||
+      keyValue === null
+    ){
+
+      toast(
+        "Update failed",
+        "No primary-key value was found."
+      );
+
+      return;
+
     }
 
-    STATE.realtimeChannel =
-      SUPABASE
-        .channel(
-          "crowrules-admin-live"
-        )
-        .on(
-          "postgres_changes",
-          {
-            event:"*",
-            schema:"public",
-            table:"tv_active_viewers"
-          },
-          () => {
-            loadViewerData();
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event:"*",
-            schema:"public",
-            table:"tv_channels"
-          },
-          () => {
-            loadChannels()
-              .then(loadViewerData);
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event:"*",
-            schema:"public",
-            table:"schedule_items"
-          },
-          () => {
-            loadSchedule();
-          }
-        )
-        .subscribe();
+    result =
+      await DB.update(
+        table,
+        key,
+        keyValue,
+        payload
+      );
 
-  }catch(error){
+  }else{
 
-    console.warn(
-      "Realtime setup:",
-      error
-    );
+    result =
+      await DB.insert(
+        table,
+        payload
+      );
+
   }
+
+  if(result.error){
+
+    toast(
+      "Supabase write failed",
+      result.error.message
+    );
+
+    return;
+
+  }
+
+  closeModal();
+
+  toast(
+    "Saved",
+    `${table} was successfully ${
+      STATE.currentRecord
+        ? "updated"
+        : "created"
+    }.`
+  );
+
+  await reloadCurrentSection();
+
 }
+
 
 /* =========================================================
-   NAVIGATION
+   DELETE
 ========================================================= */
 
-function showPage(page){
+async function confirmDelete(
+  table,
+  id
+){
 
-  const target =
-    $(`#page-${page}`);
+  const answer =
+    window.confirm(
+      `Delete this ${table} record?\n\n` +
+      `ID: ${id}\n\n` +
+      `This cannot be undone.`
+    );
 
-  if(!target){
+  if(!answer){
+
     return;
+
   }
 
-  $$(".page").forEach(
-    el =>
-      el.classList.remove("active")
+  const key =
+    guessPrimaryKey(table);
+
+  const result =
+    await DB.delete(
+      table,
+      key,
+      id
+    );
+
+  if(result.error){
+
+    toast(
+      "Delete failed",
+      result.error.message
+    );
+
+    return;
+
+  }
+
+  toast(
+    "Deleted",
+    `${table} record deleted.`
   );
 
-  target.classList.add("active");
+  await reloadCurrentSection();
 
-  $$(".nav-btn").forEach(
-    button =>
-      button.classList.toggle(
-        "active",
-        button.dataset.page === page
-      )
+}
+
+
+/* =========================================================
+   RELOAD CURRENT SECTION
+========================================================= */
+
+async function reloadCurrentSection(){
+
+  await navigate(
+    STATE.currentSection
   );
 
-  $("#sidebar").classList.remove("open");
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-
-  /*
-    Refresh page-specific information when opened.
-  */
-
-  if(page === "live"){
-    loadViewerData();
-  }
-
-  if(page === "channels"){
-    loadChannels()
-      .then(loadViewerData);
-  }
-
-  if(page === "schedule"){
-    loadSchedule();
-  }
-
-  if(page === "members"){
-    loadMembers();
-  }
-
-  if(page === "rewards"){
-    loadRewards();
-  }
-
-  if(page === "analytics"){
-    loadAnalytics();
-  }
-
-  if(page === "content"){
-    loadContent();
-  }
-
-  if(page === "chat"){
-    loadChat();
-  }
-
-  if(page === "polls"){
-    loadPolls();
-  }
-
-  if(page === "creators"){
-    loadCreators();
-  }
-
-  if(page === "newsletter"){
-    loadNewsletter();
-  }
-
-  if(page === "activity"){
-    loadActivity();
-  }
 }
 
-function setupNavigation(){
 
-  $$(".nav-btn").forEach(button => {
+/* =========================================================
+   MODAL
+========================================================= */
 
-    button.addEventListener(
-      "click",
-      () =>
-        showPage(
-          button.dataset.page
-        )
-    );
-  });
+function closeModal(){
 
-  $$("[data-page-jump]").forEach(button => {
+  document
+    .getElementById("crudModal")
+    .classList.remove("open");
 
-    button.addEventListener(
-      "click",
-      () =>
-        showPage(
-          button.dataset.pageJump
-        )
-    );
-  });
+  STATE.currentRecord=null;
+
 }
+
+
+document
+  .getElementById("crudModal")
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target.id ===
+        "crudModal"
+      ){
+
+        closeModal();
+
+      }
+
+    }
+  );
+
 
 /* =========================================================
    SEARCH
@@ -4959,415 +5238,591 @@ function setupNavigation(){
 
 function setupSearch(){
 
-  const input =
-    $("#globalSearch");
+  const pairs = [
 
-  input.addEventListener(
-    "input",
-    () => {
+    ["channelSearch","tv_channels","channelsTable"],
 
-      const query =
-        input.value
-          .trim()
-          .toLowerCase();
+    ["scheduleSearch","schedule_items","scheduleTable"],
 
-      if(!query){
-        return;
-      }
+    ["showsSearch","shows","showsTable"],
 
-      const matches =
-        STATE.channels.filter(
-          channel =>
-            JSON.stringify(channel)
-              .toLowerCase()
-              .includes(query)
+    ["episodesSearch","episodes","episodesTable"]
+
+  ];
+
+  pairs.forEach(
+    ([input,table,container]) => {
+
+      const element =
+        document.getElementById(
+          input
         );
 
-      if(matches.length){
+      if(!element) return;
 
-        showPage("channels");
+      element.addEventListener(
+        "input",
+        () => {
 
-        const body =
-          $("#channelsTable");
+          const rows =
+            STATE.data[table] || [];
 
-        [...body.querySelectorAll("tr")]
-          .forEach(row => {
+          const search =
+            element.value
+              .toLowerCase();
 
-            row.style.display =
-              row.textContent
-                .toLowerCase()
-                .includes(query)
-                  ? ""
-                  : "none";
-          });
-      }
-    }
-  );
-}
+          const filtered =
+            rows.filter(
+              row =>
+                JSON.stringify(row)
+                  .toLowerCase()
+                  .includes(search)
+            );
 
-/* =========================================================
-   EXPORT
-========================================================= */
+          document.getElementById(
+            container
+          ).innerHTML =
+            createTable(
+              table,
+              filtered
+            );
 
-function exportDashboard(){
-
-  const payload = {
-
-    generated_at:
-      new Date().toISOString(),
-
-    source:{
-      channels:"tv_channels",
-      schedule:"schedule_items",
-      viewers:"tv_active_viewers / RPC"
-    },
-
-    current_viewers:
-      totalCurrentViewers(),
-
-    active_channels:
-      STATE.channels.length,
-
-    channels:
-      STATE.channels.map(
-        channel => ({
-          id:channel.id,
-          name:first(
-            channel,
-            ["name","title","channel_name"],
-            ""
-          ),
-          is_active:
-            channel.is_active === true,
-          current_viewers:
-            channelViewerCount(channel),
-          accumulated_views:
-            first(
-              channel,
-              [
-                "views",
-                "view_count",
-                "total_views"
-              ],
-              0
-            )
-        })
-      ),
-
-    schedule_items:
-      STATE.schedule,
-
-    database_health:
-      [...STATE.tables.entries()]
-        .map(
-          ([table,state]) => ({
-            table,
-            available:state.ok,
-            count:state.count || 0
-          })
-        )
-  };
-
-  const blob =
-    new Blob(
-      [
-        JSON.stringify(
-          payload,
-          null,
-          2
-        )
-      ],
-      {
-        type:"application/json"
-      }
-    );
-
-  const url =
-    URL.createObjectURL(blob);
-
-  const a =
-    document.createElement("a");
-
-  a.href = url;
-
-  a.download =
-    `crowrules-admin-${new Date()
-      .toISOString()
-      .replaceAll(":","-")}.json`;
-
-  document.body.appendChild(a);
-
-  a.click();
-
-  a.remove();
-
-  URL.revokeObjectURL(url);
-
-  showToast(
-    "Admin statistics exported.",
-    "good"
-  );
-}
-
-/* =========================================================
-   REFRESH
-========================================================= */
-
-async function refreshAll(){
-
-  showToast(
-    "Refreshing CrowRules Admin Pro…"
-  );
-
-  await testConnection();
-
-  await loadEverything();
-
-  showToast(
-    "Dashboard refreshed.",
-    "good"
-  );
-}
-
-/* =========================================================
-   BUTTON EVENTS
-========================================================= */
-
-function setupButtons(){
-
-  $("#refreshBtn")
-    .addEventListener(
-      "click",
-      refreshAll
-    );
-
-  $("#refreshViewers")
-    .addEventListener(
-      "click",
-      async () => {
-
-        await loadChannels();
-
-        await loadViewerData();
-
-        renderSystemInfo();
-
-        showToast(
-          "Viewer statistics refreshed.",
-          "good"
-        );
-      }
-    );
-
-  $("#liveRefresh")
-    .addEventListener(
-      "click",
-      async () => {
-
-        await loadChannels();
-
-        await loadViewerData();
-
-        showToast(
-          "Live viewer counts refreshed.",
-          "good"
-        );
-      }
-    );
-
-  $("#databaseRefresh")
-    .addEventListener(
-      "click",
-      async () => {
-
-        await runDatabaseHealth();
-
-        showToast(
-          "Database health check complete.",
-          "good"
-        );
-      }
-    );
-
-  $("#exportBtn")
-    .addEventListener(
-      "click",
-      exportDashboard
-    );
-
-  $$("[data-refresh-section]")
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        async () => {
-
-          const section =
-            button.dataset.refreshSection;
-
-          if(section === "channels"){
-
-            await loadChannels();
-            await loadViewerData();
-
-          }
-
-          if(section === "schedule"){
-            await loadSchedule();
-          }
-
-          showToast(
-            `${section} refreshed.`,
-            "good"
-          );
         }
       );
-    });
 
-  $("#mobileMenu")
-    .addEventListener(
-      "click",
-      () =>
-        $("#sidebar")
-          .classList
-          .toggle("open")
-    );
-}
-
-/* =========================================================
-   AUTOMATIC VIEWER REFRESH
-========================================================= */
-
-function setupViewerTimer(){
-
-  setInterval(
-    async () => {
-
-      try{
-
-        await loadChannels();
-
-        await loadViewerData();
-
-        renderSystemInfo();
-
-      }catch(error){
-
-        console.warn(
-          "Viewer refresh:",
-          error
-        );
-      }
-
-    },
-    CONFIG.viewerRefreshMs
-  );
-}
-
-/* =========================================================
-   AUTH SESSION MONITORING
-========================================================= */
-
-function setupAuth(){
-
-  SUPABASE.auth.onAuthStateChange(
-    (_event,session) => {
-
-      /*
-        Admin authorization should be enforced with
-        Supabase RLS/database policies.
-
-        This browser page deliberately does NOT use a
-        service_role key or attempt to bypass RLS.
-      */
-
-      if(session){
-
-        console.log(
-          "Supabase session active:",
-          session.user?.id
-        );
-
-      }else{
-
-        console.log(
-          "No Supabase session."
-        );
-      }
     }
   );
+
 }
+
 
 /* =========================================================
-   STARTUP
+   DIAGNOSTICS
 ========================================================= */
 
-async function boot(){
+async function runDiagnostics(){
 
-  setupNavigation();
+  const output =
+    document.getElementById(
+      "diagnosticsLog"
+    );
 
-  setupSearch();
+  output.textContent =
+    "Running diagnostics…\n";
 
-  setupButtons();
+  const lines=[];
 
-  setupAuth();
-
-  renderSystemInfo();
-
-  await testConnection();
-
-  await loadEverything();
-
-  setupRealtime();
-
-  setupViewerTimer();
-
-  console.log(
-    "CrowRules Admin Pro initialized."
+  lines.push(
+    "=== CROWRULES SUPABASE DIAGNOSTICS ==="
   );
 
-  console.log(
-    "Authoritative channel table:",
-    CONFIG.authoritative.channels
+  lines.push(
+    `URL: ${CONFIG.supabaseUrl}`
   );
 
-  console.log(
-    "Authoritative schedule table:",
-    CONFIG.authoritative.schedule
+  lines.push(
+    `Key type: ${
+      CONFIG.supabaseKey.startsWith(
+        "sb_publishable_"
+      )
+        ? "Publishable"
+        : "Check key"
+    }`
   );
 
-  console.log(
-    "Current viewer source:",
-    CONFIG.authoritative.viewers
-  );
+  lines.push("");
+
+  const connection =
+    await DB.select(
+      "tv_channels",
+      {
+        columns:"*",
+        limit:1
+      }
+    );
+
+  if(connection.error){
+
+    lines.push(
+      `✗ tv_channels — ${connection.error.message}`
+    );
+
+  }else{
+
+    lines.push(
+      `✓ tv_channels — API access OK`
+    );
+
+  }
+
+  const tables =
+    Object.keys(
+      TABLES
+    );
+
+  for(const table of tables){
+
+    if(table === "tv_channels"){
+      continue;
+    }
+
+    const result =
+      await DB.select(
+        table,
+        {
+          columns:"*",
+          limit:1
+        }
+      );
+
+    if(result.error){
+
+      lines.push(
+        `✗ ${table} — ${result.error.message}`
+      );
+
+    }else{
+
+      lines.push(
+        `✓ ${table} — OK`
+      );
+
+    }
+
+  }
+
+  /*
+   * Test authoritative viewer source.
+   */
+
+  const viewers =
+    await DB.select(
+      "tv_active_viewers",
+      {
+        columns:"*",
+        limit:1
+      }
+    );
+
+  if(viewers.error){
+
+    lines.push(
+      `! tv_active_viewers — ${viewers.error.message}`
+    );
+
+    lines.push(
+      "  Viewer counts will require the configured RPC."
+    );
+
+  }else{
+
+    lines.push(
+      `✓ tv_active_viewers — viewer presence accessible`
+    );
+
+  }
+
+  output.textContent =
+    lines.join("\n");
+
 }
 
-document.addEventListener(
-  "DOMContentLoaded",
-  boot
-);
+
+/* =========================================================
+   REFRESH / TIMERS
+========================================================= */
+
+function startTimers(){
+
+  STATE.timers.forEach(
+    clearInterval
+  );
+
+  STATE.timers=[];
+
+  STATE.timers.push(
+    setInterval(
+      async () => {
+
+        await loadViewerStats();
+
+      },
+      CONFIG.viewerRefreshInterval
+    )
+  );
+
+  STATE.timers.push(
+    setInterval(
+      async () => {
+
+        if(
+          STATE.currentSection ===
+          "dashboard"
+        ){
+
+          await loadDashboard();
+
+        }
+
+      },
+      CONFIG.refreshInterval
+    )
+  );
+
+}
+
+
+document
+  .getElementById("refreshAll")
+  .addEventListener(
+    "click",
+    async () => {
+
+      await reloadCurrentSection();
+
+      toast(
+        "Refreshed",
+        "Admin Pro data refreshed."
+      );
+
+    }
+  );
+
+
+document
+  .getElementById("mobileMenu")
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById("sidebar")
+        .classList.toggle("open");
+
+    }
+  );
+
+
+/* =========================================================
+   LOG
+========================================================= */
+
+function log(message){
+
+  const dashboard =
+    document.getElementById(
+      "dashboardLog"
+    );
+
+  if(!dashboard) return;
+
+  const stamp =
+    new Date()
+      .toLocaleTimeString();
+
+  dashboard.textContent =
+    `[${stamp}] ${message}\n` +
+    dashboard.textContent;
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer=null;
+
+function toast(
+  title,
+  message
+){
+
+  const element =
+    document.getElementById(
+      "toast"
+    );
+
+  document.getElementById(
+    "toastTitle"
+  ).textContent =
+    title;
+
+  document.getElementById(
+    "toastMessage"
+  ).textContent =
+    message;
+
+  element.classList.add(
+    "show"
+  );
+
+  clearTimeout(
+    toastTimer
+  );
+
+  toastTimer =
+    setTimeout(
+      () => {
+
+        element.classList.remove(
+          "show"
+        );
+
+      },
+      5000
+    );
+
+}
+
+
+/* =========================================================
+   ERROR RENDERING
+========================================================= */
+
+function renderError(
+  id,
+  error
+){
+
+  const container =
+    document.getElementById(id);
+
+  if(!container) return;
+
+  container.innerHTML =
+    `
+      <div class="empty">
+
+        <div
+          style="
+            color:var(--red);
+            font-weight:900;
+            margin-bottom:8px;
+          "
+        >
+          Supabase error
+        </div>
+
+        <div>
+          ${escapeHtml(
+            error?.message ||
+            "Unknown Supabase error"
+          )}
+        </div>
+
+        ${
+          error?.code
+            ? `<div style="
+                 margin-top:5px;
+                 color:var(--muted);
+                 font-size:11px;
+               ">
+                 Code: ${escapeHtml(error.code)}
+               </div>`
+            : ""
+        }
+
+      </div>
+    `;
+
+}
+
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function formatNumber(
+  value
+){
+
+  const number =
+    Number(value);
+
+  if(
+    !Number.isFinite(number)
+  ){
+
+    return "0";
+
+  }
+
+  return number.toLocaleString();
+
+}
+
+
+function truncate(
+  value,
+  length
+){
+
+  const string =
+    String(value);
+
+  if(
+    string.length <= length
+  ){
+
+    return string;
+
+  }
+
+  return (
+    string.slice(
+      0,
+      length
+    ) +
+    "…"
+  );
+
+}
+
+
+function escapeHtml(
+  value
+){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+function escapeAttr(
+  value
+){
+
+  return escapeHtml(value);
+
+}
+
+
+function escapeJs(
+  value
+){
+
+  return String(value)
+    .replaceAll("\\","\\\\")
+    .replaceAll("'","\\'")
+    .replaceAll("\n","\\n")
+    .replaceAll("\r","\\r");
+
+}
+
+
+function safeJson(
+  value
+){
+
+  return JSON.stringify(
+    String(value)
+  );
+
+}
+
+
+/* =========================================================
+   AUTH SESSION
+========================================================= */
+
+async function checkSession(){
+
+  if(!STATE.supabase){
+
+    return;
+
+  }
+
+  const result =
+    await STATE.supabase
+      .auth
+      .getSession();
+
+  if(result.error){
+
+    log(
+      `Auth session check: ${result.error.message}`
+    );
+
+    return;
+
+  }
+
+  const session =
+    result.data?.session;
+
+  if(!session){
+
+    log(
+      "No authenticated Supabase session. " +
+      "Public reads/writes remain governed by RLS."
+    );
+
+    return;
+
+  }
+
+  const email =
+    session.user?.email || "";
+
+  log(
+    `Authenticated session: ${email}`
+  );
+
+}
+
+
+/* =========================================================
+   AUTH STATE LISTENER
+========================================================= */
+
+function setupAuthListener(){
+
+  if(!STATE.supabase){
+
+    return;
+
+  }
+
+  STATE.supabase
+    .auth
+    .onAuthStateChange(
+      (
+        event,
+        session
+      ) => {
+
+        log(
+          `Auth event: ${event}`
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+(async function(){
+
+  await init();
+
+  await checkSession();
+
+  setupAuthListener();
 
 })();
+
 </script>
 
-
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
-})();
-</script>
 </body>
 </html>
