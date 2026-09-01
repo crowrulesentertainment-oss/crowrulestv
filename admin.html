@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050507">
@@ -12,17 +11,12 @@
 
 <meta
   name="description"
-  content="CrowRules Entertainment Admin Pro — database-backed administration, analytics, TV channels, schedules, members and content."
+  content="CrowRules Entertainment Admin Pro — live TV, analytics, members, content, schedule and database administration."
 >
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
-/* =========================================================
-   CROWRULES ADMIN PRO
-========================================================= */
-
 :root{
   --bg:#050507;
   --bg2:#09090d;
@@ -38,7 +32,7 @@
   --yellow:#f59e0b;
   --red:#ef4444;
   --blue:#38bdf8;
-  --radius:16px;
+  --shadow:0 15px 45px rgba(0,0,0,.25);
 }
 
 *{
@@ -52,16 +46,8 @@ html{
 body{
   margin:0;
   background:
-    radial-gradient(
-      circle at 85% -10%,
-      rgba(168,85,247,.16),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 10% 110%,
-      rgba(56,189,248,.06),
-      transparent 28%
-    ),
+    radial-gradient(circle at 85% -10%,rgba(168,85,247,.15),transparent 30%),
+    radial-gradient(circle at 5% 100%,rgba(56,189,248,.06),transparent 28%),
     var(--bg);
   color:var(--text);
   font-family:
@@ -94,6 +80,10 @@ a{
   display:none!important;
 }
 
+.muted{
+  color:var(--muted);
+}
+
 /* =========================================================
    LAYOUT
 ========================================================= */
@@ -104,13 +94,11 @@ a{
 
 .sidebar{
   position:fixed;
-  left:0;
-  top:0;
-  bottom:0;
+  inset:0 auto 0 0;
   width:255px;
+  padding:20px;
   background:rgba(7,7,11,.97);
   border-right:1px solid var(--border);
-  padding:20px;
   overflow:auto;
   z-index:100;
 }
@@ -133,10 +121,10 @@ a{
 }
 
 .brand-sub{
-  color:var(--muted);
-  font-size:11px;
   margin-top:4px;
   margin-bottom:25px;
+  color:var(--muted);
+  font-size:11px;
 }
 
 /* =========================================================
@@ -150,11 +138,11 @@ a{
 
 .nav button{
   width:100%;
+  padding:11px 12px;
   border:1px solid transparent;
+  border-radius:10px;
   background:transparent;
   color:#bdbdc8;
-  padding:11px 12px;
-  border-radius:10px;
   text-align:left;
   transition:.15s ease;
 }
@@ -169,9 +157,29 @@ a{
     linear-gradient(
       90deg,
       rgba(168,85,247,.20),
-      rgba(168,85,247,.05)
+      rgba(168,85,247,.04)
     );
   border-color:#3a294c;
+  color:white;
+}
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.mobile-nav{
+  display:none;
+  gap:6px;
+  overflow:auto;
+  padding-bottom:13px;
+}
+
+.mobile-nav button{
+  white-space:nowrap;
+  padding:8px 11px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:#101017;
   color:white;
 }
 
@@ -184,7 +192,7 @@ a{
   justify-content:space-between;
   align-items:center;
   gap:20px;
-  margin-bottom:24px;
+  margin-bottom:22px;
 }
 
 h1{
@@ -194,9 +202,9 @@ h1{
 }
 
 .subtitle{
+  margin-top:7px;
   color:var(--muted);
   font-size:13px;
-  margin-top:7px;
 }
 
 .connection{
@@ -205,8 +213,8 @@ h1{
   gap:9px;
   padding:9px 13px;
   border:1px solid var(--border);
-  background:#0b0b10;
   border-radius:999px;
+  background:#0b0b10;
   font-size:12px;
   white-space:nowrap;
 }
@@ -223,24 +231,8 @@ h1{
   box-shadow:0 0 13px rgba(34,197,94,.7);
 }
 
-/* =========================================================
-   MOBILE NAV
-========================================================= */
-
-.mobile-nav{
-  display:none;
-  overflow:auto;
-  gap:6px;
-  padding-bottom:12px;
-}
-
-.mobile-nav button{
-  white-space:nowrap;
-  border:1px solid var(--border);
-  background:#101017;
-  color:white;
-  padding:8px 11px;
-  border-radius:9px;
+.connection-dot.partial{
+  background:var(--yellow);
 }
 
 /* =========================================================
@@ -261,13 +253,10 @@ h1{
 
 .card{
   background:
-    linear-gradient(
-      145deg,
-      rgba(17,17,25,.98),
-      rgba(8,8,12,.98)
-    );
+    linear-gradient(145deg,rgba(17,17,25,.98),rgba(8,8,12,.98));
   border:1px solid var(--border);
-  border-radius:var(--radius);
+  border-radius:16px;
+  box-shadow:var(--shadow);
   overflow:hidden;
 }
 
@@ -290,59 +279,60 @@ h1{
 }
 
 /* =========================================================
-   STATS
+   STAT CARDS
 ========================================================= */
 
 .stats{
   display:grid;
-  grid-template-columns:
-    repeat(6,minmax(0,1fr));
+  grid-template-columns:repeat(6,minmax(0,1fr));
   gap:12px;
   margin-bottom:18px;
 }
 
 .stat{
-  background:
-    linear-gradient(
-      145deg,
-      var(--panel2),
-      var(--panel)
-    );
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:17px;
   min-width:0;
+  padding:17px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:
+    linear-gradient(145deg,var(--panel2),var(--panel));
 }
 
 .stat-label{
   color:var(--muted);
   font-size:10px;
-  font-weight:800;
+  font-weight:850;
   text-transform:uppercase;
   letter-spacing:.09em;
 }
 
 .stat-value{
+  margin-top:8px;
   font-size:27px;
   font-weight:950;
-  margin-top:8px;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .stat-note{
+  margin-top:4px;
   color:#696974;
   font-size:10px;
-  margin-top:4px;
 }
 
 /* =========================================================
-   GRID
+   GRIDS
 ========================================================= */
 
 .dashboard-grid{
   display:grid;
-  grid-template-columns:minmax(0,1.4fr) minmax(300px,.6fr);
+  grid-template-columns:minmax(0,1.45fr) minmax(300px,.55fr);
+  gap:18px;
+}
+
+.two-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:18px;
 }
 
@@ -351,11 +341,11 @@ h1{
 ========================================================= */
 
 .btn{
+  padding:8px 12px;
   border:1px solid var(--border);
+  border-radius:9px;
   background:#15151d;
   color:white;
-  border-radius:9px;
-  padding:8px 12px;
   font-size:12px;
   font-weight:750;
 }
@@ -365,8 +355,8 @@ h1{
 }
 
 .btn.primary{
-  background:var(--accent);
   border-color:var(--accent);
+  background:var(--accent);
 }
 
 .btn.primary:hover{
@@ -374,16 +364,17 @@ h1{
 }
 
 .btn.danger{
-  color:#fecaca;
-  background:#2a0c10;
   border-color:#5a1a22;
+  background:#2a0c10;
+  color:#fecaca;
 }
 
 /* =========================================================
-   TABLES
+   TABLE
 ========================================================= */
 
 .table-wrap{
+  width:100%;
   overflow:auto;
 }
 
@@ -423,62 +414,62 @@ tbody tr:hover{
 .badge{
   display:inline-flex;
   align-items:center;
+  padding:4px 8px;
   border:1px solid var(--border);
   border-radius:999px;
-  padding:4px 8px;
   font-size:10px;
   font-weight:800;
 }
 
 .badge.good{
-  color:#86efac;
-  background:#08200f;
   border-color:#123c20;
+  background:#08200f;
+  color:#86efac;
 }
 
 .badge.warn{
-  color:#fcd34d;
-  background:#211a05;
   border-color:#4b3908;
+  background:#211a05;
+  color:#fcd34d;
 }
 
 .badge.bad{
-  color:#fca5a5;
-  background:#260a0e;
   border-color:#53151e;
+  background:#260a0e;
+  color:#fca5a5;
 }
 
 .badge.blue{
-  color:#7dd3fc;
-  background:#061923;
   border-color:#0d3444;
+  background:#061923;
+  color:#7dd3fc;
 }
 
 /* =========================================================
-   EMPTY / ERROR
+   EMPTY / INFO / ERROR
 ========================================================= */
 
 .empty{
   padding:35px 20px;
-  text-align:center;
   color:var(--muted);
+  text-align:center;
 }
 
 .error-box{
+  padding:13px;
   border:1px solid #5b1b23;
+  border-radius:10px;
   background:#220a0e;
   color:#fecaca;
-  padding:13px;
-  border-radius:10px;
   font-size:12px;
 }
 
 .info-box{
+  padding:13px;
   border:1px solid #24354a;
+  border-radius:10px;
   background:#09131e;
   color:#bae6fd;
-  padding:13px;
-  border-radius:10px;
   font-size:12px;
 }
 
@@ -509,15 +500,15 @@ tbody tr:hover{
 }
 
 .event-meta{
+  margin-top:4px;
   color:var(--muted);
   font-size:11px;
-  margin-top:4px;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 /* =========================================================
-   CHANNEL VIEWERS
+   CHANNEL
 ========================================================= */
 
 .channel{
@@ -534,16 +525,14 @@ tbody tr:hover{
 }
 
 .channel-name{
-  font-weight:850;
   font-size:13px;
+  font-weight:850;
 }
 
 .channel-id{
+  margin-top:3px;
   color:var(--muted);
   font-size:9px;
-  margin-top:3px;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }
 
 .viewer-count{
@@ -553,14 +542,51 @@ tbody tr:hover{
 }
 
 /* =========================================================
+   LINKS
+========================================================= */
+
+.page-links{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+.page-link{
+  display:block;
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#101017;
+  transition:.15s ease;
+}
+
+.page-link:hover{
+  border-color:#4c3266;
+  background:#15131c;
+}
+
+.page-link-title{
+  font-size:12px;
+  font-weight:850;
+}
+
+.page-link-url{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* =========================================================
    FOOTER
 ========================================================= */
 
 .footer{
-  color:#5d5d69;
-  text-align:center;
-  font-size:10px;
   margin:30px 0 5px;
+  color:#5d5d69;
+  font-size:10px;
+  text-align:center;
 }
 
 /* =========================================================
@@ -570,11 +596,11 @@ tbody tr:hover{
 @media(max-width:1250px){
 
   .stats{
-    grid-template-columns:
-      repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(3,minmax(0,1fr));
   }
 
-  .dashboard-grid{
+  .dashboard-grid,
+  .two-grid{
     grid-template-columns:1fr;
   }
 
@@ -600,8 +626,11 @@ tbody tr:hover{
   }
 
   .stats{
-    grid-template-columns:
-      repeat(2,minmax(0,1fr));
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .page-links{
+    grid-template-columns:1fr;
   }
 
 }
@@ -645,10 +674,7 @@ tbody tr:hover{
 
   <nav class="nav">
 
-    <button
-      class="active"
-      data-section="dashboard"
-    >
+    <button class="active" data-section="dashboard">
       Dashboard
     </button>
 
@@ -661,7 +687,7 @@ tbody tr:hover{
     </button>
 
     <button data-section="schedule">
-      TV Schedule
+      TV Guide
     </button>
 
     <button data-section="shows">
@@ -676,6 +702,10 @@ tbody tr:hover{
       Members
     </button>
 
+    <button data-section="rewards">
+      Member Rewards
+    </button>
+
     <button data-section="events">
       Live Events
     </button>
@@ -684,352 +714,181 @@ tbody tr:hover{
       Content Views
     </button>
 
+    <button data-section="community">
+      Community
+    </button>
+
+    <button data-section="pages">
+      CrowRules Pages
+    </button>
+
   </nav>
 
 </aside>
 
 
-<!-- =======================================================
-     MAIN
-======================================================== -->
-
 <main class="main">
 
+<!-- =======================================================
+     MOBILE NAV
+======================================================== -->
 
-  <div class="mobile-nav">
+<div class="mobile-nav">
 
-    <button data-section="dashboard">
-      Dashboard
-    </button>
+  <button data-section="dashboard">
+    Dashboard
+  </button>
 
-    <button data-section="analytics">
-      Analytics
-    </button>
+  <button data-section="analytics">
+    Analytics
+  </button>
 
-    <button data-section="channels">
-      Channels
-    </button>
+  <button data-section="channels">
+    Channels
+  </button>
 
-    <button data-section="schedule">
-      Schedule
-    </button>
+  <button data-section="schedule">
+    TV Guide
+  </button>
 
-    <button data-section="members">
-      Members
-    </button>
+  <button data-section="members">
+    Members
+  </button>
+
+  <button data-section="content">
+    Content
+  </button>
+
+</div>
+
+
+<!-- =======================================================
+     HEADER
+======================================================== -->
+
+<header class="topbar">
+
+  <div>
+
+    <h1 id="pageTitle">
+      Admin Pro
+    </h1>
+
+    <div class="subtitle">
+      CrowRules Entertainment control center
+    </div>
+
+  </div>
+
+  <div class="connection">
+
+    <span
+      id="connectionDot"
+      class="connection-dot"
+    ></span>
+
+    <span id="connectionText">
+      Connecting...
+    </span>
+
+  </div>
+
+</header>
+
+
+<!-- =======================================================
+     DASHBOARD
+======================================================== -->
+
+<section
+  id="section-dashboard"
+  class="section active"
+>
+
+  <div class="stats">
+
+    <div class="stat">
+      <div class="stat-label">
+        Content Views
+      </div>
+      <div
+        id="statContentViews"
+        class="stat-value"
+      >—</div>
+      <div class="stat-note">
+        content_views
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        View Events
+      </div>
+      <div
+        id="statViewEvents"
+        class="stat-value"
+      >—</div>
+      <div class="stat-note">
+        analytics_events
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Sessions
+      </div>
+      <div
+        id="statSessions"
+        class="stat-value"
+      >—</div>
+      <div class="stat-note">
+        actual session IDs
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Analytics Events
+      </div>
+      <div
+        id="statAnalytics"
+        class="stat-value"
+      >—</div>
+      <div class="stat-note">
+        database rows
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Watch History
+      </div>
+      <div
+        id="statHistory"
+        class="stat-value"
+      >—</div>
+      <div class="stat-note">
+        member_watch_history
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Current Viewers
+      </div>
+      <div
+        id="statActive"
+        class="stat-value"
+      >—</div>
+      <div class="stat-note">
+        tv_active_viewers
+      </div>
+    </div>
 
   </div>
 
 
-  <!-- =====================================================
-       HEADER
-  ====================================================== -->
-
-  <header class="topbar">
-
-    <div>
-
-      <h1 id="pageTitle">
-        Admin Pro
-      </h1>
-
-      <div class="subtitle">
-        CrowRules Entertainment control center
-      </div>
-
-    </div>
-
-    <div class="connection">
-
-      <span
-        id="connectionDot"
-        class="connection-dot"
-      ></span>
-
-      <span id="connectionText">
-        Connecting...
-      </span>
-
-    </div>
-
-  </header>
-
-
-  <!-- =====================================================
-       DASHBOARD
-  ====================================================== -->
-
-  <section
-    id="section-dashboard"
-    class="section active"
-  >
-
-    <div class="stats">
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Content Views
-        </div>
-
-        <div
-          id="statContentViews"
-          class="stat-value"
-        >
-          —
-        </div>
-
-        <div class="stat-note">
-          Real content view records
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          View Events
-        </div>
-
-        <div
-          id="statViewEvents"
-          class="stat-value"
-        >
-          —
-        </div>
-
-        <div class="stat-note">
-          Analytics view events
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          View Sessions
-        </div>
-
-        <div
-          id="statSessions"
-          class="stat-value"
-        >
-          —
-        </div>
-
-        <div class="stat-note">
-          Distinct analytics sessions
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Analytics Events
-        </div>
-
-        <div
-          id="statAnalytics"
-          class="stat-value"
-        >
-          —
-        </div>
-
-        <div class="stat-note">
-          Database event rows
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Watch History
-        </div>
-
-        <div
-          id="statHistory"
-          class="stat-value"
-        >
-          —
-        </div>
-
-        <div class="stat-note">
-          Member watch history
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Current Viewers
-        </div>
-
-        <div
-          id="statActive"
-          class="stat-value"
-        >
-          —
-        </div>
-
-        <div class="stat-note">
-          tv_active_viewers
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="dashboard-grid">
-
-
-      <!-- RECENT EVENTS -->
-
-      <div class="card">
-
-        <div class="card-head">
-
-          <div class="card-title">
-            Recent Analytics Events
-          </div>
-
-          <button
-            id="refreshRecent"
-            class="btn"
-          >
-            Refresh
-          </button>
-
-        </div>
-
-        <div
-          id="recentAnalytics"
-          class="card-body"
-        >
-          <div class="empty">
-            Loading...
-          </div>
-        </div>
-
-      </div>
-
-
-      <!-- VIEWERS -->
-
-      <div class="card">
-
-        <div class="card-head">
-
-          <div class="card-title">
-            Current TV Viewers
-          </div>
-
-          <button
-            id="refreshViewers"
-            class="btn"
-          >
-            Refresh
-          </button>
-
-        </div>
-
-        <div
-          id="channelViewers"
-          class="card-body"
-        >
-          <div class="empty">
-            Loading...
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       ANALYTICS
-  ====================================================== -->
-
-  <section
-    id="section-analytics"
-    class="section"
-  >
-
-    <div class="stats">
-
-      <div class="stat">
-        <div class="stat-label">
-          Content Views
-        </div>
-        <div
-          id="analyticsContentViews"
-          class="stat-value"
-        >—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">
-          View Events
-        </div>
-        <div
-          id="analyticsViewEvents"
-          class="stat-value"
-        >—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">
-          Sessions
-        </div>
-        <div
-          id="analyticsSessions"
-          class="stat-value"
-        >—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">
-          Analytics Events
-        </div>
-        <div
-          id="analyticsEvents"
-          class="stat-value"
-        >—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">
-          Watch History
-        </div>
-        <div
-          id="analyticsHistory"
-          class="stat-value"
-        >—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">
-          Active Viewers
-        </div>
-        <div
-          id="analyticsActive"
-          class="stat-value"
-        >—</div>
-      </div>
-
-    </div>
-
+  <div class="dashboard-grid">
 
     <div class="card">
 
@@ -1040,8 +899,8 @@ tbody tr:hover{
         </div>
 
         <button
-          id="refreshAnalytics"
           class="btn"
+          id="refreshRecent"
         >
           Refresh
         </button>
@@ -1049,7 +908,7 @@ tbody tr:hover{
       </div>
 
       <div
-        id="analyticsEventsList"
+        id="recentAnalytics"
         class="card-body"
       >
         <div class="empty">
@@ -1059,29 +918,18 @@ tbody tr:hover{
 
     </div>
 
-  </section>
-
-
-  <!-- =====================================================
-       CHANNELS
-  ====================================================== -->
-
-  <section
-    id="section-channels"
-    class="section"
-  >
 
     <div class="card">
 
       <div class="card-head">
 
         <div class="card-title">
-          Active TV Channels
+          Current Viewers By Channel
         </div>
 
         <button
-          id="refreshChannels"
           class="btn"
+          id="refreshViewers"
         >
           Refresh
         </button>
@@ -1089,8 +937,8 @@ tbody tr:hover{
       </div>
 
       <div
-        id="channelsList"
-        class="table-wrap"
+        id="channelViewers"
+        class="card-body"
       >
         <div class="empty">
           Loading...
@@ -1099,368 +947,790 @@ tbody tr:hover{
 
     </div>
 
-  </section>
-
-
-  <!-- =====================================================
-       SCHEDULE
-  ====================================================== -->
-
-  <section
-    id="section-schedule"
-    class="section"
-  >
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          TV Schedule
-        </div>
-
-        <button
-          id="refreshSchedule"
-          class="btn"
-        >
-          Refresh
-        </button>
-
-      </div>
-
-      <div
-        id="scheduleList"
-        class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       SHOWS
-  ====================================================== -->
-
-  <section
-    id="section-shows"
-    class="section"
-  >
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Shows
-        </div>
-
-        <button
-          id="refreshShows"
-          class="btn"
-        >
-          Refresh
-        </button>
-
-      </div>
-
-      <div
-        id="showsList"
-        class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       EPISODES
-  ====================================================== -->
-
-  <section
-    id="section-episodes"
-    class="section"
-  >
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Episodes
-        </div>
-
-        <button
-          id="refreshEpisodes"
-          class="btn"
-        >
-          Refresh
-        </button>
-
-      </div>
-
-      <div
-        id="episodesList"
-        class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       MEMBERS
-  ====================================================== -->
-
-  <section
-    id="section-members"
-    class="section"
-  >
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Members
-        </div>
-
-        <button
-          id="refreshMembers"
-          class="btn"
-        >
-          Refresh
-        </button>
-
-      </div>
-
-      <div
-        id="membersList"
-        class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       LIVE EVENTS
-  ====================================================== -->
-
-  <section
-    id="section-events"
-    class="section"
-  >
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Live Events
-        </div>
-
-        <button
-          id="refreshEvents"
-          class="btn"
-        >
-          Refresh
-        </button>
-
-      </div>
-
-      <div
-        id="eventsList"
-        class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       CONTENT VIEWS
-  ====================================================== -->
-
-  <section
-    id="section-content"
-    class="section"
-  >
-
-    <div class="stats">
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Total Content Views
-        </div>
-
-        <div
-          id="contentTotalViews"
-          class="stat-value"
-        >
-          —
-        </div>
-
-        <div class="stat-note">
-          content_view_stats
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Unique Users
-        </div>
-
-        <div
-          id="contentUniqueUsers"
-          class="stat-value"
-        >
-          —
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Unique Sessions
-        </div>
-
-        <div
-          id="contentUniqueSessions"
-          class="stat-value"
-        >
-          —
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Watch Seconds
-        </div>
-
-        <div
-          id="contentWatchSeconds"
-          class="stat-value"
-        >
-          —
-        </div>
-
-      </div>
-
-
-      <div class="stat">
-
-        <div class="stat-label">
-          Completed Views
-        </div>
-
-        <div
-          id="contentCompleted"
-          class="stat-value"
-        >
-          —
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Content View Statistics
-        </div>
-
-        <button
-          id="refreshContent"
-          class="btn"
-        >
-          Refresh
-        </button>
-
-      </div>
-
-      <div
-        id="contentList"
-        class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-
-    <br>
-
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Raw Content View Records
-        </div>
-
-      </div>
-
-      <div
-        id="rawContentViews"
-        class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <div class="footer">
-    CrowRules Entertainment · Admin Pro · Supabase Database
   </div>
 
-</main>
+</section>
 
+
+<!-- =======================================================
+     ANALYTICS
+======================================================== -->
+
+<section
+  id="section-analytics"
+  class="section"
+>
+
+  <div class="stats">
+
+    <div class="stat">
+      <div class="stat-label">Content Views</div>
+      <div id="analyticsContentViews" class="stat-value">—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">View Events</div>
+      <div id="analyticsViewEvents" class="stat-value">—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Sessions</div>
+      <div id="analyticsSessions" class="stat-value">—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Analytics Events</div>
+      <div id="analyticsEvents" class="stat-value">—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Watch History</div>
+      <div id="analyticsHistory" class="stat-value">—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Active Viewers</div>
+      <div id="analyticsActive" class="stat-value">—</div>
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Recent Analytics Events
+      </div>
+
+      <button
+        id="refreshAnalytics"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="analyticsEventsList"
+      class="card-body"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     CHANNELS
+======================================================== -->
+
+<section
+  id="section-channels"
+  class="section"
+>
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Active TV Channels
+      </div>
+
+      <button
+        id="refreshChannels"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="channelsList"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     TV GUIDE
+======================================================== -->
+
+<section
+  id="section-schedule"
+  class="section"
+>
+
+  <div class="info-box">
+    <strong>Authoritative TV schedule:</strong>
+    this Admin Pro uses <strong>schedule_items</strong>.
+    The legacy schedule, scheduled_items and tv_programs
+    tables are intentionally not used.
+  </div>
+
+  <br>
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Schedule Items
+      </div>
+
+      <button
+        id="refreshSchedule"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="scheduleList"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     SHOWS
+======================================================== -->
+
+<section
+  id="section-shows"
+  class="section"
+>
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Shows
+      </div>
+
+      <button
+        id="refreshShows"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="showsList"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     EPISODES
+======================================================== -->
+
+<section
+  id="section-episodes"
+  class="section"
+>
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Episodes
+      </div>
+
+      <button
+        id="refreshEpisodes"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="episodesList"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     MEMBERS
+======================================================== -->
+
+<section
+  id="section-members"
+  class="section"
+>
+
+  <div class="stats">
+
+    <div class="stat">
+      <div class="stat-label">
+        Profiles
+      </div>
+      <div
+        id="memberProfileCount"
+        class="stat-value"
+      >—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Points Rows
+      </div>
+      <div
+        id="memberPointsCount"
+        class="stat-value"
+      >—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Activity
+      </div>
+      <div
+        id="memberActivityCount"
+        class="stat-value"
+      >—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Watch History
+      </div>
+      <div
+        id="memberHistoryCount"
+        class="stat-value"
+      >—</div>
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Member Profiles
+      </div>
+
+      <button
+        id="refreshMembers"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="membersList"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     REWARDS
+======================================================== -->
+
+<section
+  id="section-rewards"
+  class="section"
+>
+
+  <div class="info-box">
+    Member viewing rewards are database-backed.
+    Verified watch minutes are processed through
+    <strong>crowrules_track_watch</strong> and can update
+    member_points, member_point_transactions,
+    member_stats and crowrules_member_watch_minutes.
+  </div>
+
+  <br>
+
+  <div class="two-grid">
+
+    <div class="card">
+
+      <div class="card-head">
+        <div class="card-title">
+          Member Points
+        </div>
+      </div>
+
+      <div
+        id="pointsList"
+        class="table-wrap"
+      >
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="card-head">
+        <div class="card-title">
+          Watch Minutes
+        </div>
+      </div>
+
+      <div
+        id="watchMinutesList"
+        class="table-wrap"
+      >
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     LIVE EVENTS
+======================================================== -->
+
+<section
+  id="section-events"
+  class="section"
+>
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Live Events
+      </div>
+
+      <button
+        id="refreshEvents"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="eventsList"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     CONTENT VIEWS
+======================================================== -->
+
+<section
+  id="section-content"
+  class="section"
+>
+
+  <div class="stats">
+
+    <div class="stat">
+      <div class="stat-label">
+        Total Content Views
+      </div>
+      <div
+        id="contentTotalViews"
+        class="stat-value"
+      >—</div>
+      <div class="stat-note">
+        content_view_stats
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Unique Users
+      </div>
+      <div
+        id="contentUniqueUsers"
+        class="stat-value"
+      >—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Unique Sessions
+      </div>
+      <div
+        id="contentUniqueSessions"
+        class="stat-value"
+      >—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Watch Seconds
+      </div>
+      <div
+        id="contentWatchSeconds"
+        class="stat-value"
+      >—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">
+        Completed Views
+      </div>
+      <div
+        id="contentCompleted"
+        class="stat-value"
+      >—</div>
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Content View Statistics
+      </div>
+
+      <button
+        id="refreshContent"
+        class="btn"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div
+      id="contentList"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+
+  <br>
+
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Raw Content View Records
+      </div>
+
+    </div>
+
+    <div
+      id="rawContentViews"
+      class="table-wrap"
+    >
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     COMMUNITY
+======================================================== -->
+
+<section
+  id="section-community"
+  class="section"
+>
+
+  <div class="two-grid">
+
+    <div class="card">
+
+      <div class="card-head">
+        <div class="card-title">
+          Chat Rooms
+        </div>
+      </div>
+
+      <div
+        id="chatRoomsList"
+        class="table-wrap"
+      >
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="card-head">
+        <div class="card-title">
+          Polls
+        </div>
+      </div>
+
+      <div
+        id="pollsList"
+        class="table-wrap"
+      >
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="card-head">
+        <div class="card-title">
+          Newsletter Subscribers
+        </div>
+      </div>
+
+      <div
+        id="newsletterList"
+        class="table-wrap"
+      >
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="card-head">
+        <div class="card-title">
+          Creator Applications
+        </div>
+      </div>
+
+      <div
+        id="creatorApplicationsList"
+        class="table-wrap"
+      >
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     PAGES
+======================================================== -->
+
+<section
+  id="section-pages"
+  class="section"
+>
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        CrowRules Entertainment Pages
+      </div>
+
+    </div>
+
+    <div class="card-body">
+
+      <div class="page-links">
+
+        <a
+          class="page-link"
+          href="index.html"
+        >
+          <div class="page-link-title">
+            CrowRules Entertainment
+          </div>
+          <div class="page-link-url">
+            index.html
+          </div>
+        </a>
+
+
+        <a
+          class="page-link"
+          href="tv.html"
+        >
+          <div class="page-link-title">
+            CrowRules TV
+          </div>
+          <div class="page-link-url">
+            tv.html
+          </div>
+        </a>
+
+
+        <a
+          class="page-link"
+          href="members.html"
+        >
+          <div class="page-link-title">
+            Member Hub
+          </div>
+          <div class="page-link-url">
+            members.html
+          </div>
+        </a>
+
+
+        <a
+          class="page-link"
+          href="nest.html"
+        >
+          <div class="page-link-title">
+            Crow Nest
+          </div>
+          <div class="page-link-url">
+            nest.html
+          </div>
+        </a>
+
+
+        <a
+          class="page-link"
+          href="tacomanights.html"
+        >
+          <div class="page-link-title">
+            Tacoma Nights
+          </div>
+          <div class="page-link-url">
+            tacomanights.html
+          </div>
+        </a>
+
+
+        <a
+          class="page-link"
+          href="awards.html"
+        >
+          <div class="page-link-title">
+            Spectrum Awards
+          </div>
+          <div class="page-link-url">
+            awards.html
+          </div>
+        </a>
+
+
+        <a
+          class="page-link"
+          href="shop.html"
+        >
+          <div class="page-link-title">
+            CrowRules Shop
+          </div>
+          <div class="page-link-url">
+            shop.html
+          </div>
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<div class="footer">
+  CrowRules Entertainment · Admin Pro · Supabase
+</div>
+
+</main>
 </div>
 
 
@@ -1468,7 +1738,7 @@ tbody tr:hover{
 
 /* =========================================================
    CROWRULES ADMIN PRO
-   SUPABASE CONFIGURATION
+   ONE SUPABASE CONFIGURATION
 ========================================================= */
 
 const CONFIG = Object.freeze({
@@ -1505,25 +1775,29 @@ const supabase =
 
 
 /* =========================================================
-   SINGLE ROBUST SUPABASE WRAPPER
+   SINGLE ROBUST DATABASE WRAPPER
 ========================================================= */
 
 const CRDB = {
 
   async select(
     table,
-    {
-      columns="*",
-      order=null,
-      limit=null,
-      eq={},
-      gte={},
-      lte={},
-      in=null
-    }={}
+    options={}
   ){
 
     try{
+
+      const {
+        columns="*",
+        order=null,
+        limit=null,
+        eq={},
+        gte={},
+        lte={},
+        neq={},
+        is={}
+      } = options;
+
 
       let query =
         supabase
@@ -1531,61 +1805,74 @@ const CRDB = {
           .select(columns);
 
 
-      for(
-        const [column,value]
-        of Object.entries(eq || {})
-      ){
+      Object.entries(eq || {})
+        .forEach(
+          ([column,value]) => {
 
-        query =
-          query.eq(
-            column,
-            value
-          );
+            query =
+              query.eq(
+                column,
+                value
+              );
 
-      }
-
-
-      for(
-        const [column,value]
-        of Object.entries(gte || {})
-      ){
-
-        query =
-          query.gte(
-            column,
-            value
-          );
-
-      }
+          }
+        );
 
 
-      for(
-        const [column,value]
-        of Object.entries(lte || {})
-      ){
+      Object.entries(gte || {})
+        .forEach(
+          ([column,value]) => {
 
-        query =
-          query.lte(
-            column,
-            value
-          );
+            query =
+              query.gte(
+                column,
+                value
+              );
 
-      }
+          }
+        );
 
 
-      if(
-        in &&
-        in.column &&
-        Array.isArray(in.values)
-      ){
+      Object.entries(lte || {})
+        .forEach(
+          ([column,value]) => {
 
-        query =
-          query.in(
-            in.column,
-            in.values
-          );
+            query =
+              query.lte(
+                column,
+                value
+              );
 
-      }
+          }
+        );
+
+
+      Object.entries(neq || {})
+        .forEach(
+          ([column,value]) => {
+
+            query =
+              query.neq(
+                column,
+                value
+              );
+
+          }
+        );
+
+
+      Object.entries(is || {})
+        .forEach(
+          ([column,value]) => {
+
+            query =
+              query.is(
+                column,
+                value
+              );
+
+          }
+        );
 
 
       if(order){
@@ -1671,21 +1958,20 @@ const CRDB = {
       } =
         await supabase
           .from(table)
-          .select("*",{
-            count:"exact",
-            head:true
-          });
+          .select(
+            "*",
+            {
+              count:"exact",
+              head:true
+            }
+          );
 
 
       if(error){
 
-        console.warn(
-          `[CrowRules DB COUNT] ${table}`,
-          error
-        );
-
         return {
           ok:false,
+          table,
           count:0,
           error
         };
@@ -1695,7 +1981,10 @@ const CRDB = {
 
       return {
         ok:true,
-        count:Number(count || 0),
+        table,
+        count:Number(
+          count || 0
+        ),
         error:null
       };
 
@@ -1704,7 +1993,61 @@ const CRDB = {
 
       return {
         ok:false,
+        table,
         count:0,
+        error
+      };
+
+    }
+
+  },
+
+
+  async rpc(
+    functionName,
+    params={}
+  ){
+
+    try{
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          functionName,
+          params
+        );
+
+
+      if(error){
+
+        console.warn(
+          `[CrowRules RPC] ${functionName}`,
+          error
+        );
+
+        return {
+          ok:false,
+          data:null,
+          error
+        };
+
+      }
+
+
+      return {
+        ok:true,
+        data,
+        error:null
+      };
+
+
+    }catch(error){
+
+      return {
+        ok:false,
+        data:null,
         error
       };
 
@@ -1726,14 +2069,17 @@ function $(id){
 }
 
 
-function setText(id,value){
+function setText(
+  id,
+  value
+){
 
-  const element =
+  const el =
     $(id);
 
-  if(element){
+  if(el){
 
-    element.textContent =
+    el.textContent =
       value;
 
   }
@@ -1787,7 +2133,7 @@ function formatDate(value){
 }
 
 
-function json(value){
+function stringify(value){
 
   try{
 
@@ -1816,12 +2162,19 @@ async function testConnection(){
   );
 
   $("connectionDot")
-    .classList.remove("online");
+    .className =
+      "connection-dot";
 
+
+  /*
+    A lightweight known table is used.
+    A failure here does not prevent individual
+    sections from attempting their own reads.
+  */
 
   const result =
     await CRDB.select(
-      "analytics_events",
+      "tv_channels",
       {
         columns:"id",
         limit:1
@@ -1837,14 +2190,26 @@ async function testConnection(){
     );
 
     $("connectionDot")
-      .classList.add("online");
+      .classList.add(
+        "online"
+      );
 
   }else{
+
+    /*
+      Supabase itself may still be reachable
+      while RLS blocks a particular table.
+    */
 
     setText(
       "connectionText",
       "Supabase connected / restricted"
     );
+
+    $("connectionDot")
+      .classList.add(
+        "partial"
+      );
 
   }
 
@@ -1852,7 +2217,82 @@ async function testConnection(){
 
 
 /* =========================================================
-   ANALYTICS MASTER LOAD
+   CONTENT VIEW TOTAL
+========================================================= */
+
+async function getContentViewTotal(){
+
+  const result =
+    await CRDB.select(
+      "content_view_stats",
+      {
+        columns:"total_views"
+      }
+    );
+
+
+  if(!result.ok){
+
+    /*
+      Safe raw-table fallback.
+      Never fabricate a number.
+    */
+
+    const raw =
+      await CRDB.count(
+        "content_views"
+      );
+
+    return raw.count;
+
+  }
+
+
+  return result.data.reduce(
+    (sum,row) =>
+      sum +
+      Number(
+        row.total_views || 0
+      ),
+    0
+  );
+
+}
+
+
+/* =========================================================
+   SESSION TOTAL
+========================================================= */
+
+async function getSessionTotal(){
+
+  const result =
+    await CRDB.select(
+      "analytics_events",
+      {
+        columns:"session_id"
+      }
+    );
+
+
+  if(!result.ok)
+    return 0;
+
+
+  return new Set(
+    result.data
+      .map(
+        row =>
+          row.session_id
+      )
+      .filter(Boolean)
+  ).size;
+
+}
+
+
+/* =========================================================
+   MASTER ANALYTICS
 ========================================================= */
 
 async function loadAnalytics(){
@@ -1860,8 +2300,9 @@ async function loadAnalytics(){
   const [
     contentViews,
     analyticsEvents,
-    watchHistory,
-    activeViewers
+    history,
+    activeViewers,
+    contentTotal
   ] =
     await Promise.all([
 
@@ -1879,97 +2320,20 @@ async function loadAnalytics(){
 
       CRDB.count(
         "tv_active_viewers"
-      )
+      ),
+
+      getContentViewTotal()
 
     ]);
 
 
-  /*
-    Sessions are calculated from
-    actual analytics_events rows.
-  */
-
   const sessions =
-    await CRDB.select(
-      "analytics_events",
-      {
-        columns:"session_id"
-      }
-    );
+    await getSessionTotal();
 
-
-  let sessionCount = 0;
-
-
-  if(sessions.ok){
-
-    sessionCount =
-      new Set(
-        sessions.data
-          .map(
-            row =>
-              row.session_id
-          )
-          .filter(Boolean)
-      ).size;
-
-  }
-
-
-  /*
-    IMPORTANT:
-
-    Content Views is based on the
-    actual content_view_stats aggregate
-    rather than blindly trusting the raw
-    table count for the dashboard metric.
-  */
-
-  const contentStats =
-    await CRDB.select(
-      "content_view_stats",
-      {
-        columns:"total_views"
-      }
-    );
-
-
-  let totalContentViews = 0;
-
-
-  if(contentStats.ok){
-
-    totalContentViews =
-      contentStats.data.reduce(
-        (sum,row) =>
-          sum +
-          Number(
-            row.total_views || 0
-          ),
-        0
-      );
-
-  }else{
-
-    /*
-      Safe fallback to raw table count.
-    */
-
-    totalContentViews =
-      contentViews.count;
-
-  }
-
-
-  /*
-    Dashboard cards
-  */
 
   setText(
     "statContentViews",
-    number(
-      totalContentViews
-    )
+    number(contentTotal)
   );
 
   setText(
@@ -1981,9 +2345,7 @@ async function loadAnalytics(){
 
   setText(
     "statSessions",
-    number(
-      sessionCount
-    )
+    number(sessions)
   );
 
   setText(
@@ -1996,7 +2358,7 @@ async function loadAnalytics(){
   setText(
     "statHistory",
     number(
-      watchHistory.count
+      history.count
     )
   );
 
@@ -2008,15 +2370,9 @@ async function loadAnalytics(){
   );
 
 
-  /*
-    Analytics section
-  */
-
   setText(
     "analyticsContentViews",
-    number(
-      totalContentViews
-    )
+    number(contentTotal)
   );
 
   setText(
@@ -2028,9 +2384,7 @@ async function loadAnalytics(){
 
   setText(
     "analyticsSessions",
-    number(
-      sessionCount
-    )
+    number(sessions)
   );
 
   setText(
@@ -2043,7 +2397,7 @@ async function loadAnalytics(){
   setText(
     "analyticsHistory",
     number(
-      watchHistory.count
+      history.count
     )
   );
 
@@ -2061,7 +2415,7 @@ async function loadAnalytics(){
 
 
 /* =========================================================
-   RECENT ANALYTICS
+   RECENT ANALYTICS EVENTS
 ========================================================= */
 
 async function loadRecentAnalytics(){
@@ -2081,7 +2435,7 @@ async function loadRecentAnalytics(){
     );
 
 
-  const containers = [
+  const boxes = [
 
     $("recentAnalytics"),
 
@@ -2092,16 +2446,16 @@ async function loadRecentAnalytics(){
 
   if(!result.ok){
 
-    containers.forEach(
+    boxes.forEach(
       box => {
 
         if(box){
 
           box.innerHTML = `
             <div class="error-box">
-              Recent analytics events could not be read.
-              The dashboard is not generating replacement
-              or fabricated data.
+              Analytics events are unavailable to this
+              browser session. No replacement counters
+              are being generated.
             </div>
           `;
 
@@ -2117,14 +2471,14 @@ async function loadRecentAnalytics(){
 
   if(!result.data.length){
 
-    containers.forEach(
+    boxes.forEach(
       box => {
 
         if(box){
 
           box.innerHTML = `
             <div class="empty">
-              No analytics events have been recorded yet.
+              No analytics events recorded yet.
             </div>
           `;
 
@@ -2139,16 +2493,9 @@ async function loadRecentAnalytics(){
 
 
   const html =
-    result.data.map(
-      event => {
-
-        const metadata =
-          event.metadata
-            ? json(event.metadata)
-            : "";
-
-
-        return `
+    result.data
+      .map(
+        event => `
 
           <div class="event">
 
@@ -2172,7 +2519,8 @@ async function loadRecentAnalytics(){
               <div class="event-meta">
 
                 ${escapeHTML(
-                  event.path || ""
+                  event.path ||
+                  ""
                 )}
 
                 ${
@@ -2186,7 +2534,7 @@ async function loadRecentAnalytics(){
 
                 ${
                   event.session_id
-                  ? " · session " +
+                  ? " · " +
                     escapeHTML(
                       event.session_id
                     )
@@ -2196,11 +2544,13 @@ async function loadRecentAnalytics(){
               </div>
 
               ${
-                metadata
+                event.metadata
                 ? `
                   <div class="event-meta">
                     ${escapeHTML(
-                      metadata
+                      stringify(
+                        event.metadata
+                      )
                     )}
                   </div>
                 `
@@ -2211,21 +2561,17 @@ async function loadRecentAnalytics(){
 
           </div>
 
-        `;
+        `
+      )
+      .join("");
 
-      }
-    ).join("");
 
-
-  containers.forEach(
+  boxes.forEach(
     box => {
 
-      if(box){
-
+      if(box)
         box.innerHTML =
           html;
-
-      }
 
     }
   );
@@ -2235,7 +2581,8 @@ async function loadRecentAnalytics(){
 
 /* =========================================================
    CURRENT VIEWERS
-   tv_active_viewers ONLY
+   AUTHORITATIVE:
+   tv_active_viewers
 ========================================================= */
 
 async function loadViewers(){
@@ -2244,25 +2591,39 @@ async function loadViewers(){
     $("channelViewers");
 
 
-  const result =
-    await CRDB.select(
-      "tv_active_viewers",
-      {
-        columns:
-          "id,channel_id,user_id,session_id,visitor_id,started_at,last_seen_at,created_at,updated_at",
-        order:{
-          column:"last_seen_at",
-          ascending:false
+  const [
+    viewers,
+    channels
+  ] =
+    await Promise.all([
+
+      CRDB.select(
+        "tv_active_viewers",
+        {
+          columns:
+            "id,channel_id,user_id,session_id,visitor_id,started_at,last_seen_at,created_at,updated_at"
         }
-      }
-    );
+      ),
+
+      CRDB.select(
+        "tv_channels",
+        {
+          columns:
+            "id,name,is_active",
+          eq:{
+            is_active:true
+          }
+        }
+      )
+
+    ]);
 
 
-  if(!result.ok){
+  if(!viewers.ok){
 
     box.innerHTML = `
       <div class="error-box">
-        Current viewer data is unavailable.
+        tv_active_viewers could not be read.
       </div>
     `;
 
@@ -2274,23 +2635,23 @@ async function loadViewers(){
   setText(
     "statActive",
     number(
-      result.data.length
+      viewers.data.length
     )
   );
 
   setText(
     "analyticsActive",
     number(
-      result.data.length
+      viewers.data.length
     )
   );
 
 
-  if(!result.data.length){
+  if(!viewers.data.length){
 
     box.innerHTML = `
       <div class="empty">
-        No active TV viewers right now.
+        0 active viewers right now.
       </div>
     `;
 
@@ -2299,30 +2660,13 @@ async function loadViewers(){
   }
 
 
-  /*
-    Authoritative channels
-  */
-
-  const channels =
-    await CRDB.select(
-      "tv_channels",
-      {
-        columns:"id,name,is_active",
-        eq:{
-          is_active:true
-        }
-      }
-    );
-
-
   const channelMap =
     new Map(
       channels.data.map(
-        channel =>
-          [
-            String(channel.id),
-            channel
-          ]
+        channel => [
+          String(channel.id),
+          channel
+        ]
       )
     );
 
@@ -2331,7 +2675,7 @@ async function loadViewers(){
     new Map();
 
 
-  result.data.forEach(
+  viewers.data.forEach(
     viewer => {
 
       const id =
@@ -2358,11 +2702,11 @@ async function loadViewers(){
           b[1] - a[1]
       )
       .map(
-        ([channelId,count]) => {
+        ([id,count]) => {
 
           const channel =
             channelMap.get(
-              channelId
+              id
             );
 
 
@@ -2380,23 +2724,18 @@ async function loadViewers(){
                 </div>
 
                 <div class="channel-id">
-                  ${escapeHTML(
-                    channelId
-                  )}
+                  ${escapeHTML(id)}
                 </div>
 
               </div>
 
               <div class="viewer-count">
-
                 ${number(count)}
-
                 ${
                   count === 1
                   ? "viewer"
                   : "viewers"
                 }
-
               </div>
 
             </div>
@@ -2453,8 +2792,8 @@ async function loadChannels(){
   if(!channels.ok){
 
     box.innerHTML = `
-      <div class="empty">
-        Active TV channels could not be loaded.
+      <div class="error-box">
+        tv_channels could not be read.
       </div>
     `;
 
@@ -2467,7 +2806,7 @@ async function loadChannels(){
 
     box.innerHTML = `
       <div class="empty">
-        No active TV channels found.
+        No active TV channels.
       </div>
     `;
 
@@ -2508,13 +2847,11 @@ async function loadChannels(){
       <thead>
 
         <tr>
-
           <th>Channel</th>
           <th>Status</th>
           <th>Current Viewers</th>
-          <th>Views</th>
+          <th>Accumulated Views</th>
           <th>ID</th>
-
         </tr>
 
       </thead>
@@ -2525,7 +2862,9 @@ async function loadChannels(){
           channel => {
 
             const id =
-              String(channel.id);
+              String(
+                channel.id
+              );
 
 
             return `
@@ -2583,156 +2922,7 @@ async function loadChannels(){
 
 
 /* =========================================================
-   GENERIC DATABASE TABLE
-========================================================= */
-
-async function loadGenericTable(
-  table,
-  elementId
-){
-
-  const box =
-    $(elementId);
-
-
-  const result =
-    await CRDB.select(
-      table,
-      {
-        columns:"*",
-        order:{
-          column:"created_at",
-          ascending:false
-        },
-        limit:200
-      }
-    );
-
-
-  if(!result.ok){
-
-    box.innerHTML = `
-      <div class="empty">
-        ${escapeHTML(table)}
-        is unavailable.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  if(!result.data.length){
-
-    box.innerHTML = `
-      <div class="empty">
-        No rows found in
-        <strong>
-          ${escapeHTML(table)}
-        </strong>.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const columns =
-    Object.keys(
-      result.data[0]
-    ).slice(0,10);
-
-
-  box.innerHTML = `
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          ${columns.map(
-            column =>
-              `<th>
-                ${escapeHTML(column)}
-              </th>`
-          ).join("")}
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        ${result.data.map(
-          row => `
-
-            <tr>
-
-              ${columns.map(
-                column => {
-
-                  let value =
-                    row[column];
-
-
-                  if(
-                    column.endsWith(
-                      "_at"
-                    ) &&
-                    value
-                  ){
-
-                    value =
-                      formatDate(
-                        value
-                      );
-
-                  }
-
-
-                  if(
-                    typeof value ===
-                    "object" &&
-                    value !== null
-                  ){
-
-                    value =
-                      json(value);
-
-                  }
-
-
-                  return `
-                    <td>
-                      ${escapeHTML(
-                        value ??
-                        "—"
-                      )}
-                    </td>
-                  `;
-
-                }
-              ).join("")}
-
-            </tr>
-
-          `
-        ).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/* =========================================================
-   CONTENT VIEW STATISTICS
+   CONTENT STATISTICS
 ========================================================= */
 
 async function loadContentStats(){
@@ -2760,7 +2950,7 @@ async function loadContentStats(){
 
     box.innerHTML = `
       <div class="error-box">
-        Content statistics could not be read.
+        content_view_stats could not be read.
       </div>
     `;
 
@@ -2770,9 +2960,9 @@ async function loadContentStats(){
 
 
   let totalViews = 0;
-  let uniqueUsers = 0;
-  let uniqueSessions = 0;
-  let watchSeconds = 0;
+  let users = 0;
+  let sessions = 0;
+  let seconds = 0;
   let completed = 0;
 
 
@@ -2784,17 +2974,17 @@ async function loadContentStats(){
           row.total_views || 0
         );
 
-      uniqueUsers +=
+      users +=
         Number(
           row.unique_users || 0
         );
 
-      uniqueSessions +=
+      sessions +=
         Number(
           row.unique_sessions || 0
         );
 
-      watchSeconds +=
+      seconds +=
         Number(
           row.total_watch_seconds || 0
         );
@@ -2808,10 +2998,6 @@ async function loadContentStats(){
   );
 
 
-  /*
-    These are real aggregate values.
-  */
-
   setText(
     "contentTotalViews",
     number(totalViews)
@@ -2819,17 +3005,17 @@ async function loadContentStats(){
 
   setText(
     "contentUniqueUsers",
-    number(uniqueUsers)
+    number(users)
   );
 
   setText(
     "contentUniqueSessions",
-    number(uniqueSessions)
+    number(sessions)
   );
 
   setText(
     "contentWatchSeconds",
-    number(watchSeconds)
+    number(seconds)
   );
 
   setText(
@@ -2843,20 +3029,15 @@ async function loadContentStats(){
     box.innerHTML = `
       <div class="empty">
 
-        <div style="font-size:24px;font-weight:900">
+        <div style="
+          font-size:27px;
+          font-weight:950;
+        ">
           0
         </div>
 
         <div>
-          No content view statistics exist yet.
-        </div>
-
-        <div style="
-          margin-top:8px;
-          font-size:11px;
-        ">
-          Statistics are generated from
-          <strong>content_views</strong>.
+          No content views have been recorded yet.
         </div>
 
       </div>
@@ -2874,17 +3055,15 @@ async function loadContentStats(){
       <thead>
 
         <tr>
-
-          <th>Content ID</th>
+          <th>Content</th>
           <th>Type</th>
           <th>Views</th>
           <th>Users</th>
           <th>Sessions</th>
-          <th>Watch Time</th>
+          <th>Watch</th>
           <th>Average</th>
           <th>Completed</th>
           <th>Last Viewed</th>
-
         </tr>
 
       </thead>
@@ -3003,7 +3182,7 @@ async function loadRawContentViews(){
 
     box.innerHTML = `
       <div class="error-box">
-        Raw content view records could not be read.
+        content_views could not be read.
       </div>
     `;
 
@@ -3016,18 +3195,7 @@ async function loadRawContentViews(){
 
     box.innerHTML = `
       <div class="empty">
-
-        <div style="
-          font-size:25px;
-          font-weight:950;
-        ">
-          0
-        </div>
-
-        <div>
-          No raw content view records have been recorded.
-        </div>
-
+        No raw content-view records exist yet.
       </div>
     `;
 
@@ -3043,7 +3211,6 @@ async function loadRawContentViews(){
       <thead>
 
         <tr>
-
           <th>Content</th>
           <th>Type</th>
           <th>User</th>
@@ -3051,7 +3218,6 @@ async function loadRawContentViews(){
           <th>Watch</th>
           <th>Completed</th>
           <th>Viewed</th>
-
         </tr>
 
       </thead>
@@ -3101,13 +3267,11 @@ async function loadRawContentViews(){
 
                 ${
                   row.completed
-
                   ? `
                     <span class="badge good">
                       YES
                     </span>
                   `
-
                   : `
                     <span class="badge">
                       NO
@@ -3158,6 +3322,325 @@ async function loadContent(){
 
 
 /* =========================================================
+   GENERIC TABLE LOADER
+========================================================= */
+
+async function loadGenericTable(
+  table,
+  elementId,
+  options={}
+){
+
+  const box =
+    $(elementId);
+
+
+  if(!box)
+    return;
+
+
+  box.innerHTML = `
+    <div class="empty">
+      Loading ${escapeHTML(table)}...
+    </div>
+  `;
+
+
+  const result =
+    await CRDB.select(
+      table,
+      {
+        columns:
+          options.columns ||
+          "*",
+        order:
+          options.order ||
+          {
+            column:
+              options.orderColumn ||
+              "created_at",
+            ascending:false
+          },
+        limit:
+          options.limit ||
+          200
+      }
+    );
+
+
+  if(!result.ok){
+
+    box.innerHTML = `
+      <div class="empty">
+        ${escapeHTML(table)}
+        is unavailable to this session.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  if(!result.data.length){
+
+    box.innerHTML = `
+      <div class="empty">
+        No records in
+        <strong>
+          ${escapeHTML(table)}
+        </strong>.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const columns =
+    options.displayColumns ||
+    Object.keys(
+      result.data[0]
+    ).slice(0,10);
+
+
+  box.innerHTML = `
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          ${columns.map(
+            column =>
+              `<th>
+                ${escapeHTML(column)}
+              </th>`
+          ).join("")}
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        ${result.data.map(
+          row => `
+
+            <tr>
+
+              ${columns.map(
+                column => {
+
+                  let value =
+                    row[column];
+
+
+                  if(
+                    column.endsWith(
+                      "_at"
+                    ) &&
+                    value
+                  ){
+
+                    value =
+                      formatDate(
+                        value
+                      );
+
+                  }
+
+
+                  if(
+                    typeof value ===
+                    "object" &&
+                    value !== null
+                  ){
+
+                    value =
+                      stringify(
+                        value
+                      );
+
+                  }
+
+
+                  return `
+                    <td>
+                      ${escapeHTML(
+                        value ??
+                        "—"
+                      )}
+                    </td>
+                  `;
+
+                }
+              ).join("")}
+
+            </tr>
+
+          `
+        ).join("")}
+
+      </tbody>
+
+    </table>
+
+  `;
+
+}
+
+
+/* =========================================================
+   MEMBERS
+========================================================= */
+
+async function loadMembers(){
+
+  const [
+    profiles,
+    points,
+    activity,
+    history
+  ] =
+    await Promise.all([
+
+      CRDB.count(
+        "member_profiles"
+      ),
+
+      CRDB.count(
+        "member_points"
+      ),
+
+      CRDB.count(
+        "member_activity"
+      ),
+
+      CRDB.count(
+        "member_watch_history"
+      )
+
+    ]);
+
+
+  setText(
+    "memberProfileCount",
+    number(
+      profiles.count
+    )
+  );
+
+  setText(
+    "memberPointsCount",
+    number(
+      points.count
+    )
+  );
+
+  setText(
+    "memberActivityCount",
+    number(
+      activity.count
+    )
+  );
+
+  setText(
+    "memberHistoryCount",
+    number(
+      history.count
+    )
+  );
+
+
+  await loadGenericTable(
+    "member_profiles",
+    "membersList",
+    {
+      limit:200
+    }
+  );
+
+}
+
+
+/* =========================================================
+   MEMBER REWARDS
+========================================================= */
+
+async function loadRewards(){
+
+  await Promise.all([
+
+    loadGenericTable(
+      "member_points",
+      "pointsList",
+      {
+        limit:200
+      }
+    ),
+
+    loadGenericTable(
+      "crowrules_member_watch_minutes",
+      "watchMinutesList",
+      {
+        limit:200
+      }
+    )
+
+  ]);
+
+}
+
+
+/* =========================================================
+   COMMUNITY
+========================================================= */
+
+async function loadCommunity(){
+
+  await Promise.all([
+
+    loadGenericTable(
+      "chat_rooms",
+      "chatRoomsList",
+      {
+        limit:100
+      }
+    ),
+
+    loadGenericTable(
+      "polls",
+      "pollsList",
+      {
+        limit:100
+      }
+    ),
+
+    loadGenericTable(
+      "newsletter_subscribers",
+      "newsletterList",
+      {
+        limit:100
+      }
+    ),
+
+    loadGenericTable(
+      "creator_applications",
+      "creatorApplicationsList",
+      {
+        limit:100
+      }
+    )
+
+  ]);
+
+}
+
+
+/* =========================================================
    NAVIGATION
 ========================================================= */
 
@@ -3173,7 +3656,7 @@ const TITLES = {
     "TV Channels",
 
   schedule:
-    "TV Schedule",
+    "TV Guide",
 
   shows:
     "Shows",
@@ -3184,16 +3667,27 @@ const TITLES = {
   members:
     "Members",
 
+  rewards:
+    "Member Rewards",
+
   events:
     "Live Events",
 
   content:
-    "Content Views"
+    "Content Views",
+
+  community:
+    "Community",
+
+  pages:
+    "CrowRules Pages"
 
 };
 
 
-function openSection(name){
+async function openSection(
+  name
+){
 
   document
     .querySelectorAll(
@@ -3236,57 +3730,58 @@ function openSection(name){
   );
 
 
-  /*
-    Lazy-load sections.
-  */
-
   switch(name){
 
     case "analytics":
-      loadAnalytics();
+      await loadAnalytics();
       break;
 
     case "channels":
-      loadChannels();
+      await loadChannels();
       break;
 
     case "schedule":
-      loadGenericTable(
+      await loadGenericTable(
         "schedule_items",
         "scheduleList"
       );
       break;
 
     case "shows":
-      loadGenericTable(
+      await loadGenericTable(
         "shows",
         "showsList"
       );
       break;
 
     case "episodes":
-      loadGenericTable(
+      await loadGenericTable(
         "episodes",
         "episodesList"
       );
       break;
 
     case "members":
-      loadGenericTable(
-        "member_profiles",
-        "membersList"
-      );
+      await loadMembers();
+      break;
+
+    case "rewards":
+      await loadRewards();
       break;
 
     case "events":
-      loadGenericTable(
+      await loadGenericTable(
         "live_events",
         "eventsList"
       );
       break;
 
     case "content":
-      loadContent();
+      await loadContent();
+      break;
+
+    case "community":
+      await loadCommunity();
       break;
 
   }
@@ -3318,7 +3813,7 @@ document
 
 
 /* =========================================================
-   REFRESH EVENTS
+   REFRESH BUTTONS
 ========================================================= */
 
 $("refreshRecent")
@@ -3385,11 +3880,7 @@ $("refreshEpisodes")
 $("refreshMembers")
   .addEventListener(
     "click",
-    () =>
-      loadGenericTable(
-        "member_profiles",
-        "membersList"
-      )
+    loadMembers
   );
 
 
@@ -3412,12 +3903,17 @@ $("refreshContent")
 
 
 /* =========================================================
-   BOOT
+   INITIAL LOAD
 ========================================================= */
 
 async function boot(){
 
   await testConnection();
+
+  /*
+    Dashboard intentionally loads only the important
+    live/database-backed information initially.
+  */
 
   await Promise.all([
 
@@ -3433,7 +3929,7 @@ async function boot(){
 
 
 /* =========================================================
-   LIVE REFRESH
+   LIVE VIEWER REFRESH
 ========================================================= */
 
 setInterval(
@@ -3441,6 +3937,10 @@ setInterval(
   30000
 );
 
+
+/* =========================================================
+   ANALYTICS REFRESH
+========================================================= */
 
 setInterval(
   loadAnalytics,
