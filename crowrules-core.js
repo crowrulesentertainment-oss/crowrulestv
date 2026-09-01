@@ -10,15 +10,11 @@ const SUPABASE_ANON_KEY='sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
 const ADMIN_PRO_URL='https://crowrulesentertainment-oss.github.io/crowrulestv/admin';
 const TV_URL='https://crowrulesentertainment-oss.github.io/crowrulestv/tv';
 const BRANCHES=[
-{slug:'entertainment',name:'CrowRules Entertainment',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/',icon:'🏠'},
+{slug:'entertainment',name:'CrowRules Entertainment',url:'https://crowrulesentertainment-oss.github.io/crowrulesentertainment/',icon:'🏠'},
 {slug:'tv',name:'CrowRules TV',url:TV_URL,icon:'📺'},
-{slug:'yearbook',name:'CrowRules Yearbooks',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/yearbook',icon:'📚'},
-{slug:'awards',name:'CrowRules Awards',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/awards',icon:'🏆'},
 {slug:'tacoma-nights',name:'Tacoma Nights',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/tacoma-nights',icon:'🌃'},
 {slug:'backdeckcrew',name:'Back Deck Crew',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/backdeckcrew',icon:'🎥'},
-{slug:'pnwm',name:'Pacific Northwest Mothers',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/pnwm',icon:'👩‍👧‍👦'},
-{slug:'crowrules-records',name:'CrowRules Records',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/crowrules-records',icon:'💿'},
-{slug:'admin',name:'Admin Pro',url:ADMIN_PRO_URL,icon:'⚙️'}];
+{slug:'pnwm',name:'Pacific Northwest Mothers',url:'https://crowrulesentertainment-oss.github.io/crowrulestv/pnwm',icon:'👩‍👧‍👦'}];
 function ready(fn){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fn,{once:true});else fn()}
 function loadSupabase(){if(window.supabase?.createClient)return Promise.resolve(window.supabase);return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.onload=()=>resolve(window.supabase);s.onerror=reject;document.head.appendChild(s)})}
 async function client(){const s=await loadSupabase();if(!window.__crowrulesSupabase)window.__crowrulesSupabase=s.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'crowrules-unified-session',flowType:'pkce'}});return window.__crowrulesSupabase}
