@@ -1,4 +1,3 @@
-```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,11 +6,11 @@
 <meta name="theme-color" content="#050507">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
-<title>CrowRules Entertainment — Admin Pro v1.0</title>
+<title>CrowRules Entertainment - Admin Pro v1.1</title>
 
 <meta
   name="description"
-  content="CrowRules Entertainment Admin Pro — live TV, analytics, members, content, schedule and database administration."
+  content="CrowRules Entertainment Admin Pro — Supabase-powered administration dashboard."
 >
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,20 +18,18 @@
 <style>
 :root{
   --bg:#050507;
-  --bg2:#09090d;
-  --panel:#0d0d13;
+  --panel:#0d0d12;
   --panel2:#111119;
   --panel3:#171720;
-  --border:#282833;
+  --border:#292933;
   --text:#f5f5f7;
-  --muted:#8f8f9d;
+  --muted:#92929e;
   --accent:#a855f7;
   --accent2:#7c3aed;
   --green:#22c55e;
   --yellow:#f59e0b;
   --red:#ef4444;
   --blue:#38bdf8;
-  --shadow:0 15px 45px rgba(0,0,0,.25);
 }
 
 *{
@@ -46,13 +43,15 @@ html{
 body{
   margin:0;
   background:
-    radial-gradient(circle at 85% -10%,rgba(168,85,247,.15),transparent 30%),
-    radial-gradient(circle at 5% 100%,rgba(56,189,248,.06),transparent 28%),
+    radial-gradient(
+      circle at 85% -10%,
+      rgba(168,85,247,.16),
+      transparent 30%
+    ),
     var(--bg);
   color:var(--text);
   font-family:
     Inter,
-    ui-sans-serif,
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -85,29 +84,26 @@ a{
 }
 
 /* =========================================================
-   LAYOUT
+   APP
 ========================================================= */
-
-.app{
-  min-height:100vh;
-}
 
 .sidebar{
   position:fixed;
-  inset:0 auto 0 0;
-  width:255px;
+  top:0;
+  bottom:0;
+  left:0;
+  width:250px;
   padding:20px;
-  background:rgba(7,7,11,.97);
-  border-right:1px solid var(--border);
   overflow:auto;
+  background:#08080c;
+  border-right:1px solid var(--border);
   z-index:100;
 }
 
 .main{
-  margin-left:255px;
   min-height:100vh;
+  margin-left:250px;
   padding:24px;
-  max-width:1900px;
 }
 
 /* =========================================================
@@ -115,14 +111,12 @@ a{
 ========================================================= */
 
 .brand{
-  font-size:21px;
+  font-size:20px;
   font-weight:950;
-  letter-spacing:.02em;
 }
 
 .brand-sub{
-  margin-top:4px;
-  margin-bottom:25px;
+  margin:5px 0 24px;
   color:var(--muted);
   font-size:11px;
 }
@@ -142,25 +136,19 @@ a{
   border:1px solid transparent;
   border-radius:10px;
   background:transparent;
-  color:#bdbdc8;
+  color:#b9b9c4;
   text-align:left;
-  transition:.15s ease;
 }
 
 .nav button:hover{
-  background:#12121a;
+  background:#121219;
   color:white;
 }
 
 .nav button.active{
-  background:
-    linear-gradient(
-      90deg,
-      rgba(168,85,247,.20),
-      rgba(168,85,247,.04)
-    );
-  border-color:#3a294c;
   color:white;
+  border-color:#422b55;
+  background:rgba(168,85,247,.14);
 }
 
 /* =========================================================
@@ -171,7 +159,7 @@ a{
   display:none;
   gap:6px;
   overflow:auto;
-  padding-bottom:13px;
+  margin-bottom:14px;
 }
 
 .mobile-nav button{
@@ -179,7 +167,7 @@ a{
   padding:8px 11px;
   border:1px solid var(--border);
   border-radius:9px;
-  background:#101017;
+  background:#111118;
   color:white;
 }
 
@@ -189,20 +177,19 @@ a{
 
 .topbar{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   gap:20px;
-  margin-bottom:22px;
+  margin-bottom:20px;
 }
 
 h1{
   margin:0;
-  font-size:29px;
-  line-height:1.1;
+  font-size:28px;
 }
 
 .subtitle{
-  margin-top:7px;
+  margin-top:6px;
   color:var(--muted);
   font-size:13px;
 }
@@ -210,28 +197,27 @@ h1{
 .connection{
   display:flex;
   align-items:center;
-  gap:9px;
-  padding:9px 13px;
+  gap:8px;
+  padding:8px 12px;
   border:1px solid var(--border);
   border-radius:999px;
   background:#0b0b10;
-  font-size:12px;
-  white-space:nowrap;
+  font-size:11px;
 }
 
-.connection-dot{
+.dot{
   width:9px;
   height:9px;
   border-radius:50%;
   background:var(--red);
 }
 
-.connection-dot.online{
+.dot.online{
   background:var(--green);
-  box-shadow:0 0 13px rgba(34,197,94,.7);
+  box-shadow:0 0 12px rgba(34,197,94,.7);
 }
 
-.connection-dot.partial{
+.dot.warning{
   background:var(--yellow);
 }
 
@@ -252,87 +238,94 @@ h1{
 ========================================================= */
 
 .card{
-  background:
-    linear-gradient(145deg,rgba(17,17,25,.98),rgba(8,8,12,.98));
-  border:1px solid var(--border);
-  border-radius:16px;
-  box-shadow:var(--shadow);
+  margin-bottom:18px;
   overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(17,17,25,.98),
+      rgba(8,8,12,.98)
+    );
 }
 
 .card-head{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   gap:12px;
-  padding:15px 17px;
+  padding:14px 16px;
   border-bottom:1px solid var(--border);
 }
 
 .card-title{
   font-size:14px;
-  font-weight:850;
+  font-weight:900;
 }
 
 .card-body{
-  padding:17px;
+  padding:16px;
 }
 
 /* =========================================================
-   STAT CARDS
+   STATS
 ========================================================= */
 
 .stats{
   display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-template-columns:
+    repeat(6,minmax(0,1fr));
   gap:12px;
   margin-bottom:18px;
 }
 
 .stat{
   min-width:0;
-  padding:17px;
+  padding:16px;
   border:1px solid var(--border);
-  border-radius:16px;
-  background:
-    linear-gradient(145deg,var(--panel2),var(--panel));
+  border-radius:15px;
+  background:#101017;
 }
 
 .stat-label{
   color:var(--muted);
-  font-size:10px;
-  font-weight:850;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
   text-transform:uppercase;
-  letter-spacing:.09em;
 }
 
 .stat-value{
-  margin-top:8px;
-  font-size:27px;
+  margin-top:7px;
+  font-size:26px;
   font-weight:950;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .stat-note{
-  margin-top:4px;
-  color:#696974;
-  font-size:10px;
+  margin-top:3px;
+  color:#676773;
+  font-size:9px;
 }
 
 /* =========================================================
-   GRIDS
+   GRID
 ========================================================= */
 
-.dashboard-grid{
+.grid{
   display:grid;
-  grid-template-columns:minmax(0,1.45fr) minmax(300px,.55fr);
+  grid-template-columns:
+    minmax(0,1.4fr)
+    minmax(300px,.6fr);
   gap:18px;
 }
 
-.two-grid{
+.two{
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
   gap:18px;
 }
 
@@ -343,11 +336,11 @@ h1{
 .btn{
   padding:8px 12px;
   border:1px solid var(--border);
-  border-radius:9px;
+  border-radius:8px;
   background:#15151d;
   color:white;
-  font-size:12px;
-  font-weight:750;
+  font-size:11px;
+  font-weight:800;
 }
 
 .btn:hover{
@@ -359,18 +352,14 @@ h1{
   background:var(--accent);
 }
 
-.btn.primary:hover{
-  background:var(--accent2);
-}
-
 .btn.danger{
-  border-color:#5a1a22;
+  border-color:#5a1b24;
   background:#2a0c10;
   color:#fecaca;
 }
 
 /* =========================================================
-   TABLE
+   TABLES
 ========================================================= */
 
 .table-wrap{
@@ -385,7 +374,7 @@ table{
 
 th,
 td{
-  padding:11px 13px;
+  padding:10px 12px;
   border-bottom:1px solid var(--border);
   text-align:left;
   vertical-align:middle;
@@ -393,18 +382,17 @@ td{
 
 th{
   color:var(--muted);
-  font-size:10px;
-  font-weight:850;
+  font-size:9px;
   text-transform:uppercase;
   letter-spacing:.07em;
 }
 
 td{
-  font-size:12px;
+  font-size:11px;
 }
 
-tbody tr:hover{
-  background:rgba(255,255,255,.018);
+tr:hover td{
+  background:rgba(255,255,255,.015);
 }
 
 /* =========================================================
@@ -413,40 +401,39 @@ tbody tr:hover{
 
 .badge{
   display:inline-flex;
-  align-items:center;
-  padding:4px 8px;
+  padding:4px 7px;
   border:1px solid var(--border);
   border-radius:999px;
-  font-size:10px;
-  font-weight:800;
+  font-size:9px;
+  font-weight:900;
 }
 
-.badge.good{
-  border-color:#123c20;
-  background:#08200f;
+.good{
   color:#86efac;
+  border-color:#164a29;
+  background:#08200f;
 }
 
-.badge.warn{
-  border-color:#4b3908;
-  background:#211a05;
+.warn{
   color:#fcd34d;
+  border-color:#51400d;
+  background:#211a05;
 }
 
-.badge.bad{
-  border-color:#53151e;
-  background:#260a0e;
+.bad{
   color:#fca5a5;
+  border-color:#571923;
+  background:#250a0e;
 }
 
-.badge.blue{
-  border-color:#0d3444;
-  background:#061923;
+.blue{
   color:#7dd3fc;
+  border-color:#103d51;
+  background:#061a23;
 }
 
 /* =========================================================
-   EMPTY / INFO / ERROR
+   MESSAGES
 ========================================================= */
 
 .empty{
@@ -455,138 +442,115 @@ tbody tr:hover{
   text-align:center;
 }
 
-.error-box{
+.info{
   padding:13px;
-  border:1px solid #5b1b23;
+  border:1px solid #18364a;
   border-radius:10px;
-  background:#220a0e;
-  color:#fecaca;
-  font-size:12px;
-}
-
-.info-box{
-  padding:13px;
-  border:1px solid #24354a;
-  border-radius:10px;
-  background:#09131e;
+  background:#07151e;
   color:#bae6fd;
-  font-size:12px;
-}
-
-/* =========================================================
-   EVENTS
-========================================================= */
-
-.event{
-  display:grid;
-  grid-template-columns:125px minmax(0,1fr);
-  gap:13px;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-
-.event:last-child{
-  border-bottom:0;
-}
-
-.event-time{
-  color:var(--muted);
   font-size:11px;
 }
 
-.event-type{
-  font-size:12px;
-  font-weight:850;
+.error{
+  padding:13px;
+  border:1px solid #571923;
+  border-radius:10px;
+  background:#250a0e;
+  color:#fecaca;
+  font-size:11px;
 }
 
-.event-meta{
-  margin-top:4px;
-  color:var(--muted);
+.success{
+  padding:13px;
+  border:1px solid #164a29;
+  border-radius:10px;
+  background:#08200f;
+  color:#bbf7d0;
   font-size:11px;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }
 
 /* =========================================================
-   CHANNEL
+   VIEWERS
 ========================================================= */
 
-.channel{
+.viewer-row{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   gap:15px;
-  padding:12px 0;
+  padding:11px 0;
   border-bottom:1px solid var(--border);
 }
 
-.channel:last-child{
+.viewer-row:last-child{
   border-bottom:0;
 }
 
-.channel-name{
-  font-size:13px;
+.viewer-name{
   font-weight:850;
+  font-size:12px;
 }
 
-.channel-id{
-  margin-top:3px;
-  color:var(--muted);
-  font-size:9px;
-}
-
-.viewer-count{
+.viewer-number{
   color:#86efac;
   font-weight:950;
-  white-space:nowrap;
 }
 
 /* =========================================================
    LINKS
 ========================================================= */
 
-.page-links{
+.links{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
   gap:10px;
 }
 
-.page-link{
-  display:block;
-  padding:13px;
+.link-card{
+  padding:14px;
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:11px;
   background:#101017;
-  transition:.15s ease;
 }
 
-.page-link:hover{
-  border-color:#4c3266;
-  background:#15131c;
+.link-card:hover{
+  border-color:#4d3266;
 }
 
-.page-link-title{
+.link-title{
   font-size:12px;
-  font-weight:850;
+  font-weight:900;
 }
 
-.page-link-url{
-  margin-top:5px;
+.link-file{
+  margin-top:4px;
   color:var(--muted);
-  font-size:10px;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  font-size:9px;
 }
 
 /* =========================================================
-   FOOTER
+   DIAGNOSTICS
 ========================================================= */
 
-.footer{
-  margin:30px 0 5px;
-  color:#5d5d69;
-  font-size:10px;
-  text-align:center;
+.diagnostic{
+  display:grid;
+  grid-template-columns:180px minmax(0,1fr) 100px;
+  gap:12px;
+  align-items:center;
+  padding:9px 0;
+  border-bottom:1px solid var(--border);
+  font-size:11px;
+}
+
+.diagnostic:last-child{
+  border-bottom:0;
+}
+
+.diagnostic-message{
+  color:var(--muted);
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 /* =========================================================
@@ -596,11 +560,12 @@ tbody tr:hover{
 @media(max-width:1250px){
 
   .stats{
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-columns:
+      repeat(3,minmax(0,1fr));
   }
 
-  .dashboard-grid,
-  .two-grid{
+  .grid,
+  .two{
     grid-template-columns:1fr;
   }
 
@@ -621,15 +586,16 @@ tbody tr:hover{
     display:flex;
   }
 
+  .stats{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
+
   .topbar{
     align-items:flex-start;
   }
 
-  .stats{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-
-  .page-links{
+  .links{
     grid-template-columns:1fr;
   }
 
@@ -645,22 +611,11 @@ tbody tr:hover{
     flex-direction:column;
   }
 
-  h1{
-    font-size:24px;
-  }
-
 }
-
 </style>
 </head>
 
 <body>
-
-<div class="app">
-
-<!-- =======================================================
-     SIDEBAR
-======================================================== -->
 
 <aside class="sidebar">
 
@@ -669,7 +624,7 @@ tbody tr:hover{
   </div>
 
   <div class="brand-sub">
-    Admin Pro · Database Control
+    Admin Pro · Supabase Control Center
   </div>
 
   <nav class="nav">
@@ -718,6 +673,10 @@ tbody tr:hover{
       Community
     </button>
 
+    <button data-section="diagnostics">
+      Database Diagnostics
+    </button>
+
     <button data-section="pages">
       CrowRules Pages
     </button>
@@ -729,71 +688,63 @@ tbody tr:hover{
 
 <main class="main">
 
-<!-- =======================================================
-     MOBILE NAV
-======================================================== -->
+  <div class="mobile-nav">
 
-<div class="mobile-nav">
+    <button data-section="dashboard">
+      Dashboard
+    </button>
 
-  <button data-section="dashboard">
-    Dashboard
-  </button>
+    <button data-section="analytics">
+      Analytics
+    </button>
 
-  <button data-section="analytics">
-    Analytics
-  </button>
+    <button data-section="channels">
+      Channels
+    </button>
 
-  <button data-section="channels">
-    Channels
-  </button>
+    <button data-section="schedule">
+      TV Guide
+    </button>
 
-  <button data-section="schedule">
-    TV Guide
-  </button>
+    <button data-section="members">
+      Members
+    </button>
 
-  <button data-section="members">
-    Members
-  </button>
+    <button data-section="content">
+      Content
+    </button>
 
-  <button data-section="content">
-    Content
-  </button>
-
-</div>
+  </div>
 
 
-<!-- =======================================================
-     HEADER
-======================================================== -->
+  <header class="topbar">
 
-<header class="topbar">
+    <div>
 
-  <div>
+      <h1 id="pageTitle">
+        Admin Pro
+      </h1>
 
-    <h1 id="pageTitle">
-      Admin Pro
-    </h1>
+      <div class="subtitle">
+        Database-backed CrowRules Entertainment administration
+      </div>
 
-    <div class="subtitle">
-      CrowRules Entertainment control center
     </div>
 
-  </div>
+    <div class="connection">
 
-  <div class="connection">
+      <span
+        id="connectionDot"
+        class="dot"
+      ></span>
 
-    <span
-      id="connectionDot"
-      class="connection-dot"
-    ></span>
+      <span id="connectionText">
+        Starting...
+      </span>
 
-    <span id="connectionText">
-      Connecting...
-    </span>
+    </div>
 
-  </div>
-
-</header>
+  </header>
 
 
 <!-- =======================================================
@@ -808,87 +759,45 @@ tbody tr:hover{
   <div class="stats">
 
     <div class="stat">
-      <div class="stat-label">
-        Content Views
-      </div>
-      <div
-        id="statContentViews"
-        class="stat-value"
-      >—</div>
-      <div class="stat-note">
-        content_views
-      </div>
+      <div class="stat-label">Content Views</div>
+      <div id="statViews" class="stat-value">—</div>
+      <div class="stat-note">content_views</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        View Events
-      </div>
-      <div
-        id="statViewEvents"
-        class="stat-value"
-      >—</div>
-      <div class="stat-note">
-        analytics_events
-      </div>
+      <div class="stat-label">View Events</div>
+      <div id="statEvents" class="stat-value">—</div>
+      <div class="stat-note">analytics_events</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        Sessions
-      </div>
-      <div
-        id="statSessions"
-        class="stat-value"
-      >—</div>
-      <div class="stat-note">
-        actual session IDs
-      </div>
+      <div class="stat-label">Sessions</div>
+      <div id="statSessions" class="stat-value">—</div>
+      <div class="stat-note">real session IDs</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        Analytics Events
-      </div>
-      <div
-        id="statAnalytics"
-        class="stat-value"
-      >—</div>
-      <div class="stat-note">
-        database rows
-      </div>
+      <div class="stat-label">Watch History</div>
+      <div id="statHistory" class="stat-value">—</div>
+      <div class="stat-note">member_watch_history</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        Watch History
-      </div>
-      <div
-        id="statHistory"
-        class="stat-value"
-      >—</div>
-      <div class="stat-note">
-        member_watch_history
-      </div>
+      <div class="stat-label">Active Viewers</div>
+      <div id="statActive" class="stat-value">—</div>
+      <div class="stat-note">tv_active_viewers</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        Current Viewers
-      </div>
-      <div
-        id="statActive"
-        class="stat-value"
-      >—</div>
-      <div class="stat-note">
-        tv_active_viewers
-      </div>
+      <div class="stat-label">Channels</div>
+      <div id="statChannels" class="stat-value">—</div>
+      <div class="stat-note">active only</div>
     </div>
 
   </div>
 
 
-  <div class="dashboard-grid">
+  <div class="grid">
 
     <div class="card">
 
@@ -900,7 +809,7 @@ tbody tr:hover{
 
         <button
           class="btn"
-          id="refreshRecent"
+          id="refreshAnalytics"
         >
           Refresh
         </button>
@@ -937,7 +846,7 @@ tbody tr:hover{
       </div>
 
       <div
-        id="channelViewers"
+        id="viewerList"
         class="card-body"
       >
         <div class="empty">
@@ -965,32 +874,27 @@ tbody tr:hover{
 
     <div class="stat">
       <div class="stat-label">Content Views</div>
-      <div id="analyticsContentViews" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">View Events</div>
-      <div id="analyticsViewEvents" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Sessions</div>
-      <div id="analyticsSessions" class="stat-value">—</div>
+      <div id="aViews" class="stat-value">—</div>
     </div>
 
     <div class="stat">
       <div class="stat-label">Analytics Events</div>
-      <div id="analyticsEvents" class="stat-value">—</div>
+      <div id="aEvents" class="stat-value">—</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Sessions</div>
+      <div id="aSessions" class="stat-value">—</div>
     </div>
 
     <div class="stat">
       <div class="stat-label">Watch History</div>
-      <div id="analyticsHistory" class="stat-value">—</div>
+      <div id="aHistory" class="stat-value">—</div>
     </div>
 
     <div class="stat">
       <div class="stat-label">Active Viewers</div>
-      <div id="analyticsActive" class="stat-value">—</div>
+      <div id="aActive" class="stat-value">—</div>
     </div>
 
   </div>
@@ -1005,8 +909,8 @@ tbody tr:hover{
       </div>
 
       <button
-        id="refreshAnalytics"
         class="btn"
+        id="refreshAnalytics2"
       >
         Refresh
       </button>
@@ -1014,7 +918,7 @@ tbody tr:hover{
     </div>
 
     <div
-      id="analyticsEventsList"
+      id="analyticsList"
       class="card-body"
     >
       <div class="empty">
@@ -1036,6 +940,16 @@ tbody tr:hover{
   class="section"
 >
 
+  <div class="info">
+    <strong>Authoritative source:</strong>
+    <code>tv_channels</code>.
+    Only rows with <code>is_active = true</code> are displayed.
+    Current viewers come from <code>tv_active_viewers</code>;
+    accumulated channel views are a separate metric.
+  </div>
+
+  <br>
+
   <div class="card">
 
     <div class="card-head">
@@ -1045,8 +959,8 @@ tbody tr:hover{
       </div>
 
       <button
-        id="refreshChannels"
         class="btn"
+        id="refreshChannels"
       >
         Refresh
       </button>
@@ -1056,11 +970,7 @@ tbody tr:hover{
     <div
       id="channelsList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
 
@@ -1076,11 +986,16 @@ tbody tr:hover{
   class="section"
 >
 
-  <div class="info-box">
+  <div class="info">
+
     <strong>Authoritative TV schedule:</strong>
-    this Admin Pro uses <strong>schedule_items</strong>.
-    The legacy schedule, scheduled_items and tv_programs
-    tables are intentionally not used.
+    <code>schedule_items</code>.
+
+    This page does not query the legacy
+    <code>schedule</code>,
+    <code>scheduled_items</code>, or
+    <code>tv_programs</code> tables.
+
   </div>
 
   <br>
@@ -1094,8 +1009,8 @@ tbody tr:hover{
       </div>
 
       <button
-        id="refreshSchedule"
         class="btn"
+        id="refreshSchedule"
       >
         Refresh
       </button>
@@ -1105,11 +1020,7 @@ tbody tr:hover{
     <div
       id="scheduleList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
 
@@ -1134,8 +1045,8 @@ tbody tr:hover{
       </div>
 
       <button
-        id="refreshShows"
         class="btn"
+        onclick="loadGeneric('shows','showsList')"
       >
         Refresh
       </button>
@@ -1145,11 +1056,7 @@ tbody tr:hover{
     <div
       id="showsList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
 
@@ -1174,8 +1081,8 @@ tbody tr:hover{
       </div>
 
       <button
-        id="refreshEpisodes"
         class="btn"
+        onclick="loadGeneric('episodes','episodesList')"
       >
         Refresh
       </button>
@@ -1185,11 +1092,7 @@ tbody tr:hover{
     <div
       id="episodesList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
 
@@ -1208,73 +1111,46 @@ tbody tr:hover{
   <div class="stats">
 
     <div class="stat">
-      <div class="stat-label">
-        Profiles
-      </div>
-      <div
-        id="memberProfileCount"
-        class="stat-value"
-      >—</div>
+      <div class="stat-label">Member Profiles</div>
+      <div id="memberProfiles" class="stat-value">—</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        Points Rows
-      </div>
-      <div
-        id="memberPointsCount"
-        class="stat-value"
-      >—</div>
+      <div class="stat-label">Points</div>
+      <div id="memberPoints" class="stat-value">—</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        Activity
-      </div>
-      <div
-        id="memberActivityCount"
-        class="stat-value"
-      >—</div>
+      <div class="stat-label">Activity</div>
+      <div id="memberActivity" class="stat-value">—</div>
     </div>
 
     <div class="stat">
-      <div class="stat-label">
-        Watch History
-      </div>
-      <div
-        id="memberHistoryCount"
-        class="stat-value"
-      >—</div>
+      <div class="stat-label">Watch History</div>
+      <div id="memberHistory" class="stat-value">—</div>
     </div>
 
   </div>
 
-
   <div class="card">
 
     <div class="card-head">
-
       <div class="card-title">
         Member Profiles
       </div>
 
       <button
-        id="refreshMembers"
         class="btn"
+        onclick="loadMembers()"
       >
         Refresh
       </button>
-
     </div>
 
     <div
       id="membersList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
 
@@ -1290,17 +1166,23 @@ tbody tr:hover{
   class="section"
 >
 
-  <div class="info-box">
-    Member viewing rewards are database-backed.
-    Verified watch minutes are processed through
-    <strong>crowrules_track_watch</strong> and can update
-    member_points, member_point_transactions,
-    member_stats and crowrules_member_watch_minutes.
+  <div class="info">
+
+    Member viewing rewards use the database-backed
+    <code>crowrules_track_watch</code> architecture.
+
+    Verified viewing can update:
+
+    <code>member_points</code>,
+    <code>member_point_transactions</code>,
+    <code>member_stats</code>, and
+    <code>crowrules_member_watch_minutes</code>.
+
   </div>
 
   <br>
 
-  <div class="two-grid">
+  <div class="two">
 
     <div class="card">
 
@@ -1313,14 +1195,9 @@ tbody tr:hover{
       <div
         id="pointsList"
         class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
+      ></div>
 
     </div>
-
 
     <div class="card">
 
@@ -1331,13 +1208,9 @@ tbody tr:hover{
       </div>
 
       <div
-        id="watchMinutesList"
+        id="minutesList"
         class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
+      ></div>
 
     </div>
 
@@ -1347,7 +1220,7 @@ tbody tr:hover{
 
 
 <!-- =======================================================
-     LIVE EVENTS
+     EVENTS
 ======================================================== -->
 
 <section
@@ -1364,8 +1237,8 @@ tbody tr:hover{
       </div>
 
       <button
-        id="refreshEvents"
         class="btn"
+        onclick="loadGeneric('live_events','eventsList')"
       >
         Refresh
       </button>
@@ -1375,11 +1248,7 @@ tbody tr:hover{
     <div
       id="eventsList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
 
@@ -1399,15 +1268,12 @@ tbody tr:hover{
 
     <div class="stat">
       <div class="stat-label">
-        Total Content Views
+        Total Views
       </div>
       <div
-        id="contentTotalViews"
+        id="contentViews"
         class="stat-value"
       >—</div>
-      <div class="stat-note">
-        content_view_stats
-      </div>
     </div>
 
     <div class="stat">
@@ -1415,7 +1281,7 @@ tbody tr:hover{
         Unique Users
       </div>
       <div
-        id="contentUniqueUsers"
+        id="contentUsers"
         class="stat-value"
       >—</div>
     </div>
@@ -1425,7 +1291,7 @@ tbody tr:hover{
         Unique Sessions
       </div>
       <div
-        id="contentUniqueSessions"
+        id="contentSessions"
         class="stat-value"
       >—</div>
     </div>
@@ -1435,14 +1301,14 @@ tbody tr:hover{
         Watch Seconds
       </div>
       <div
-        id="contentWatchSeconds"
+        id="contentSeconds"
         class="stat-value"
       >—</div>
     </div>
 
     <div class="stat">
       <div class="stat-label">
-        Completed Views
+        Completed
       </div>
       <div
         id="contentCompleted"
@@ -1462,8 +1328,8 @@ tbody tr:hover{
       </div>
 
       <button
-        id="refreshContent"
         class="btn"
+        onclick="loadContent()"
       >
         Refresh
       </button>
@@ -1471,38 +1337,25 @@ tbody tr:hover{
     </div>
 
     <div
-      id="contentList"
+      id="contentStatsList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
-
-
-  <br>
 
 
   <div class="card">
 
     <div class="card-head">
-
       <div class="card-title">
-        Raw Content View Records
+        Raw Content Views
       </div>
-
     </div>
 
     <div
-      id="rawContentViews"
+      id="rawViewsList"
       class="table-wrap"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
+    ></div>
 
   </div>
 
@@ -1518,7 +1371,7 @@ tbody tr:hover{
   class="section"
 >
 
-  <div class="two-grid">
+  <div class="two">
 
     <div class="card">
 
@@ -1529,16 +1382,11 @@ tbody tr:hover{
       </div>
 
       <div
-        id="chatRoomsList"
+        id="chatRooms"
         class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
+      ></div>
 
     </div>
-
 
     <div class="card">
 
@@ -1549,16 +1397,11 @@ tbody tr:hover{
       </div>
 
       <div
-        id="pollsList"
+        id="polls"
         class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
+      ></div>
 
     </div>
-
 
     <div class="card">
 
@@ -1569,16 +1412,11 @@ tbody tr:hover{
       </div>
 
       <div
-        id="newsletterList"
+        id="newsletter"
         class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
+      ></div>
 
     </div>
-
 
     <div class="card">
 
@@ -1589,15 +1427,58 @@ tbody tr:hover{
       </div>
 
       <div
-        id="creatorApplicationsList"
+        id="creatorApplications"
         class="table-wrap"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
+      ></div>
 
     </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     DIAGNOSTICS
+======================================================== -->
+
+<section
+  id="section-diagnostics"
+  class="section"
+>
+
+  <div class="info">
+
+    This diagnostic panel checks the browser's Supabase
+    connection independently for every CrowRules table.
+    A failed table does not make the entire dashboard
+    appear disconnected.
+
+  </div>
+
+  <br>
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        Supabase Connection
+      </div>
+
+      <button
+        class="btn"
+        onclick="runDiagnostics()"
+      >
+        Run Diagnostics
+      </button>
+
+    </div>
+
+    <div
+      id="diagnostics"
+      class="card-body"
+    ></div>
 
   </div>
 
@@ -1616,103 +1497,95 @@ tbody tr:hover{
   <div class="card">
 
     <div class="card-head">
-
       <div class="card-title">
-        CrowRules Entertainment Pages
+        CrowRules Entertainment
       </div>
-
     </div>
 
     <div class="card-body">
 
-      <div class="page-links">
+      <div class="links">
 
         <a
-          class="page-link"
+          class="link-card"
           href="index.html"
         >
-          <div class="page-link-title">
+          <div class="link-title">
             CrowRules Entertainment
           </div>
-          <div class="page-link-url">
+          <div class="link-file">
             index.html
           </div>
         </a>
 
-
         <a
-          class="page-link"
+          class="link-card"
           href="tv.html"
         >
-          <div class="page-link-title">
+          <div class="link-title">
             CrowRules TV
           </div>
-          <div class="page-link-url">
+          <div class="link-file">
             tv.html
           </div>
         </a>
 
-
         <a
-          class="page-link"
+          class="link-card"
           href="members.html"
         >
-          <div class="page-link-title">
+          <div class="link-title">
             Member Hub
           </div>
-          <div class="page-link-url">
+          <div class="link-file">
             members.html
           </div>
         </a>
 
-
         <a
-          class="page-link"
+          class="link-card"
           href="nest.html"
         >
-          <div class="page-link-title">
+          <div class="link-title">
             Crow Nest
           </div>
-          <div class="page-link-url">
+          <div class="link-file">
             nest.html
           </div>
         </a>
 
-
         <a
-          class="page-link"
+          class="link-card"
           href="tacomanights.html"
         >
-          <div class="page-link-title">
+          <div class="link-title">
             Tacoma Nights
           </div>
-          <div class="page-link-url">
+          <div class="link-file">
             tacomanights.html
           </div>
         </a>
 
-
         <a
-          class="page-link"
+          class="link-card"
           href="awards.html"
         >
-          <div class="page-link-title">
+          <div class="link-title">
             Spectrum Awards
           </div>
-          <div class="page-link-url">
+          <div class="link-file">
             awards.html
           </div>
         </a>
 
-
         <a
-          class="page-link"
+          class="link-card"
           href="shop.html"
         >
-          <div class="page-link-title">
+          <div class="link-title">
             CrowRules Shop
           </div>
-          <div class="page-link-url">
+          <div class="link-file">
             shop.html
           </div>
         </a>
@@ -1726,87 +1599,180 @@ tbody tr:hover{
 </section>
 
 
-<div class="footer">
+<footer
+  style="
+    margin-top:30px;
+    color:#5f5f6a;
+    font-size:10px;
+    text-align:center;
+  "
+>
   CrowRules Entertainment · Admin Pro · Supabase
-</div>
+</footer>
 
 </main>
-</div>
 
 
 <script>
 
 /* =========================================================
-   CROWRULES ADMIN PRO
-   ONE SUPABASE CONFIGURATION
+   CROWRULES SUPABASE CONFIGURATION
 ========================================================= */
 
 const CONFIG = Object.freeze({
 
-  supabaseUrl:
+  /*
+    DO NOT USE A SERVICE_ROLE KEY HERE.
+
+    Replace the value below with the CURRENT
+    Supabase Publishable key from:
+
+    Supabase Dashboard
+    → Project Settings
+    → API
+    → Publishable key
+
+    If your project still exposes the legacy anon key,
+    that can be used instead.
+  */
+
+  SUPABASE_URL:
     "https://zauxdqyssratvzmomozf.supabase.co",
 
-  supabaseKey:
-    "sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J"
+  SUPABASE_KEY:
+    "sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J",
+
+  /*
+    Viewer refresh interval.
+  */
+
+  VIEWER_REFRESH_MS:
+    30000,
+
+  /*
+    Analytics refresh interval.
+  */
+
+  ANALYTICS_REFRESH_MS:
+    60000
 
 });
 
 
 /* =========================================================
-   SUPABASE CLIENT
+   CONFIG VALIDATION
 ========================================================= */
 
-const {
-  createClient
-} = window.supabase;
+function configIsReady(){
 
-const supabase =
-  createClient(
-    CONFIG.supabaseUrl,
-    CONFIG.supabaseKey,
-    {
-      auth:{
-        persistSession:true,
-        autoRefreshToken:true,
-        detectSessionInUrl:true
-      }
-    }
-  );
+  const key =
+    CONFIG.SUPABASE_KEY.trim();
+
+  if(
+    !key ||
+    key ===
+      "PASTE_CURRENT_SUPABASE_PUBLISHABLE_KEY_HERE"
+  ){
+
+    return false;
+
+  }
+
+  return true;
+
+}
 
 
 /* =========================================================
-   SINGLE ROBUST DATABASE WRAPPER
+   SINGLE SUPABASE CLIENT
 ========================================================= */
 
-const CRDB = {
+let supabaseClient = null;
+
+
+if(
+  window.supabase &&
+  typeof window.supabase.createClient ===
+    "function" &&
+  configIsReady()
+){
+
+  supabaseClient =
+    window.supabase.createClient(
+      CONFIG.SUPABASE_URL,
+      CONFIG.SUPABASE_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+        },
+        global:{
+          headers:{
+            "x-client-info":
+              "crowrules-admin-pro"
+          }
+        }
+      }
+    );
+
+}
+
+
+/* =========================================================
+   SINGLE DATABASE WRAPPER
+========================================================= */
+
+const DB = {
+
+  client(){
+
+    return supabaseClient;
+
+  },
+
 
   async select(
     table,
     options={}
   ){
 
+    if(!supabaseClient){
+
+      return {
+
+        ok:false,
+
+        table,
+
+        data:[],
+
+        error:{
+          message:
+            "Supabase client is not initialized. Check SUPABASE_KEY."
+        }
+
+      };
+
+    }
+
+
     try{
 
-      const {
-        columns="*",
-        order=null,
-        limit=null,
-        eq={},
-        gte={},
-        lte={},
-        neq={},
-        is={}
-      } = options;
-
-
       let query =
-        supabase
+        supabaseClient
           .from(table)
-          .select(columns);
+          .select(
+            options.columns ||
+            "*"
+          );
 
 
-      Object.entries(eq || {})
-        .forEach(
+      if(options.eq){
+
+        Object.entries(
+          options.eq
+        ).forEach(
           ([column,value]) => {
 
             query =
@@ -1818,37 +1784,14 @@ const CRDB = {
           }
         );
 
-
-      Object.entries(gte || {})
-        .forEach(
-          ([column,value]) => {
-
-            query =
-              query.gte(
-                column,
-                value
-              );
-
-          }
-        );
+      }
 
 
-      Object.entries(lte || {})
-        .forEach(
-          ([column,value]) => {
+      if(options.neq){
 
-            query =
-              query.lte(
-                column,
-                value
-              );
-
-          }
-        );
-
-
-      Object.entries(neq || {})
-        .forEach(
+        Object.entries(
+          options.neq
+        ).forEach(
           ([column,value]) => {
 
             query =
@@ -1860,13 +1803,18 @@ const CRDB = {
           }
         );
 
+      }
 
-      Object.entries(is || {})
-        .forEach(
+
+      if(options.gte){
+
+        Object.entries(
+          options.gte
+        ).forEach(
           ([column,value]) => {
 
             query =
-              query.is(
+              query.gte(
                 column,
                 value
               );
@@ -1874,25 +1822,48 @@ const CRDB = {
           }
         );
 
+      }
 
-      if(order){
+
+      if(options.lte){
+
+        Object.entries(
+          options.lte
+        ).forEach(
+          ([column,value]) => {
+
+            query =
+              query.lte(
+                column,
+                value
+              );
+
+          }
+        );
+
+      }
+
+
+      if(options.order){
 
         query =
           query.order(
-            order.column,
+            options.order.column,
             {
               ascending:
-                order.ascending !== false
+                options.order.ascending !== false
             }
           );
 
       }
 
 
-      if(limit){
+      if(options.limit){
 
         query =
-          query.limit(limit);
+          query.limit(
+            options.limit
+          );
 
       }
 
@@ -1906,41 +1877,49 @@ const CRDB = {
 
       if(error){
 
-        console.warn(
-          `[CrowRules DB] ${table}`,
-          error
-        );
-
         return {
+
           ok:false,
+
           table,
+
           data:[],
+
           error
+
         };
 
       }
 
 
       return {
+
         ok:true,
+
         table,
-        data:data || [],
+
+        data:
+          Array.isArray(data)
+          ? data
+          : [],
+
         error:null
+
       };
 
 
     }catch(error){
 
-      console.warn(
-        `[CrowRules DB] ${table}`,
-        error
-      );
-
       return {
+
         ok:false,
+
         table,
+
         data:[],
+
         error
+
       };
 
     }
@@ -1950,13 +1929,31 @@ const CRDB = {
 
   async count(table){
 
+    if(!supabaseClient){
+
+      return {
+
+        ok:false,
+
+        count:0,
+
+        error:{
+          message:
+            "Supabase client is not initialized."
+        }
+
+      };
+
+    }
+
+
     try{
 
       const {
         count,
         error
       } =
-        await supabase
+        await supabaseClient
           .from(table)
           .select(
             "*",
@@ -1970,32 +1967,42 @@ const CRDB = {
       if(error){
 
         return {
+
           ok:false,
-          table,
+
           count:0,
+
           error
+
         };
 
       }
 
 
       return {
+
         ok:true,
-        table,
-        count:Number(
-          count || 0
-        ),
+
+        count:
+          Number(
+            count || 0
+          ),
+
         error:null
+
       };
 
 
     }catch(error){
 
       return {
+
         ok:false,
-        table,
+
         count:0,
+
         error
+
       };
 
     }
@@ -2004,9 +2011,27 @@ const CRDB = {
 
 
   async rpc(
-    functionName,
+    name,
     params={}
   ){
+
+    if(!supabaseClient){
+
+      return {
+
+        ok:false,
+
+        data:null,
+
+        error:{
+          message:
+            "Supabase client is not initialized."
+        }
+
+      };
+
+    }
+
 
     try{
 
@@ -2014,41 +2039,32 @@ const CRDB = {
         data,
         error
       } =
-        await supabase.rpc(
-          functionName,
+        await supabaseClient.rpc(
+          name,
           params
         );
 
 
-      if(error){
-
-        console.warn(
-          `[CrowRules RPC] ${functionName}`,
-          error
-        );
-
-        return {
-          ok:false,
-          data:null,
-          error
-        };
-
-      }
-
-
       return {
-        ok:true,
-        data,
-        error:null
-      };
 
+        ok:!error,
+
+        data,
+
+        error
+
+      };
 
     }catch(error){
 
       return {
+
         ok:false,
+
         data:null,
+
         error
+
       };
 
     }
@@ -2069,17 +2085,17 @@ function $(id){
 }
 
 
-function setText(
+function text(
   id,
   value
 ){
 
-  const el =
+  const element =
     $(id);
 
-  if(el){
+  if(element){
 
-    el.textContent =
+    element.textContent =
       value;
 
   }
@@ -2087,7 +2103,9 @@ function setText(
 }
 
 
-function number(value){
+function fmt(
+  value
+){
 
   return Number(
     value || 0
@@ -2096,7 +2114,9 @@ function number(value){
 }
 
 
-function escapeHTML(value){
+function escapeHTML(
+  value
+){
 
   return String(
     value ?? ""
@@ -2110,17 +2130,19 @@ function escapeHTML(value){
 }
 
 
-function formatDate(value){
+function date(
+  value
+){
 
   if(!value)
     return "—";
 
-  const date =
+  const d =
     new Date(value);
 
   if(
     Number.isNaN(
-      date.getTime()
+      d.getTime()
     )
   ){
 
@@ -2128,12 +2150,32 @@ function formatDate(value){
 
   }
 
-  return date.toLocaleString();
+  return d.toLocaleString();
 
 }
 
 
-function stringify(value){
+function errorMessage(
+  error
+){
+
+  if(!error)
+    return "Unknown error";
+
+  return (
+    error.message ||
+    error.details ||
+    error.hint ||
+    error.code ||
+    "Unknown Supabase error"
+  );
+
+}
+
+
+function json(
+  value
+){
 
   try{
 
@@ -2151,29 +2193,83 @@ function stringify(value){
 
 
 /* =========================================================
-   CONNECTION
+   CONNECTION STATUS
+========================================================= */
+
+function setConnection(
+  state,
+  message
+){
+
+  const dot =
+    $("connectionDot");
+
+  const label =
+    $("connectionText");
+
+
+  dot.className =
+    "dot";
+
+
+  if(state === "online"){
+
+    dot.classList.add(
+      "online"
+    );
+
+  }else if(state === "warning"){
+
+    dot.classList.add(
+      "warning"
+    );
+
+  }
+
+
+  label.textContent =
+    message;
+
+}
+
+
+/* =========================================================
+   CONNECTION TEST
 ========================================================= */
 
 async function testConnection(){
 
-  setText(
-    "connectionText",
-    "Connecting..."
-  );
+  if(!configIsReady()){
 
-  $("connectionDot")
-    .className =
-      "connection-dot";
+    setConnection(
+      "warning",
+      "Supabase key required"
+    );
+
+    return false;
+
+  }
+
+
+  if(!supabaseClient){
+
+    setConnection(
+      "warning",
+      "Supabase client unavailable"
+    );
+
+    return false;
+
+  }
 
 
   /*
-    A lightweight known table is used.
-    A failure here does not prevent individual
-    sections from attempting their own reads.
+    We intentionally use tv_channels only as a
+    lightweight authentication/connectivity probe.
   */
 
   const result =
-    await CRDB.select(
+    await DB.select(
       "tv_channels",
       {
         columns:"id",
@@ -2184,46 +2280,55 @@ async function testConnection(){
 
   if(result.ok){
 
-    setText(
-      "connectionText",
+    setConnection(
+      "online",
       "Supabase ONLINE"
     );
 
-    $("connectionDot")
-      .classList.add(
-        "online"
-      );
+    return true;
+
+  }
+
+
+  const message =
+    errorMessage(
+      result.error
+    );
+
+
+  if(
+    message.toLowerCase()
+      .includes("invalid api key")
+  ){
+
+    setConnection(
+      "warning",
+      "Invalid Supabase API key"
+    );
 
   }else{
 
-    /*
-      Supabase itself may still be reachable
-      while RLS blocks a particular table.
-    */
-
-    setText(
-      "connectionText",
+    setConnection(
+      "warning",
       "Supabase connected / restricted"
     );
 
-    $("connectionDot")
-      .classList.add(
-        "partial"
-      );
-
   }
+
+
+  return false;
 
 }
 
 
 /* =========================================================
-   CONTENT VIEW TOTAL
+   CONTENT VIEWS
 ========================================================= */
 
-async function getContentViewTotal(){
+async function contentViewTotal(){
 
-  const result =
-    await CRDB.select(
+  const stats =
+    await DB.select(
       "content_view_stats",
       {
         columns:"total_views"
@@ -2231,46 +2336,52 @@ async function getContentViewTotal(){
     );
 
 
-  if(!result.ok){
+  if(stats.ok){
 
-    /*
-      Safe raw-table fallback.
-      Never fabricate a number.
-    */
-
-    const raw =
-      await CRDB.count(
-        "content_views"
-      );
-
-    return raw.count;
+    return stats.data.reduce(
+      (
+        total,
+        row
+      ) =>
+        total +
+        Number(
+          row.total_views || 0
+        ),
+      0
+    );
 
   }
 
 
-  return result.data.reduce(
-    (sum,row) =>
-      sum +
-      Number(
-        row.total_views || 0
-      ),
-    0
-  );
+  /*
+    If aggregate stats aren't accessible,
+    count the actual raw content_view rows.
+  */
+
+  const raw =
+    await DB.count(
+      "content_views"
+    );
+
+
+  return raw.count;
 
 }
 
 
 /* =========================================================
-   SESSION TOTAL
+   SESSION COUNT
 ========================================================= */
 
-async function getSessionTotal(){
+async function sessionCount(){
 
   const result =
-    await CRDB.select(
+    await DB.select(
       "analytics_events",
       {
-        columns:"session_id"
+        columns:
+          "session_id",
+        limit:5000
       }
     );
 
@@ -2292,120 +2403,88 @@ async function getSessionTotal(){
 
 
 /* =========================================================
-   MASTER ANALYTICS
+   ANALYTICS
 ========================================================= */
 
 async function loadAnalytics(){
 
   const [
-    contentViews,
-    analyticsEvents,
+    views,
+    events,
     history,
-    activeViewers,
-    contentTotal
+    active,
+    sessions
   ] =
     await Promise.all([
 
-      CRDB.count(
-        "content_views"
-      ),
+      contentViewTotal(),
 
-      CRDB.count(
+      DB.count(
         "analytics_events"
       ),
 
-      CRDB.count(
+      DB.count(
         "member_watch_history"
       ),
 
-      CRDB.count(
+      DB.count(
         "tv_active_viewers"
       ),
 
-      getContentViewTotal()
+      sessionCount()
 
     ]);
 
 
-  const sessions =
-    await getSessionTotal();
-
-
-  setText(
-    "statContentViews",
-    number(contentTotal)
+  text(
+    "statViews",
+    fmt(views)
   );
 
-  setText(
-    "statViewEvents",
-    number(
-      analyticsEvents.count
-    )
+  text(
+    "statEvents",
+    fmt(events.count)
   );
 
-  setText(
+  text(
     "statSessions",
-    number(sessions)
+    fmt(sessions)
   );
 
-  setText(
-    "statAnalytics",
-    number(
-      analyticsEvents.count
-    )
-  );
-
-  setText(
+  text(
     "statHistory",
-    number(
-      history.count
-    )
+    fmt(history.count)
   );
 
-  setText(
+  text(
     "statActive",
-    number(
-      activeViewers.count
-    )
+    fmt(active.count)
   );
 
 
-  setText(
-    "analyticsContentViews",
-    number(contentTotal)
+  text(
+    "aViews",
+    fmt(views)
   );
 
-  setText(
-    "analyticsViewEvents",
-    number(
-      analyticsEvents.count
-    )
+  text(
+    "aEvents",
+    fmt(events.count)
   );
 
-  setText(
-    "analyticsSessions",
-    number(sessions)
+  text(
+    "aSessions",
+    fmt(sessions)
   );
 
-  setText(
-    "analyticsEvents",
-    number(
-      analyticsEvents.count
-    )
+  text(
+    "aHistory",
+    fmt(history.count)
   );
 
-  setText(
-    "analyticsHistory",
-    number(
-      history.count
-    )
-  );
-
-  setText(
-    "analyticsActive",
-    number(
-      activeViewers.count
-    )
+  text(
+    "aActive",
+    fmt(active.count)
   );
 
 
@@ -2415,17 +2494,25 @@ async function loadAnalytics(){
 
 
 /* =========================================================
-   RECENT ANALYTICS EVENTS
+   RECENT ANALYTICS
 ========================================================= */
 
 async function loadRecentAnalytics(){
 
+  const targets = [
+
+    $("recentAnalytics"),
+
+    $("analyticsList")
+
+  ];
+
+
   const result =
-    await CRDB.select(
+    await DB.select(
       "analytics_events",
       {
-        columns:
-          "id,event_type,table_name,record_id,path,referrer,user_id,session_id,visitor_id,metadata,created_at",
+        columns:"*",
         order:{
           column:"created_at",
           ascending:false
@@ -2435,31 +2522,30 @@ async function loadRecentAnalytics(){
     );
 
 
-  const boxes = [
-
-    $("recentAnalytics"),
-
-    $("analyticsEventsList")
-
-  ];
-
-
   if(!result.ok){
 
-    boxes.forEach(
-      box => {
+    targets.forEach(
+      element => {
 
-        if(box){
+        element.innerHTML = `
 
-          box.innerHTML = `
-            <div class="error-box">
-              Analytics events are unavailable to this
-              browser session. No replacement counters
-              are being generated.
-            </div>
-          `;
+          <div class="error">
 
-        }
+            Analytics events could not be read.
+
+            <br><br>
+
+            <strong>
+              ${escapeHTML(
+                errorMessage(
+                  result.error
+                )
+              )}
+            </strong>
+
+          </div>
+
+        `;
 
       }
     );
@@ -2471,18 +2557,16 @@ async function loadRecentAnalytics(){
 
   if(!result.data.length){
 
-    boxes.forEach(
-      box => {
+    targets.forEach(
+      element => {
 
-        if(box){
+        element.innerHTML = `
 
-          box.innerHTML = `
-            <div class="empty">
-              No analytics events recorded yet.
-            </div>
-          `;
+          <div class="empty">
+            No analytics events recorded yet.
+          </div>
 
-        }
+        `;
 
       }
     );
@@ -2493,85 +2577,74 @@ async function loadRecentAnalytics(){
 
 
   const html =
-    result.data
-      .map(
-        event => `
+    result.data.map(
+      row => `
 
-          <div class="event">
+        <div
+          style="
+            padding:11px 0;
+            border-bottom:1px solid var(--border);
+          "
+        >
 
-            <div class="event-time">
-              ${escapeHTML(
-                formatDate(
-                  event.created_at
+          <div
+            style="
+              font-size:12px;
+              font-weight:900;
+            "
+          >
+            ${escapeHTML(
+              row.event_type ||
+              "event"
+            )}
+          </div>
+
+          <div
+            style="
+              margin-top:4px;
+              color:var(--muted);
+              font-size:10px;
+            "
+          >
+
+            ${escapeHTML(
+              row.path ||
+              ""
+            )}
+
+            ${
+              row.session_id
+              ? " · " +
+                escapeHTML(
+                  row.session_id
                 )
-              )}
-            </div>
+              : ""
+            }
 
-            <div>
-
-              <div class="event-type">
-                ${escapeHTML(
-                  event.event_type ||
-                  "event"
-                )}
-              </div>
-
-              <div class="event-meta">
-
-                ${escapeHTML(
-                  event.path ||
-                  ""
-                )}
-
-                ${
-                  event.table_name
-                  ? " · " +
-                    escapeHTML(
-                      event.table_name
-                    )
-                  : ""
-                }
-
-                ${
-                  event.session_id
-                  ? " · " +
-                    escapeHTML(
-                      event.session_id
-                    )
-                  : ""
-                }
-
-              </div>
-
-              ${
-                event.metadata
-                ? `
-                  <div class="event-meta">
-                    ${escapeHTML(
-                      stringify(
-                        event.metadata
-                      )
-                    )}
-                  </div>
-                `
-                : ""
-              }
-
-            </div>
+            ${
+              row.created_at
+              ? " · " +
+                escapeHTML(
+                  date(
+                    row.created_at
+                  )
+                )
+              : ""
+            }
 
           </div>
 
-        `
-      )
-      .join("");
+        </div>
+
+      `
+    ).join("");
 
 
-  boxes.forEach(
-    box => {
+  targets.forEach(
+    element => {
 
-      if(box)
-        box.innerHTML =
-          html;
+      element.innerHTML =
+        html;
 
     }
   );
@@ -2580,15 +2653,13 @@ async function loadRecentAnalytics(){
 
 
 /* =========================================================
-   CURRENT VIEWERS
-   AUTHORITATIVE:
-   tv_active_viewers
+   ACTIVE VIEWERS
 ========================================================= */
 
 async function loadViewers(){
 
   const box =
-    $("channelViewers");
+    $("viewerList");
 
 
   const [
@@ -2597,19 +2668,18 @@ async function loadViewers(){
   ] =
     await Promise.all([
 
-      CRDB.select(
+      DB.select(
         "tv_active_viewers",
         {
-          columns:
-            "id,channel_id,user_id,session_id,visitor_id,started_at,last_seen_at,created_at,updated_at"
+          columns:"channel_id"
         }
       ),
 
-      CRDB.select(
+      DB.select(
         "tv_channels",
         {
           columns:
-            "id,name,is_active",
+            "id,name",
           eq:{
             is_active:true
           }
@@ -2622,37 +2692,23 @@ async function loadViewers(){
   if(!viewers.ok){
 
     box.innerHTML = `
-      <div class="error-box">
-        tv_active_viewers could not be read.
+
+      <div class="error">
+
+        <strong>
+          tv_active_viewers unavailable
+        </strong>
+
+        <br><br>
+
+        ${escapeHTML(
+          errorMessage(
+            viewers.error
+          )
+        )}
+
       </div>
-    `;
 
-    return;
-
-  }
-
-
-  setText(
-    "statActive",
-    number(
-      viewers.data.length
-    )
-  );
-
-  setText(
-    "analyticsActive",
-    number(
-      viewers.data.length
-    )
-  );
-
-
-  if(!viewers.data.length){
-
-    box.innerHTML = `
-      <div class="empty">
-        0 active viewers right now.
-      </div>
     `;
 
     return;
@@ -2665,7 +2721,7 @@ async function loadViewers(){
       channels.data.map(
         channel => [
           String(channel.id),
-          channel
+          channel.name
         ]
       )
     );
@@ -2676,12 +2732,13 @@ async function loadViewers(){
 
 
   viewers.data.forEach(
-    viewer => {
+    row => {
 
       const id =
         String(
-          viewer.channel_id
+          row.channel_id
         );
+
 
       counts.set(
         id,
@@ -2695,6 +2752,21 @@ async function loadViewers(){
   );
 
 
+  if(!counts.size){
+
+    box.innerHTML = `
+
+      <div class="empty">
+        0 active viewers right now.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
   box.innerHTML =
     [...counts.entries()]
       .sort(
@@ -2702,49 +2774,47 @@ async function loadViewers(){
           b[1] - a[1]
       )
       .map(
-        ([id,count]) => {
+        ([id,count]) => `
 
-          const channel =
-            channelMap.get(
-              id
-            );
+          <div class="viewer-row">
 
+            <div>
 
-          return `
-
-            <div class="channel">
-
-              <div>
-
-                <div class="channel-name">
-                  ${escapeHTML(
-                    channel?.name ||
-                    "Unknown Channel"
-                  )}
-                </div>
-
-                <div class="channel-id">
-                  ${escapeHTML(id)}
-                </div>
-
+              <div class="viewer-name">
+                ${escapeHTML(
+                  channelMap.get(id) ||
+                  "Unknown Channel"
+                )}
               </div>
 
-              <div class="viewer-count">
-                ${number(count)}
-                ${
-                  count === 1
-                  ? "viewer"
-                  : "viewers"
-                }
+              <div
+                style="
+                  color:var(--muted);
+                  font-size:8px;
+                  margin-top:3px;
+                "
+              >
+                ${escapeHTML(id)}
               </div>
 
             </div>
 
-          `;
+            <div class="viewer-number">
 
-        }
-      )
-      .join("");
+              ${fmt(count)}
+
+              ${
+                count === 1
+                ? "viewer"
+                : "viewers"
+              }
+
+            </div>
+
+          </div>
+
+        `
+      ).join("");
 
 }
 
@@ -2765,21 +2835,18 @@ async function loadChannels(){
   ] =
     await Promise.all([
 
-      CRDB.select(
+      DB.select(
         "tv_channels",
         {
           columns:"*",
           eq:{
             is_active:true
           },
-          order:{
-            column:"created_at",
-            ascending:false
-          }
+          limit:500
         }
       ),
 
-      CRDB.select(
+      DB.select(
         "tv_active_viewers",
         {
           columns:"channel_id"
@@ -2792,9 +2859,21 @@ async function loadChannels(){
   if(!channels.ok){
 
     box.innerHTML = `
-      <div class="error-box">
+
+      <div class="error">
+
         tv_channels could not be read.
+
+        <br><br>
+
+        ${escapeHTML(
+          errorMessage(
+            channels.error
+          )
+        )}
+
       </div>
+
     `;
 
     return;
@@ -2802,17 +2881,12 @@ async function loadChannels(){
   }
 
 
-  if(!channels.data.length){
-
-    box.innerHTML = `
-      <div class="empty">
-        No active TV channels.
-      </div>
-    `;
-
-    return;
-
-  }
+  text(
+    "statChannels",
+    fmt(
+      channels.data.length
+    )
+  );
 
 
   const counts = {};
@@ -2821,11 +2895,11 @@ async function loadChannels(){
   if(viewers.ok){
 
     viewers.data.forEach(
-      viewer => {
+      row => {
 
         const id =
           String(
-            viewer.channel_id
+            row.channel_id
           );
 
         counts[id] =
@@ -2840,6 +2914,21 @@ async function loadChannels(){
   }
 
 
+  if(!channels.data.length){
+
+    box.innerHTML = `
+
+      <div class="empty">
+        No active TV channels.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
   box.innerHTML = `
 
     <table>
@@ -2847,11 +2936,13 @@ async function loadChannels(){
       <thead>
 
         <tr>
+
           <th>Channel</th>
           <th>Status</th>
           <th>Current Viewers</th>
           <th>Accumulated Views</th>
           <th>ID</th>
+
         </tr>
 
       </thead>
@@ -2876,7 +2967,7 @@ async function loadChannels(){
                     ${escapeHTML(
                       channel.name ||
                       channel.title ||
-                      "Unnamed Channel"
+                      "Unnamed"
                     )}
                   </strong>
                 </td>
@@ -2889,15 +2980,16 @@ async function loadChannels(){
 
                 <td>
                   <strong>
-                    ${number(
+                    ${fmt(
                       counts[id] || 0
                     )}
                   </strong>
                 </td>
 
                 <td>
-                  ${number(
-                    channel.views || 0
+                  ${fmt(
+                    channel.views ||
+                    0
                   )}
                 </td>
 
@@ -2922,490 +3014,213 @@ async function loadChannels(){
 
 
 /* =========================================================
-   CONTENT STATISTICS
-========================================================= */
-
-async function loadContentStats(){
-
-  const box =
-    $("contentList");
-
-
-  const result =
-    await CRDB.select(
-      "content_view_stats",
-      {
-        columns:
-          "content_id,content_type,total_views,unique_users,unique_sessions,total_watch_seconds,average_watch_seconds,completed_views,first_viewed_at,last_viewed_at",
-        order:{
-          column:"last_viewed_at",
-          ascending:false
-        },
-        limit:200
-      }
-    );
-
-
-  if(!result.ok){
-
-    box.innerHTML = `
-      <div class="error-box">
-        content_view_stats could not be read.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  let totalViews = 0;
-  let users = 0;
-  let sessions = 0;
-  let seconds = 0;
-  let completed = 0;
-
-
-  result.data.forEach(
-    row => {
-
-      totalViews +=
-        Number(
-          row.total_views || 0
-        );
-
-      users +=
-        Number(
-          row.unique_users || 0
-        );
-
-      sessions +=
-        Number(
-          row.unique_sessions || 0
-        );
-
-      seconds +=
-        Number(
-          row.total_watch_seconds || 0
-        );
-
-      completed +=
-        Number(
-          row.completed_views || 0
-        );
-
-    }
-  );
-
-
-  setText(
-    "contentTotalViews",
-    number(totalViews)
-  );
-
-  setText(
-    "contentUniqueUsers",
-    number(users)
-  );
-
-  setText(
-    "contentUniqueSessions",
-    number(sessions)
-  );
-
-  setText(
-    "contentWatchSeconds",
-    number(seconds)
-  );
-
-  setText(
-    "contentCompleted",
-    number(completed)
-  );
-
-
-  if(!result.data.length){
-
-    box.innerHTML = `
-      <div class="empty">
-
-        <div style="
-          font-size:27px;
-          font-weight:950;
-        ">
-          0
-        </div>
-
-        <div>
-          No content views have been recorded yet.
-        </div>
-
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  box.innerHTML = `
-
-    <table>
-
-      <thead>
-
-        <tr>
-          <th>Content</th>
-          <th>Type</th>
-          <th>Views</th>
-          <th>Users</th>
-          <th>Sessions</th>
-          <th>Watch</th>
-          <th>Average</th>
-          <th>Completed</th>
-          <th>Last Viewed</th>
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        ${result.data.map(
-          row => `
-
-            <tr>
-
-              <td>
-                ${escapeHTML(
-                  row.content_id
-                )}
-              </td>
-
-              <td>
-                ${escapeHTML(
-                  row.content_type ||
-                  "—"
-                )}
-              </td>
-
-              <td>
-                <strong>
-                  ${number(
-                    row.total_views
-                  )}
-                </strong>
-              </td>
-
-              <td>
-                ${number(
-                  row.unique_users
-                )}
-              </td>
-
-              <td>
-                ${number(
-                  row.unique_sessions
-                )}
-              </td>
-
-              <td>
-                ${number(
-                  row.total_watch_seconds
-                )} sec
-              </td>
-
-              <td>
-                ${number(
-                  Math.round(
-                    Number(
-                      row.average_watch_seconds ||
-                      0
-                    )
-                  )
-                )} sec
-              </td>
-
-              <td>
-                ${number(
-                  row.completed_views
-                )}
-              </td>
-
-              <td>
-                ${escapeHTML(
-                  formatDate(
-                    row.last_viewed_at
-                  )
-                )}
-              </td>
-
-            </tr>
-
-          `
-        ).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/* =========================================================
-   RAW CONTENT VIEWS
-========================================================= */
-
-async function loadRawContentViews(){
-
-  const box =
-    $("rawContentViews");
-
-
-  const result =
-    await CRDB.select(
-      "content_views",
-      {
-        columns:
-          "id,content_id,content_type,user_id,session_id,referrer,watch_seconds,completed,viewed_at,created_at",
-        order:{
-          column:"viewed_at",
-          ascending:false
-        },
-        limit:200
-      }
-    );
-
-
-  if(!result.ok){
-
-    box.innerHTML = `
-      <div class="error-box">
-        content_views could not be read.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  if(!result.data.length){
-
-    box.innerHTML = `
-      <div class="empty">
-        No raw content-view records exist yet.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  box.innerHTML = `
-
-    <table>
-
-      <thead>
-
-        <tr>
-          <th>Content</th>
-          <th>Type</th>
-          <th>User</th>
-          <th>Session</th>
-          <th>Watch</th>
-          <th>Completed</th>
-          <th>Viewed</th>
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        ${result.data.map(
-          row => `
-
-            <tr>
-
-              <td>
-                ${escapeHTML(
-                  row.content_id
-                )}
-              </td>
-
-              <td>
-                ${escapeHTML(
-                  row.content_type ||
-                  "—"
-                )}
-              </td>
-
-              <td>
-                ${escapeHTML(
-                  row.user_id ||
-                  "Anonymous"
-                )}
-              </td>
-
-              <td>
-                ${escapeHTML(
-                  row.session_id ||
-                  "—"
-                )}
-              </td>
-
-              <td>
-                ${number(
-                  row.watch_seconds ||
-                  0
-                )} sec
-              </td>
-
-              <td>
-
-                ${
-                  row.completed
-                  ? `
-                    <span class="badge good">
-                      YES
-                    </span>
-                  `
-                  : `
-                    <span class="badge">
-                      NO
-                    </span>
-                  `
-                }
-
-              </td>
-
-              <td>
-                ${escapeHTML(
-                  formatDate(
-                    row.viewed_at ||
-                    row.created_at
-                  )
-                )}
-              </td>
-
-            </tr>
-
-          `
-        ).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/* =========================================================
-   CONTENT MASTER
+   CONTENT
 ========================================================= */
 
 async function loadContent(){
 
-  await Promise.all([
+  const [
+    stats,
+    raw
+  ] =
+    await Promise.all([
 
-    loadContentStats(),
+      DB.select(
+        "content_view_stats",
+        {
+          columns:"*",
+          limit:500
+        }
+      ),
 
-    loadRawContentViews()
+      DB.select(
+        "content_views",
+        {
+          columns:"*",
+          order:{
+            column:"created_at",
+            ascending:false
+          },
+          limit:100
+        }
+      )
 
-  ]);
+    ]);
+
+
+  if(stats.ok){
+
+    let views = 0;
+    let users = 0;
+    let sessions = 0;
+    let seconds = 0;
+    let completed = 0;
+
+
+    stats.data.forEach(
+      row => {
+
+        views +=
+          Number(
+            row.total_views || 0
+          );
+
+        users +=
+          Number(
+            row.unique_users || 0
+          );
+
+        sessions +=
+          Number(
+            row.unique_sessions || 0
+          );
+
+        seconds +=
+          Number(
+            row.total_watch_seconds || 0
+          );
+
+        completed +=
+          Number(
+            row.completed_views || 0
+          );
+
+      }
+    );
+
+
+    text(
+      "contentViews",
+      fmt(views)
+    );
+
+    text(
+      "contentUsers",
+      fmt(users)
+    );
+
+    text(
+      "contentSessions",
+      fmt(sessions)
+    );
+
+    text(
+      "contentSeconds",
+      fmt(seconds)
+    );
+
+    text(
+      "contentCompleted",
+      fmt(completed)
+    );
+
+
+    $("contentStatsList")
+      .innerHTML =
+        makeTable(
+          stats.data,
+          [
+            "content_id",
+            "content_type",
+            "total_views",
+            "unique_users",
+            "unique_sessions",
+            "total_watch_seconds",
+            "completed_views",
+            "last_viewed_at"
+          ]
+        );
+
+  }else{
+
+    $("contentStatsList")
+      .innerHTML = `
+
+        <div class="error">
+
+          content_view_stats unavailable.
+
+          <br><br>
+
+          ${escapeHTML(
+            errorMessage(
+              stats.error
+            )
+          )}
+
+        </div>
+
+      `;
+
+  }
+
+
+  if(raw.ok){
+
+    $("rawViewsList")
+      .innerHTML =
+        makeTable(
+          raw.data,
+          [
+            "content_id",
+            "content_type",
+            "user_id",
+            "session_id",
+            "watch_seconds",
+            "completed",
+            "created_at"
+          ]
+        );
+
+  }else{
+
+    $("rawViewsList")
+      .innerHTML = `
+
+        <div class="error">
+
+          content_views unavailable.
+
+          <br><br>
+
+          ${escapeHTML(
+            errorMessage(
+              raw.error
+            )
+          )}
+
+        </div>
+
+      `;
+
+  }
 
 }
 
 
 /* =========================================================
-   GENERIC TABLE LOADER
+   GENERIC TABLE
 ========================================================= */
 
-async function loadGenericTable(
-  table,
-  elementId,
-  options={}
+function makeTable(
+  rows,
+  columns
 ){
 
-  const box =
-    $(elementId);
+  if(!rows.length){
 
+    return `
 
-  if(!box)
-    return;
-
-
-  box.innerHTML = `
-    <div class="empty">
-      Loading ${escapeHTML(table)}...
-    </div>
-  `;
-
-
-  const result =
-    await CRDB.select(
-      table,
-      {
-        columns:
-          options.columns ||
-          "*",
-        order:
-          options.order ||
-          {
-            column:
-              options.orderColumn ||
-              "created_at",
-            ascending:false
-          },
-        limit:
-          options.limit ||
-          200
-      }
-    );
-
-
-  if(!result.ok){
-
-    box.innerHTML = `
       <div class="empty">
-        ${escapeHTML(table)}
-        is unavailable to this session.
+        No records found.
       </div>
-    `;
 
-    return;
+    `;
 
   }
 
 
-  if(!result.data.length){
-
-    box.innerHTML = `
-      <div class="empty">
-        No records in
-        <strong>
-          ${escapeHTML(table)}
-        </strong>.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const columns =
-    options.displayColumns ||
-    Object.keys(
-      result.data[0]
-    ).slice(0,10);
-
-
-  box.innerHTML = `
+  return `
 
     <table>
 
@@ -3426,7 +3241,7 @@ async function loadGenericTable(
 
       <tbody>
 
-        ${result.data.map(
+        ${rows.map(
           row => `
 
             <tr>
@@ -3441,12 +3256,11 @@ async function loadGenericTable(
                   if(
                     column.endsWith(
                       "_at"
-                    ) &&
-                    value
+                    )
                   ){
 
                     value =
-                      formatDate(
+                      date(
                         value
                       );
 
@@ -3460,20 +3274,20 @@ async function loadGenericTable(
                   ){
 
                     value =
-                      stringify(
-                        value
-                      );
+                      json(value);
 
                   }
 
 
                   return `
+
                     <td>
                       ${escapeHTML(
                         value ??
                         "—"
                       )}
                     </td>
+
                   `;
 
                 }
@@ -3494,6 +3308,101 @@ async function loadGenericTable(
 
 
 /* =========================================================
+   GENERIC DATABASE VIEW
+========================================================= */
+
+async function loadGeneric(
+  table,
+  elementId
+){
+
+  const box =
+    $(elementId);
+
+
+  box.innerHTML = `
+
+    <div class="empty">
+      Loading ${escapeHTML(table)}...
+    </div>
+
+  `;
+
+
+  const result =
+    await DB.select(
+      table,
+      {
+        columns:"*",
+        order:{
+          column:"created_at",
+          ascending:false
+        },
+        limit:200
+      }
+    );
+
+
+  if(!result.ok){
+
+    box.innerHTML = `
+
+      <div class="error">
+
+        ${escapeHTML(table)}
+        is unavailable.
+
+        <br><br>
+
+        ${escapeHTML(
+          errorMessage(
+            result.error
+          )
+        )}
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  if(!result.data.length){
+
+    box.innerHTML = `
+
+      <div class="empty">
+        No records in
+        <strong>
+          ${escapeHTML(table)}
+        </strong>.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  const columns =
+    Object.keys(
+      result.data[0]
+    ).slice(0,12);
+
+
+  box.innerHTML =
+    makeTable(
+      result.data,
+      columns
+    );
+
+}
+
+
+/* =========================================================
    MEMBERS
 ========================================================= */
 
@@ -3507,87 +3416,78 @@ async function loadMembers(){
   ] =
     await Promise.all([
 
-      CRDB.count(
+      DB.count(
         "member_profiles"
       ),
 
-      CRDB.count(
+      DB.count(
         "member_points"
       ),
 
-      CRDB.count(
+      DB.count(
         "member_activity"
       ),
 
-      CRDB.count(
+      DB.count(
         "member_watch_history"
       )
 
     ]);
 
 
-  setText(
-    "memberProfileCount",
-    number(
+  text(
+    "memberProfiles",
+    fmt(
       profiles.count
     )
   );
 
-  setText(
-    "memberPointsCount",
-    number(
+  text(
+    "memberPoints",
+    fmt(
       points.count
     )
   );
 
-  setText(
-    "memberActivityCount",
-    number(
+  text(
+    "memberActivity",
+    fmt(
       activity.count
     )
   );
 
-  setText(
-    "memberHistoryCount",
-    number(
+  text(
+    "memberHistory",
+    fmt(
       history.count
     )
   );
 
 
-  await loadGenericTable(
+  await loadGeneric(
     "member_profiles",
-    "membersList",
-    {
-      limit:200
-    }
+    "membersList"
   );
 
 }
 
 
 /* =========================================================
-   MEMBER REWARDS
+   REWARDS
 ========================================================= */
 
 async function loadRewards(){
 
   await Promise.all([
 
-    loadGenericTable(
+    loadGeneric(
       "member_points",
-      "pointsList",
-      {
-        limit:200
-      }
+      "pointsList"
     ),
 
-    loadGenericTable(
+    loadGeneric(
       "crowrules_member_watch_minutes",
-      "watchMinutesList",
-      {
-        limit:200
-      }
+      "minutesList"
     )
 
   ]);
@@ -3603,39 +3503,199 @@ async function loadCommunity(){
 
   await Promise.all([
 
-    loadGenericTable(
+    loadGeneric(
       "chat_rooms",
-      "chatRoomsList",
-      {
-        limit:100
-      }
+      "chatRooms"
     ),
 
-    loadGenericTable(
+    loadGeneric(
       "polls",
-      "pollsList",
-      {
-        limit:100
-      }
+      "polls"
     ),
 
-    loadGenericTable(
+    loadGeneric(
       "newsletter_subscribers",
-      "newsletterList",
-      {
-        limit:100
-      }
+      "newsletter"
     ),
 
-    loadGenericTable(
+    loadGeneric(
       "creator_applications",
-      "creatorApplicationsList",
-      {
-        limit:100
-      }
+      "creatorApplications"
     )
 
   ]);
+
+}
+
+
+/* =========================================================
+   DATABASE DIAGNOSTICS
+========================================================= */
+
+const TABLES = [
+
+  "tv_channels",
+  "schedule_items",
+  "tv_active_viewers",
+
+  "content_views",
+  "content_view_stats",
+  "analytics_events",
+
+  "member_profiles",
+  "member_points",
+  "member_point_transactions",
+  "member_stats",
+  "crowrules_member_watch_minutes",
+  "member_watch_history",
+  "member_activity",
+
+  "shows",
+  "episodes",
+  "live_events",
+
+  "chat_rooms",
+  "chat_messages",
+  "polls",
+
+  "newsletter_subscribers",
+  "creator_applications",
+  "crow_nest_creators",
+
+  "memberships",
+  "content_likes",
+  "watch_progress",
+  "member_friends",
+  "member_favorite_channels",
+  "chat_reports"
+
+];
+
+
+async function runDiagnostics(){
+
+  const box =
+    $("diagnostics");
+
+
+  box.innerHTML = `
+
+    <div class="empty">
+      Testing Supabase...
+    </div>
+
+  `;
+
+
+  if(!configIsReady()){
+
+    box.innerHTML = `
+
+      <div class="error">
+
+        <strong>
+          Supabase key is not configured.
+        </strong>
+
+        <br><br>
+
+        Replace:
+
+        <br>
+
+        <code>
+          PASTE_CURRENT_SUPABASE_PUBLISHABLE_KEY_HERE
+        </code>
+
+        <br><br>
+
+        with the current Supabase Publishable key.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  const results = [];
+
+
+  for(
+    const table of TABLES
+  ){
+
+    const result =
+      await DB.select(
+        table,
+        {
+          columns:"*",
+          limit:1
+        }
+      );
+
+
+    results.push({
+
+      table,
+
+      ok:
+        result.ok,
+
+      message:
+        result.ok
+        ? "Accessible"
+        : errorMessage(
+            result.error
+          )
+
+    });
+
+  }
+
+
+  box.innerHTML =
+    results.map(
+      result => `
+
+        <div class="diagnostic">
+
+          <strong>
+            ${escapeHTML(
+              result.table
+            )}
+          </strong>
+
+          <div class="diagnostic-message">
+
+            ${escapeHTML(
+              result.message
+            )}
+
+          </div>
+
+          ${
+            result.ok
+
+            ? `
+              <span class="badge good">
+                ONLINE
+              </span>
+            `
+
+            : `
+              <span class="badge bad">
+                ERROR
+              </span>
+            `
+          }
+
+        </div>
+
+      `
+    ).join("");
 
 }
 
@@ -3678,6 +3738,9 @@ const TITLES = {
 
   community:
     "Community",
+
+  diagnostics:
+    "Database Diagnostics",
 
   pages:
     "CrowRules Pages"
@@ -3723,7 +3786,7 @@ async function openSection(
     );
 
 
-  setText(
+  text(
     "pageTitle",
     TITLES[name] ||
     "Admin Pro"
@@ -3732,56 +3795,103 @@ async function openSection(
 
   switch(name){
 
-    case "analytics":
-      await loadAnalytics();
+    case "dashboard":
+
+      await Promise.all([
+        loadAnalytics(),
+        loadViewers(),
+        loadChannels()
+      ]);
+
       break;
+
+
+    case "analytics":
+
+      await loadAnalytics();
+
+      break;
+
 
     case "channels":
+
       await loadChannels();
+
       break;
 
+
     case "schedule":
-      await loadGenericTable(
+
+      await loadGeneric(
         "schedule_items",
         "scheduleList"
       );
+
       break;
 
+
     case "shows":
-      await loadGenericTable(
+
+      await loadGeneric(
         "shows",
         "showsList"
       );
+
       break;
 
+
     case "episodes":
-      await loadGenericTable(
+
+      await loadGeneric(
         "episodes",
         "episodesList"
       );
+
       break;
+
 
     case "members":
+
       await loadMembers();
+
       break;
+
 
     case "rewards":
+
       await loadRewards();
+
       break;
 
+
     case "events":
-      await loadGenericTable(
+
+      await loadGeneric(
         "live_events",
         "eventsList"
       );
+
       break;
+
 
     case "content":
+
       await loadContent();
+
       break;
 
+
     case "community":
+
       await loadCommunity();
+
+      break;
+
+
+    case "diagnostics":
+
+      await runDiagnostics();
+
       break;
 
   }
@@ -3816,14 +3926,14 @@ document
    REFRESH BUTTONS
 ========================================================= */
 
-$("refreshRecent")
+$("refreshAnalytics")
   .addEventListener(
     "click",
-    loadRecentAnalytics
+    loadAnalytics
   );
 
 
-$("refreshAnalytics")
+$("refreshAnalytics2")
   .addEventListener(
     "click",
     loadAnalytics
@@ -3848,93 +3958,20 @@ $("refreshSchedule")
   .addEventListener(
     "click",
     () =>
-      loadGenericTable(
+      loadGeneric(
         "schedule_items",
         "scheduleList"
       )
   );
 
 
-$("refreshShows")
-  .addEventListener(
-    "click",
-    () =>
-      loadGenericTable(
-        "shows",
-        "showsList"
-      )
-  );
-
-
-$("refreshEpisodes")
-  .addEventListener(
-    "click",
-    () =>
-      loadGenericTable(
-        "episodes",
-        "episodesList"
-      )
-  );
-
-
-$("refreshMembers")
-  .addEventListener(
-    "click",
-    loadMembers
-  );
-
-
-$("refreshEvents")
-  .addEventListener(
-    "click",
-    () =>
-      loadGenericTable(
-        "live_events",
-        "eventsList"
-      )
-  );
-
-
-$("refreshContent")
-  .addEventListener(
-    "click",
-    loadContent
-  );
-
-
 /* =========================================================
-   INITIAL LOAD
-========================================================= */
-
-async function boot(){
-
-  await testConnection();
-
-  /*
-    Dashboard intentionally loads only the important
-    live/database-backed information initially.
-  */
-
-  await Promise.all([
-
-    loadAnalytics(),
-
-    loadViewers(),
-
-    loadContent()
-
-  ]);
-
-}
-
-
-/* =========================================================
-   LIVE VIEWER REFRESH
+   REAL-TIME VIEWER REFRESH
 ========================================================= */
 
 setInterval(
   loadViewers,
-  30000
+  CONFIG.VIEWER_REFRESH_MS
 );
 
 
@@ -3944,8 +3981,95 @@ setInterval(
 
 setInterval(
   loadAnalytics,
-  60000
+  CONFIG.ANALYTICS_REFRESH_MS
 );
+
+
+/* =========================================================
+   BOOT
+========================================================= */
+
+async function boot(){
+
+  if(!configIsReady()){
+
+    setConnection(
+      "warning",
+      "Add current Supabase key"
+    );
+
+
+    $("recentAnalytics")
+      .innerHTML = `
+
+        <div class="error">
+
+          <strong>
+            Supabase is not configured yet.
+          </strong>
+
+          <br><br>
+
+          Open this file and replace the
+          <code>SUPABASE_KEY</code> value with your
+          current Supabase Publishable key.
+
+          <br><br>
+
+          Do not put a service-role/secret key in this file.
+
+        </div>
+
+      `;
+
+    return;
+
+  }
+
+
+  const connected =
+    await testConnection();
+
+
+  if(!connected){
+
+    $("recentAnalytics")
+      .innerHTML = `
+
+        <div class="error">
+
+          <strong>
+            Supabase browser connection failed.
+          </strong>
+
+          <br><br>
+
+          Open
+          <strong>
+            Database Diagnostics
+          </strong>
+          to see the exact error returned by Supabase.
+
+        </div>
+
+      `;
+
+    return;
+
+  }
+
+
+  await Promise.all([
+
+    loadAnalytics(),
+
+    loadViewers(),
+
+    loadChannels()
+
+  ]);
+
+}
 
 
 /* =========================================================
