@@ -7,33 +7,33 @@
 <meta name="theme-color" content="#050507">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
-<title>CrowRules Entertainment — Admin Pro</title>
+<title>CrowRules Entertainment - Admin Pro v1.0</title>
 
-<meta
-name="description"
-content="CrowRules Entertainment Admin Pro — centralized Supabase administration, TV analytics, viewer statistics, content, members, schedule and network management."
-
->
+<meta name="description"
+content="CrowRules Entertainment Admin Pro — network administration, live viewers, TV channels, schedule, members, content, analytics and Supabase database monitoring.">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
   --bg:#050507;
+  --bg2:#08080c;
   --panel:#0d0d12;
   --panel2:#111119;
   --panel3:#171720;
   --line:#292934;
-  --text:#f4f4f7;
-  --muted:#9b9ba8;
-  --accent:#8b5cf6;
-  --accent2:#22d3ee;
+  --line2:#383844;
+  --text:#f5f5f7;
+  --muted:#9999a7;
+  --muted2:#6e6e7c;
+  --purple:#8b5cf6;
+  --cyan:#22d3ee;
   --green:#22c55e;
   --yellow:#f59e0b;
   --red:#ef4444;
   --blue:#3b82f6;
-  --shadow:0 18px 55px rgba(0,0,0,.35);
   --radius:18px;
+  --shadow:0 18px 60px rgba(0,0,0,.34);
 }
 
 *{
@@ -47,8 +47,8 @@ html{
 body{
   margin:0;
   background:
-    radial-gradient(circle at 10% 0%,rgba(139,92,246,.12),transparent 30%),
-    radial-gradient(circle at 90% 10%,rgba(34,211,238,.08),transparent 30%),
+    radial-gradient(circle at 5% 0%,rgba(139,92,246,.13),transparent 28%),
+    radial-gradient(circle at 95% 5%,rgba(34,211,238,.08),transparent 25%),
     var(--bg);
   color:var(--text);
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -69,82 +69,93 @@ a{
   text-decoration:none;
 }
 
+.hidden{
+  display:none!important;
+}
+
+.muted{
+  color:var(--muted);
+}
+
 /* =========================================================
-   LAYOUT
+   APP
 ========================================================= */
 
 .app{
   min-height:100vh;
   display:grid;
-  grid-template-columns:260px 1fr;
+  grid-template-columns:260px minmax(0,1fr);
 }
 
 .sidebar{
   position:fixed;
   inset:0 auto 0 0;
   width:260px;
-  background:rgba(7,7,10,.96);
-  border-right:1px solid var(--line);
-  padding:20px 14px;
-  overflow:auto;
   z-index:100;
+  overflow:auto;
+  padding:18px 13px;
+  background:rgba(7,7,10,.97);
+  border-right:1px solid var(--line);
 }
 
 .brand{
-  padding:10px 12px 20px;
+  padding:12px;
+  margin-bottom:14px;
   border-bottom:1px solid var(--line);
-  margin-bottom:15px;
 }
 
-.brand strong{
-  display:block;
-  font-size:20px;
-  letter-spacing:.5px;
+.brand-main{
+  font-size:21px;
+  font-weight:900;
+  letter-spacing:.4px;
 }
 
-.brand span{
+.brand-sub{
   color:var(--muted);
-  font-size:12px;
+  margin-top:4px;
+  font-size:11px;
 }
 
 .nav-title{
-  color:#666674;
-  font-size:10px;
-  font-weight:800;
+  padding:13px 12px 7px;
+  color:#686875;
+  font-size:9px;
+  font-weight:900;
   text-transform:uppercase;
   letter-spacing:1.5px;
-  padding:12px;
 }
 
 .nav{
   display:flex;
   flex-direction:column;
-  gap:4px;
+  gap:3px;
 }
 
 .nav button,
 .nav a{
+  width:100%;
   border:0;
   background:transparent;
-  color:#b8b8c4;
-  padding:11px 12px;
-  border-radius:11px;
+  color:#bdbdc7;
+  padding:10px 12px;
+  border-radius:10px;
   text-align:left;
   display:flex;
   align-items:center;
   gap:10px;
+  font-size:12px;
   transition:.18s ease;
 }
 
 .nav button:hover,
-.nav a:hover,
-.nav button.active{
-  background:#171720;
+.nav button.active,
+.nav a:hover{
   color:#fff;
+  background:#17171f;
 }
 
-.nav .live{
-  color:#ff6666;
+.nav .danger-link{
+  color:#ff7777;
 }
 
 .main{
@@ -156,14 +167,15 @@ a{
   position:sticky;
   top:0;
   z-index:90;
-  height:72px;
+  min-height:72px;
+  padding:0 25px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:0 26px;
-  border-bottom:1px solid var(--line);
-  background:rgba(5,5,7,.88);
+  gap:20px;
+  background:rgba(5,5,7,.9);
   backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
 }
 
 .top-left{
@@ -172,223 +184,294 @@ a{
   gap:12px;
 }
 
-.menu{
+.menu-btn{
   display:none;
 }
 
 .page-title{
   font-size:19px;
-  font-weight:800;
+  font-weight:900;
 }
 
-.status{
+.connection{
+  margin-top:3px;
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:7px;
   color:var(--muted);
-  font-size:12px;
+  font-size:11px;
 }
 
-.status-dot{
-  width:9px;
-  height:9px;
+.connection-dot{
+  width:8px;
+  height:8px;
   border-radius:50%;
   background:var(--red);
 }
 
-.status-dot.online{
+.connection-dot.online{
   background:var(--green);
-  box-shadow:0 0 14px rgba(34,197,94,.65);
+  box-shadow:0 0 13px rgba(34,197,94,.7);
 }
 
 .top-actions{
   display:flex;
-  gap:8px;
-}
-
-.btn{
-  border:1px solid var(--line);
-  background:var(--panel2);
-  color:#fff;
-  border-radius:10px;
-  padding:9px 13px;
-}
-
-.btn:hover{
-  border-color:#484856;
-  background:#191921;
-}
-
-.btn.primary{
-  background:var(--accent);
-  border-color:var(--accent);
-}
-
-.btn.danger{
-  color:#fff;
-  border-color:rgba(239,68,68,.4);
+  align-items:center;
+  gap:7px;
 }
 
 .content{
-  padding:25px;
-  max-width:1800px;
+  width:100%;
+  max-width:1850px;
   margin:auto;
+  padding:25px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:9px 13px;
+  background:var(--panel2);
+  color:#fff;
+  font-size:12px;
+}
+
+.btn:hover{
+  background:#1a1a22;
+  border-color:var(--line2);
+}
+
+.btn.primary{
+  background:var(--purple);
+  border-color:var(--purple);
+}
+
+.btn.primary:hover{
+  background:#7c4fe0;
+}
+
+.btn.small{
+  padding:7px 9px;
+  font-size:10px;
 }
 
 /* =========================================================
    CARDS
 ========================================================= */
 
-.grid{
-  display:grid;
-  gap:16px;
-}
-
-.stats-grid{
-  grid-template-columns:repeat(6,minmax(0,1fr));
-}
-
 .card{
-  background:linear-gradient(180deg,rgba(18,18,25,.96),rgba(10,10,14,.96));
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18,18,25,.97),
+      rgba(10,10,14,.97)
+    );
   border:1px solid var(--line);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
 
-.stat{
-  padding:18px;
-}
-
-.stat-label{
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:8px;
-}
-
-.stat-value{
-  font-size:29px;
-  font-weight:900;
-  letter-spacing:-1px;
-}
-
-.stat-sub{
-  margin-top:7px;
-  color:#777783;
-  font-size:11px;
-}
-
 .section{
-  margin-top:20px;
+  margin-top:22px;
 }
 
 .section-head{
+  margin-bottom:12px;
   display:flex;
-  align-items:center;
+  align-items:flex-end;
   justify-content:space-between;
   gap:15px;
-  margin-bottom:12px;
 }
 
-.section-head h2{
+.section-title{
   margin:0;
   font-size:18px;
+  font-weight:900;
 }
 
-.section-head p{
-  margin:3px 0 0;
+.section-description{
+  margin:4px 0 0;
   color:var(--muted);
-  font-size:12px;
+  font-size:11px;
 }
 
 .section-actions{
   display:flex;
-  gap:8px;
+  gap:7px;
   flex-wrap:wrap;
 }
 
 /* =========================================================
-   VIEWER CARDS
+   STATS
 ========================================================= */
 
-.viewer-grid{
+.stats-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-  gap:12px;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:13px;
 }
 
-.channel-card{
-  position:relative;
-  padding:16px;
-  overflow:hidden;
+.stat{
+  padding:17px;
+  min-width:0;
 }
 
-.channel-card::after{
-  content:"";
-  position:absolute;
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  background:rgba(139,92,246,.09);
-  right:-35px;
-  top:-35px;
-}
-
-.channel-top{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  position:relative;
-  z-index:1;
-}
-
-.channel-number{
+.stat-label{
   color:var(--muted);
   font-size:11px;
 }
 
-.channel-name{
-  font-weight:800;
-  margin-top:4px;
+.stat-value{
+  margin-top:7px;
+  font-size:28px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1px;
 }
 
-.live-count{
-  font-size:27px;
-  font-weight:900;
-  color:#fff;
-}
-
-.live-label{
-  color:var(--green);
+.stat-sub{
+  margin-top:8px;
+  color:var(--muted2);
   font-size:10px;
-  font-weight:800;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:4px 8px;
+  background:#18181f;
+  color:#bdbdc8;
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.badge.green{
+  color:#70f098;
+  border-color:rgba(34,197,94,.22);
+  background:rgba(34,197,94,.08);
+}
+
+.badge.red{
+  color:#ff8585;
+  border-color:rgba(239,68,68,.25);
+  background:rgba(239,68,68,.08);
+}
+
+.badge.yellow{
+  color:#ffd075;
+  border-color:rgba(245,158,11,.25);
+  background:rgba(245,158,11,.08);
+}
+
+.badge.blue{
+  color:#7db3ff;
+  border-color:rgba(59,130,246,.25);
+  background:rgba(59,130,246,.08);
+}
+
+/* =========================================================
+   VIEWERS
+========================================================= */
+
+.viewer-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(245px,1fr));
+  gap:12px;
+}
+
+.viewer-card{
+  position:relative;
+  overflow:hidden;
+  padding:16px;
+}
+
+.viewer-card::after{
+  content:"";
+  position:absolute;
+  right:-35px;
+  top:-35px;
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  background:rgba(139,92,246,.08);
+}
+
+.viewer-card-top{
+  position:relative;
+  z-index:1;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.channel-number{
+  color:var(--muted2);
+  font-size:10px;
+}
+
+.channel-name{
+  margin-top:4px;
+  font-size:14px;
+  font-weight:900;
+}
+
+.viewer-number{
+  text-align:right;
+  font-size:28px;
+  line-height:1;
+  font-weight:950;
+}
+
+.viewer-caption{
+  color:var(--green);
+  margin-top:4px;
+  font-size:8px;
+  font-weight:900;
   text-transform:uppercase;
   letter-spacing:1px;
 }
 
 .viewer-meta{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:10px;
-}
-
-.bar{
-  height:5px;
-  background:#24242d;
-  border-radius:99px;
-  overflow:hidden;
   margin-top:12px;
+  color:var(--muted);
+  font-size:10px;
 }
 
-.bar span{
+.viewer-bar{
+  height:4px;
+  margin-top:11px;
+  overflow:hidden;
+  border-radius:99px;
+  background:#24242c;
+}
+
+.viewer-bar span{
   display:block;
   height:100%;
-  width:0%;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  width:0;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
 }
 
 /* =========================================================
-   TABLE
+   TABLES
 ========================================================= */
+
+.table-card{
+  overflow:hidden;
+}
 
 .table-wrap{
   overflow:auto;
@@ -396,58 +479,32 @@ a{
 
 table{
   width:100%;
+  min-width:720px;
   border-collapse:collapse;
-  min-width:700px;
 }
 
 th,
 td{
-  text-align:left;
   padding:12px 14px;
-  border-bottom:1px solid #22222b;
-  font-size:12px;
+  text-align:left;
+  border-bottom:1px solid #22222a;
+  font-size:11px;
 }
 
 th{
-  color:#888895;
-  font-size:10px;
+  color:#777784;
+  font-size:9px;
+  font-weight:900;
   text-transform:uppercase;
   letter-spacing:1px;
 }
 
 td{
-  color:#d7d7df;
+  color:#d8d8df;
 }
 
 tr:hover td{
   background:rgba(255,255,255,.015);
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:5px;
-  padding:5px 8px;
-  border-radius:999px;
-  background:#1a1a22;
-  color:#bdbdc7;
-  font-size:10px;
-  font-weight:800;
-}
-
-.badge.green{
-  color:#74f29b;
-  background:rgba(34,197,94,.09);
-}
-
-.badge.red{
-  color:#ff7d7d;
-  background:rgba(239,68,68,.09);
-}
-
-.badge.yellow{
-  color:#ffc867;
-  background:rgba(245,158,11,.09);
 }
 
 /* =========================================================
@@ -456,92 +513,65 @@ tr:hover td{
 
 .db-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-  gap:12px;
+  grid-template-columns:repeat(auto-fill,minmax(245px,1fr));
+  gap:11px;
 }
 
 .db-card{
-  padding:15px;
+  padding:14px;
 }
 
 .db-card-top{
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  gap:10px;
+  justify-content:space-between;
+  gap:8px;
 }
 
 .db-name{
-  font-weight:800;
-  font-size:13px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:850;
 }
 
 .db-count{
-  font-size:24px;
-  font-weight:900;
-  margin-top:13px;
+  margin-top:12px;
+  font-size:25px;
+  font-weight:950;
 }
 
-.db-status{
-  margin-top:7px;
-  font-size:11px;
+.db-info{
+  margin-top:5px;
+  min-height:27px;
   color:var(--muted);
+  font-size:9px;
+  line-height:1.45;
 }
 
-.db-status.ok{
-  color:#70ee96;
+.db-info.ok{
+  color:#6ee994;
 }
 
-.db-status.err{
+.db-info.err{
   color:#ff7777;
-}
-
-/* =========================================================
-   QUICK LINKS
-========================================================= */
-
-.link-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
-  gap:10px;
-}
-
-.quick-link{
-  padding:15px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:#0e0e14;
-  transition:.18s;
-}
-
-.quick-link:hover{
-  border-color:#4b4b58;
-  transform:translateY(-1px);
-}
-
-.quick-link strong{
-  display:block;
-  margin-bottom:4px;
-}
-
-.quick-link span{
-  color:var(--muted);
-  font-size:11px;
 }
 
 /* =========================================================
    HEALTH
 ========================================================= */
 
-.health{
-  padding:17px;
+.health-card{
+  padding:7px 17px;
 }
 
 .health-row{
+  min-height:45px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:11px 0;
+  gap:15px;
   border-bottom:1px solid #22222a;
 }
 
@@ -551,12 +581,120 @@ tr:hover td{
 
 .health-name{
   color:#cfcfd8;
-  font-size:12px;
+  font-size:11px;
 }
 
 .health-value{
+  text-align:right;
+  font-size:10px;
+  font-weight:900;
+}
+
+/* =========================================================
+   QUICK LINKS
+========================================================= */
+
+.link-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(185px,1fr));
+  gap:10px;
+}
+
+.quick-link{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#0d0d13;
+  transition:.18s;
+}
+
+.quick-link:hover{
+  background:#15151d;
+  border-color:#454550;
+  transform:translateY(-1px);
+}
+
+.quick-link strong{
+  display:block;
   font-size:12px;
-  font-weight:800;
+}
+
+.quick-link span{
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:9px;
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+.login-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(2,2,4,.94);
+}
+
+.login-box{
+  width:min(420px,100%);
+  padding:26px;
+}
+
+.login-box h1{
+  margin:0;
+  font-size:25px;
+}
+
+.login-box p{
+  margin:7px 0 0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+}
+
+.field{
+  margin-top:14px;
+}
+
+.field label{
+  display:block;
+  margin-bottom:6px;
+  color:#aaaab5;
+  font-size:10px;
+  font-weight:700;
+}
+
+.field input{
+  width:100%;
+  border:1px solid var(--line);
+  outline:none;
+  border-radius:10px;
+  padding:11px 12px;
+  background:#08080c;
+  color:#fff;
+}
+
+.field input:focus{
+  border-color:var(--purple);
+}
+
+.login-actions{
+  display:flex;
+  gap:7px;
+  margin-top:17px;
+}
+
+.login-error{
+  min-height:17px;
+  margin-top:9px;
+  color:#ff7777;
+  font-size:10px;
 }
 
 /* =========================================================
@@ -567,18 +705,19 @@ tr:hover td{
   position:fixed;
   right:20px;
   bottom:20px;
-  z-index:500;
-  max-width:400px;
-  padding:13px 15px;
+  z-index:1200;
+  max-width:420px;
+  padding:12px 14px;
+  border:1px solid #3a3a45;
   border-radius:12px;
   background:#17171f;
-  border:1px solid #383843;
+  color:#fff;
   box-shadow:var(--shadow);
+  font-size:11px;
   opacity:0;
-  transform:translateY(15px);
   pointer-events:none;
+  transform:translateY(12px);
   transition:.25s;
-  font-size:12px;
 }
 
 #toast.show{
@@ -587,86 +726,11 @@ tr:hover td{
 }
 
 #toast.error{
-  border-color:rgba(239,68,68,.5);
+  border-color:rgba(239,68,68,.55);
 }
 
 /* =========================================================
-   LOGIN
-========================================================= */
-
-.login-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(3,3,5,.94);
-  z-index:1000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-
-.login-box{
-  width:min(420px,100%);
-  padding:28px;
-}
-
-.login-box h1{
-  margin:0 0 6px;
-}
-
-.login-box p{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.5;
-}
-
-.field{
-  margin-top:13px;
-}
-
-.field label{
-  display:block;
-  color:#aaaab6;
-  font-size:11px;
-  margin-bottom:6px;
-}
-
-.field input{
-  width:100%;
-  padding:12px;
-  background:#09090d;
-  color:#fff;
-  border:1px solid var(--line);
-  border-radius:10px;
-  outline:none;
-}
-
-.field input:focus{
-  border-color:var(--accent);
-}
-
-.login-actions{
-  margin-top:18px;
-  display:flex;
-  gap:8px;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.muted{
-  color:var(--muted);
-}
-
-.error-text{
-  color:#ff7b7b;
-  font-size:12px;
-  margin-top:10px;
-}
-
-/* =========================================================
-   RESPONSIVE
+   MOBILE
 ========================================================= */
 
 @media(max-width:1250px){
@@ -676,13 +740,14 @@ tr:hover td{
 }
 
 @media(max-width:850px){
+
   .app{
     grid-template-columns:1fr;
   }
 
   .sidebar{
     transform:translateX(-100%);
-    transition:.25s;
+    transition:.25s ease;
   }
 
   body.nav-open .sidebar{
@@ -693,7 +758,7 @@ tr:hover td{
     grid-column:1;
   }
 
-  .menu{
+  .menu-btn{
     display:block;
   }
 
@@ -701,27 +766,30 @@ tr:hover td{
     padding:17px;
   }
 
-  .stats-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-
   .topbar{
     padding:0 15px;
-  }
-}
-
-@media(max-width:500px){
-  .stats-grid{
-    grid-template-columns:1fr;
-  }
-
-  .top-actions .btn{
-    padding:8px;
   }
 
   .top-actions .btn span{
     display:none;
   }
+
+  .stats-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+}
+
+@media(max-width:500px){
+
+  .stats-grid{
+    grid-template-columns:1fr;
+  }
+
+  .viewer-grid{
+    grid-template-columns:1fr;
+  }
+
 }
 </style>
 
@@ -731,61 +799,121 @@ tr:hover td{
 
 <div id="toast"></div>
 
+<!-- =======================================================
+     LOGIN
+======================================================= -->
+
 <div class="login-overlay" id="loginOverlay">
+
   <div class="login-box card">
-    <h1>Admin Pro</h1>
-    <p>
-      Sign in with your Supabase account. This dashboard never uses a
-      service-role or secret key in the browser.
-    </p>
 
 ```
+<h1>Admin Pro</h1>
+
+<p>
+  Sign in with your Supabase Auth account.
+  This browser dashboard uses the public publishable key
+  and never contains a service-role or secret key.
+</p>
+
 <div class="field">
-  <label>Email</label>
-  <input id="loginEmail" type="email" autocomplete="email">
+  <label for="loginEmail">EMAIL</label>
+  <input
+    id="loginEmail"
+    type="email"
+    autocomplete="email"
+    placeholder="admin@example.com"
+  >
 </div>
 
 <div class="field">
-  <label>Password</label>
-  <input id="loginPassword" type="password" autocomplete="current-password">
+  <label for="loginPassword">PASSWORD</label>
+  <input
+    id="loginPassword"
+    type="password"
+    autocomplete="current-password"
+    placeholder="Password"
+  >
 </div>
 
 <div class="login-actions">
-  <button class="btn primary" id="loginBtn">Sign In</button>
-  <button class="btn" id="loginCancel">Continue</button>
+  <button class="btn primary" id="loginBtn">
+    Sign In
+  </button>
+
+  <button class="btn" id="loginCloseBtn">
+    Close
+  </button>
 </div>
 
-<div class="error-text" id="loginError"></div>
+<div class="login-error" id="loginError"></div>
 ```
 
   </div>
+
 </div>
+
+<!-- =======================================================
+     APPLICATION
+======================================================= -->
 
 <div class="app">
 
 <!-- =======================================================
      SIDEBAR
-======================================================== -->
+======================================================= -->
 
 <aside class="sidebar">
 
   <div class="brand">
-    <strong>♜ CrowRules</strong>
-    <span>Entertainment · Admin Pro</span>
+    <div class="brand-main">♜ CrowRules</div>
+    <div class="brand-sub">
+      Entertainment · Admin Pro
+    </div>
   </div>
 
-  <div class="nav-title">Dashboard</div>
+  <div class="nav-title">Control Center</div>
 
   <nav class="nav">
-    <button class="active" data-target="dashboard">▦ Dashboard</button>
-    <button data-target="viewers">◉ Live Viewers</button>
-    <button data-target="channels">▣ TV Channels</button>
-    <button data-target="schedule">▤ TV Schedule</button>
-    <button data-target="database">◫ Database</button>
-    <button data-target="members">♟ Members</button>
-    <button data-target="content">▶ Content</button>
-    <button data-target="activity">◷ Activity</button>
-    <button data-target="health">♥ System Health</button>
+
+```
+<button class="active" data-section="dashboard">
+  ▦ Dashboard
+</button>
+
+<button data-section="viewers">
+  ◉ Live Viewers
+</button>
+
+<button data-section="channels">
+  ▣ TV Channels
+</button>
+
+<button data-section="schedule">
+  ▤ TV Schedule
+</button>
+
+<button data-section="database">
+  ◫ Database
+</button>
+
+<button data-section="members">
+  ♟ Members
+</button>
+
+<button data-section="content">
+  ▶ Content
+</button>
+
+<button data-section="activity">
+  ◷ Activity
+</button>
+
+<button data-section="health">
+  ♥ System Health
+</button>
+```
+
   </nav>
 
   <div class="nav-title">CrowRules Pages</div>
@@ -794,61 +922,99 @@ tr:hover td{
 
 ```
 <a href="index.html">⌂ Main Site</a>
+
 <a href="tv.html">▣ CrowRules TV</a>
+
 <a href="members.html">♟ Members</a>
+
 <a href="nest.html">♜ Crow Nest</a>
+
 <a href="shows.html">★ Shows</a>
+
 <a href="episodes.html">▶ Episodes</a>
+
 <a href="live.html">● Live Events</a>
-<a href="shop.html">◇ Shop</a>
-<a href="newsletter.html">✉ Newsletter</a>
-<a href="spectrum-awards.html">🏆 Spectrum Awards</a>
+
 <a href="tacoma-nights.html">◉ Tacoma Nights</a>
+
+<a href="shop.html">◇ Shop</a>
+
+<a href="newsletter.html">✉ Newsletter</a>
+
+<a href="spectrum-awards.html">🏆 Spectrum Awards</a>
 ```
 
   </nav>
 
-  <div class="nav-title">External</div>
+  <div class="nav-title">Network</div>
 
   <nav class="nav">
-    <a
-      href="https://www.youtube.com/@CrowRules_TV"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      ▶ YouTube
-    </a>
+
+```
+<a
+  href="https://www.youtube.com/@CrowRules_TV"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  ▶ CrowRules TV YouTube
+</a>
+```
+
   </nav>
 
 </aside>
 
 <!-- =======================================================
      MAIN
-======================================================== -->
+======================================================= -->
 
 <main class="main">
 
 <header class="topbar">
 
   <div class="top-left">
-    <button class="btn menu" id="menuBtn">☰</button>
 
 ```
-<div>
-  <div class="page-title">Admin Pro</div>
+<button class="btn menu-btn" id="menuBtn">
+  ☰
+</button>
 
-  <div class="status">
-    <span class="status-dot" id="connectionDot"></span>
-    <span id="connectionText">Connecting to Supabase…</span>
+<div>
+
+  <div class="page-title">
+    Admin Pro
   </div>
+
+  <div class="connection">
+
+    <span
+      class="connection-dot"
+      id="connectionDot"
+    ></span>
+
+    <span id="connectionText">
+      Connecting…
+    </span>
+
+  </div>
+
 </div>
 ```
 
   </div>
 
   <div class="top-actions">
-    <button class="btn" id="refreshBtn">↻ <span>Refresh</span></button>
-    <button class="btn" id="authBtn">Sign In</button>
+
+```
+<button class="btn" id="refreshBtn">
+  ↻ <span>Refresh</span>
+</button>
+
+<button class="btn" id="authBtn">
+  Sign In
+</button>
+```
+
   </div>
 
 </header>
@@ -857,61 +1023,139 @@ tr:hover td{
 
 <!-- =======================================================
      DASHBOARD
-======================================================== -->
+======================================================= -->
 
-<section id="dashboard" class="page-section">
+<section
+  id="dashboard"
+  class="page-section"
+>
 
   <div class="section-head">
-    <div>
-      <h2>Network Overview</h2>
-      <p>Real-time CrowRules Entertainment operating statistics.</p>
-    </div>
 
 ```
-<div class="section-actions">
-  <span class="badge green" id="lastUpdated">Waiting for data</span>
+<div>
+  <h1 class="section-title">
+    Network Overview
+  </h1>
+
+  <p class="section-description">
+    Real-time CrowRules Entertainment statistics.
+  </p>
 </div>
+
+<span
+  class="badge green"
+  id="lastUpdated"
+>
+  Waiting for data
+</span>
 ```
 
   </div>
 
-  <div class="grid stats-grid">
+  <div class="stats-grid">
 
 ```
 <div class="card stat">
-  <div class="stat-label">Current Network Viewers</div>
-  <div class="stat-value" id="statViewers">0</div>
-  <div class="stat-sub">Live active viewers</div>
+  <div class="stat-label">
+    Current Network Viewers
+  </div>
+
+  <div
+    class="stat-value"
+    id="statViewers"
+  >
+    0
+  </div>
+
+  <div class="stat-sub">
+    Active viewers right now
+  </div>
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Active Channels</div>
-  <div class="stat-value" id="statChannels">0</div>
-  <div class="stat-sub">tv_channels / is_active</div>
+  <div class="stat-label">
+    Active Channels
+  </div>
+
+  <div
+    class="stat-value"
+    id="statChannels"
+  >
+    0
+  </div>
+
+  <div class="stat-sub">
+    tv_channels / is_active
+  </div>
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Channel Views</div>
-  <div class="stat-value" id="statChannelViews">0</div>
-  <div class="stat-sub">Accumulated views</div>
+  <div class="stat-label">
+    Accumulated Channel Views
+  </div>
+
+  <div
+    class="stat-value"
+    id="statViews"
+  >
+    0
+  </div>
+
+  <div class="stat-sub">
+    Historical views
+  </div>
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Members</div>
-  <div class="stat-value" id="statMembers">0</div>
-  <div class="stat-sub">member_profiles</div>
+  <div class="stat-label">
+    Members
+  </div>
+
+  <div
+    class="stat-value"
+    id="statMembers"
+  >
+    0
+  </div>
+
+  <div class="stat-sub">
+    member_profiles
+  </div>
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Shows</div>
-  <div class="stat-value" id="statShows">0</div>
-  <div class="stat-sub">Published show records</div>
+  <div class="stat-label">
+    Shows
+  </div>
+
+  <div
+    class="stat-value"
+    id="statShows"
+  >
+    0
+  </div>
+
+  <div class="stat-sub">
+    shows
+  </div>
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Episodes</div>
-  <div class="stat-value" id="statEpisodes">0</div>
-  <div class="stat-sub">Episode library</div>
+  <div class="stat-label">
+    Episodes
+  </div>
+
+  <div
+    class="stat-value"
+    id="statEpisodes"
+  >
+    0
+  </div>
+
+  <div class="stat-sub">
+    episodes
+  </div>
 </div>
 ```
 
@@ -921,20 +1165,35 @@ tr:hover td{
 
 ```
 <div class="section-head">
+
   <div>
-    <h2>Live Channel Viewers</h2>
-    <p>
-      Current viewers are calculated from the active-viewer system,
-      not from accumulated channel views.
+    <h2 class="section-title">
+      Current Viewers By Channel
+    </h2>
+
+    <p class="section-description">
+      Live counts come from the authoritative viewer RPC.
+      They are never read from tv_channels.views.
     </p>
   </div>
 
-  <button class="btn" id="viewerRefresh">Refresh Viewers</button>
+  <button
+    class="btn small"
+    id="viewerRefreshBtn"
+  >
+    Refresh Viewers
+  </button>
+
 </div>
 
-<div class="viewer-grid" id="dashboardViewerGrid">
-  <div class="card channel-card">
-    <div class="muted">Loading live channel statistics…</div>
+<div
+  class="viewer-grid"
+  id="dashboardViewerGrid"
+>
+  <div class="card viewer-card">
+    <span class="muted">
+      Loading live viewer statistics…
+    </span>
   </div>
 </div>
 ```
@@ -945,48 +1204,68 @@ tr:hover td{
 
 <!-- =======================================================
      VIEWERS
-======================================================== -->
+======================================================= -->
 
-<section id="viewers" class="page-section hidden">
+<section
+  id="viewers"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>Current Viewers</h2>
-      <p>
-        Authoritative live viewer statistics from
-        crowrules_admin_viewer_stats().
-      </p>
-    </div>
 
 ```
-<div class="section-actions">
-  <button class="btn" id="viewerRefresh2">Refresh</button>
+<div>
+  <h1 class="section-title">
+    Live Viewer Monitor
+  </h1>
+
+  <p class="section-description">
+    Real current viewers from crowrules_admin_viewer_stats().
+  </p>
 </div>
+
+<button
+  class="btn small"
+  id="viewerRefreshBtn2"
+>
+  Refresh
+</button>
 ```
 
   </div>
 
-  <div class="card table-wrap">
+  <div class="card table-card">
 
 ```
-<table>
-  <thead>
-    <tr>
-      <th>Channel</th>
-      <th>Channel #</th>
-      <th>Current Viewers</th>
-      <th>Last Viewer Seen</th>
-      <th>Status</th>
-    </tr>
-  </thead>
+<div class="table-wrap">
 
-  <tbody id="viewerTableBody">
-    <tr>
-      <td colspan="5">Loading…</td>
-    </tr>
-  </tbody>
+  <table>
 
-</table>
+    <thead>
+
+      <tr>
+        <th>Channel</th>
+        <th>Number</th>
+        <th>Current Viewers</th>
+        <th>Last Viewer Seen</th>
+        <th>State</th>
+      </tr>
+
+    </thead>
+
+    <tbody id="viewerTableBody">
+
+      <tr>
+        <td colspan="5">
+          Loading…
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
 ```
 
   </div>
@@ -995,40 +1274,62 @@ tr:hover td{
 
 <!-- =======================================================
      CHANNELS
-======================================================== -->
+======================================================= -->
 
-<section id="channels" class="page-section hidden">
+<section
+  id="channels"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>TV Channels</h2>
-      <p>
-        Only active rows from tv_channels are displayed.
-      </p>
-    </div>
-  </div>
-
-  <div class="card table-wrap">
 
 ```
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Channel</th>
-      <th>Slug</th>
-      <th>Active</th>
-      <th>Accumulated Views</th>
-      <th>Live Viewers</th>
-    </tr>
-  </thead>
+<div>
+  <h1 class="section-title">
+    TV Channels
+  </h1>
 
-  <tbody id="channelTableBody">
-    <tr>
-      <td colspan="6">Loading…</td>
-    </tr>
-  </tbody>
-</table>
+  <p class="section-description">
+    Authoritative source: tv_channels. Only is_active = true.
+  </p>
+</div>
+```
+
+  </div>
+
+  <div class="card table-card">
+
+```
+<div class="table-wrap">
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Number</th>
+        <th>Channel</th>
+        <th>Slug</th>
+        <th>Active</th>
+        <th>Accumulated Views</th>
+        <th>Current Viewers</th>
+      </tr>
+
+    </thead>
+
+    <tbody id="channelTableBody">
+
+      <tr>
+        <td colspan="6">
+          Loading…
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
 ```
 
   </div>
@@ -1037,40 +1338,63 @@ tr:hover td{
 
 <!-- =======================================================
      SCHEDULE
-======================================================== -->
+======================================================= -->
 
-<section id="schedule" class="page-section hidden">
+<section
+  id="schedule"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>TV Guide / Schedule</h2>
-      <p>
-        schedule_items is the authoritative TV schedule.
-      </p>
-    </div>
-  </div>
-
-  <div class="card table-wrap">
 
 ```
-<table>
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Channel</th>
-      <th>Starts</th>
-      <th>Ends</th>
-      <th>Type</th>
-      <th>Episode</th>
-    </tr>
-  </thead>
+<div>
+  <h1 class="section-title">
+    TV Schedule
+  </h1>
 
-  <tbody id="scheduleTableBody">
-    <tr>
-      <td colspan="6">Loading…</td>
-    </tr>
-  </tbody>
-</table>
+  <p class="section-description">
+    Authoritative source: schedule_items. Legacy schedule tables
+    are intentionally not used.
+  </p>
+</div>
+```
+
+  </div>
+
+  <div class="card table-card">
+
+```
+<div class="table-wrap">
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Title</th>
+        <th>Channel</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Type</th>
+        <th>Content</th>
+      </tr>
+
+    </thead>
+
+    <tbody id="scheduleTableBody">
+
+      <tr>
+        <td colspan="6">
+          Loading…
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
 ```
 
   </div>
@@ -1079,64 +1403,132 @@ tr:hover td{
 
 <!-- =======================================================
      DATABASE
-======================================================== -->
+======================================================= -->
 
-<section id="database" class="page-section hidden">
+<section
+  id="database"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>Supabase Database</h2>
-      <p>
-        Unified database health and row counts.
-      </p>
-    </div>
 
 ```
-<button class="btn" id="dbRefresh">Refresh Database</button>
+<div>
+  <h1 class="section-title">
+    Supabase Database
+  </h1>
+
+  <p class="section-description">
+    Each table is checked independently. A failure in one table
+    does not stop the dashboard.
+  </p>
+
+</div>
+
+<button
+  class="btn small"
+  id="databaseRefreshBtn"
+>
+  Refresh Database
+</button>
 ```
 
   </div>
 
-  <div class="db-grid" id="databaseGrid"></div>
+  <div
+    class="db-grid"
+    id="databaseGrid"
+  ></div>
 
 </section>
 
 <!-- =======================================================
      MEMBERS
-======================================================== -->
+======================================================= -->
 
-<section id="members" class="page-section hidden">
+<section
+  id="members"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>Members & Rewards</h2>
-      <p>
-        Member activity, points and watch-reward infrastructure.
-      </p>
-    </div>
+
+```
+<div>
+  <h1 class="section-title">
+    Members & Rewards
+  </h1>
+
+  <p class="section-description">
+    Member profiles, memberships, points and watch-reward infrastructure.
+  </p>
+
+</div>
+```
+
   </div>
 
-  <div class="grid stats-grid">
+  <div class="stats-grid">
 
 ```
 <div class="card stat">
-  <div class="stat-label">Member Profiles</div>
-  <div class="stat-value" id="memberProfilesCount">0</div>
+
+  <div class="stat-label">
+    Member Profiles
+  </div>
+
+  <div
+    class="stat-value"
+    id="memberProfilesCount"
+  >
+    0
+  </div>
+
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Memberships</div>
-  <div class="stat-value" id="membershipsCount">0</div>
+
+  <div class="stat-label">
+    Memberships
+  </div>
+
+  <div
+    class="stat-value"
+    id="membershipsCount"
+  >
+    0
+  </div>
+
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Member Points</div>
-  <div class="stat-value" id="memberPointsCount">0</div>
+
+  <div class="stat-label">
+    Member Points
+  </div>
+
+  <div
+    class="stat-value"
+    id="memberPointsCount"
+  >
+    0
+  </div>
+
 </div>
 
 <div class="card stat">
-  <div class="stat-label">Watch History</div>
-  <div class="stat-value" id="watchHistoryCount">0</div>
+
+  <div class="stat-label">
+    Watch History
+  </div>
+
+  <div
+    class="stat-value"
+    id="watchHistoryCount"
+  >
+    0
+  </div>
+
 </div>
 ```
 
@@ -1145,36 +1537,81 @@ tr:hover td{
   <div class="section">
 
 ```
-<div class="card health">
+<div class="card health-card">
 
   <div class="health-row">
-    <span class="health-name">Watch tracking RPC</span>
-    <span class="health-value" id="watchRpcStatus">Checking…</span>
+
+    <span class="health-name">
+      Reward model
+    </span>
+
+    <span class="health-value">
+      1 point / verified minute
+    </span>
+
   </div>
 
   <div class="health-row">
-    <span class="health-name">Reward system</span>
-    <span class="health-value">1 point / verified minute</span>
+
+    <span class="health-name">
+      Tracking RPC
+    </span>
+
+    <span
+      class="health-value"
+      id="memberWatchRpc"
+    >
+      Checking…
+    </span>
+
   </div>
 
   <div class="health-row">
-    <span class="health-name">Member points</span>
-    <span class="health-value">member_points</span>
+
+    <span class="health-name">
+      Points ledger
+    </span>
+
+    <span class="health-value">
+      member_points
+    </span>
+
   </div>
 
   <div class="health-row">
-    <span class="health-name">Point transactions</span>
-    <span class="health-value">member_point_transactions</span>
+
+    <span class="health-name">
+      Transactions
+    </span>
+
+    <span class="health-value">
+      member_point_transactions
+    </span>
+
   </div>
 
   <div class="health-row">
-    <span class="health-name">Member statistics</span>
-    <span class="health-value">member_stats</span>
+
+    <span class="health-name">
+      Member statistics
+    </span>
+
+    <span class="health-value">
+      member_stats
+    </span>
+
   </div>
 
   <div class="health-row">
-    <span class="health-name">Watch minutes</span>
-    <span class="health-value">crowrules_member_watch_minutes</span>
+
+    <span class="health-name">
+      Watch minutes
+    </span>
+
+    <span class="health-value">
+      crowrules_member_watch_minutes
+    </span>
+
   </div>
 
 </div>
@@ -1186,93 +1623,194 @@ tr:hover td{
 
 <!-- =======================================================
      CONTENT
-======================================================== -->
+======================================================= -->
 
-<section id="content" class="page-section hidden">
+<section
+  id="content"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>Content Operations</h2>
-      <p>
-        Shows, episodes, live events, on-demand content and analytics.
-      </p>
-    </div>
+
+```
+<div>
+  <h1 class="section-title">
+    Content Operations
+  </h1>
+
+  <p class="section-description">
+    Programming, episodes, live events, on-demand content and analytics.
+  </p>
+
+</div>
+```
+
   </div>
 
-  <div class="db-grid" id="contentDatabaseGrid"></div>
+  <div
+    class="db-grid"
+    id="contentGrid"
+  ></div>
 
 </section>
 
 <!-- =======================================================
      ACTIVITY
-======================================================== -->
+======================================================= -->
 
-<section id="activity" class="page-section hidden">
+<section
+  id="activity"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>Member & Platform Activity</h2>
-      <p>
-        Database-backed activity and engagement records.
-      </p>
-    </div>
+
+```
+<div>
+  <h1 class="section-title">
+    Activity & Engagement
+  </h1>
+
+  <p class="section-description">
+    Platform activity, chats, polls, watch history and engagement.
+  </p>
+
+</div>
+```
+
   </div>
 
-  <div class="db-grid" id="activityDatabaseGrid"></div>
+  <div
+    class="db-grid"
+    id="activityGrid"
+  ></div>
 
 </section>
 
 <!-- =======================================================
      HEALTH
-======================================================== -->
+======================================================= -->
 
-<section id="health" class="page-section hidden">
+<section
+  id="health"
+  class="page-section hidden"
+>
 
   <div class="section-head">
-    <div>
-      <h2>System Health</h2>
-      <p>
-        Unified Supabase connectivity and RPC diagnostics.
-      </p>
-    </div>
 
 ```
-<button class="btn" id="healthRefresh">Run Diagnostics</button>
+<div>
+  <h1 class="section-title">
+    System Health
+  </h1>
+
+  <p class="section-description">
+    Independent Supabase, table and RPC diagnostics.
+  </p>
+
+</div>
+
+<button
+  class="btn small"
+  id="healthRefreshBtn"
+>
+  Run Diagnostics
+</button>
 ```
 
   </div>
 
-  <div class="card health" id="healthPanel">
+  <div class="card health-card">
 
 ```
 <div class="health-row">
-  <span class="health-name">Supabase API</span>
-  <span class="health-value" id="healthApi">Checking…</span>
+
+  <span class="health-name">
+    Supabase client
+  </span>
+
+  <span
+    class="health-value"
+    id="healthSupabase"
+  >
+    Checking…
+  </span>
+
 </div>
 
 <div class="health-row">
-  <span class="health-name">tv_channels</span>
-  <span class="health-value" id="healthChannels">Checking…</span>
+
+  <span class="health-name">
+    tv_channels
+  </span>
+
+  <span
+    class="health-value"
+    id="healthChannels"
+  >
+    Checking…
+  </span>
+
 </div>
 
 <div class="health-row">
-  <span class="health-name">schedule_items</span>
-  <span class="health-value" id="healthSchedule">Checking…</span>
+
+  <span class="health-name">
+    schedule_items
+  </span>
+
+  <span
+    class="health-value"
+    id="healthSchedule"
+  >
+    Checking…
+  </span>
+
 </div>
 
 <div class="health-row">
-  <span class="health-name">Viewer RPC</span>
-  <span class="health-value" id="healthViewerRpc">Checking…</span>
+
+  <span class="health-name">
+    crowrules_admin_viewer_stats
+  </span>
+
+  <span
+    class="health-value"
+    id="healthViewerRpc"
+  >
+    Checking…
+  </span>
+
 </div>
 
 <div class="health-row">
-  <span class="health-name">Watch RPC</span>
-  <span class="health-value" id="healthWatchRpc">Checking…</span>
+
+  <span class="health-name">
+    crowrules_track_watch
+  </span>
+
+  <span
+    class="health-value"
+    id="healthWatchRpc"
+  >
+    Checking…
+  </span>
+
 </div>
 
 <div class="health-row">
-  <span class="health-name">Authenticated user</span>
-  <span class="health-value" id="healthUser">Checking…</span>
+
+  <span class="health-name">
+    Authenticated user
+  </span>
+
+  <span
+    class="health-value"
+    id="healthUser"
+  >
+    Anonymous
+  </span>
+
 </div>
 ```
 
@@ -1282,15 +1820,26 @@ tr:hover td{
 
 <!-- =======================================================
      QUICK LINKS
-======================================================== -->
+======================================================= -->
 
-<section class="section">
+<div class="section">
 
   <div class="section-head">
-    <div>
-      <h2>CrowRules Control Center</h2>
-      <p>Jump directly into the major CrowRules properties.</p>
-    </div>
+
+```
+<div>
+
+  <h2 class="section-title">
+    CrowRules Control Center
+  </h2>
+
+  <p class="section-description">
+    Direct links to the CrowRules Entertainment ecosystem.
+  </p>
+
+</div>
+```
+
   </div>
 
   <div class="link-grid">
@@ -1298,17 +1847,17 @@ tr:hover td{
 ```
 <a class="quick-link" href="tv.html">
   <strong>▣ CrowRules TV</strong>
-  <span>Live network and TV guide</span>
+  <span>Live TV, channels and TV guide</span>
 </a>
 
 <a class="quick-link" href="members.html">
-  <strong>♟ Member Hub</strong>
-  <span>Profiles, rewards and activity</span>
+  <strong>♟ Members</strong>
+  <span>Member Hub and rewards</span>
 </a>
 
 <a class="quick-link" href="nest.html">
   <strong>♜ Crow Nest</strong>
-  <span>Creator ecosystem</span>
+  <span>Creators and community</span>
 </a>
 
 <a class="quick-link" href="shows.html">
@@ -1326,35 +1875,45 @@ tr:hover td{
   <span>Live programming</span>
 </a>
 
+<a class="quick-link" href="tacoma-nights.html">
+  <strong>◉ Tacoma Nights</strong>
+  <span>Weekly CrowRules show</span>
+</a>
+
 <a class="quick-link" href="spectrum-awards.html">
   <strong>🏆 Spectrum Awards</strong>
   <span>CrowRules awards platform</span>
-</a>
-
-<a class="quick-link" href="tacoma-nights.html">
-  <strong>◉ Tacoma Nights</strong>
-  <span>Weekly show</span>
 </a>
 
 <a class="quick-link" href="shop.html">
   <strong>◇ Shop</strong>
   <span>CrowRules merchandise</span>
 </a>
+
+<a class="quick-link" href="newsletter.html">
+  <strong>✉ Newsletter</strong>
+  <span>Subscriber management</span>
+</a>
 ```
 
   </div>
 
-</section>
+</div>
 
 </div>
 </main>
+
 </div>
 
 <script>
+/* =========================================================
+   CROWRULES ENTERTAINMENT
+   ADMIN PRO
+   COMPLETE REWRITE
+========================================================= */
 
 /* =========================================================
-   CROWRULES ADMIN PRO
-   SINGLE SUPABASE WRAPPER
+   CONFIG
 ========================================================= */
 
 const CONFIG = Object.freeze({
@@ -1363,93 +1922,179 @@ const CONFIG = Object.freeze({
     "https://zauxdqyssratvzmomozf.supabase.co",
 
   /*
-    Browser-safe Supabase publishable key.
-
-    DO NOT replace this with a service_role or sb_secret key.
+    IMPORTANT:
+    This must be your Supabase PUBLISHABLE key.
+    Never put sb_secret_ or service_role in this file.
   */
   supabaseKey:
     "sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J",
 
-  refreshMs: 30000,
-
-  activeViewerRpc:
+  viewerRpc:
     "crowrules_admin_viewer_stats",
 
-  networkViewerRpc:
-    "crowrules_network_viewers",
+  watchRpc:
+    "crowrules_track_watch",
 
-  trackWatchRpc:
-    "crowrules_track_watch"
+  refreshInterval:
+    30000,
+
+  scheduleLimit:
+    100
 
 });
 
 /* =========================================================
-   SINGLE CLIENT
+   SUPABASE CLIENT
 ========================================================= */
 
-const { createClient } = window.supabase;
+if(!window.supabase){
 
-const supabase = createClient(
-  CONFIG.supabaseUrl,
-  CONFIG.supabaseKey,
-  {
-    db:{
-      schema:"public"
-    },
-    auth:{
-      autoRefreshToken:true,
-      persistSession:true,
-      detectSessionInUrl:true
+  document.body.innerHTML=`
+    <div style="
+      padding:40px;
+      color:white;
+      background:#050507;
+      font-family:system-ui;
+    ">
+      Supabase JavaScript library failed to load.
+    </div>
+  `;
+
+  throw new Error(
+    "Supabase JavaScript library unavailable."
+  );
+
+}
+
+const supabase =
+  window.supabase.createClient(
+    CONFIG.supabaseUrl,
+    CONFIG.supabaseKey,
+    {
+      db:{
+        schema:"public"
+      },
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
     }
-  }
-);
+  );
 
 /* =========================================================
-   GLOBAL STATE
+   STATE
 ========================================================= */
 
 const STATE = {
-  channels:[],
-  viewers:[],
+
   user:null,
-  lastUpdated:null,
-  timer:null
+
+  channels:[],
+
+  viewers:[],
+
+  schedule:[],
+
+  database:{},
+
+  initialized:false,
+
+  refreshTimer:null
+
 };
 
 /* =========================================================
-   DOM
+   HELPERS
 ========================================================= */
 
-const $ = id => document.getElementById(id);
+const $ = id =>
+  document.getElementById(id);
 
-/* =========================================================
-   TOAST
-========================================================= */
+function escapeHtml(value){
 
-let toastTimer;
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 
-function toast(message,error=false){
-
-  const el=$("toast");
-
-  el.textContent=message;
-  el.classList.toggle("error",error);
-  el.classList.add("show");
-
-  clearTimeout(toastTimer);
-
-  toastTimer=setTimeout(()=>{
-    el.classList.remove("show");
-  },4200);
 }
 
-/* =========================================================
-   ERROR NORMALIZER
-========================================================= */
+function formatNumber(value){
 
-function errorMessage(error){
+  const n=Number(value);
 
-  if(!error) return "";
+  if(!Number.isFinite(n)){
+    return "0";
+  }
+
+  return n.toLocaleString();
+
+}
+
+function formatDate(value){
+
+  if(!value){
+    return "—";
+  }
+
+  const d=new Date(value);
+
+  if(Number.isNaN(d.getTime())){
+    return String(value);
+  }
+
+  return d.toLocaleString();
+
+}
+
+function relativeTime(value){
+
+  if(!value){
+    return "No viewer activity";
+  }
+
+  const time=new Date(value).getTime();
+
+  if(!Number.isFinite(time)){
+    return "Unknown";
+  }
+
+  const seconds=
+    Math.max(
+      0,
+      Math.floor(
+        (Date.now()-time)/1000
+      )
+    );
+
+  if(seconds < 60){
+    return `${Math.max(1,seconds)}s ago`;
+  }
+
+  if(seconds < 3600){
+    return `${Math.floor(seconds/60)}m ago`;
+  }
+
+  if(seconds < 86400){
+    return `${Math.floor(seconds/3600)}h ago`;
+  }
+
+  return `${Math.floor(seconds/86400)}d ago`;
+
+}
+
+function errorText(error){
+
+  if(!error){
+    return "";
+  }
+
+  if(typeof error==="string"){
+    return error;
+  }
 
   return [
     error.message,
@@ -1459,44 +2104,119 @@ function errorMessage(error){
   ]
   .filter(Boolean)
   .join(" — ");
+
 }
 
 /* =========================================================
-   SINGLE DATABASE WRAPPER
+   TOAST
+========================================================= */
+
+let toastTimer=null;
+
+function toast(message,isError=false){
+
+  const el=$("toast");
+
+  el.textContent=message;
+
+  el.classList.toggle(
+    "error",
+    Boolean(isError)
+  );
+
+  el.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer=setTimeout(
+    ()=>{
+      el.classList.remove("show");
+    },
+    4000
+  );
+
+}
+
+/* =========================================================
+   CONNECTION STATUS
+========================================================= */
+
+function connection(online,message){
+
+  $("connectionDot")
+    .classList.toggle(
+      "online",
+      Boolean(online)
+    );
+
+  $("connectionText").textContent=
+    message ||
+    (
+      online
+      ? "Supabase ONLINE"
+      : "Supabase ERROR"
+    );
+
+}
+
+/* =========================================================
+   SINGLE SUPABASE WRAPPER
 ========================================================= */
 
 const DB = {
 
-  async select(table,options={}){
+  async select(
+    table,
+    {
+      columns="*",
+      eq={},
+      order=null,
+      limit=null,
+      head=false
+    }={}
+  ){
 
     try{
 
-      let query=supabase
-        .from(table)
-        .select(
-          options.columns || "*",
-          options.count ? {count:"exact",head:!!options.head} : undefined
+      let query=
+        supabase
+          .from(table)
+          .select(
+            columns,
+            {
+              count:"exact",
+              head
+            }
+          );
+
+      for(
+        const [column,value]
+        of Object.entries(eq || {})
+      ){
+
+        query=query.eq(
+          column,
+          value
         );
-
-      if(options.eq){
-
-        for(const [column,value] of Object.entries(options.eq)){
-          query=query.eq(column,value);
-        }
 
       }
 
-      if(options.order){
+      if(order){
+
         query=query.order(
-          options.order.column,
+          order.column,
           {
-            ascending:options.order.ascending ?? false
+            ascending:
+              order.ascending !== false
           }
         );
+
       }
 
-      if(options.limit){
-        query=query.limit(options.limit);
+      if(limit){
+
+        query=query.limit(limit);
+
       }
 
       return await query;
@@ -1515,27 +2235,24 @@ const DB = {
 
   async count(table){
 
-    const result=await this.select(
+    return await this.select(
       table,
       {
-        columns:"*",
-        count:true,
+        columns:"id",
         head:true
       }
     );
 
-    return {
-      count:Number(result.count || 0),
-      error:result.error || null
-    };
-
   },
 
-  async rpc(name,args={}){
+  async rpc(name,args){
 
     try{
 
-      return await supabase.rpc(name,args);
+      return await supabase.rpc(
+        name,
+        args || {}
+      );
 
     }catch(error){
 
@@ -1551,12 +2268,18 @@ const DB = {
   async session(){
 
     try{
+
       return await supabase.auth.getSession();
+
     }catch(error){
+
       return {
-        data:{session:null},
+        data:{
+          session:null
+        },
         error
       };
+
     }
 
   }
@@ -1564,92 +2287,56 @@ const DB = {
 };
 
 /* =========================================================
-   CONNECTION STATUS
-========================================================= */
-
-function setConnection(online,message){
-
-  $("connectionDot").classList.toggle(
-    "online",
-    !!online
-  );
-
-  $("connectionText").textContent=
-    message || (online ? "Supabase ONLINE" : "Supabase ERROR");
-
-}
-
-/* =========================================================
-   FORMATTERS
-========================================================= */
-
-function number(value){
-
-  return Number(value || 0).toLocaleString();
-
-}
-
-function dateTime(value){
-
-  if(!value) return "Never";
-
-  const date=new Date(value);
-
-  if(Number.isNaN(date.getTime())){
-    return String(value);
-  }
-
-  return date.toLocaleString();
-
-}
-
-function relativeTime(value){
-
-  if(!value) return "No active viewer";
-
-  const diff=Date.now()-new Date(value).getTime();
-
-  if(diff < 60000){
-    return `${Math.max(1,Math.floor(diff/1000))}s ago`;
-  }
-
-  if(diff < 3600000){
-    return `${Math.floor(diff/60000)}m ago`;
-  }
-
-  return dateTime(value);
-
-}
-
-/* =========================================================
    AUTH
 ========================================================= */
 
 async function loadAuth(){
 
-  const result=await DB.session();
+  const result=
+    await DB.session();
 
-  STATE.user=result.data?.session?.user || null;
+  STATE.user=
+    result.data?.session?.user ||
+    null;
+
+  updateAuthUI();
+
+}
+
+function updateAuthUI(){
 
   if(STATE.user){
 
-    $("authBtn").textContent="Sign Out";
+    $("authBtn").textContent=
+      "Sign Out";
+
     $("healthUser").textContent=
-      STATE.user.email || STATE.user.id;
+      STATE.user.email ||
+      STATE.user.id ||
+      "Authenticated";
 
   }else{
 
-    $("authBtn").textContent="Sign In";
-    $("healthUser").textContent="Anonymous";
+    $("authBtn").textContent=
+      "Sign In";
+
+    $("healthUser").textContent=
+      "Anonymous";
 
   }
 
 }
 
-async function signIn(){
+async function login(){
 
-  const email=$("loginEmail").value.trim();
-  const password=$("loginPassword").value;
+  const email=
+    $("loginEmail")
+      .value
+      .trim();
+
+  const password=
+    $("loginPassword")
+      .value;
 
   if(!email || !password){
 
@@ -1657,165 +2344,284 @@ async function signIn(){
       "Enter your email and password.";
 
     return;
+
   }
 
-  $("loginError").textContent="Signing in…";
+  $("loginError").textContent=
+    "Signing in…";
 
-  const {data,error}=await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
+  const {
+    data,
+    error
+  }=
+    await supabase.auth
+      .signInWithPassword({
+        email,
+        password
+      });
 
   if(error){
 
-    $("loginError").textContent=errorMessage(error);
+    $("loginError").textContent=
+      errorText(error);
 
     return;
+
   }
 
   STATE.user=data.user;
 
-  $("loginOverlay").style.display="none";
+  updateAuthUI();
 
-  $("authBtn").textContent="Sign Out";
+  $("loginOverlay").style.display=
+    "none";
 
-  $("healthUser").textContent=
-    data.user?.email || data.user?.id || "Authenticated";
+  $("loginPassword").value="";
 
-  toast("Signed in successfully.");
+  $("loginError").textContent="";
+
+  toast(
+    "Supabase authentication successful."
+  );
 
   await refreshAll();
 
 }
 
-async function signOut(){
+async function logout(){
 
   await supabase.auth.signOut();
 
   STATE.user=null;
 
-  $("authBtn").textContent="Sign In";
+  updateAuthUI();
 
-  $("healthUser").textContent="Anonymous";
-
-  toast("Signed out.");
+  toast(
+    "Signed out."
+  );
 
 }
 
-$("loginBtn").addEventListener("click",signIn);
+$("authBtn").addEventListener(
+  "click",
+  async()=>{
 
-$("loginCancel").addEventListener("click",()=>{
-  $("loginOverlay").style.display="none";
-});
+    if(STATE.user){
 
-$("authBtn").addEventListener("click",async()=>{
+      await logout();
 
-  if(STATE.user){
-    await signOut();
-  }else{
-    $("loginOverlay").style.display="flex";
+    }else{
+
+      $("loginOverlay").style.display=
+        "flex";
+
+    }
+
   }
+);
 
-});
+$("loginBtn").addEventListener(
+  "click",
+  login
+);
 
-supabase.auth.onAuthStateChange((_event,session)=>{
+$("loginCloseBtn").addEventListener(
+  "click",
+  ()=>{
+    $("loginOverlay").style.display=
+      "none";
+  }
+);
 
-  STATE.user=session?.user || null;
+$("loginPassword").addEventListener(
+  "keydown",
+  event=>{
 
-  $("authBtn").textContent=
-    STATE.user ? "Sign Out" : "Sign In";
+    if(event.key==="Enter"){
+      login();
+    }
 
-  $("healthUser").textContent=
-    STATE.user?.email ||
-    STATE.user?.id ||
-    "Anonymous";
+  }
+);
 
-});
+supabase.auth.onAuthStateChange(
+  (_event,session)=>{
+
+    STATE.user=
+      session?.user ||
+      null;
+
+    updateAuthUI();
+
+  }
+);
 
 /* =========================================================
-   ACTIVE CHANNELS
+   AUTHORITATIVE CHANNELS
 ========================================================= */
 
 async function loadChannels(){
 
-  const result=await DB.select(
-    "tv_channels",
-    {
-      columns:"*",
-      eq:{
-        is_active:true
-      },
-      order:{
-        column:"channel_number",
-        ascending:true
+  const result=
+    await DB.select(
+      "tv_channels",
+      {
+        columns:"*",
+
+        eq:{
+          is_active:true
+        },
+
+        order:{
+          column:"channel_number",
+          ascending:true
+        }
       }
-    }
-  );
+    );
+
+  $("healthChannels").textContent=
+    result.error
+      ? "ERROR"
+      : "ONLINE";
 
   if(result.error){
+
+    STATE.channels=[];
+
+    $("statChannels").textContent="—";
 
     $("channelTableBody").innerHTML=`
       <tr>
         <td colspan="6">
           <span class="badge red">
             tv_channels unavailable:
-            ${escapeHtml(errorMessage(result.error))}
+            ${escapeHtml(errorText(result.error))}
           </span>
         </td>
       </tr>
     `;
 
-    $("statChannels").textContent="—";
-
     return result;
 
   }
 
-  STATE.channels=result.data || [];
+  STATE.channels=
+    Array.isArray(result.data)
+      ? result.data
+      : [];
 
   $("statChannels").textContent=
-    number(STATE.channels.length);
-
-  renderChannels();
+    formatNumber(
+      STATE.channels.length
+    );
 
   return result;
 
 }
 
 /* =========================================================
-   LIVE VIEWERS
+   AUTHORITATIVE VIEWER RPC
 ========================================================= */
 
-async function loadViewers(){
+async function loadViewerStats(){
 
-  const result=await DB.rpc(
-    CONFIG.activeViewerRpc
-  );
+  const result=
+    await DB.rpc(
+      CONFIG.viewerRpc
+    );
+
+  $("healthViewerRpc").textContent=
+    result.error
+      ? "ERROR"
+      : "ONLINE";
 
   if(result.error){
 
-    setConnection(
-      false,
-      "Supabase connected · viewer RPC unavailable"
-    );
+    STATE.viewers=[];
 
-    $("viewerTableBody").innerHTML=`
-      <tr>
-        <td colspan="5">
-          <span class="badge red">
-            ${escapeHtml(errorMessage(result.error))}
-          </span>
-        </td>
-      </tr>
-    `;
+    renderViewerError(
+      result.error
+    );
 
     return result;
 
   }
 
-  STATE.viewers=Array.isArray(result.data)
-    ? result.data
-    : [];
+  let rows=
+    Array.isArray(result.data)
+      ? result.data
+      : [];
+
+  /*
+    Restrict the RPC result to the active
+    tv_channels authoritative list.
+  */
+
+  const activeIds=
+    new Set(
+      STATE.channels.map(
+        channel =>
+          String(channel.id)
+      )
+    );
+
+  rows=
+    rows.filter(
+      row =>
+        activeIds.has(
+          String(row.channel_id)
+        )
+    );
+
+  const viewerByChannel=
+    new Map();
+
+  rows.forEach(row=>{
+
+    viewerByChannel.set(
+      String(row.channel_id),
+      row
+    );
+
+  });
+
+  STATE.viewers=
+    STATE.channels.map(channel=>{
+
+      const row=
+        viewerByChannel.get(
+          String(channel.id)
+        );
+
+      return {
+
+        channel_id:
+          channel.id,
+
+        channel_name:
+          channel.channel_name ??
+          channel.name ??
+          row?.channel_name ??
+          "Unnamed Channel",
+
+        channel_number:
+          channel.channel_number ??
+          channel.number ??
+          row?.channel_number ??
+          "",
+
+        current_viewers:
+          Number(
+            row?.current_viewers || 0
+          ),
+
+        last_viewer_seen_at:
+          row?.last_viewer_seen_at ||
+          null
+
+      };
+
+    });
 
   renderViewers();
 
@@ -1827,170 +2633,243 @@ async function loadViewers(){
    NETWORK VIEWERS
 ========================================================= */
 
-async function loadNetworkViewers(){
+function calculateNetworkViewers(){
 
-  const result=await DB.rpc(
-    CONFIG.networkViewerRpc
-  );
+  const total=
+    STATE.viewers.reduce(
+      (sum,row)=>
+        sum+
+        Number(
+          row.current_viewers || 0
+        ),
+      0
+    );
 
-  if(!result.error){
+  $("statViewers").textContent=
+    formatNumber(total);
 
-    $("statViewers").textContent=
-      number(result.data);
-
-    return result;
-
-  }
-
-  /*
-    Fallback to summing the authoritative admin viewer RPC.
-  */
-
-  const total=STATE.viewers.reduce(
-    (sum,row)=>
-      sum + Number(row.current_viewers || 0),
-    0
-  );
-
-  $("statViewers").textContent=number(total);
-
-  return result;
+  return total;
 
 }
 
 /* =========================================================
-   VIEWER RENDER
+   VIEWER RENDERING
 ========================================================= */
 
 function renderViewers(){
 
-  const activeIds=new Set(
-    STATE.channels.map(c=>String(c.id))
-  );
+  const rows=
+    STATE.viewers;
 
-  const rows=STATE.viewers
-    .filter(row=>activeIds.has(String(row.channel_id)));
+  const maximum=
+    Math.max(
+      1,
+      ...rows.map(
+        row =>
+          Number(
+            row.current_viewers || 0
+          )
+      )
+    );
 
-  /*
-    Ensure active channels with zero viewers still appear.
-  */
+  $("dashboardViewerGrid").innerHTML=
+    rows.map(row=>{
 
-  const byId=new Map(
-    rows.map(row=>[
-      String(row.channel_id),
-      row
-    ])
-  );
+      const count=
+        Number(
+          row.current_viewers || 0
+        );
 
-  const merged=STATE.channels.map(channel=>{
+      const percent=
+        Math.min(
+          100,
+          Math.round(
+            count/
+            maximum*
+            100
+          )
+        );
 
-    const viewer=byId.get(String(channel.id));
+      return `
+        <div class="card viewer-card">
 
-    return {
-      channel_id:channel.id,
-      channel_name:
-        channel.channel_name ||
-        channel.name ||
-        "Unnamed Channel",
-      channel_number:
-        channel.channel_number ??
-        channel.number ??
-        "",
-      current_viewers:
-        Number(viewer?.current_viewers || 0),
-      last_viewer_seen_at:
-        viewer?.last_viewer_seen_at || null
-    };
+          <div class="viewer-card-top">
 
-  });
+            <div>
 
-  STATE.viewers=merged;
+              <div class="channel-number">
+                CHANNEL
+                ${escapeHtml(
+                  String(
+                    row.channel_number ||
+                    "—"
+                  )
+                )}
+              </div>
+
+              <div class="channel-name">
+                ${escapeHtml(
+                  row.channel_name
+                )}
+              </div>
+
+            </div>
+
+            <div>
+
+              <div class="viewer-number">
+                ${formatNumber(count)}
+              </div>
+
+              <div class="viewer-caption">
+                current viewers
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="viewer-meta">
+
+            ${
+              count > 0
+              ? "● People watching now"
+              : "No active viewers"
+            }
+
+          </div>
+
+          <div class="viewer-meta">
+
+            Last viewer:
+            ${escapeHtml(
+              relativeTime(
+                row.last_viewer_seen_at
+              )
+            )}
+
+          </div>
+
+          <div class="viewer-bar">
+            <span
+              style="width:${percent}%"
+            ></span>
+          </div>
+
+        </div>
+      `;
+
+    }).join("") ||
+
+    `
+      <div class="card viewer-card">
+        <span class="muted">
+          No active channels found.
+        </span>
+      </div>
+    `;
 
   $("viewerTableBody").innerHTML=
-    merged.map(row=>{
+    rows.map(row=>{
 
-      const count=Number(row.current_viewers || 0);
+      const count=
+        Number(
+          row.current_viewers || 0
+        );
 
       return `
         <tr>
-          <td><strong>${escapeHtml(row.channel_name)}</strong></td>
-          <td>${escapeHtml(String(row.channel_number || "—"))}</td>
+
           <td>
-            <strong>${number(count)}</strong>
+            <strong>
+              ${escapeHtml(
+                row.channel_name
+              )}
+            </strong>
           </td>
-          <td>${escapeHtml(relativeTime(row.last_viewer_seen_at))}</td>
+
           <td>
+            ${escapeHtml(
+              String(
+                row.channel_number || "—"
+              )
+            )}
+          </td>
+
+          <td>
+            <strong>
+              ${formatNumber(count)}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              relativeTime(
+                row.last_viewer_seen_at
+              )
+            )}
+          </td>
+
+          <td>
+
             ${
               count > 0
               ? '<span class="badge green">● LIVE</span>'
               : '<span class="badge">IDLE</span>'
             }
+
           </td>
+
         </tr>
       `;
 
     }).join("") ||
+
     `
       <tr>
-        <td colspan="5">No active channels found.</td>
+        <td colspan="5">
+          No active channels found.
+        </td>
       </tr>
     `;
 
-  const grid=merged.map(row=>{
+  calculateNetworkViewers();
 
-    const count=Number(row.current_viewers || 0);
+}
 
-    return `
-      <div class="card channel-card">
+function renderViewerError(error){
 
-        <div class="channel-top">
+  const message=
+    errorText(error);
 
-          <div>
-            <div class="channel-number">
-              CH ${escapeHtml(String(row.channel_number || "—"))}
-            </div>
+  $("dashboardViewerGrid").innerHTML=`
+    <div class="card viewer-card">
 
-            <div class="channel-name">
-              ${escapeHtml(row.channel_name)}
-            </div>
-          </div>
+      <span class="badge red">
+        Viewer RPC unavailable
+      </span>
 
-          <div style="text-align:right">
-            <div class="live-count">${number(count)}</div>
-            <div class="live-label">viewers</div>
-          </div>
-
-        </div>
-
-        <div class="viewer-meta">
-          ${
-            count > 0
-            ? "Currently being watched"
-            : "No active viewers"
-          }
-        </div>
-
-        <div class="viewer-meta">
-          Last seen:
-          ${escapeHtml(relativeTime(row.last_viewer_seen_at))}
-        </div>
-
-        <div class="bar">
-          <span style="width:${Math.min(100,count * 10)}%"></span>
-        </div>
-
+      <div class="viewer-meta">
+        ${escapeHtml(message)}
       </div>
-    `;
 
-  }).join("");
+    </div>
+  `;
 
-  $("dashboardViewerGrid").innerHTML=
-    grid ||
-    `
-      <div class="card channel-card">
-        No active TV channels found.
-      </div>
-    `;
+  $("viewerTableBody").innerHTML=`
+    <tr>
+      <td colspan="5">
+
+        <span class="badge red">
+          ${escapeHtml(message)}
+        </span>
+
+      </td>
+    </tr>
+  `;
+
+  $("statViewers").textContent=
+    "—";
 
 }
 
@@ -2000,88 +2879,113 @@ function renderViewers(){
 
 function renderChannels(){
 
-  const viewerMap=new Map(
-    STATE.viewers.map(row=>[
-      String(row.channel_id),
-      Number(row.current_viewers || 0)
-    ])
-  );
+  const viewerMap=
+    new Map(
+      STATE.viewers.map(
+        row=>[
+          String(row.channel_id),
+          Number(
+            row.current_viewers || 0
+          )
+        ]
+      )
+    );
 
   $("channelTableBody").innerHTML=
-    STATE.channels.map(channel=>{
+    STATE.channels.map(
+      channel=>{
 
-      const views=
-        channel.views ??
-        channel.view_count ??
-        channel.total_views ??
-        0;
+        const name=
+          channel.channel_name ??
+          channel.name ??
+          "Unnamed Channel";
 
-      const viewers=
-        viewerMap.get(String(channel.id)) || 0;
+        const slug=
+          channel.channel_slug ??
+          channel.slug ??
+          "—";
 
-      const name=
-        channel.channel_name ||
-        channel.name ||
-        "Unnamed Channel";
+        const views=
+          Number(
+            channel.views ??
+            channel.view_count ??
+            channel.total_views ??
+            0
+          );
 
-      const slug=
-        channel.channel_slug ||
-        channel.slug ||
-        "—";
+        const viewers=
+          viewerMap.get(
+            String(channel.id)
+          ) || 0;
 
-      return `
-        <tr>
+        return `
+          <tr>
 
-          <td>
-            ${escapeHtml(String(
-              channel.channel_number ??
-              channel.number ??
-              "—"
-            ))}
-          </td>
+            <td>
+              ${escapeHtml(
+                String(
+                  channel.channel_number ??
+                  channel.number ??
+                  "—"
+                )
+              )}
+            </td>
 
-          <td>
-            <strong>${escapeHtml(name)}</strong>
-          </td>
+            <td>
+              <strong>
+                ${escapeHtml(name)}
+              </strong>
+            </td>
 
-          <td>${escapeHtml(slug)}</td>
+            <td>
+              ${escapeHtml(slug)}
+            </td>
 
-          <td>
-            <span class="badge green">ACTIVE</span>
-          </td>
+            <td>
+              <span class="badge green">
+                ACTIVE
+              </span>
+            </td>
 
-          <td>
-            ${number(views)}
-          </td>
+            <td>
+              ${formatNumber(views)}
+            </td>
 
-          <td>
-            <strong>${number(viewers)}</strong>
-          </td>
+            <td>
+              <strong>
+                ${formatNumber(viewers)}
+              </strong>
+            </td>
 
-        </tr>
-      `;
+          </tr>
+        `;
 
-    }).join("") ||
+      }
+    ).join("") ||
+
     `
       <tr>
-        <td colspan="6">No active channels.</td>
+        <td colspan="6">
+          No active channels.
+        </td>
       </tr>
     `;
 
-  const totalViews=STATE.channels.reduce(
-    (sum,row)=>
-      sum +
-      Number(
-        row.views ??
-        row.view_count ??
-        row.total_views ??
-        0
-      ),
-    0
-  );
+  const totalViews=
+    STATE.channels.reduce(
+      (sum,channel)=>
+        sum+
+        Number(
+          channel.views ??
+          channel.view_count ??
+          channel.total_views ??
+          0
+        ),
+      0
+    );
 
-  $("statChannelViews").textContent=
-    number(totalViews);
+  $("statViews").textContent=
+    formatNumber(totalViews);
 
 }
 
@@ -2091,17 +2995,21 @@ function renderChannels(){
 
 async function loadSchedule(){
 
-  const result=await DB.select(
-    "schedule_items",
-    {
-      columns:"*",
-      order:{
-        column:"starts_at",
-        ascending:true
-      },
-      limit:100
-    }
-  );
+  const result=
+    await DB.select(
+      "schedule_items",
+      {
+        columns:"*",
+
+        order:{
+          column:"starts_at",
+          ascending:true
+        },
+
+        limit:
+          CONFIG.scheduleLimit
+      }
+    );
 
   $("healthSchedule").textContent=
     result.error
@@ -2110,12 +3018,19 @@ async function loadSchedule(){
 
   if(result.error){
 
+    STATE.schedule=[];
+
     $("scheduleTableBody").innerHTML=`
       <tr>
         <td colspan="6">
+
           <span class="badge red">
-            ${escapeHtml(errorMessage(result.error))}
+            schedule_items unavailable:
+            ${escapeHtml(
+              errorText(result.error)
+            )}
           </span>
+
         </td>
       </tr>
     `;
@@ -2124,66 +3039,90 @@ async function loadSchedule(){
 
   }
 
-  const rows=result.data || [];
+  STATE.schedule=
+    Array.isArray(result.data)
+      ? result.data
+      : [];
 
   $("scheduleTableBody").innerHTML=
-    rows.map(item=>{
+    STATE.schedule.map(item=>{
 
       const channel=
         STATE.channels.find(
-          c=>String(c.id)===String(item.channel_id)
+          c=>
+            String(c.id) ===
+            String(item.channel_id)
         );
 
       const title=
-        item.title ||
-        item.program_title ||
-        item.name ||
+        item.title ??
+        item.program_title ??
+        item.name ??
         "Untitled";
 
+      const start=
+        item.starts_at ??
+        item.start_at ??
+        item.start_time;
+
+      const end=
+        item.ends_at ??
+        item.end_at ??
+        item.end_time;
+
       const type=
-        item.item_type ||
-        item.content_type ||
+        item.item_type ??
+        item.content_type ??
+        item.type ??
         "program";
+
+      const content=
+        item.episode_id ??
+        item.content_id ??
+        item.show_id ??
+        "—";
 
       return `
         <tr>
 
           <td>
-            <strong>${escapeHtml(title)}</strong>
+            <strong>
+              ${escapeHtml(title)}
+            </strong>
           </td>
 
           <td>
             ${escapeHtml(
-              channel?.channel_name ||
-              channel?.name ||
-              item.channel_id ||
+              channel?.channel_name ??
+              channel?.name ??
+              item.channel_id ??
               "—"
             )}
           </td>
 
-          <td>${escapeHtml(dateTime(
-            item.starts_at ||
-            item.start_time ||
-            item.start_at
-          ))}</td>
+          <td>
+            ${escapeHtml(
+              formatDate(start)
+            )}
+          </td>
 
-          <td>${escapeHtml(dateTime(
-            item.ends_at ||
-            item.end_time ||
-            item.end_at
-          ))}</td>
+          <td>
+            ${escapeHtml(
+              formatDate(end)
+            )}
+          </td>
 
           <td>
             <span class="badge">
-              ${escapeHtml(String(type))}
+              ${escapeHtml(
+                String(type)
+              )}
             </span>
           </td>
 
           <td>
             ${escapeHtml(
-              item.episode_id ||
-              item.episode_title ||
-              "—"
+              String(content)
             )}
           </td>
 
@@ -2191,9 +3130,12 @@ async function loadSchedule(){
       `;
 
     }).join("") ||
+
     `
       <tr>
-        <td colspan="6">No schedule items found.</td>
+        <td colspan="6">
+          No schedule items found.
+        </td>
       </tr>
     `;
 
@@ -2208,40 +3150,59 @@ async function loadSchedule(){
 const DATABASE_TABLES=[
 
   "member_profiles",
+
   "episodes",
+
   "live_events",
+
   "shows",
 
   "tv_channels",
+
   "schedule_items",
 
   "on_demand_library",
+
   "content_items",
+
   "content_views",
+
   "analytics_events",
 
   "memberships",
+
   "content_likes",
+
   "member_points",
+
   "member_point_transactions",
+
   "member_stats",
 
   "chat_rooms",
+
   "chat_messages",
 
   "watch_progress",
+
   "member_watch_history",
+
   "crowrules_member_watch_minutes",
 
   "creator_channels",
+
   "creator_applications",
+
   "crow_nest_creators",
 
   "member_favorite_channels",
+
   "member_friends",
+
   "member_activity",
 
   "content_view_stats",
+
   "content_daily_stats",
 
   "polls",
@@ -2256,152 +3217,63 @@ const DATABASE_TABLES=[
    DATABASE COUNTS
 ========================================================= */
 
+async function getTableCount(table){
+
+  const result=
+    await DB.count(table);
+
+  return {
+
+    table,
+
+    count:
+      Number(
+        result.count || 0
+      ),
+
+    error:
+      result.error || null
+
+  };
+
+}
+
 async function loadDatabaseCounts(){
 
-  const grid=$("databaseGrid");
-
-  grid.innerHTML="";
-
-  const results=[];
-
-  for(const table of DATABASE_TABLES){
-
-    const result=await DB.count(table);
-
-    results.push({
-      table,
-      count:result.count,
-      error:result.error
-    });
-
-  }
-
-  for(const row of results){
-
-    const ok=!row.error;
-
-    grid.insertAdjacentHTML(
-      "beforeend",
-      `
-        <div class="card db-card">
-
-          <div class="db-card-top">
-
-            <div class="db-name">
-              ${escapeHtml(row.table)}
-            </div>
-
-            <span class="badge ${ok ? "green" : "red"}">
-              ${ok ? "ONLINE" : "ERROR"}
-            </span>
-
-          </div>
-
-          <div class="db-count">
-            ${ok ? number(row.count) : "—"}
-          </div>
-
-          <div class="db-status ${ok ? "ok" : "err"}">
-
-            ${
-              ok
-              ? "Rows available through Data API"
-              : errorMessage(row.error)
-            }
-
-          </div>
-
-        </div>
-      `
+  const results=
+    await Promise.all(
+      DATABASE_TABLES.map(
+        getTableCount
+      )
     );
 
-  }
+  STATE.database={};
 
-  /*
-    High-level dashboard statistics.
-  */
+  results.forEach(row=>{
 
-  const find=name=>
-    results.find(row=>row.table===name);
+    STATE.database[row.table]=row;
 
-  $("statMembers").textContent=
-    number(find("member_profiles")?.count);
+  });
 
-  $("statShows").textContent=
-    number(find("shows")?.count);
+  renderDatabase(results);
 
-  $("statEpisodes").textContent=
-    number(find("episodes")?.count);
-
-  $("memberProfilesCount").textContent=
-    number(find("member_profiles")?.count);
-
-  $("membershipsCount").textContent=
-    number(find("memberships")?.count);
-
-  $("memberPointsCount").textContent=
-    number(find("member_points")?.count);
-
-  $("watchHistoryCount").textContent=
-    number(find("member_watch_history")?.count);
-
-  renderSpecialDatabaseSections(results);
+  updateHighLevelStats(results);
 
   return results;
 
 }
 
 /* =========================================================
-   SPECIAL DATABASE SECTIONS
+   DATABASE RENDER
 ========================================================= */
 
-function renderSpecialDatabaseSections(results){
+function renderDatabase(results){
 
-  const contentNames=[
-    "shows",
-    "episodes",
-    "live_events",
-    "on_demand_library",
-    "content_items",
-    "content_views",
-    "content_likes",
-    "content_view_stats",
-    "content_daily_stats"
-  ];
+  $("databaseGrid").innerHTML=
+    results.map(row=>{
 
-  const activityNames=[
-    "analytics_events",
-    "member_activity",
-    "watch_progress",
-    "member_watch_history",
-    "chat_messages",
-    "chat_reports",
-    "polls",
-    "newsletter_subscribers"
-  ];
-
-  renderDatabaseList(
-    $("contentDatabaseGrid"),
-    results.filter(row=>
-      contentNames.includes(row.table)
-    )
-  );
-
-  renderDatabaseList(
-    $("activityDatabaseGrid"),
-    results.filter(row=>
-      activityNames.includes(row.table)
-    )
-  );
-
-}
-
-function renderDatabaseList(container,rows){
-
-  container.innerHTML=
-    rows.map(row=>{
-
-      const ok=!row.error;
+      const ok=
+        !row.error;
 
       return `
         <div class="card db-card">
@@ -2409,25 +3281,57 @@ function renderDatabaseList(container,rows){
           <div class="db-card-top">
 
             <div class="db-name">
-              ${escapeHtml(row.table)}
+              ${escapeHtml(
+                row.table
+              )}
             </div>
 
-            <span class="badge ${ok ? "green" : "red"}">
-              ${ok ? "ONLINE" : "ERROR"}
+            <span
+              class="badge ${
+                ok
+                ? "green"
+                : "red"
+              }"
+            >
+              ${
+                ok
+                ? "ONLINE"
+                : "ERROR"
+              }
             </span>
 
           </div>
 
           <div class="db-count">
-            ${ok ? number(row.count) : "—"}
-          </div>
 
-          <div class="db-status ${ok ? "ok" : "err"}">
             ${
               ok
-              ? "Database records"
-              : errorMessage(row.error)
+              ? formatNumber(
+                  row.count
+                )
+              : "—"
             }
+
+          </div>
+
+          <div
+            class="db-info ${
+              ok
+              ? "ok"
+              : "err"
+            }"
+          >
+
+            ${
+              ok
+              ? "Data API query successful"
+              : escapeHtml(
+                  classifyDatabaseError(
+                    row.error
+                  )
+                )
+            }
+
           </div>
 
         </div>
@@ -2435,95 +3339,394 @@ function renderDatabaseList(container,rows){
 
     }).join("");
 
+  renderSpecialDatabaseGroups(
+    results
+  );
+
 }
 
 /* =========================================================
-   RPC DIAGNOSTICS
+   DATABASE ERROR CLASSIFICATION
+========================================================= */
+
+function classifyDatabaseError(error){
+
+  const message=
+    errorText(error);
+
+  if(!message){
+    return "Unknown database error.";
+  }
+
+  if(
+    /relation .* does not exist|table .* does not exist|could not find/i
+      .test(message)
+  ){
+    return "Table not found.";
+  }
+
+  if(
+    /permission denied|not allowed|row-level|rls|42501/i
+      .test(message)
+  ){
+    return "Access/RLS policy prevented this query.";
+  }
+
+  if(
+    /schema cache|column .* does not exist|42703/i
+      .test(message)
+  ){
+    return "Schema/column mismatch.";
+  }
+
+  if(
+    /401|invalid api key|apikey/i
+      .test(message)
+  ){
+    return "API key rejected.";
+  }
+
+  return message;
+
+}
+
+/* =========================================================
+   SPECIAL DATABASE GROUPS
+========================================================= */
+
+const CONTENT_TABLES=[
+
+  "shows",
+  "episodes",
+  "live_events",
+  "on_demand_library",
+  "content_items",
+  "content_views",
+  "content_likes",
+  "content_view_stats",
+  "content_daily_stats"
+
+];
+
+const ACTIVITY_TABLES=[
+
+  "analytics_events",
+  "member_activity",
+  "watch_progress",
+  "member_watch_history",
+  "chat_messages",
+  "chat_reports",
+  "polls",
+  "newsletter_subscribers"
+
+];
+
+function renderSpecialDatabaseGroups(results){
+
+  const byName=
+    new Map(
+      results.map(
+        row=>[
+          row.table,
+          row
+        ]
+      )
+    );
+
+  $("contentGrid").innerHTML=
+    CONTENT_TABLES
+      .map(
+        name =>
+          byName.get(name)
+      )
+      .filter(Boolean)
+      .map(
+        databaseCardHtml
+      )
+      .join("");
+
+  $("activityGrid").innerHTML=
+    ACTIVITY_TABLES
+      .map(
+        name =>
+          byName.get(name)
+      )
+      .filter(Boolean)
+      .map(
+        databaseCardHtml
+      )
+      .join("");
+
+}
+
+function databaseCardHtml(row){
+
+  const ok=
+    !row.error;
+
+  return `
+    <div class="card db-card">
+
+      <div class="db-card-top">
+
+        <div class="db-name">
+          ${escapeHtml(
+            row.table
+          )}
+        </div>
+
+        <span
+          class="badge ${
+            ok
+            ? "green"
+            : "red"
+          }"
+        >
+          ${
+            ok
+            ? "ONLINE"
+            : "ERROR"
+          }
+        </span>
+
+      </div>
+
+      <div class="db-count">
+
+        ${
+          ok
+          ? formatNumber(
+              row.count
+            )
+          : "—"
+        }
+
+      </div>
+
+      <div
+        class="db-info ${
+          ok
+          ? "ok"
+          : "err"
+        }"
+      >
+
+        ${
+          ok
+          ? "Records available"
+          : escapeHtml(
+              classifyDatabaseError(
+                row.error
+              )
+            )
+        }
+
+      </div>
+
+    </div>
+  `;
+
+}
+
+/* =========================================================
+   HIGH LEVEL STATS
+========================================================= */
+
+function updateHighLevelStats(results){
+
+  const map=
+    new Map(
+      results.map(
+        row=>[
+          row.table,
+          row
+        ]
+      )
+    );
+
+  function count(name){
+
+    return map.get(
+      name
+    )?.error
+      ? "—"
+      : formatNumber(
+          map.get(
+            name
+          )?.count || 0
+        );
+
+  }
+
+  $("statMembers").textContent=
+    count("member_profiles");
+
+  $("statShows").textContent=
+    count("shows");
+
+  $("statEpisodes").textContent=
+    count("episodes");
+
+  $("memberProfilesCount").textContent=
+    count("member_profiles");
+
+  $("membershipsCount").textContent=
+    count("memberships");
+
+  $("memberPointsCount").textContent=
+    count("member_points");
+
+  $("watchHistoryCount").textContent=
+    count("member_watch_history");
+
+}
+
+/* =========================================================
+   WATCH RPC DIAGNOSTIC
+========================================================= */
+
+async function checkWatchRpc(){
+
+  /*
+    We intentionally call the function with zero minutes
+    and a diagnostic session.
+
+    A validation/business-rule response still proves the
+    RPC exists and is reachable, so it is classified as
+    AVAILABLE rather than automatically treated as broken.
+  */
+
+  const result=
+    await DB.rpc(
+      CONFIG.watchRpc,
+      {
+        p_content_type:
+          "admin_health_check",
+
+        p_content_id:
+          null,
+
+        p_session_id:
+          "admin-health-check",
+
+        p_channel_id:
+          null,
+
+        p_minutes:
+          0
+      }
+    );
+
+  if(!result.error){
+
+    $("memberWatchRpc").textContent=
+      "ONLINE";
+
+    $("healthWatchRpc").textContent=
+      "ONLINE";
+
+    return true;
+
+  }
+
+  const message=
+    errorText(
+      result.error
+    );
+
+  if(
+    /does not exist|function .* not found|unknown function|42883/i
+      .test(message)
+  ){
+
+    $("memberWatchRpc").textContent=
+      "ERROR";
+
+    $("healthWatchRpc").textContent=
+      "ERROR";
+
+    return false;
+
+  }
+
+  /*
+    A business-rule rejection means the RPC was found.
+  */
+
+  $("memberWatchRpc").textContent=
+    "AVAILABLE";
+
+  $("healthWatchRpc").textContent=
+    "AVAILABLE";
+
+  return true;
+
+}
+
+/* =========================================================
+   SYSTEM HEALTH
 ========================================================= */
 
 async function runHealthChecks(){
 
-  const channelResult=await DB.count("tv_channels");
-
-  $("healthChannels").textContent=
-    channelResult.error
-      ? "ERROR"
-      : "ONLINE";
-
-  const scheduleResult=await DB.count("schedule_items");
-
-  $("healthSchedule").textContent=
-    scheduleResult.error
-      ? "ERROR"
-      : "ONLINE";
-
-  const viewerResult=
-    await DB.rpc(CONFIG.activeViewerRpc);
-
-  $("healthViewerRpc").textContent=
-    viewerResult.error
-      ? "ERROR"
-      : "ONLINE";
-
-  const watchResult=
-    await DB.rpc(
-      CONFIG.trackWatchRpc,
-      {
-        p_content_type:"admin_health_check",
-        p_content_id:null,
-        p_session_id:"admin-health-check",
-        p_channel_id:null,
-        p_minutes:0
-      }
-    );
-
-  /*
-    A zero-minute diagnostic call may legitimately be rejected
-    by a production reward function. That does not mean the
-    function is missing.
-
-    We distinguish missing/RPC errors from an intentional
-    validation response.
-  */
-
-  if(!watchResult.error){
-
-    $("healthWatchRpc").textContent="ONLINE";
-    $("watchRpcStatus").textContent="ONLINE";
-
-  }else{
-
-    const message=
-      errorMessage(watchResult.error);
-
-    if(
-      /function|parameter|does not exist|not found/i.test(message)
-    ){
-
-      $("healthWatchRpc").textContent="ERROR";
-      $("watchRpcStatus").textContent="ERROR";
-
-    }else{
-
-      $("healthWatchRpc").textContent="AVAILABLE";
-      $("watchRpcStatus").textContent="AVAILABLE";
-
-    }
-
-  }
-
-  const session=await DB.session();
+  const session=
+    await DB.session();
 
   if(session.error){
 
-    $("healthApi").textContent="ERROR";
-    setConnection(false,"Supabase ERROR");
+    $("healthSupabase").textContent=
+      "ERROR";
+
+    connection(
+      false,
+      "Supabase session error"
+    );
 
   }else{
 
-    $("healthApi").textContent="ONLINE";
+    $("healthSupabase").textContent=
+      "ONLINE";
 
-    setConnection(
+  }
+
+  const channel=
+    await DB.count(
+      "tv_channels"
+    );
+
+  $("healthChannels").textContent=
+    channel.error
+      ? "ERROR"
+      : "ONLINE";
+
+  const schedule=
+    await DB.count(
+      "schedule_items"
+    );
+
+  $("healthSchedule").textContent=
+    schedule.error
+      ? "ERROR"
+      : "ONLINE";
+
+  const viewer=
+    await DB.rpc(
+      CONFIG.viewerRpc
+    );
+
+  $("healthViewerRpc").textContent=
+    viewer.error
+      ? "ERROR"
+      : "ONLINE";
+
+  await checkWatchRpc();
+
+  if(
+    !session.error &&
+    !channel.error
+  ){
+
+    connection(
       true,
       "Supabase ONLINE"
     );
@@ -2533,50 +3736,45 @@ async function runHealthChecks(){
 }
 
 /* =========================================================
-   ESCAPE
-========================================================= */
-
-function escapeHtml(value){
-
-  return String(value ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-
-}
-
-/* =========================================================
-   REFRESH EVERYTHING
+   COMPLETE REFRESH
 ========================================================= */
 
 async function refreshAll(){
 
-  try{
+  connection(
+    true,
+    "Supabase connecting…"
+  );
 
-    setConnection(
-      true,
-      "Connecting to Supabase…"
-    );
+  try{
 
     await loadAuth();
 
     /*
-      Authoritative order:
-      1. active tv_channels
-      2. viewer RPC
-      3. network viewer RPC
-      4. schedule_items
-      5. database statistics
-      6. diagnostics
+      AUTHORITATIVE DATA FLOW
+
+      tv_channels
+          ↓
+      active channels
+          ↓
+      viewer RPC
+          ↓
+      current viewers
+
+      schedule_items
+          ↓
+      TV schedule
+
+      Other tables
+          ↓
+      independent statistics
     */
 
     await loadChannels();
 
-    await loadViewers();
+    renderChannels();
 
-    await loadNetworkViewers();
+    await loadViewerStats();
 
     renderChannels();
 
@@ -2586,13 +3784,14 @@ async function refreshAll(){
 
     await runHealthChecks();
 
-    STATE.lastUpdated=new Date();
+    STATE.initialized=true;
 
     $("lastUpdated").textContent=
       "Updated " +
-      STATE.lastUpdated.toLocaleTimeString();
+      new Date()
+        .toLocaleTimeString();
 
-    setConnection(
+    connection(
       true,
       "Supabase ONLINE"
     );
@@ -2604,14 +3803,49 @@ async function refreshAll(){
       error
     );
 
-    setConnection(
+    connection(
       false,
-      "Supabase ERROR"
+      "Supabase connected with errors"
     );
 
     toast(
-      "Dashboard refresh error: " +
-      errorMessage(error),
+      "Admin Pro encountered an error: "+
+      errorText(error),
+      true
+    );
+
+  }
+
+}
+
+/* =========================================================
+   LIVE VIEWER REFRESH
+========================================================= */
+
+async function refreshViewersOnly(){
+
+  try{
+
+    await loadChannels();
+
+    await loadViewerStats();
+
+    renderChannels();
+
+    $("lastUpdated").textContent=
+      "Live update " +
+      new Date()
+        .toLocaleTimeString();
+
+  }catch(error){
+
+    console.error(
+      "Viewer refresh error:",
+      error
+    );
+
+    toast(
+      "Viewer refresh failed.",
       true
     );
 
@@ -2623,178 +3857,203 @@ async function refreshAll(){
    NAVIGATION
 ========================================================= */
 
-document.querySelectorAll(".nav button[data-target]")
-.forEach(button=>{
+document
+  .querySelectorAll(
+    ".nav button[data-section]"
+  )
+  .forEach(button=>{
 
-  button.addEventListener("click",()=>{
+    button.addEventListener(
+      "click",
+      ()=>{
 
-    const target=button.dataset.target;
+        const section=
+          button.dataset.section;
 
-    document.querySelectorAll(".page-section")
-      .forEach(section=>{
-        section.classList.add("hidden");
-      });
+        document
+          .querySelectorAll(
+            ".page-section"
+          )
+          .forEach(
+            element =>
+              element.classList.add(
+                "hidden"
+              )
+          );
 
-    const section=$(target);
+        const target=
+          $(section);
 
-    if(section){
-      section.classList.remove("hidden");
-    }
+        if(target){
 
-    document.querySelectorAll(".nav button")
-      .forEach(btn=>{
-        btn.classList.remove("active");
-      });
+          target.classList.remove(
+            "hidden"
+          );
 
-    button.classList.add("active");
+        }
 
-    document.body.classList.remove("nav-open");
+        document
+          .querySelectorAll(
+            ".nav button[data-section]"
+          )
+          .forEach(
+            element =>
+              element.classList.remove(
+                "active"
+              )
+          );
+
+        button.classList.add(
+          "active"
+        );
+
+        document.body.classList.remove(
+          "nav-open"
+        );
+
+      }
+    );
 
   });
 
-});
-
 /* =========================================================
-   MOBILE MENU
+   BUTTONS
 ========================================================= */
 
 $("menuBtn").addEventListener(
   "click",
   ()=>{
-    document.body.classList.toggle("nav-open");
+    document.body.classList.toggle(
+      "nav-open"
+    );
   }
 );
-
-/* =========================================================
-   REFRESH BUTTONS
-========================================================= */
 
 $("refreshBtn").addEventListener(
   "click",
-  refreshAll
-);
-
-$("viewerRefresh").addEventListener(
-  "click",
   async()=>{
-    await loadViewers();
-    await loadNetworkViewers();
-    toast("Live viewer statistics refreshed.");
+
+    await refreshAll();
+
+    toast(
+      "Admin Pro refreshed."
+    );
+
   }
 );
 
-$("viewerRefresh2").addEventListener(
+$("viewerRefreshBtn").addEventListener(
   "click",
   async()=>{
-    await loadViewers();
-    await loadNetworkViewers();
-    toast("Live viewer statistics refreshed.");
+
+    await refreshViewersOnly();
+
+    toast(
+      "Live viewer statistics refreshed."
+    );
+
   }
 );
 
-$("dbRefresh").addEventListener(
+$("viewerRefreshBtn2").addEventListener(
   "click",
   async()=>{
+
+    await refreshViewersOnly();
+
+    toast(
+      "Live viewer statistics refreshed."
+    );
+
+  }
+);
+
+$("databaseRefreshBtn").addEventListener(
+  "click",
+  async()=>{
+
     await loadDatabaseCounts();
-    toast("Database statistics refreshed.");
+
+    toast(
+      "Database statistics refreshed."
+    );
+
   }
 );
 
-$("healthRefresh").addEventListener(
+$("healthRefreshBtn").addEventListener(
   "click",
   async()=>{
+
     await runHealthChecks();
-    toast("System diagnostics complete.");
+
+    toast(
+      "System diagnostics complete."
+    );
+
   }
 );
 
 /* =========================================================
-   AUTOMATIC REFRESH
+   AUTOMATIC LIVE VIEWER REFRESH
 ========================================================= */
 
-function startAutoRefresh(){
+function startLiveRefresh(){
 
-  clearInterval(STATE.timer);
-
-  STATE.timer=setInterval(
-    async()=>{
-
-      /*
-        Live viewers update frequently.
-        Full database counts are intentionally not refreshed
-        every 30 seconds to avoid unnecessary API traffic.
-      */
-
-      await loadViewers();
-      await loadNetworkViewers();
-
-      STATE.lastUpdated=new Date();
-
-      $("lastUpdated").textContent=
-        "Live update " +
-        STATE.lastUpdated.toLocaleTimeString();
-
-    },
-    CONFIG.refreshMs
+  clearInterval(
+    STATE.refreshTimer
   );
+
+  STATE.refreshTimer=
+    setInterval(
+      async()=>{
+
+        await refreshViewersOnly();
+
+      },
+      CONFIG.refreshInterval
+    );
 
 }
 
 /* =========================================================
-   START
+   INITIALIZE
 ========================================================= */
 
-(async function(){
+(async function initialize(){
 
   try{
 
-    setConnection(
+    connection(
       true,
-      "Supabase ONLINE"
+      "Supabase connecting…"
     );
 
     await refreshAll();
 
-    startAutoRefresh();
+    startLiveRefresh();
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "Admin Pro initialization error:",
+      error
+    );
 
-    setConnection(
+    connection(
       false,
-      "Supabase ERROR"
+      "Supabase initialization error"
     );
 
     toast(
-      "Unable to initialize Admin Pro.",
+      "Admin Pro could not initialize.",
       true
     );
 
   }
 
 })();
-
 </script>
 
-
-<!-- BACKDECKCREW_ADMIN_INTEGRATION -->
-<script>
-(()=>{
- const add=()=>{
-  const aside=document.querySelector('aside');
-  const main=document.querySelector('main');
-  if(!aside||!main)return;
-  const nav=document.createElement('button'); nav.className='nav'; nav.dataset.page='backdeckcrew'; nav.textContent='🎬 Back Deck Crew'; aside.appendChild(nav);
-  const page=document.createElement('section'); page.id='page-backdeckcrew'; page.className='page'; page.innerHTML='<h1>Back Deck Crew</h1><div class="grid"><div class="card"><h2>Back Deck Crew Settings</h2><div id="backdeck-settings" class="muted">Loading…</div></div><div class="card"><h2>Crew Members</h2><div id="backdeck-members" class="muted">Loading…</div></div></div>'; main.appendChild(page);
-  nav.onclick=async()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));page.classList.add('active');
-   const s=await db.from('backdeckcrew_settings').select('*').eq('site_slug','backdeckcrew').maybeSingle();
-   document.getElementById('backdeck-settings').textContent=s.error?s.error.message:JSON.stringify(s.data||{},null,2);
-   const m=await db.from('backdeckcrew_members').select('name,role,bio,is_featured,is_active,sort_order').order('sort_order',{ascending:true});
-   document.getElementById('backdeck-members').innerHTML=m.error?'<span class="bad">'+String(m.error.message).replace(/[<>]/g,'')+'</span>':(m.data||[]).map(x=>'<div class="notice"><b>'+String(x.name||'').replace(/[<>]/g,'')+'</b> — '+String(x.role||'').replace(/[<>]/g,'')+'</div>').join('')||'<span class="muted">No crew members yet.</span>';
-  };
- }; if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
-})();
-</script>
 </body>
 </html>
