@@ -6,30 +6,33 @@
 <meta name="theme-color" content="#050507">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
-<title>CrowRules Entertainment - Admin Pro v1.1</title>
+<title>CrowRules Entertainment — Admin Pro v1.2</title>
 
 <meta
   name="description"
-  content="CrowRules Entertainment Admin Pro — Supabase-powered administration dashboard."
+  content="CrowRules Entertainment Admin Pro — database administration, TV channels, schedule, members, analytics and live viewer statistics."
 >
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap');
+
 :root{
   --bg:#050507;
-  --panel:#0d0d12;
-  --panel2:#111119;
-  --panel3:#171720;
-  --border:#292933;
-  --text:#f5f5f7;
+  --panel:#0b0b10;
+  --panel2:#101017;
+  --panel3:#15151e;
+  --line:#272733;
+  --text:#f4f4f7;
   --muted:#92929e;
-  --accent:#a855f7;
-  --accent2:#7c3aed;
-  --green:#22c55e;
-  --yellow:#f59e0b;
-  --red:#ef4444;
-  --blue:#38bdf8;
+  --accent:#9d4edd;
+  --accent2:#c77dff;
+  --green:#38d996;
+  --yellow:#ffd166;
+  --red:#ff5c72;
+  --blue:#55aaff;
+  --shadow:0 18px 60px rgba(0,0,0,.35);
 }
 
 *{
@@ -43,20 +46,11 @@ html{
 body{
   margin:0;
   background:
-    radial-gradient(
-      circle at 85% -10%,
-      rgba(168,85,247,.16),
-      transparent 30%
-    ),
+    radial-gradient(circle at top right,rgba(157,78,221,.12),transparent 30%),
+    radial-gradient(circle at bottom left,rgba(85,170,255,.06),transparent 25%),
     var(--bg);
   color:var(--text);
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family:Montserrat,Arial,sans-serif;
 }
 
 button,
@@ -75,55 +69,41 @@ a{
   text-decoration:none;
 }
 
-.hidden{
-  display:none!important;
+.app{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:270px 1fr;
 }
-
-.muted{
-  color:var(--muted);
-}
-
-/* =========================================================
-   APP
-========================================================= */
 
 .sidebar{
-  position:fixed;
+  position:sticky;
   top:0;
-  bottom:0;
-  left:0;
-  width:250px;
-  padding:20px;
+  height:100vh;
   overflow:auto;
-  background:#08080c;
-  border-right:1px solid var(--border);
-  z-index:100;
+  border-right:1px solid var(--line);
+  background:rgba(5,5,7,.94);
+  backdrop-filter:blur(20px);
+  padding:20px 14px;
+  z-index:20;
 }
 
-.main{
-  min-height:100vh;
-  margin-left:250px;
-  padding:24px;
+.logo{
+  padding:8px 12px 22px;
 }
 
-/* =========================================================
-   BRAND
-========================================================= */
-
-.brand{
+.logo strong{
+  display:block;
+  font-family:Orbitron,sans-serif;
   font-size:20px;
-  font-weight:950;
+  letter-spacing:1px;
 }
 
-.brand-sub{
-  margin:5px 0 24px;
-  color:var(--muted);
+.logo span{
+  color:var(--accent2);
   font-size:11px;
+  font-weight:800;
+  letter-spacing:2px;
 }
-
-/* =========================================================
-   NAV
-========================================================= */
 
 .nav{
   display:grid;
@@ -132,98 +112,84 @@ a{
 
 .nav button{
   width:100%;
-  padding:11px 12px;
-  border:1px solid transparent;
-  border-radius:10px;
-  background:transparent;
-  color:#b9b9c4;
   text-align:left;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--muted);
+  padding:11px 12px;
+  border-radius:10px;
+  transition:.2s;
 }
 
-.nav button:hover{
-  background:#121219;
-  color:white;
-}
-
+.nav button:hover,
 .nav button.active{
-  color:white;
-  border-color:#422b55;
-  background:rgba(168,85,247,.14);
+  color:var(--text);
+  background:var(--panel2);
+  border-color:var(--line);
 }
 
-/* =========================================================
-   MOBILE NAV
-========================================================= */
-
-.mobile-nav{
-  display:none;
-  gap:6px;
-  overflow:auto;
-  margin-bottom:14px;
+.nav-section{
+  margin:22px 12px 7px;
+  color:#686875;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
 }
 
-.mobile-nav button{
-  white-space:nowrap;
-  padding:8px 11px;
-  border:1px solid var(--border);
-  border-radius:9px;
-  background:#111118;
-  color:white;
+.main{
+  min-width:0;
 }
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .topbar{
+  position:sticky;
+  top:0;
+  z-index:15;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:20px;
-  margin-bottom:20px;
+  align-items:center;
+  gap:15px;
+  padding:14px 22px;
+  border-bottom:1px solid var(--line);
+  background:rgba(5,5,7,.82);
+  backdrop-filter:blur(18px);
 }
 
-h1{
+.topbar h1{
   margin:0;
-  font-size:28px;
+  font-family:Orbitron,sans-serif;
+  font-size:18px;
 }
 
-.subtitle{
-  margin-top:6px;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.connection{
+.status{
   display:flex;
   align-items:center;
   gap:8px;
-  padding:8px 12px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:#0b0b10;
-  font-size:11px;
+  color:var(--muted);
+  font-size:12px;
 }
 
 .dot{
   width:9px;
   height:9px;
   border-radius:50%;
-  background:var(--red);
+  background:var(--yellow);
+  box-shadow:0 0 12px currentColor;
 }
 
 .dot.online{
   background:var(--green);
-  box-shadow:0 0 12px rgba(34,197,94,.7);
 }
 
-.dot.warning{
-  background:var(--yellow);
+.dot.error{
+  background:var(--red);
 }
 
-/* =========================================================
-   SECTIONS
-========================================================= */
+.content{
+  padding:24px;
+  max-width:1800px;
+  margin:auto;
+}
 
 .section{
   display:none;
@@ -233,1490 +199,1501 @@ h1{
   display:block;
 }
 
-/* =========================================================
-   CARDS
-========================================================= */
-
-.card{
-  margin-bottom:18px;
-  overflow:hidden;
-  border:1px solid var(--border);
-  border-radius:15px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(17,17,25,.98),
-      rgba(8,8,12,.98)
-    );
-}
-
-.card-head{
+.section-head{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:12px;
-  padding:14px 16px;
-  border-bottom:1px solid var(--border);
+  align-items:flex-start;
+  gap:15px;
+  margin-bottom:20px;
 }
 
-.card-title{
-  font-size:14px;
-  font-weight:900;
+.section-head h2{
+  margin:0 0 5px;
+  font-family:Orbitron,sans-serif;
+  font-size:22px;
 }
 
-.card-body{
-  padding:16px;
+.section-head p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
 }
 
-/* =========================================================
-   STATS
-========================================================= */
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.btn{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:9px;
+  padding:9px 13px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.btn:hover{
+  border-color:var(--accent);
+}
+
+.btn.primary{
+  background:var(--accent);
+  border-color:var(--accent);
+}
+
+.btn.danger{
+  color:#fff;
+  border-color:rgba(255,92,114,.35);
+  background:rgba(255,92,114,.1);
+}
+
+.grid{
+  display:grid;
+  gap:14px;
+}
 
 .stats{
-  display:grid;
-  grid-template-columns:
-    repeat(6,minmax(0,1fr));
-  gap:12px;
-  margin-bottom:18px;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+}
+
+.card{
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:var(--shadow);
 }
 
 .stat{
-  min-width:0;
-  padding:16px;
-  border:1px solid var(--border);
-  border-radius:15px;
-  background:#101017;
+  padding:18px;
 }
 
 .stat-label{
   color:var(--muted);
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.08em;
+  font-size:11px;
+  font-weight:700;
   text-transform:uppercase;
+  letter-spacing:.8px;
 }
 
 .stat-value{
-  margin-top:7px;
-  font-size:26px;
-  font-weight:950;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  margin-top:8px;
+  font-family:Orbitron,sans-serif;
+  font-size:27px;
 }
 
-.stat-note{
-  margin-top:3px;
-  color:#676773;
-  font-size:9px;
-}
-
-/* =========================================================
-   GRID
-========================================================= */
-
-.grid{
-  display:grid;
-  grid-template-columns:
-    minmax(0,1.4fr)
-    minmax(300px,.6fr);
-  gap:18px;
+.stat-sub{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
 }
 
 .two{
-  display:grid;
-  grid-template-columns:
-    repeat(2,minmax(0,1fr));
-  gap:18px;
+  grid-template-columns:repeat(2,minmax(0,1fr));
 }
 
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.btn{
-  padding:8px 12px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:#15151d;
-  color:white;
-  font-size:11px;
-  font-weight:800;
+.three{
+  grid-template-columns:repeat(3,minmax(0,1fr));
 }
 
-.btn:hover{
-  background:#20202a;
+.panel{
+  padding:18px;
 }
 
-.btn.primary{
-  border-color:var(--accent);
-  background:var(--accent);
+.panel h3{
+  margin:0 0 14px;
+  font-size:14px;
 }
-
-.btn.danger{
-  border-color:#5a1b24;
-  background:#2a0c10;
-  color:#fecaca;
-}
-
-/* =========================================================
-   TABLES
-========================================================= */
 
 .table-wrap{
-  width:100%;
   overflow:auto;
+  border:1px solid var(--line);
+  border-radius:10px;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
+  min-width:700px;
 }
 
 th,
 td{
-  padding:10px 12px;
-  border-bottom:1px solid var(--border);
+  padding:10px 11px;
+  border-bottom:1px solid var(--line);
   text-align:left;
-  vertical-align:middle;
+  font-size:11px;
+  vertical-align:top;
 }
 
 th{
-  color:var(--muted);
-  font-size:9px;
+  position:sticky;
+  top:0;
+  background:var(--panel3);
+  color:#bbb;
+  font-size:10px;
   text-transform:uppercase;
-  letter-spacing:.07em;
+  letter-spacing:.6px;
 }
 
-td{
-  font-size:11px;
+tr:last-child td{
+  border-bottom:0;
 }
-
-tr:hover td{
-  background:rgba(255,255,255,.015);
-}
-
-/* =========================================================
-   BADGES
-========================================================= */
 
 .badge{
   display:inline-flex;
+  align-items:center;
+  gap:5px;
   padding:4px 7px;
-  border:1px solid var(--border);
-  border-radius:999px;
+  border-radius:99px;
   font-size:9px;
-  font-weight:900;
+  font-weight:800;
+  border:1px solid var(--line);
 }
 
-.good{
-  color:#86efac;
-  border-color:#164a29;
-  background:#08200f;
+.badge.green{
+  color:var(--green);
+  background:rgba(56,217,150,.08);
 }
 
-.warn{
-  color:#fcd34d;
-  border-color:#51400d;
-  background:#211a05;
+.badge.red{
+  color:var(--red);
+  background:rgba(255,92,114,.08);
 }
 
-.bad{
-  color:#fca5a5;
-  border-color:#571923;
-  background:#250a0e;
+.badge.yellow{
+  color:var(--yellow);
+  background:rgba(255,209,102,.08);
 }
 
-.blue{
-  color:#7dd3fc;
-  border-color:#103d51;
-  background:#061a23;
+.badge.blue{
+  color:var(--blue);
+  background:rgba(85,170,255,.08);
 }
-
-/* =========================================================
-   MESSAGES
-========================================================= */
 
 .empty{
-  padding:35px 20px;
-  color:var(--muted);
+  padding:30px;
   text-align:center;
-}
-
-.info{
-  padding:13px;
-  border:1px solid #18364a;
-  border-radius:10px;
-  background:#07151e;
-  color:#bae6fd;
-  font-size:11px;
+  color:var(--muted);
+  font-size:12px;
 }
 
 .error{
-  padding:13px;
-  border:1px solid #571923;
+  padding:14px;
+  color:#ff9aaa;
+  background:rgba(255,92,114,.06);
+  border:1px solid rgba(255,92,114,.2);
   border-radius:10px;
-  background:#250a0e;
-  color:#fecaca;
   font-size:11px;
+  line-height:1.6;
 }
 
-.success{
-  padding:13px;
-  border:1px solid #164a29;
+.notice{
+  padding:12px 14px;
+  border:1px solid rgba(157,78,221,.25);
+  background:rgba(157,78,221,.06);
   border-radius:10px;
-  background:#08200f;
-  color:#bbf7d0;
+  color:#cdb3df;
   font-size:11px;
+  line-height:1.5;
 }
 
-/* =========================================================
-   VIEWERS
-========================================================= */
-
-.viewer-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-  padding:11px 0;
-  border-bottom:1px solid var(--border);
-}
-
-.viewer-row:last-child{
-  border-bottom:0;
-}
-
-.viewer-name{
-  font-weight:850;
-  font-size:12px;
-}
-
-.viewer-number{
-  color:#86efac;
-  font-weight:950;
-}
-
-/* =========================================================
-   LINKS
-========================================================= */
-
-.links{
+.channel-grid{
   display:grid;
-  grid-template-columns:
-    repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:14px;
+}
+
+.channel{
+  padding:16px;
+}
+
+.channel-top{
+  display:flex;
+  justify-content:space-between;
   gap:10px;
 }
 
-.link-card{
-  padding:14px;
-  border:1px solid var(--border);
-  border-radius:11px;
-  background:#101017;
+.channel-name{
+  font-weight:800;
 }
 
-.link-card:hover{
-  border-color:#4d3266;
-}
-
-.link-title{
-  font-size:12px;
-  font-weight:900;
-}
-
-.link-file{
-  margin-top:4px;
+.channel-slug{
   color:var(--muted);
-  font-size:9px;
+  font-size:10px;
+  margin-top:3px;
 }
 
-/* =========================================================
-   DIAGNOSTICS
-========================================================= */
-
-.diagnostic{
-  display:grid;
-  grid-template-columns:180px minmax(0,1fr) 100px;
-  gap:12px;
-  align-items:center;
-  padding:9px 0;
-  border-bottom:1px solid var(--border);
-  font-size:11px;
+.viewer{
+  margin:20px 0 12px;
 }
 
-.diagnostic:last-child{
-  border-bottom:0;
+.viewer-number{
+  font-family:Orbitron,sans-serif;
+  font-size:30px;
 }
 
-.diagnostic-message{
+.viewer-label{
   color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+}
+
+.progress{
+  height:5px;
+  background:#1d1d25;
+  border-radius:99px;
   overflow:hidden;
-  text-overflow:ellipsis;
+  margin-top:14px;
 }
 
-/* =========================================================
-   RESPONSIVE
-========================================================= */
+.progress span{
+  display:block;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
 
-@media(max-width:1250px){
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
 
+.field{
+  display:grid;
+  gap:6px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+.field label{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  border:1px solid var(--line);
+  background:#07070a;
+  color:var(--text);
+  border-radius:8px;
+  padding:10px;
+  outline:none;
+}
+
+.field textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.72);
+  z-index:100;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal-box{
+  width:min(720px,100%);
+  max-height:90vh;
+  overflow:auto;
+  padding:20px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:0 30px 100px #000;
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.modal-head h3{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:16px;
+}
+
+.close{
+  border:0;
+  background:none;
+  color:var(--muted);
+  font-size:22px;
+}
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  max-width:400px;
+  padding:13px 15px;
+  background:var(--panel3);
+  border:1px solid var(--line);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  font-size:12px;
+  z-index:200;
+  transform:translateY(130%);
+  transition:.25s;
+}
+
+.toast.show{
+  transform:translateY(0);
+}
+
+.toast.success{
+  border-color:rgba(56,217,150,.35);
+}
+
+.toast.error{
+  border-color:rgba(255,92,114,.35);
+}
+
+.mobile-toggle{
+  display:none;
+}
+
+@media(max-width:1100px){
   .stats{
-    grid-template-columns:
-      repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(3,1fr);
   }
-
-  .grid,
-  .two{
-    grid-template-columns:1fr;
-  }
-
 }
 
-@media(max-width:850px){
+@media(max-width:800px){
+  .app{
+    display:block;
+  }
 
   .sidebar{
-    display:none;
+    position:fixed;
+    left:-290px;
+    width:270px;
+    transition:.25s;
   }
 
-  .main{
-    margin-left:0;
-    padding:14px;
+  body.menu-open .sidebar{
+    left:0;
   }
 
-  .mobile-nav{
-    display:flex;
+  .mobile-toggle{
+    display:block;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--text);
+    border-radius:8px;
+    padding:7px 10px;
   }
 
   .stats{
-    grid-template-columns:
-      repeat(2,minmax(0,1fr));
+    grid-template-columns:repeat(2,1fr);
   }
 
-  .topbar{
-    align-items:flex-start;
-  }
-
-  .links{
+  .two,
+  .three,
+  .form-grid{
     grid-template-columns:1fr;
   }
 
-}
-
-@media(max-width:500px){
-
-  .stats{
-    grid-template-columns:1fr;
+  .content{
+    padding:15px;
   }
-
-  .topbar{
-    flex-direction:column;
-  }
-
 }
 </style>
 </head>
 
 <body>
 
-<aside class="sidebar">
+<div class="app">
 
-  <div class="brand">
-    CrowRules Entertainment
-  </div>
+  <aside class="sidebar">
 
-  <div class="brand-sub">
-    Admin Pro · Supabase Control Center
-  </div>
+    <div class="logo">
+      <strong>CROWRULES</strong>
+      <span>ADMIN PRO</span>
+    </div>
 
-  <nav class="nav">
+    <nav class="nav">
 
-    <button class="active" data-section="dashboard">
-      Dashboard
-    </button>
+      <button class="active" data-section="dashboard">Dashboard</button>
 
-    <button data-section="analytics">
-      Analytics
-    </button>
+      <div class="nav-section">CrowRules TV</div>
 
-    <button data-section="channels">
-      TV Channels
-    </button>
+      <button data-section="channels">TV Channels</button>
+      <button data-section="schedule">TV Guide</button>
+      <button data-section="live">Live Events</button>
+      <button data-section="shows">Shows</button>
+      <button data-section="episodes">Episodes</button>
+      <button data-section="content">Content</button>
 
-    <button data-section="schedule">
-      TV Guide
-    </button>
+      <div class="nav-section">Members</div>
 
-    <button data-section="shows">
-      Shows
-    </button>
+      <button data-section="members">Members</button>
+      <button data-section="points">Member Points</button>
+      <button data-section="watch">Watch Minutes</button>
+      <button data-section="activity">Member Activity</button>
 
-    <button data-section="episodes">
-      Episodes
-    </button>
+      <div class="nav-section">Analytics</div>
 
-    <button data-section="members">
-      Members
-    </button>
+      <button data-section="analytics">Analytics</button>
+      <button data-section="views">Content Views</button>
+      <button data-section="viewers">Active Viewers</button>
 
-    <button data-section="rewards">
-      Member Rewards
-    </button>
+      <div class="nav-section">Community</div>
 
-    <button data-section="events">
-      Live Events
-    </button>
+      <button data-section="chat">Chat</button>
+      <button data-section="polls">Polls</button>
+      <button data-section="newsletter">Newsletter</button>
 
-    <button data-section="content">
-      Content Views
-    </button>
+      <div class="nav-section">Creators</div>
 
-    <button data-section="community">
-      Community
-    </button>
+      <button data-section="creators">Creator Channels</button>
+      <button data-section="applications">Applications</button>
 
-    <button data-section="diagnostics">
-      Database Diagnostics
-    </button>
+      <div class="nav-section">Awards</div>
 
-    <button data-section="pages">
-      CrowRules Pages
-    </button>
+      <button data-section="awards">Spectrum Awards</button>
 
-  </nav>
+      <div class="nav-section">Pages</div>
 
-</aside>
+      <button data-section="links">CrowRules Pages</button>
 
+    </nav>
 
-<main class="main">
+  </aside>
 
-  <div class="mobile-nav">
+  <main class="main">
 
-    <button data-section="dashboard">
-      Dashboard
-    </button>
+    <header class="topbar">
 
-    <button data-section="analytics">
-      Analytics
-    </button>
+      <div style="display:flex;align-items:center;gap:10px">
 
-    <button data-section="channels">
-      Channels
-    </button>
+        <button class="mobile-toggle" id="menuBtn">☰</button>
 
-    <button data-section="schedule">
-      TV Guide
-    </button>
+        <h1 id="pageTitle">
+          Dashboard
+        </h1>
 
-    <button data-section="members">
-      Members
-    </button>
-
-    <button data-section="content">
-      Content
-    </button>
-
-  </div>
-
-
-  <header class="topbar">
-
-    <div>
-
-      <h1 id="pageTitle">
-        Admin Pro
-      </h1>
-
-      <div class="subtitle">
-        Database-backed CrowRules Entertainment administration
       </div>
 
-    </div>
+      <div class="status">
 
-    <div class="connection">
+        <span class="dot" id="connectionDot"></span>
 
-      <span
-        id="connectionDot"
-        class="dot"
-      ></span>
+        <span id="connectionText">
+          Connecting…
+        </span>
 
-      <span id="connectionText">
-        Starting...
-      </span>
+      </div>
 
-    </div>
+    </header>
 
-  </header>
+    <div class="content">
 
+      <!-- DASHBOARD -->
 
-<!-- =======================================================
-     DASHBOARD
-======================================================== -->
+      <section class="section active" id="dashboard">
 
-<section
-  id="section-dashboard"
-  class="section active"
->
+        <div class="section-head">
 
-  <div class="stats">
+          <div>
+            <h2>Admin Pro</h2>
+            <p>
+              Live CrowRules Entertainment database control center.
+            </p>
+          </div>
 
-    <div class="stat">
-      <div class="stat-label">Content Views</div>
-      <div id="statViews" class="stat-value">—</div>
-      <div class="stat-note">content_views</div>
-    </div>
+          <div class="actions">
 
-    <div class="stat">
-      <div class="stat-label">View Events</div>
-      <div id="statEvents" class="stat-value">—</div>
-      <div class="stat-note">analytics_events</div>
-    </div>
+            <button class="btn" onclick="refreshAll()">
+              Refresh
+            </button>
 
-    <div class="stat">
-      <div class="stat-label">Sessions</div>
-      <div id="statSessions" class="stat-value">—</div>
-      <div class="stat-note">real session IDs</div>
-    </div>
+          </div>
 
-    <div class="stat">
-      <div class="stat-label">Watch History</div>
-      <div id="statHistory" class="stat-value">—</div>
-      <div class="stat-note">member_watch_history</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Active Viewers</div>
-      <div id="statActive" class="stat-value">—</div>
-      <div class="stat-note">tv_active_viewers</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Channels</div>
-      <div id="statChannels" class="stat-value">—</div>
-      <div class="stat-note">active only</div>
-    </div>
-
-  </div>
-
-
-  <div class="grid">
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Recent Analytics Events
         </div>
 
-        <button
+        <div class="grid stats">
+
+          <div class="card stat">
+            <div class="stat-label">Active Channels</div>
+            <div class="stat-value" id="statChannels">—</div>
+            <div class="stat-sub">tv_channels</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Current Viewers</div>
+            <div class="stat-value" id="statViewers">—</div>
+            <div class="stat-sub">real active sessions</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Schedule Items</div>
+            <div class="stat-value" id="statSchedule">—</div>
+            <div class="stat-sub">schedule_items</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Members</div>
+            <div class="stat-value" id="statMembers">—</div>
+            <div class="stat-sub">member_profiles</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Content Views</div>
+            <div class="stat-value" id="statViews">—</div>
+            <div class="stat-sub">database events</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Watch Minutes</div>
+            <div class="stat-value" id="statMinutes">—</div>
+            <div class="stat-sub">verified minutes</div>
+          </div>
+
+        </div>
+
+        <br>
+
+        <div class="grid two">
+
+          <div class="card panel">
+
+            <h3>Live Channel Viewers</h3>
+
+            <div id="dashboardChannels">
+              <div class="empty">Loading…</div>
+            </div>
+
+          </div>
+
+          <div class="card panel">
+
+            <h3>Database Health</h3>
+
+            <div id="healthList">
+              <div class="empty">Checking…</div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CHANNELS -->
+
+      <section class="section" id="channels">
+
+        <div class="section-head">
+
+          <div>
+            <h2>TV Channels</h2>
+            <p>
+              Authoritative channel list: active rows from tv_channels only.
+            </p>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" onclick="openEditor('tv_channels')">
+              + Add Channel
+            </button>
+
+            <button class="btn" onclick="loadChannels()">
+              Refresh
+            </button>
+          </div>
+
+        </div>
+
+        <div class="notice">
+          Current viewers are read from the active viewer system. The
+          <strong>views</strong> column is accumulated channel views and is
+          not used as the live viewer count.
+        </div>
+
+        <br>
+
+        <div id="channelsGrid" class="channel-grid"></div>
+
+      </section>
+
+
+      <!-- SCHEDULE -->
+
+      <section class="section" id="schedule">
+
+        <div class="section-head">
+
+          <div>
+            <h2>TV Guide</h2>
+            <p>
+              Authoritative schedule: schedule_items.
+            </p>
+          </div>
+
+          <div class="actions">
+
+            <button class="btn primary"
+              onclick="openEditor('schedule_items')">
+              + Add Schedule Item
+            </button>
+
+            <button class="btn"
+              onclick="loadTableSection('schedule_items','scheduleTable')">
+              Refresh
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="scheduleTable"></div>
+
+      </section>
+
+
+      <!-- LIVE EVENTS -->
+
+      <section class="section" id="live">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Live Events</h2>
+            <p>Live programming and events.</p>
+          </div>
+
+          <button class="btn primary"
+            onclick="openEditor('live_events')">
+            + Add Event
+          </button>
+
+        </div>
+
+        <div id="liveTable"></div>
+
+      </section>
+
+
+      <!-- SHOWS -->
+
+      <section class="section" id="shows">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Shows</h2>
+            <p>Show database.</p>
+          </div>
+
+          <button class="btn primary"
+            onclick="openEditor('shows')">
+            + Add Show
+          </button>
+
+        </div>
+
+        <div id="showsTable"></div>
+
+      </section>
+
+
+      <!-- EPISODES -->
+
+      <section class="section" id="episodes">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Episodes</h2>
+            <p>Episode database.</p>
+          </div>
+
+          <button class="btn primary"
+            onclick="openEditor('episodes')">
+            + Add Episode
+          </button>
+
+        </div>
+
+        <div id="episodesTable"></div>
+
+      </section>
+
+
+      <!-- CONTENT -->
+
+      <section class="section" id="content">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Content</h2>
+            <p>On-demand and content records.</p>
+          </div>
+
+          <button class="btn primary"
+            onclick="openEditor('content_items')">
+            + Add Content
+          </button>
+
+        </div>
+
+        <div id="contentTable"></div>
+
+      </section>
+
+
+      <!-- MEMBERS -->
+
+      <section class="section" id="members">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Members</h2>
+            <p>Member profiles and membership activity.</p>
+          </div>
+
+          <button class="btn" onclick="loadTableSection('member_profiles','membersTable')">
+            Refresh
+          </button>
+
+        </div>
+
+        <div id="membersTable"></div>
+
+      </section>
+
+
+      <!-- POINTS -->
+
+      <section class="section" id="points">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Member Points</h2>
+            <p>
+              Real member reward balances. Uses updated_at, not created_at.
+            </p>
+          </div>
+
+          <button class="btn" onclick="loadPoints()">
+            Refresh
+          </button>
+
+        </div>
+
+        <div id="pointsTable"></div>
+
+      </section>
+
+
+      <!-- WATCH -->
+
+      <section class="section" id="watch">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Watch Minutes</h2>
+            <p>
+              Verified member viewing activity. Uses watched_at.
+            </p>
+          </div>
+
+          <button class="btn" onclick="loadWatchMinutes()">
+            Refresh
+          </button>
+
+        </div>
+
+        <div id="watchTable"></div>
+
+      </section>
+
+
+      <!-- ACTIVITY -->
+
+      <section class="section" id="activity">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Member Activity</h2>
+            <p>Member activity records.</p>
+          </div>
+
+          <button class="btn"
+            onclick="loadTableSection('member_activity','activityTable')">
+            Refresh
+          </button>
+
+        </div>
+
+        <div id="activityTable"></div>
+
+      </section>
+
+
+      <!-- ANALYTICS -->
+
+      <section class="section" id="analytics">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Analytics</h2>
+            <p>Database-backed analytics rather than fabricated counters.</p>
+          </div>
+
+          <button class="btn" onclick="loadAnalytics()">
+            Refresh
+          </button>
+
+        </div>
+
+        <div class="grid stats">
+
+          <div class="card stat">
+            <div class="stat-label">Content Views</div>
+            <div class="stat-value" id="analyticsViews">—</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">View Events</div>
+            <div class="stat-value" id="analyticsViewEvents">—</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">View Sessions</div>
+            <div class="stat-value" id="analyticsSessions">—</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Analytics Events</div>
+            <div class="stat-value" id="analyticsEvents">—</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Watch History</div>
+            <div class="stat-value" id="analyticsHistory">—</div>
+          </div>
+
+          <div class="card stat">
+            <div class="stat-label">Active Viewers</div>
+            <div class="stat-value" id="analyticsActive">—</div>
+          </div>
+
+        </div>
+
+        <br>
+
+        <div class="card panel">
+
+          <h3>Recent Analytics Events</h3>
+
+          <button class="btn" onclick="loadRecentAnalytics()">
+            Refresh
+          </button>
+
+          <br><br>
+
+          <div id="recentAnalytics"></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- VIEWS -->
+
+      <section class="section" id="views">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Content Views</h2>
+            <p>Raw database-backed content view records.</p>
+          </div>
+
+          <button class="btn"
+            onclick="loadTableSection('content_views','viewsTable')">
+            Refresh
+          </button>
+
+        </div>
+
+        <div id="viewsTable"></div>
+
+      </section>
+
+
+      <!-- ACTIVE VIEWERS -->
+
+      <section class="section" id="viewers">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Active Viewers</h2>
+            <p>Current viewers from tv_active_viewers.</p>
+          </div>
+
+          <button class="btn" onclick="loadActiveViewerSection()">
+            Refresh
+          </button>
+
+        </div>
+
+        <div id="viewersTable"></div>
+
+      </section>
+
+
+      <!-- CHAT -->
+
+      <section class="section" id="chat">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Chat</h2>
+            <p>Chat rooms and recent messages.</p>
+          </div>
+
+          <button class="btn primary"
+            onclick="openEditor('chat_rooms')">
+            + Add Room
+          </button>
+
+        </div>
+
+        <div class="grid two">
+
+          <div class="card panel">
+            <h3>Chat Rooms</h3>
+            <div id="chatRooms"></div>
+          </div>
+
+          <div class="card panel">
+            <h3>Recent Messages</h3>
+            <div id="chatMessages"></div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- POLLS -->
+
+      <section class="section" id="polls">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Polls</h2>
+            <p>Community polls.</p>
+          </div>
+
+          <button class="btn primary"
+            onclick="openEditor('polls')">
+            + Add Poll
+          </button>
+
+        </div>
+
+        <div id="pollsTable"></div>
+
+      </section>
+
+
+      <!-- NEWSLETTER -->
+
+      <section class="section" id="newsletter">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Newsletter</h2>
+            <p>Newsletter subscribers.</p>
+          </div>
+
+        </div>
+
+        <div id="newsletterTable"></div>
+
+      </section>
+
+
+      <!-- CREATORS -->
+
+      <section class="section" id="creators">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Creator Channels</h2>
+            <p>CrowRules creator ecosystem.</p>
+          </div>
+
+          <button class="btn primary"
+            onclick="openEditor('creator_channels')">
+            + Add Creator
+          </button>
+
+        </div>
+
+        <div id="creatorsTable"></div>
+
+      </section>
+
+
+      <!-- APPLICATIONS -->
+
+      <section class="section" id="applications">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Creator Applications</h2>
+            <p>Creator application queue.</p>
+          </div>
+
+        </div>
+
+        <div id="applicationsTable"></div>
+
+      </section>
+
+
+      <!-- AWARDS -->
+
+      <section class="section" id="awards">
+
+        <div class="section-head">
+
+          <div>
+            <h2>Spectrum Awards</h2>
+            <p>CrowRules Entertainment Spectrum Awards administration.</p>
+          </div>
+
+        </div>
+
+        <div class="card panel">
+
+          <div class="notice">
+
+            Spectrum Awards replaces the former CROW Awards branding.
+
+            Award-specific database tables can be connected here when
+            created in Supabase.
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- LINKS -->
+
+      <section class="section" id="links">
+
+        <div class="section-head">
+
+          <div>
+            <h2>CrowRules Pages</h2>
+            <p>Quick access to the CrowRules Entertainment ecosystem.</p>
+          </div>
+
+        </div>
+
+        <div class="channel-grid">
+
+          <a class="card panel" href="index.html">
+            <h3>CrowRules Entertainment</h3>
+            <p>Home page</p>
+          </a>
+
+          <a class="card panel" href="tv.html">
+            <h3>CrowRules TV</h3>
+            <p>24/7 streaming network</p>
+          </a>
+
+          <a class="card panel" href="members.html">
+            <h3>Members</h3>
+            <p>Member Hub</p>
+          </a>
+
+          <a class="card panel" href="nest.html">
+            <h3>Crow Nest</h3>
+            <p>Creator community</p>
+          </a>
+
+          <a class="card panel" href="tacoma-nights.html">
+            <h3>Tacoma Nights</h3>
+            <p>Show page</p>
+          </a>
+
+          <a class="card panel"
+             href="https://www.youtube.com/@CrowRules_TV"
+             target="_blank"
+             rel="noopener">
+            <h3>CrowRules TV YouTube</h3>
+            <p>Official YouTube channel</p>
+          </a>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- EDITOR -->
+
+<div class="modal" id="editorModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <h3 id="editorTitle">
+        Edit Record
+      </h3>
+
+      <button class="close"
+        onclick="closeEditor()">
+        ×
+      </button>
+
+    </div>
+
+    <form id="editorForm">
+
+      <div id="editorFields"
+           class="form-grid">
+      </div>
+
+      <br>
+
+      <div class="actions">
+
+        <button type="button"
           class="btn"
-          id="refreshAnalytics"
-        >
-          Refresh
+          onclick="closeEditor()">
+          Cancel
+        </button>
+
+        <button type="submit"
+          class="btn primary">
+          Save
         </button>
 
       </div>
 
-      <div
-        id="recentAnalytics"
-        class="card-body"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
-
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          Current Viewers By Channel
-        </div>
-
-        <button
-          class="btn"
-          id="refreshViewers"
-        >
-          Refresh
-        </button>
-
-      </div>
-
-      <div
-        id="viewerList"
-        class="card-body"
-      >
-        <div class="empty">
-          Loading...
-        </div>
-      </div>
-
-    </div>
+    </form>
 
   </div>
 
-</section>
+</div>
 
 
-<!-- =======================================================
-     ANALYTICS
-======================================================== -->
-
-<section
-  id="section-analytics"
-  class="section"
->
-
-  <div class="stats">
-
-    <div class="stat">
-      <div class="stat-label">Content Views</div>
-      <div id="aViews" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Analytics Events</div>
-      <div id="aEvents" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Sessions</div>
-      <div id="aSessions" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Watch History</div>
-      <div id="aHistory" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Active Viewers</div>
-      <div id="aActive" class="stat-value">—</div>
-    </div>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Recent Analytics Events
-      </div>
-
-      <button
-        class="btn"
-        id="refreshAnalytics2"
-      >
-        Refresh
-      </button>
-
-    </div>
-
-    <div
-      id="analyticsList"
-      class="card-body"
-    >
-      <div class="empty">
-        Loading...
-      </div>
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     CHANNELS
-======================================================== -->
-
-<section
-  id="section-channels"
-  class="section"
->
-
-  <div class="info">
-    <strong>Authoritative source:</strong>
-    <code>tv_channels</code>.
-    Only rows with <code>is_active = true</code> are displayed.
-    Current viewers come from <code>tv_active_viewers</code>;
-    accumulated channel views are a separate metric.
-  </div>
-
-  <br>
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Active TV Channels
-      </div>
-
-      <button
-        class="btn"
-        id="refreshChannels"
-      >
-        Refresh
-      </button>
-
-    </div>
-
-    <div
-      id="channelsList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     TV GUIDE
-======================================================== -->
-
-<section
-  id="section-schedule"
-  class="section"
->
-
-  <div class="info">
-
-    <strong>Authoritative TV schedule:</strong>
-    <code>schedule_items</code>.
-
-    This page does not query the legacy
-    <code>schedule</code>,
-    <code>scheduled_items</code>, or
-    <code>tv_programs</code> tables.
-
-  </div>
-
-  <br>
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Schedule Items
-      </div>
-
-      <button
-        class="btn"
-        id="refreshSchedule"
-      >
-        Refresh
-      </button>
-
-    </div>
-
-    <div
-      id="scheduleList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     SHOWS
-======================================================== -->
-
-<section
-  id="section-shows"
-  class="section"
->
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Shows
-      </div>
-
-      <button
-        class="btn"
-        onclick="loadGeneric('shows','showsList')"
-      >
-        Refresh
-      </button>
-
-    </div>
-
-    <div
-      id="showsList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     EPISODES
-======================================================== -->
-
-<section
-  id="section-episodes"
-  class="section"
->
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Episodes
-      </div>
-
-      <button
-        class="btn"
-        onclick="loadGeneric('episodes','episodesList')"
-      >
-        Refresh
-      </button>
-
-    </div>
-
-    <div
-      id="episodesList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     MEMBERS
-======================================================== -->
-
-<section
-  id="section-members"
-  class="section"
->
-
-  <div class="stats">
-
-    <div class="stat">
-      <div class="stat-label">Member Profiles</div>
-      <div id="memberProfiles" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Points</div>
-      <div id="memberPoints" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Activity</div>
-      <div id="memberActivity" class="stat-value">—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">Watch History</div>
-      <div id="memberHistory" class="stat-value">—</div>
-    </div>
-
-  </div>
-
-  <div class="card">
-
-    <div class="card-head">
-      <div class="card-title">
-        Member Profiles
-      </div>
-
-      <button
-        class="btn"
-        onclick="loadMembers()"
-      >
-        Refresh
-      </button>
-    </div>
-
-    <div
-      id="membersList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     REWARDS
-======================================================== -->
-
-<section
-  id="section-rewards"
-  class="section"
->
-
-  <div class="info">
-
-    Member viewing rewards use the database-backed
-    <code>crowrules_track_watch</code> architecture.
-
-    Verified viewing can update:
-
-    <code>member_points</code>,
-    <code>member_point_transactions</code>,
-    <code>member_stats</code>, and
-    <code>crowrules_member_watch_minutes</code>.
-
-  </div>
-
-  <br>
-
-  <div class="two">
-
-    <div class="card">
-
-      <div class="card-head">
-        <div class="card-title">
-          Member Points
-        </div>
-      </div>
-
-      <div
-        id="pointsList"
-        class="table-wrap"
-      ></div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-head">
-        <div class="card-title">
-          Watch Minutes
-        </div>
-      </div>
-
-      <div
-        id="minutesList"
-        class="table-wrap"
-      ></div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     EVENTS
-======================================================== -->
-
-<section
-  id="section-events"
-  class="section"
->
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Live Events
-      </div>
-
-      <button
-        class="btn"
-        onclick="loadGeneric('live_events','eventsList')"
-      >
-        Refresh
-      </button>
-
-    </div>
-
-    <div
-      id="eventsList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     CONTENT VIEWS
-======================================================== -->
-
-<section
-  id="section-content"
-  class="section"
->
-
-  <div class="stats">
-
-    <div class="stat">
-      <div class="stat-label">
-        Total Views
-      </div>
-      <div
-        id="contentViews"
-        class="stat-value"
-      >—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">
-        Unique Users
-      </div>
-      <div
-        id="contentUsers"
-        class="stat-value"
-      >—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">
-        Unique Sessions
-      </div>
-      <div
-        id="contentSessions"
-        class="stat-value"
-      >—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">
-        Watch Seconds
-      </div>
-      <div
-        id="contentSeconds"
-        class="stat-value"
-      >—</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-label">
-        Completed
-      </div>
-      <div
-        id="contentCompleted"
-        class="stat-value"
-      >—</div>
-    </div>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Content View Statistics
-      </div>
-
-      <button
-        class="btn"
-        onclick="loadContent()"
-      >
-        Refresh
-      </button>
-
-    </div>
-
-    <div
-      id="contentStatsList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="card-head">
-      <div class="card-title">
-        Raw Content Views
-      </div>
-    </div>
-
-    <div
-      id="rawViewsList"
-      class="table-wrap"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     COMMUNITY
-======================================================== -->
-
-<section
-  id="section-community"
-  class="section"
->
-
-  <div class="two">
-
-    <div class="card">
-
-      <div class="card-head">
-        <div class="card-title">
-          Chat Rooms
-        </div>
-      </div>
-
-      <div
-        id="chatRooms"
-        class="table-wrap"
-      ></div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-head">
-        <div class="card-title">
-          Polls
-        </div>
-      </div>
-
-      <div
-        id="polls"
-        class="table-wrap"
-      ></div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-head">
-        <div class="card-title">
-          Newsletter Subscribers
-        </div>
-      </div>
-
-      <div
-        id="newsletter"
-        class="table-wrap"
-      ></div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-head">
-        <div class="card-title">
-          Creator Applications
-        </div>
-      </div>
-
-      <div
-        id="creatorApplications"
-        class="table-wrap"
-      ></div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     DIAGNOSTICS
-======================================================== -->
-
-<section
-  id="section-diagnostics"
-  class="section"
->
-
-  <div class="info">
-
-    This diagnostic panel checks the browser's Supabase
-    connection independently for every CrowRules table.
-    A failed table does not make the entire dashboard
-    appear disconnected.
-
-  </div>
-
-  <br>
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        Supabase Connection
-      </div>
-
-      <button
-        class="btn"
-        onclick="runDiagnostics()"
-      >
-        Run Diagnostics
-      </button>
-
-    </div>
-
-    <div
-      id="diagnostics"
-      class="card-body"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     PAGES
-======================================================== -->
-
-<section
-  id="section-pages"
-  class="section"
->
-
-  <div class="card">
-
-    <div class="card-head">
-      <div class="card-title">
-        CrowRules Entertainment
-      </div>
-    </div>
-
-    <div class="card-body">
-
-      <div class="links">
-
-        <a
-          class="link-card"
-          href="index.html"
-        >
-          <div class="link-title">
-            CrowRules Entertainment
-          </div>
-          <div class="link-file">
-            index.html
-          </div>
-        </a>
-
-        <a
-          class="link-card"
-          href="tv.html"
-        >
-          <div class="link-title">
-            CrowRules TV
-          </div>
-          <div class="link-file">
-            tv.html
-          </div>
-        </a>
-
-        <a
-          class="link-card"
-          href="members.html"
-        >
-          <div class="link-title">
-            Member Hub
-          </div>
-          <div class="link-file">
-            members.html
-          </div>
-        </a>
-
-        <a
-          class="link-card"
-          href="nest.html"
-        >
-          <div class="link-title">
-            Crow Nest
-          </div>
-          <div class="link-file">
-            nest.html
-          </div>
-        </a>
-
-        <a
-          class="link-card"
-          href="tacomanights.html"
-        >
-          <div class="link-title">
-            Tacoma Nights
-          </div>
-          <div class="link-file">
-            tacomanights.html
-          </div>
-        </a>
-
-        <a
-          class="link-card"
-          href="awards.html"
-        >
-          <div class="link-title">
-            Spectrum Awards
-          </div>
-          <div class="link-file">
-            awards.html
-          </div>
-        </a>
-
-        <a
-          class="link-card"
-          href="shop.html"
-        >
-          <div class="link-title">
-            CrowRules Shop
-          </div>
-          <div class="link-file">
-            shop.html
-          </div>
-        </a>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<footer
-  style="
-    margin-top:30px;
-    color:#5f5f6a;
-    font-size:10px;
-    text-align:center;
-  "
->
-  CrowRules Entertainment · Admin Pro · Supabase
-</footer>
-
-</main>
+<div class="toast" id="toast"></div>
 
 
 <script>
+/* =========================================================
+   CROWRULES ADMIN PRO
+   SINGLE ROBUST SUPABASE WRAPPER
+========================================================= */
+
+"use strict";
+
 
 /* =========================================================
-   CROWRULES SUPABASE CONFIGURATION
+   CONFIG
 ========================================================= */
 
 const CONFIG = Object.freeze({
 
-  /*
-    DO NOT USE A SERVICE_ROLE KEY HERE.
-
-    Replace the value below with the CURRENT
-    Supabase Publishable key from:
-
-    Supabase Dashboard
-    → Project Settings
-    → API
-    → Publishable key
-
-    If your project still exposes the legacy anon key,
-    that can be used instead.
-  */
-
-  SUPABASE_URL:
+  supabaseUrl:
     "https://zauxdqyssratvzmomozf.supabase.co",
 
-  SUPABASE_KEY:
+  /*
+    IMPORTANT:
+    Use ONLY your Supabase publishable/anon key here.
+
+    NEVER put a service_role or secret key in this file.
+  */
+
+  supabaseKey:
     "sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J",
 
-  /*
-    Viewer refresh interval.
-  */
-
-  VIEWER_REFRESH_MS:
+  refreshMs:
     30000,
 
-  /*
-    Analytics refresh interval.
-  */
-
-  ANALYTICS_REFRESH_MS:
-    60000
+  viewerRefreshMs:
+    15000
 
 });
 
 
 /* =========================================================
-   CONFIG VALIDATION
+   SUPABASE CLIENT
 ========================================================= */
 
-function configIsReady(){
+const supabaseClient =
+  window.supabase.createClient(
+    CONFIG.supabaseUrl,
+    CONFIG.supabaseKey,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    }
+  );
 
-  const key =
-    CONFIG.SUPABASE_KEY.trim();
 
-  if(
-    !key ||
-    key ===
-      "PASTE_CURRENT_SUPABASE_PUBLISHABLE_KEY_HERE"
-  ){
+/* =========================================================
+   DOM
+========================================================= */
 
-    return false;
+const $ =
+  id =>
+    document.getElementById(id);
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHTML(value){
+
+  if(value === null ||
+     value === undefined){
+
+    return "";
 
   }
 
-  return true;
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+function errorMessage(error){
+
+  if(!error){
+
+    return "Unknown Supabase error.";
+
+  }
+
+  return (
+    error.message ||
+    error.details ||
+    error.hint ||
+    String(error)
+  );
+
+}
+
+
+function toast(message,type=""){
+
+  const el =
+    $("toast");
+
+  el.textContent =
+    message;
+
+  el.className =
+    "toast show " +
+    type;
+
+  clearTimeout(
+    toast.timer
+  );
+
+  toast.timer =
+    setTimeout(
+      () => {
+        el.className =
+          "toast";
+      },
+      3500
+    );
 
 }
 
 
 /* =========================================================
-   SINGLE SUPABASE CLIENT
+   TABLE SCHEMA MAP
+
+   CRITICAL:
+   Never assume created_at exists.
 ========================================================= */
 
-let supabaseClient = null;
+const TABLE_SCHEMA = Object.freeze({
 
+  member_points:{
+    order:"updated_at",
+    fields:[
+      "user_id",
+      "points",
+      "level",
+      "lifetime_points",
+      "updated_at"
+    ]
+  },
 
-if(
-  window.supabase &&
-  typeof window.supabase.createClient ===
-    "function" &&
-  configIsReady()
-){
+  crowrules_member_watch_minutes:{
+    order:"watched_at",
+    fields:[
+      "id",
+      "user_id",
+      "channel_id",
+      "show_id",
+      "episode_id",
+      "minutes",
+      "points",
+      "watched_at"
+    ]
+  },
 
-  supabaseClient =
-    window.supabase.createClient(
-      CONFIG.SUPABASE_URL,
-      CONFIG.SUPABASE_KEY,
-      {
-        auth:{
-          persistSession:true,
-          autoRefreshToken:true,
-          detectSessionInUrl:true
-        },
-        global:{
-          headers:{
-            "x-client-info":
-              "crowrules-admin-pro"
-          }
-        }
-      }
-    );
+  member_point_transactions:{
+    order:"created_at"
+  },
 
-}
+  member_stats:{
+    order:"updated_at"
+  },
+
+  member_profiles:{
+    order:"created_at"
+  },
+
+  member_activity:{
+    order:"created_at"
+  },
+
+  member_watch_history:{
+    order:"created_at"
+  },
+
+  tv_channels:{
+    order:"created_at"
+  },
+
+  schedule_items:{
+    order:"start_time"
+  },
+
+  shows:{
+    order:"created_at"
+  },
+
+  episodes:{
+    order:"created_at"
+  },
+
+  live_events:{
+    order:"created_at"
+  },
+
+  content_items:{
+    order:"created_at"
+  },
+
+  content_views:{
+    order:"created_at"
+  },
+
+  content_view_stats:{
+    order:"updated_at"
+  },
+
+  analytics_events:{
+    order:"created_at"
+  },
+
+  chat_rooms:{
+    order:"created_at"
+  },
+
+  chat_messages:{
+    order:"created_at"
+  },
+
+  polls:{
+    order:"created_at"
+  },
+
+  newsletter_subscribers:{
+    order:"created_at"
+  },
+
+  creator_applications:{
+    order:"created_at"
+  },
+
+  creator_channels:{
+    order:"created_at"
+  },
+
+  crow_nest_creators:{
+    order:"created_at"
+  },
+
+  tv_active_viewers:{
+    order:null
+  },
+
+  active_viewers:{
+    order:null
+  },
+
+  crowrules_active_viewers:{
+    order:null
+  }
+
+});
 
 
 /* =========================================================
@@ -1725,145 +1702,59 @@ if(
 
 const DB = {
 
-  client(){
-
-    return supabaseClient;
-
-  },
-
-
   async select(
     table,
-    options={}
+    {
+      columns="*",
+      limit=200,
+      order=null,
+      filters={}
+    }={}
   ){
-
-    if(!supabaseClient){
-
-      return {
-
-        ok:false,
-
-        table,
-
-        data:[],
-
-        error:{
-          message:
-            "Supabase client is not initialized. Check SUPABASE_KEY."
-        }
-
-      };
-
-    }
-
 
     try{
 
       let query =
         supabaseClient
           .from(table)
-          .select(
-            options.columns ||
-            "*"
-          );
+          .select(columns)
+          .limit(limit);
 
 
-      if(options.eq){
-
-        Object.entries(
-          options.eq
-        ).forEach(
-          ([column,value]) => {
-
-            query =
-              query.eq(
-                column,
-                value
-              );
-
-          }
-        );
-
-      }
-
-
-      if(options.neq){
-
-        Object.entries(
-          options.neq
-        ).forEach(
-          ([column,value]) => {
-
-            query =
-              query.neq(
-                column,
-                value
-              );
-
-          }
-        );
-
-      }
-
-
-      if(options.gte){
-
-        Object.entries(
-          options.gte
-        ).forEach(
-          ([column,value]) => {
-
-            query =
-              query.gte(
-                column,
-                value
-              );
-
-          }
-        );
-
-      }
-
-
-      if(options.lte){
-
-        Object.entries(
-          options.lte
-        ).forEach(
-          ([column,value]) => {
-
-            query =
-              query.lte(
-                column,
-                value
-              );
-
-          }
-        );
-
-      }
-
-
-      if(options.order){
+      if(order){
 
         query =
           query.order(
-            options.order.column,
+            order.column,
             {
               ascending:
-                options.order.ascending !== false
+                order.ascending ??
+                false
             }
           );
 
       }
 
 
-      if(options.limit){
+      for(
+        const [
+          column,
+          value
+        ]
+        of Object.entries(filters)
+      ){
 
-        query =
-          query.limit(
-            options.limit
-          );
+        if(value !== undefined &&
+           value !== null &&
+           value !== ""){
+
+          query =
+            query.eq(
+              column,
+              value
+            );
+
+        }
 
       }
 
@@ -1877,49 +1768,37 @@ const DB = {
 
       if(error){
 
-        return {
-
-          ok:false,
-
-          table,
-
-          data:[],
-
+        console.error(
+          `[Supabase SELECT] ${table}`,
           error
+        );
 
+        return {
+          ok:false,
+          data:[],
+          error
         };
 
       }
 
 
       return {
-
         ok:true,
-
-        table,
-
-        data:
-          Array.isArray(data)
-          ? data
-          : [],
-
+        data:data || [],
         error:null
-
       };
-
 
     }catch(error){
 
-      return {
-
-        ok:false,
-
-        table,
-
-        data:[],
-
+      console.error(
+        `[Supabase SELECT EXCEPTION] ${table}`,
         error
+      );
 
+      return {
+        ok:false,
+        data:[],
+        error
       };
 
     }
@@ -1929,24 +1808,6 @@ const DB = {
 
   async count(table){
 
-    if(!supabaseClient){
-
-      return {
-
-        ok:false,
-
-        count:0,
-
-        error:{
-          message:
-            "Supabase client is not initialized."
-        }
-
-      };
-
-    }
-
-
     try{
 
       const {
@@ -1955,54 +1816,188 @@ const DB = {
       } =
         await supabaseClient
           .from(table)
-          .select(
-            "*",
-            {
-              count:"exact",
-              head:true
-            }
-          );
+          .select("*",{
+            count:"exact",
+            head:true
+          });
 
 
       if(error){
 
         return {
-
           ok:false,
-
           count:0,
-
           error
-
         };
 
       }
 
 
       return {
-
         ok:true,
-
         count:
-          Number(
-            count || 0
-          ),
-
+          Number(count || 0),
         error:null
-
       };
-
 
     }catch(error){
 
       return {
-
         ok:false,
-
         count:0,
-
         error
+      };
 
+    }
+
+  },
+
+
+  async insert(
+    table,
+    payload
+  ){
+
+    try{
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(table)
+          .insert(payload)
+          .select();
+
+
+      if(error){
+
+        return {
+          ok:false,
+          data:null,
+          error
+        };
+
+      }
+
+
+      return {
+        ok:true,
+        data,
+        error:null
+      };
+
+    }catch(error){
+
+      return {
+        ok:false,
+        data:null,
+        error
+      };
+
+    }
+
+  },
+
+
+  async update(
+    table,
+    idColumn,
+    idValue,
+    payload
+  ){
+
+    try{
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(table)
+          .update(payload)
+          .eq(
+            idColumn,
+            idValue
+          )
+          .select();
+
+
+      if(error){
+
+        return {
+          ok:false,
+          data:null,
+          error
+        };
+
+      }
+
+
+      return {
+        ok:true,
+        data,
+        error:null
+      };
+
+    }catch(error){
+
+      return {
+        ok:false,
+        data:null,
+        error
+      };
+
+    }
+
+  },
+
+
+  async remove(
+    table,
+    idColumn,
+    idValue
+  ){
+
+    try{
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(table)
+          .delete()
+          .eq(
+            idColumn,
+            idValue
+          )
+          .select();
+
+
+      if(error){
+
+        return {
+          ok:false,
+          data:null,
+          error
+        };
+
+      }
+
+
+      return {
+        ok:true,
+        data,
+        error:null
+      };
+
+    }catch(error){
+
+      return {
+        ok:false,
+        data:null,
+        error
       };
 
     }
@@ -2011,27 +2006,9 @@ const DB = {
 
 
   async rpc(
-    name,
-    params={}
+    functionName,
+    args={}
   ){
-
-    if(!supabaseClient){
-
-      return {
-
-        ok:false,
-
-        data:null,
-
-        error:{
-          message:
-            "Supabase client is not initialized."
-        }
-
-      };
-
-    }
-
 
     try{
 
@@ -2040,31 +2017,39 @@ const DB = {
         error
       } =
         await supabaseClient.rpc(
-          name,
-          params
+          functionName,
+          args
         );
 
 
+      if(error){
+
+        console.error(
+          `[Supabase RPC] ${functionName}`,
+          error
+        );
+
+        return {
+          ok:false,
+          data:null,
+          error
+        };
+
+      }
+
+
       return {
-
-        ok:!error,
-
+        ok:true,
         data,
-
-        error
-
+        error:null
       };
 
     }catch(error){
 
       return {
-
         ok:false,
-
         data:null,
-
         error
-
       };
 
     }
@@ -2075,246 +2060,48 @@ const DB = {
 
 
 /* =========================================================
-   HELPERS
-========================================================= */
-
-function $(id){
-
-  return document.getElementById(id);
-
-}
-
-
-function text(
-  id,
-  value
-){
-
-  const element =
-    $(id);
-
-  if(element){
-
-    element.textContent =
-      value;
-
-  }
-
-}
-
-
-function fmt(
-  value
-){
-
-  return Number(
-    value || 0
-  ).toLocaleString();
-
-}
-
-
-function escapeHTML(
-  value
-){
-
-  return String(
-    value ?? ""
-  )
-  .replaceAll("&","&amp;")
-  .replaceAll("<","&lt;")
-  .replaceAll(">","&gt;")
-  .replaceAll('"',"&quot;")
-  .replaceAll("'","&#039;");
-
-}
-
-
-function date(
-  value
-){
-
-  if(!value)
-    return "—";
-
-  const d =
-    new Date(value);
-
-  if(
-    Number.isNaN(
-      d.getTime()
-    )
-  ){
-
-    return "—";
-
-  }
-
-  return d.toLocaleString();
-
-}
-
-
-function errorMessage(
-  error
-){
-
-  if(!error)
-    return "Unknown error";
-
-  return (
-    error.message ||
-    error.details ||
-    error.hint ||
-    error.code ||
-    "Unknown Supabase error"
-  );
-
-}
-
-
-function json(
-  value
-){
-
-  try{
-
-    return JSON.stringify(
-      value
-    );
-
-  }catch{
-
-    return "";
-
-  }
-
-}
-
-
-/* =========================================================
-   CONNECTION STATUS
-========================================================= */
-
-function setConnection(
-  state,
-  message
-){
-
-  const dot =
-    $("connectionDot");
-
-  const label =
-    $("connectionText");
-
-
-  dot.className =
-    "dot";
-
-
-  if(state === "online"){
-
-    dot.classList.add(
-      "online"
-    );
-
-  }else if(state === "warning"){
-
-    dot.classList.add(
-      "warning"
-    );
-
-  }
-
-
-  label.textContent =
-    message;
-
-}
-
-
-/* =========================================================
    CONNECTION TEST
 ========================================================= */
 
 async function testConnection(){
 
-  if(!configIsReady()){
+  $("connectionText")
+    .textContent =
+    "Connecting…";
 
-    setConnection(
-      "warning",
-      "Supabase key required"
-    );
+  $("connectionDot")
+    .className =
+    "dot";
 
-    return false;
-
-  }
-
-
-  if(!supabaseClient){
-
-    setConnection(
-      "warning",
-      "Supabase client unavailable"
-    );
-
-    return false;
-
-  }
-
-
-  /*
-    We intentionally use tv_channels only as a
-    lightweight authentication/connectivity probe.
-  */
 
   const result =
-    await DB.select(
-      "tv_channels",
-      {
-        columns:"id",
-        limit:1
-      }
+    await DB.count(
+      "tv_channels"
     );
 
 
   if(result.ok){
 
-    setConnection(
-      "online",
-      "Supabase ONLINE"
-    );
+    $("connectionText")
+      .textContent =
+      "Supabase ONLINE";
+
+    $("connectionDot")
+      .className =
+      "dot online";
 
     return true;
 
   }
 
 
-  const message =
-    errorMessage(
-      result.error
-    );
+  $("connectionText")
+    .textContent =
+    "Supabase ERROR";
 
-
-  if(
-    message.toLowerCase()
-      .includes("invalid api key")
-  ){
-
-    setConnection(
-      "warning",
-      "Invalid Supabase API key"
-    );
-
-  }else{
-
-    setConnection(
-      "warning",
-      "Supabase connected / restricted"
-    );
-
-  }
-
+  $("connectionDot")
+    .className =
+    "dot error";
 
   return false;
 
@@ -2322,388 +2109,287 @@ async function testConnection(){
 
 
 /* =========================================================
-   CONTENT VIEWS
+   TABLE RENDERING
 ========================================================= */
 
-async function contentViewTotal(){
+function formatValue(
+  value,
+  column
+){
 
-  const stats =
-    await DB.select(
-      "content_view_stats",
-      {
-        columns:"total_views"
-      }
-    );
+  if(
+    value === null ||
+    value === undefined
+  ){
 
-
-  if(stats.ok){
-
-    return stats.data.reduce(
-      (
-        total,
-        row
-      ) =>
-        total +
-        Number(
-          row.total_views || 0
-        ),
-      0
-    );
+    return "—";
 
   }
+
+
+  if(
+    typeof value === "boolean"
+  ){
+
+    return value
+      ? `<span class="badge green">TRUE</span>`
+      : `<span class="badge red">FALSE</span>`;
+
+  }
+
+
+  if(
+    column.endsWith("_at") ||
+    column === "watched_at" ||
+    column === "updated_at"
+  ){
+
+    const date =
+      new Date(value);
+
+
+    if(!Number.isNaN(
+      date.getTime()
+    )){
+
+      return escapeHTML(
+        date.toLocaleString()
+      );
+
+    }
+
+  }
+
+
+  if(
+    typeof value === "object"
+  ){
+
+    return `<code>${escapeHTML(
+      JSON.stringify(value)
+    )}</code>`;
+
+  }
+
+
+  return escapeHTML(
+    value
+  );
+
+}
+
+
+function makeTable(
+  rows,
+  columns,
+  tableName
+){
+
+  if(!rows.length){
+
+    return `
+      <div class="empty">
+        No records found.
+      </div>
+    `;
+
+  }
+
+
+  return `
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            ${columns.map(
+              column =>
+                `<th>${escapeHTML(column)}</th>`
+            ).join("")}
+
+            <th>Actions</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          ${rows.map(
+            row => `
+
+              <tr>
+
+                ${columns.map(
+                  column => `
+
+                    <td>
+                      ${formatValue(
+                        row[column],
+                        column
+                      )}
+                    </td>
+
+                  `
+                ).join("")}
+
+                <td>
+
+                  ${
+                    row.id
+                    ?
+
+                    `
+
+                    <div class="actions">
+
+                      <button
+                        class="btn"
+                        onclick='openEditRecord(
+                          ${JSON.stringify(
+                            tableName
+                          )},
+                          ${JSON.stringify(row)}
+                        )'
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        class="btn danger"
+                        onclick='deleteRecord(
+                          ${JSON.stringify(
+                            tableName
+                          )},
+                          ${JSON.stringify(row.id)}
+                        )'
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+
+                    `
+
+                    :
+
+                    "—"
+
+                  }
+
+                </td>
+
+              </tr>
+
+            `
+          ).join("")}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   GENERIC TABLE LOADER
+========================================================= */
+
+async function loadTableSection(
+  table,
+  elementId
+){
+
+  const box =
+    $(elementId);
+
+
+  if(!box){
+
+    return;
+
+  }
+
+
+  box.innerHTML =
+    `<div class="empty">Loading ${escapeHTML(table)}…</div>`;
+
+
+  const schema =
+    TABLE_SCHEMA[table] ||
+    {order:null};
+
+
+  let result =
+    await DB.select(
+      table,
+      {
+        columns:"*",
+        limit:200,
+
+        order:
+          schema.order
+          ?
+          {
+            column:
+              schema.order,
+
+            ascending:false
+          }
+          :
+          null
+      }
+    );
 
 
   /*
-    If aggregate stats aren't accessible,
-    count the actual raw content_view rows.
+    Robust fallback:
+    If the configured order column does not exist,
+    immediately retry without ordering.
   */
 
-  const raw =
-    await DB.count(
-      "content_views"
-    );
+  if(
+    !result.ok &&
+    schema.order
+  ){
 
+    result =
+      await DB.select(
+        table,
+        {
+          columns:"*",
+          limit:200,
+          order:null
+        }
+      );
 
-  return raw.count;
-
-}
-
-
-/* =========================================================
-   SESSION COUNT
-========================================================= */
-
-async function sessionCount(){
-
-  const result =
-    await DB.select(
-      "analytics_events",
-      {
-        columns:
-          "session_id",
-        limit:5000
-      }
-    );
-
-
-  if(!result.ok)
-    return 0;
-
-
-  return new Set(
-    result.data
-      .map(
-        row =>
-          row.session_id
-      )
-      .filter(Boolean)
-  ).size;
-
-}
-
-
-/* =========================================================
-   ANALYTICS
-========================================================= */
-
-async function loadAnalytics(){
-
-  const [
-    views,
-    events,
-    history,
-    active,
-    sessions
-  ] =
-    await Promise.all([
-
-      contentViewTotal(),
-
-      DB.count(
-        "analytics_events"
-      ),
-
-      DB.count(
-        "member_watch_history"
-      ),
-
-      DB.count(
-        "tv_active_viewers"
-      ),
-
-      sessionCount()
-
-    ]);
-
-
-  text(
-    "statViews",
-    fmt(views)
-  );
-
-  text(
-    "statEvents",
-    fmt(events.count)
-  );
-
-  text(
-    "statSessions",
-    fmt(sessions)
-  );
-
-  text(
-    "statHistory",
-    fmt(history.count)
-  );
-
-  text(
-    "statActive",
-    fmt(active.count)
-  );
-
-
-  text(
-    "aViews",
-    fmt(views)
-  );
-
-  text(
-    "aEvents",
-    fmt(events.count)
-  );
-
-  text(
-    "aSessions",
-    fmt(sessions)
-  );
-
-  text(
-    "aHistory",
-    fmt(history.count)
-  );
-
-  text(
-    "aActive",
-    fmt(active.count)
-  );
-
-
-  await loadRecentAnalytics();
-
-}
-
-
-/* =========================================================
-   RECENT ANALYTICS
-========================================================= */
-
-async function loadRecentAnalytics(){
-
-  const targets = [
-
-    $("recentAnalytics"),
-
-    $("analyticsList")
-
-  ];
-
-
-  const result =
-    await DB.select(
-      "analytics_events",
-      {
-        columns:"*",
-        order:{
-          column:"created_at",
-          ascending:false
-        },
-        limit:30
-      }
-    );
+  }
 
 
   if(!result.ok){
-
-    targets.forEach(
-      element => {
-
-        element.innerHTML = `
-
-          <div class="error">
-
-            Analytics events could not be read.
-
-            <br><br>
-
-            <strong>
-              ${escapeHTML(
-                errorMessage(
-                  result.error
-                )
-              )}
-            </strong>
-
-          </div>
-
-        `;
-
-      }
-    );
-
-    return;
-
-  }
-
-
-  if(!result.data.length){
-
-    targets.forEach(
-      element => {
-
-        element.innerHTML = `
-
-          <div class="empty">
-            No analytics events recorded yet.
-          </div>
-
-        `;
-
-      }
-    );
-
-    return;
-
-  }
-
-
-  const html =
-    result.data.map(
-      row => `
-
-        <div
-          style="
-            padding:11px 0;
-            border-bottom:1px solid var(--border);
-          "
-        >
-
-          <div
-            style="
-              font-size:12px;
-              font-weight:900;
-            "
-          >
-            ${escapeHTML(
-              row.event_type ||
-              "event"
-            )}
-          </div>
-
-          <div
-            style="
-              margin-top:4px;
-              color:var(--muted);
-              font-size:10px;
-            "
-          >
-
-            ${escapeHTML(
-              row.path ||
-              ""
-            )}
-
-            ${
-              row.session_id
-              ? " · " +
-                escapeHTML(
-                  row.session_id
-                )
-              : ""
-            }
-
-            ${
-              row.created_at
-              ? " · " +
-                escapeHTML(
-                  date(
-                    row.created_at
-                  )
-                )
-              : ""
-            }
-
-          </div>
-
-        </div>
-
-      `
-    ).join("");
-
-
-  targets.forEach(
-    element => {
-
-      element.innerHTML =
-        html;
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   ACTIVE VIEWERS
-========================================================= */
-
-async function loadViewers(){
-
-  const box =
-    $("viewerList");
-
-
-  const [
-    viewers,
-    channels
-  ] =
-    await Promise.all([
-
-      DB.select(
-        "tv_active_viewers",
-        {
-          columns:"channel_id"
-        }
-      ),
-
-      DB.select(
-        "tv_channels",
-        {
-          columns:
-            "id,name",
-          eq:{
-            is_active:true
-          }
-        }
-      )
-
-    ]);
-
-
-  if(!viewers.ok){
 
     box.innerHTML = `
 
       <div class="error">
 
         <strong>
-          tv_active_viewers unavailable
+          ${escapeHTML(table)}
+          is unavailable.
         </strong>
 
         <br><br>
 
         ${escapeHTML(
           errorMessage(
-            viewers.error
+            result.error
           )
         )}
 
@@ -2716,105 +2402,28 @@ async function loadViewers(){
   }
 
 
-  const channelMap =
-    new Map(
-      channels.data.map(
-        channel => [
-          String(channel.id),
-          channel.name
-        ]
-      )
-    );
+  if(!result.data.length){
 
-
-  const counts =
-    new Map();
-
-
-  viewers.data.forEach(
-    row => {
-
-      const id =
-        String(
-          row.channel_id
-        );
-
-
-      counts.set(
-        id,
-        (
-          counts.get(id) ||
-          0
-        ) + 1
-      );
-
-    }
-  );
-
-
-  if(!counts.size){
-
-    box.innerHTML = `
-
-      <div class="empty">
-        0 active viewers right now.
-      </div>
-
-    `;
+    box.innerHTML =
+      `<div class="empty">No records found.</div>`;
 
     return;
 
   }
 
 
+  const columns =
+    Object.keys(
+      result.data[0]
+    );
+
+
   box.innerHTML =
-    [...counts.entries()]
-      .sort(
-        (a,b) =>
-          b[1] - a[1]
-      )
-      .map(
-        ([id,count]) => `
-
-          <div class="viewer-row">
-
-            <div>
-
-              <div class="viewer-name">
-                ${escapeHTML(
-                  channelMap.get(id) ||
-                  "Unknown Channel"
-                )}
-              </div>
-
-              <div
-                style="
-                  color:var(--muted);
-                  font-size:8px;
-                  margin-top:3px;
-                "
-              >
-                ${escapeHTML(id)}
-              </div>
-
-            </div>
-
-            <div class="viewer-number">
-
-              ${fmt(count)}
-
-              ${
-                count === 1
-                ? "viewer"
-                : "viewers"
-              }
-
-            </div>
-
-          </div>
-
-        `
-      ).join("");
+    makeTable(
+      result.data,
+      columns.slice(0,14),
+      table
+    );
 
 }
 
@@ -2826,34 +2435,28 @@ async function loadViewers(){
 async function loadChannels(){
 
   const box =
-    $("channelsList");
+    $("channelsGrid");
+
+  box.innerHTML =
+    `<div class="empty">Loading channels…</div>`;
 
 
-  const [
-    channels,
-    viewers
-  ] =
-    await Promise.all([
+  /*
+    AUTHORITATIVE:
+    Only active tv_channels rows.
+  */
 
-      DB.select(
-        "tv_channels",
-        {
-          columns:"*",
-          eq:{
-            is_active:true
-          },
-          limit:500
+  const channels =
+    await DB.select(
+      "tv_channels",
+      {
+        columns:"*",
+        limit:100,
+        filters:{
+          is_active:true
         }
-      ),
-
-      DB.select(
-        "tv_active_viewers",
-        {
-          columns:"channel_id"
-        }
-      )
-
-    ]);
+      }
+    );
 
 
   if(!channels.ok){
@@ -2862,7 +2465,9 @@ async function loadChannels(){
 
       <div class="error">
 
-        tv_channels could not be read.
+        <strong>
+          tv_channels is unavailable.
+        </strong>
 
         <br><br>
 
@@ -2881,464 +2486,279 @@ async function loadChannels(){
   }
 
 
-  text(
-    "statChannels",
-    fmt(
-      channels.data.length
-    )
+  const viewers =
+    await getActiveViewers();
+
+
+  const viewerMap =
+    new Map();
+
+
+  viewers.forEach(
+    viewer => {
+
+      const id =
+        viewer.channel_id;
+
+      if(!id){
+
+        return;
+
+      }
+
+      viewerMap.set(
+        String(id),
+        (viewerMap.get(
+          String(id)
+        ) || 0) + 1
+      );
+
+    }
   );
 
 
-  const counts = {};
-
-
-  if(viewers.ok){
-
-    viewers.data.forEach(
-      row => {
+  box.innerHTML =
+    channels.data.map(
+      channel => {
 
         const id =
           String(
-            row.channel_id
+            channel.id
           );
 
-        counts[id] =
-          (
-            counts[id] ||
-            0
-          ) + 1;
+        const count =
+          viewerMap.get(id) || 0;
+
+
+        return `
+
+          <div class="card channel">
+
+            <div class="channel-top">
+
+              <div>
+
+                <div class="channel-name">
+
+                  ${escapeHTML(
+                    channel.name ||
+                    channel.title ||
+                    "Unnamed Channel"
+                  )}
+
+                </div>
+
+                <div class="channel-slug">
+
+                  ${escapeHTML(
+                    channel.slug ||
+                    ""
+                  )}
+
+                </div>
+
+              </div>
+
+              <span class="badge green">
+                ACTIVE
+              </span>
+
+            </div>
+
+            <div class="viewer">
+
+              <div class="viewer-number">
+                ${count}
+              </div>
+
+              <div class="viewer-label">
+                Current Viewers
+              </div>
+
+            </div>
+
+            <div class="progress">
+
+              <span
+                style="width:${Math.min(
+                  count * 10,
+                  100
+                )}%"
+              ></span>
+
+            </div>
+
+            <br>
+
+            <div class="actions">
+
+              <button
+                class="btn"
+                onclick='openEditRecord(
+                  "tv_channels",
+                  ${JSON.stringify(channel)}
+                )'
+              >
+                Edit
+              </button>
+
+              <button
+                class="btn danger"
+                onclick='deleteRecord(
+                  "tv_channels",
+                  ${JSON.stringify(channel.id)}
+                )'
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+
+        `;
 
       }
-    );
-
-  }
+    ).join("");
 
 
   if(!channels.data.length){
 
-    box.innerHTML = `
+    box.innerHTML =
+      `<div class="empty">No active channels.</div>`;
 
-      <div class="empty">
-        No active TV channels.
-      </div>
+  }
 
-    `;
+}
+
+
+/* =========================================================
+   ACTIVE VIEWERS
+========================================================= */
+
+async function getActiveViewers(){
+
+  /*
+    Preferred:
+    tv_active_viewers
+
+    Fallback:
+    active_viewers
+
+    Fallback:
+    crowrules_active_viewers
+  */
+
+  const sources = [
+    "tv_active_viewers",
+    "active_viewers",
+    "crowrules_active_viewers"
+  ];
+
+
+  for(
+    const table
+    of sources
+  ){
+
+    const result =
+      await DB.select(
+        table,
+        {
+          columns:"*",
+          limit:1000
+        }
+      );
+
+
+    if(result.ok){
+
+      return result.data;
+
+    }
+
+  }
+
+
+  return [];
+
+}
+
+
+async function loadActiveViewerSection(){
+
+  const box =
+    $("viewersTable");
+
+
+  box.innerHTML =
+    `<div class="empty">Loading active viewers…</div>`;
+
+
+  const rows =
+    await getActiveViewers();
+
+
+  if(!rows.length){
+
+    box.innerHTML =
+      `<div class="empty">No active viewers detected.</div>`;
 
     return;
 
   }
 
 
-  box.innerHTML = `
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>Channel</th>
-          <th>Status</th>
-          <th>Current Viewers</th>
-          <th>Accumulated Views</th>
-          <th>ID</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        ${channels.data.map(
-          channel => {
-
-            const id =
-              String(
-                channel.id
-              );
+  const columns =
+    Object.keys(
+      rows[0]
+    );
 
 
-            return `
-
-              <tr>
-
-                <td>
-                  <strong>
-                    ${escapeHTML(
-                      channel.name ||
-                      channel.title ||
-                      "Unnamed"
-                    )}
-                  </strong>
-                </td>
-
-                <td>
-                  <span class="badge good">
-                    ACTIVE
-                  </span>
-                </td>
-
-                <td>
-                  <strong>
-                    ${fmt(
-                      counts[id] || 0
-                    )}
-                  </strong>
-                </td>
-
-                <td>
-                  ${fmt(
-                    channel.views ||
-                    0
-                  )}
-                </td>
-
-                <td class="muted">
-                  ${escapeHTML(id)}
-                </td>
-
-              </tr>
-
-            `;
-
-          }
-        ).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
+  box.innerHTML =
+    makeTable(
+      rows,
+      columns.slice(0,14),
+      "tv_active_viewers"
+    );
 
 }
 
 
 /* =========================================================
-   CONTENT
+   MEMBER POINTS
 ========================================================= */
 
-async function loadContent(){
-
-  const [
-    stats,
-    raw
-  ] =
-    await Promise.all([
-
-      DB.select(
-        "content_view_stats",
-        {
-          columns:"*",
-          limit:500
-        }
-      ),
-
-      DB.select(
-        "content_views",
-        {
-          columns:"*",
-          order:{
-            column:"created_at",
-            ascending:false
-          },
-          limit:100
-        }
-      )
-
-    ]);
-
-
-  if(stats.ok){
-
-    let views = 0;
-    let users = 0;
-    let sessions = 0;
-    let seconds = 0;
-    let completed = 0;
-
-
-    stats.data.forEach(
-      row => {
-
-        views +=
-          Number(
-            row.total_views || 0
-          );
-
-        users +=
-          Number(
-            row.unique_users || 0
-          );
-
-        sessions +=
-          Number(
-            row.unique_sessions || 0
-          );
-
-        seconds +=
-          Number(
-            row.total_watch_seconds || 0
-          );
-
-        completed +=
-          Number(
-            row.completed_views || 0
-          );
-
-      }
-    );
-
-
-    text(
-      "contentViews",
-      fmt(views)
-    );
-
-    text(
-      "contentUsers",
-      fmt(users)
-    );
-
-    text(
-      "contentSessions",
-      fmt(sessions)
-    );
-
-    text(
-      "contentSeconds",
-      fmt(seconds)
-    );
-
-    text(
-      "contentCompleted",
-      fmt(completed)
-    );
-
-
-    $("contentStatsList")
-      .innerHTML =
-        makeTable(
-          stats.data,
-          [
-            "content_id",
-            "content_type",
-            "total_views",
-            "unique_users",
-            "unique_sessions",
-            "total_watch_seconds",
-            "completed_views",
-            "last_viewed_at"
-          ]
-        );
-
-  }else{
-
-    $("contentStatsList")
-      .innerHTML = `
-
-        <div class="error">
-
-          content_view_stats unavailable.
-
-          <br><br>
-
-          ${escapeHTML(
-            errorMessage(
-              stats.error
-            )
-          )}
-
-        </div>
-
-      `;
-
-  }
-
-
-  if(raw.ok){
-
-    $("rawViewsList")
-      .innerHTML =
-        makeTable(
-          raw.data,
-          [
-            "content_id",
-            "content_type",
-            "user_id",
-            "session_id",
-            "watch_seconds",
-            "completed",
-            "created_at"
-          ]
-        );
-
-  }else{
-
-    $("rawViewsList")
-      .innerHTML = `
-
-        <div class="error">
-
-          content_views unavailable.
-
-          <br><br>
-
-          ${escapeHTML(
-            errorMessage(
-              raw.error
-            )
-          )}
-
-        </div>
-
-      `;
-
-  }
-
-}
-
-
-/* =========================================================
-   GENERIC TABLE
-========================================================= */
-
-function makeTable(
-  rows,
-  columns
-){
-
-  if(!rows.length){
-
-    return `
-
-      <div class="empty">
-        No records found.
-      </div>
-
-    `;
-
-  }
-
-
-  return `
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          ${columns.map(
-            column =>
-              `<th>
-                ${escapeHTML(column)}
-              </th>`
-          ).join("")}
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        ${rows.map(
-          row => `
-
-            <tr>
-
-              ${columns.map(
-                column => {
-
-                  let value =
-                    row[column];
-
-
-                  if(
-                    column.endsWith(
-                      "_at"
-                    )
-                  ){
-
-                    value =
-                      date(
-                        value
-                      );
-
-                  }
-
-
-                  if(
-                    typeof value ===
-                    "object" &&
-                    value !== null
-                  ){
-
-                    value =
-                      json(value);
-
-                  }
-
-
-                  return `
-
-                    <td>
-                      ${escapeHTML(
-                        value ??
-                        "—"
-                      )}
-                    </td>
-
-                  `;
-
-                }
-              ).join("")}
-
-            </tr>
-
-          `
-        ).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/* =========================================================
-   GENERIC DATABASE VIEW
-========================================================= */
-
-async function loadGeneric(
-  table,
-  elementId
-){
+async function loadPoints(){
 
   const box =
-    $(elementId);
+    $("pointsTable");
 
 
-  box.innerHTML = `
+  box.innerHTML =
+    `<div class="empty">Loading member points…</div>`;
 
-    <div class="empty">
-      Loading ${escapeHTML(table)}...
-    </div>
 
-  `;
-
+  /*
+    CORRECT SCHEMA:
+    member_points.updated_at
+  */
 
   const result =
     await DB.select(
-      table,
+      "member_points",
       {
-        columns:"*",
+        columns:
+          "user_id,points,level,lifetime_points,updated_at",
+
+        limit:500,
+
         order:{
-          column:"created_at",
+          column:
+            "updated_at",
+
           ascending:false
-        },
-        limit:200
+        }
       }
     );
 
@@ -3349,8 +2769,9 @@ async function loadGeneric(
 
       <div class="error">
 
-        ${escapeHTML(table)}
-        is unavailable.
+        <strong>
+          member_points is unavailable.
+        </strong>
 
         <br><br>
 
@@ -3369,247 +2790,78 @@ async function loadGeneric(
   }
 
 
-  if(!result.data.length){
-
-    box.innerHTML = `
-
-      <div class="empty">
-        No records in
-        <strong>
-          ${escapeHTML(table)}
-        </strong>.
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  const columns =
-    Object.keys(
-      result.data[0]
-    ).slice(0,12);
-
-
   box.innerHTML =
     makeTable(
       result.data,
-      columns
+      [
+        "user_id",
+        "points",
+        "level",
+        "lifetime_points",
+        "updated_at"
+      ],
+      "member_points"
     );
 
 }
 
 
 /* =========================================================
-   MEMBERS
+   WATCH MINUTES
 ========================================================= */
 
-async function loadMembers(){
-
-  const [
-    profiles,
-    points,
-    activity,
-    history
-  ] =
-    await Promise.all([
-
-      DB.count(
-        "member_profiles"
-      ),
-
-      DB.count(
-        "member_points"
-      ),
-
-      DB.count(
-        "member_activity"
-      ),
-
-      DB.count(
-        "member_watch_history"
-      )
-
-    ]);
-
-
-  text(
-    "memberProfiles",
-    fmt(
-      profiles.count
-    )
-  );
-
-  text(
-    "memberPoints",
-    fmt(
-      points.count
-    )
-  );
-
-  text(
-    "memberActivity",
-    fmt(
-      activity.count
-    )
-  );
-
-  text(
-    "memberHistory",
-    fmt(
-      history.count
-    )
-  );
-
-
-  await loadGeneric(
-    "member_profiles",
-    "membersList"
-  );
-
-}
-
-
-/* =========================================================
-   REWARDS
-========================================================= */
-
-async function loadRewards(){
-
-  await Promise.all([
-
-    loadGeneric(
-      "member_points",
-      "pointsList"
-    ),
-
-    loadGeneric(
-      "crowrules_member_watch_minutes",
-      "minutesList"
-    )
-
-  ]);
-
-}
-
-
-/* =========================================================
-   COMMUNITY
-========================================================= */
-
-async function loadCommunity(){
-
-  await Promise.all([
-
-    loadGeneric(
-      "chat_rooms",
-      "chatRooms"
-    ),
-
-    loadGeneric(
-      "polls",
-      "polls"
-    ),
-
-    loadGeneric(
-      "newsletter_subscribers",
-      "newsletter"
-    ),
-
-    loadGeneric(
-      "creator_applications",
-      "creatorApplications"
-    )
-
-  ]);
-
-}
-
-
-/* =========================================================
-   DATABASE DIAGNOSTICS
-========================================================= */
-
-const TABLES = [
-
-  "tv_channels",
-  "schedule_items",
-  "tv_active_viewers",
-
-  "content_views",
-  "content_view_stats",
-  "analytics_events",
-
-  "member_profiles",
-  "member_points",
-  "member_point_transactions",
-  "member_stats",
-  "crowrules_member_watch_minutes",
-  "member_watch_history",
-  "member_activity",
-
-  "shows",
-  "episodes",
-  "live_events",
-
-  "chat_rooms",
-  "chat_messages",
-  "polls",
-
-  "newsletter_subscribers",
-  "creator_applications",
-  "crow_nest_creators",
-
-  "memberships",
-  "content_likes",
-  "watch_progress",
-  "member_friends",
-  "member_favorite_channels",
-  "chat_reports"
-
-];
-
-
-async function runDiagnostics(){
+async function loadWatchMinutes(){
 
   const box =
-    $("diagnostics");
+    $("watchTable");
 
 
-  box.innerHTML = `
-
-    <div class="empty">
-      Testing Supabase...
-    </div>
-
-  `;
+  box.innerHTML =
+    `<div class="empty">Loading watch minutes…</div>`;
 
 
-  if(!configIsReady()){
+  /*
+    CORRECT SCHEMA:
+    crowrules_member_watch_minutes.watched_at
+  */
+
+  const result =
+    await DB.select(
+      "crowrules_member_watch_minutes",
+      {
+        columns:
+          "id,user_id,channel_id,show_id,episode_id,minutes,points,watched_at",
+
+        limit:500,
+
+        order:{
+          column:
+            "watched_at",
+
+          ascending:false
+        }
+      }
+    );
+
+
+  if(!result.ok){
 
     box.innerHTML = `
 
       <div class="error">
 
         <strong>
-          Supabase key is not configured.
+          crowrules_member_watch_minutes
+          is unavailable.
         </strong>
 
         <br><br>
 
-        Replace:
-
-        <br>
-
-        <code>
-          PASTE_CURRENT_SUPABASE_PUBLISHABLE_KEY_HERE
-        </code>
-
-        <br><br>
-
-        with the current Supabase Publishable key.
+        ${escapeHTML(
+          errorMessage(
+            result.error
+          )
+        )}
 
       </div>
 
@@ -3620,76 +2872,395 @@ async function runDiagnostics(){
   }
 
 
-  const results = [];
+  box.innerHTML =
+    makeTable(
+      result.data,
+      [
+        "id",
+        "user_id",
+        "channel_id",
+        "show_id",
+        "episode_id",
+        "minutes",
+        "points",
+        "watched_at"
+      ],
+      "crowrules_member_watch_minutes"
+    );
+
+}
 
 
-  for(
-    const table of TABLES
-  ){
+/* =========================================================
+   ANALYTICS
+========================================================= */
 
-    const result =
-      await DB.select(
-        table,
-        {
-          columns:"*",
-          limit:1
+async function countInto(
+  table,
+  elementId
+){
+
+  const result =
+    await DB.count(
+      table
+    );
+
+
+  $(elementId)
+    .textContent =
+      result.ok
+      ?
+      Number(
+        result.count
+      ).toLocaleString()
+      :
+      "—";
+
+}
+
+
+async function loadAnalytics(){
+
+  await Promise.all([
+
+    countInto(
+      "content_views",
+      "analyticsViews"
+    ),
+
+    countInto(
+      "content_views",
+      "analyticsViewEvents"
+    ),
+
+    countInto(
+      "member_watch_history",
+      "analyticsSessions"
+    ),
+
+    countInto(
+      "analytics_events",
+      "analyticsEvents"
+    ),
+
+    countInto(
+      "member_watch_history",
+      "analyticsHistory"
+    )
+
+  ]);
+
+
+  const viewers =
+    await getActiveViewers();
+
+
+  $("analyticsActive")
+    .textContent =
+      viewers.length
+      .toLocaleString();
+
+}
+
+
+async function loadRecentAnalytics(){
+
+  await loadTableSection(
+    "analytics_events",
+    "recentAnalytics"
+  );
+
+}
+
+
+/* =========================================================
+   DASHBOARD STATS
+========================================================= */
+
+async function loadDashboardStats(){
+
+  const [
+    channels,
+    schedule,
+    members,
+    views,
+    watch
+  ] =
+    await Promise.all([
+
+      DB.count(
+        "tv_channels"
+      ),
+
+      DB.count(
+        "schedule_items"
+      ),
+
+      DB.count(
+        "member_profiles"
+      ),
+
+      DB.count(
+        "content_views"
+      ),
+
+      DB.count(
+        "crowrules_member_watch_minutes"
+      )
+
+    ]);
+
+
+  $("statChannels")
+    .textContent =
+      channels.ok
+      ? channels.count
+      : "—";
+
+
+  $("statSchedule")
+    .textContent =
+      schedule.ok
+      ? schedule.count
+      : "—";
+
+
+  $("statMembers")
+    .textContent =
+      members.ok
+      ? members.count
+      : "—";
+
+
+  $("statViews")
+    .textContent =
+      views.ok
+      ? views.count
+      : "—";
+
+
+  /*
+    This is number of watch records,
+    not fabricated minutes.
+  */
+
+  $("statMinutes")
+    .textContent =
+      watch.ok
+      ? watch.count
+      : "—";
+
+
+  const viewers =
+    await getActiveViewers();
+
+
+  $("statViewers")
+    .textContent =
+      viewers.length;
+
+}
+
+
+/* =========================================================
+   DASHBOARD CHANNEL MINI VIEW
+========================================================= */
+
+async function loadDashboardChannels(){
+
+  const channels =
+    await DB.select(
+      "tv_channels",
+      {
+        columns:"id,name,title,slug,is_active",
+        limit:100,
+        filters:{
+          is_active:true
         }
-      );
+      }
+    );
 
 
-    results.push({
+  if(!channels.ok){
 
-      table,
+    $("dashboardChannels").innerHTML =
+      `<div class="error">${escapeHTML(
+        errorMessage(
+          channels.error
+        )
+      )}</div>`;
 
-      ok:
-        result.ok,
-
-      message:
-        result.ok
-        ? "Accessible"
-        : errorMessage(
-            result.error
-          )
-
-    });
+    return;
 
   }
 
 
-  box.innerHTML =
-    results.map(
-      result => `
+  const viewers =
+    await getActiveViewers();
 
-        <div class="diagnostic">
 
-          <strong>
-            ${escapeHTML(
-              result.table
-            )}
-          </strong>
+  const counts =
+    {};
 
-          <div class="diagnostic-message">
 
-            ${escapeHTML(
-              result.message
-            )}
+  viewers.forEach(
+    viewer => {
+
+      if(
+        viewer.channel_id
+      ){
+
+        const key =
+          String(
+            viewer.channel_id
+          );
+
+        counts[key] =
+          (counts[key] || 0) + 1;
+
+      }
+
+    }
+  );
+
+
+  $("dashboardChannels").innerHTML =
+
+    channels.data.map(
+      channel => {
+
+        const count =
+          counts[
+            String(channel.id)
+          ] || 0;
+
+
+        return `
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:11px 0;
+            border-bottom:1px solid var(--line)
+          ">
+
+            <div>
+
+              <strong>
+                ${escapeHTML(
+                  channel.name ||
+                  channel.title ||
+                  "Channel"
+                )}
+              </strong>
+
+              <div style="
+                color:var(--muted);
+                font-size:10px;
+                margin-top:3px
+              ">
+                ${escapeHTML(
+                  channel.slug || ""
+                )}
+              </div>
+
+            </div>
+
+            <span class="badge blue">
+              ${count} watching
+            </span>
 
           </div>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+
+/* =========================================================
+   DATABASE HEALTH
+========================================================= */
+
+const HEALTH_TABLES = [
+
+  "tv_channels",
+  "schedule_items",
+  "shows",
+  "episodes",
+  "live_events",
+  "member_profiles",
+  "member_points",
+  "crowrules_member_watch_minutes",
+  "content_views",
+  "analytics_events",
+  "tv_active_viewers",
+  "chat_rooms",
+  "chat_messages",
+  "polls",
+  "newsletter_subscribers",
+  "creator_channels",
+  "creator_applications"
+
+];
+
+
+async function loadHealth(){
+
+  $("healthList").innerHTML =
+    `<div class="empty">Checking database…</div>`;
+
+
+  const results =
+    await Promise.all(
+      HEALTH_TABLES.map(
+        async table => [
+
+          table,
+
+          await DB.count(
+            table
+          )
+
+        ]
+      )
+    );
+
+
+  $("healthList").innerHTML =
+
+    results.map(
+      ([table,result]) => `
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          padding:9px 0;
+          border-bottom:1px solid var(--line)
+        ">
+
+          <span>
+            ${escapeHTML(table)}
+          </span>
 
           ${
             result.ok
 
-            ? `
-              <span class="badge good">
-                ONLINE
-              </span>
-            `
+            ?
 
-            : `
-              <span class="badge bad">
-                ERROR
-              </span>
-            `
+            `<span class="badge green">
+              ONLINE · ${result.count}
+            </span>`
+
+            :
+
+            `<span class="badge red">
+              ERROR
+            </span>`
           }
 
         </div>
@@ -3701,198 +3272,555 @@ async function runDiagnostics(){
 
 
 /* =========================================================
-   NAVIGATION
+   EDITOR
 ========================================================= */
 
-const TITLES = {
+let editorTable =
+  null;
+
+let editorRecord =
+  null;
+
+
+function openEditor(
+  table
+){
+
+  editorTable =
+    table;
+
+  editorRecord =
+    null;
+
+  $("editorTitle")
+    .textContent =
+      `Add ${table}`;
+
+  buildEditorFields(
+    table,
+    {}
+  );
+
+  $("editorModal")
+    .classList
+    .add("open");
+
+}
+
+
+function openEditRecord(
+  table,
+  record
+){
+
+  editorTable =
+    table;
+
+  editorRecord =
+    record;
+
+  $("editorTitle")
+    .textContent =
+      `Edit ${table}`;
+
+  buildEditorFields(
+    table,
+    record
+  );
+
+  $("editorModal")
+    .classList
+    .add("open");
+
+}
+
+
+function closeEditor(){
+
+  $("editorModal")
+    .classList
+    .remove("open");
+
+  editorTable =
+    null;
+
+  editorRecord =
+    null;
+
+}
+
+
+function buildEditorFields(
+  table,
+  record
+){
+
+  const fields =
+    Object.keys(
+      record || {}
+    ).filter(
+      key =>
+        key !== "created_at" &&
+        key !== "updated_at" &&
+        key !== "watched_at"
+    );
+
+
+  /*
+    For new records we don't know the
+    schema completely. Use common fields.
+  */
+
+  const finalFields =
+    fields.length
+    ?
+    fields
+    :
+    [
+      "name",
+      "title",
+      "description",
+      "slug",
+      "url",
+      "youtube_url",
+      "is_active"
+    ];
+
+
+  $("editorFields").innerHTML =
+
+    finalFields.map(
+      field => {
+
+        const value =
+          record[field] ?? "";
+
+
+        const isBool =
+          typeof value === "boolean";
+
+
+        return `
+
+          <div class="field">
+
+            <label>
+              ${escapeHTML(field)}
+            </label>
+
+            ${
+              isBool
+
+              ?
+
+              `
+              <select
+                name="${escapeHTML(field)}"
+              >
+
+                <option
+                  value="true"
+                  ${value ? "selected" : ""}
+                >
+                  true
+                </option>
+
+                <option
+                  value="false"
+                  ${!value ? "selected" : ""}
+                >
+                  false
+                </option>
+
+              </select>
+              `
+
+              :
+
+              `
+
+              <input
+                name="${escapeHTML(field)}"
+                value="${escapeHTML(value)}"
+                ${field === "id" ? "readonly" : ""}
+              >
+
+              `
+
+            }
+
+          </div>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+
+$("editorForm")
+  .addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      if(!editorTable){
+
+        return;
+
+      }
+
+
+      const form =
+        new FormData(
+          event.target
+        );
+
+
+      const payload =
+        {};
+
+
+      for(
+        const [
+          key,
+          value
+        ]
+        of form.entries()
+      ){
+
+        if(
+          key === "id"
+        ){
+
+          continue;
+
+        }
+
+
+        let parsed =
+          value;
+
+
+        if(
+          value === "true"
+        ){
+
+          parsed = true;
+
+        }else if(
+          value === "false"
+        ){
+
+          parsed = false;
+
+        }
+
+
+        if(
+          String(parsed)
+            .trim() !== ""
+        ){
+
+          payload[key] =
+            parsed;
+
+        }
+
+      }
+
+
+      let result;
+
+
+      if(
+        editorRecord &&
+        editorRecord.id
+      ){
+
+        result =
+          await DB.update(
+            editorTable,
+            "id",
+            editorRecord.id,
+            payload
+          );
+
+      }else{
+
+        result =
+          await DB.insert(
+            editorTable,
+            payload
+          );
+
+      }
+
+
+      if(!result.ok){
+
+        toast(
+          errorMessage(
+            result.error
+          ),
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      closeEditor();
+
+      toast(
+        "Database record saved.",
+        "success"
+      );
+
+
+      await refreshCurrentSection();
+
+    }
+  );
+
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+async function deleteRecord(
+  table,
+  id
+){
+
+  if(!id){
+
+    toast(
+      "This record does not have an id.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !confirm(
+      `Delete this ${table} record?`
+    )
+  ){
+
+    return;
+
+  }
+
+
+  const result =
+    await DB.remove(
+      table,
+      "id",
+      id
+    );
+
+
+  if(!result.ok){
+
+    toast(
+      errorMessage(
+        result.error
+      ),
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  toast(
+    "Record deleted.",
+    "success"
+  );
+
+
+  await refreshCurrentSection();
+
+}
+
+
+/* =========================================================
+   SECTION LOADING
+========================================================= */
+
+const SECTION_LOADERS = {
 
   dashboard:
-    "Admin Pro",
+    async () => {
 
-  analytics:
-    "Analytics",
+      await Promise.all([
+        loadDashboardStats(),
+        loadDashboardChannels(),
+        loadHealth()
+      ]);
+
+    },
 
   channels:
-    "TV Channels",
+    loadChannels,
 
   schedule:
-    "TV Guide",
+    () =>
+      loadTableSection(
+        "schedule_items",
+        "scheduleTable"
+      ),
+
+  live:
+    () =>
+      loadTableSection(
+        "live_events",
+        "liveTable"
+      ),
 
   shows:
-    "Shows",
+    () =>
+      loadTableSection(
+        "shows",
+        "showsTable"
+      ),
 
   episodes:
-    "Episodes",
-
-  members:
-    "Members",
-
-  rewards:
-    "Member Rewards",
-
-  events:
-    "Live Events",
+    () =>
+      loadTableSection(
+        "episodes",
+        "episodesTable"
+      ),
 
   content:
-    "Content Views",
+    () =>
+      loadTableSection(
+        "content_items",
+        "contentTable"
+      ),
 
-  community:
-    "Community",
+  members:
+    () =>
+      loadTableSection(
+        "member_profiles",
+        "membersTable"
+      ),
 
-  diagnostics:
-    "Database Diagnostics",
+  points:
+    loadPoints,
 
-  pages:
-    "CrowRules Pages"
+  watch:
+    loadWatchMinutes,
+
+  activity:
+    () =>
+      loadTableSection(
+        "member_activity",
+        "activityTable"
+      ),
+
+  analytics:
+    loadAnalytics,
+
+  views:
+    () =>
+      loadTableSection(
+        "content_views",
+        "viewsTable"
+      ),
+
+  viewers:
+    loadActiveViewerSection,
+
+  chat:
+    async () => {
+
+      await Promise.all([
+
+        loadTableSection(
+          "chat_rooms",
+          "chatRooms"
+        ),
+
+        loadTableSection(
+          "chat_messages",
+          "chatMessages"
+        )
+
+      ]);
+
+    },
+
+  polls:
+    () =>
+      loadTableSection(
+        "polls",
+        "pollsTable"
+      ),
+
+  newsletter:
+    () =>
+      loadTableSection(
+        "newsletter_subscribers",
+        "newsletterTable"
+      ),
+
+  creators:
+    () =>
+      loadTableSection(
+        "creator_channels",
+        "creatorsTable"
+      ),
+
+  applications:
+    () =>
+      loadTableSection(
+        "creator_applications",
+        "applicationsTable"
+      ),
+
+  awards:
+    async () => {},
+
+  links:
+    async () => {}
 
 };
 
 
-async function openSection(
-  name
-){
+async function refreshCurrentSection(){
 
-  document
-    .querySelectorAll(
-      ".section"
-    )
-    .forEach(
-      section => {
-
-        section.classList.toggle(
-          "active",
-          section.id ===
-          `section-${name}`
-        );
-
-      }
+  const active =
+    document.querySelector(
+      ".section.active"
     );
 
 
-  document
-    .querySelectorAll(
-      ".nav button,.mobile-nav button"
-    )
-    .forEach(
-      button => {
+  if(!active){
 
-        button.classList.toggle(
-          "active",
-          button.dataset.section ===
-          name
-        );
+    return;
 
-      }
-    );
+  }
 
 
-  text(
-    "pageTitle",
-    TITLES[name] ||
-    "Admin Pro"
-  );
+  const loader =
+    SECTION_LOADERS[
+      active.id
+    ];
 
 
-  switch(name){
+  if(loader){
 
-    case "dashboard":
-
-      await Promise.all([
-        loadAnalytics(),
-        loadViewers(),
-        loadChannels()
-      ]);
-
-      break;
-
-
-    case "analytics":
-
-      await loadAnalytics();
-
-      break;
-
-
-    case "channels":
-
-      await loadChannels();
-
-      break;
-
-
-    case "schedule":
-
-      await loadGeneric(
-        "schedule_items",
-        "scheduleList"
-      );
-
-      break;
-
-
-    case "shows":
-
-      await loadGeneric(
-        "shows",
-        "showsList"
-      );
-
-      break;
-
-
-    case "episodes":
-
-      await loadGeneric(
-        "episodes",
-        "episodesList"
-      );
-
-      break;
-
-
-    case "members":
-
-      await loadMembers();
-
-      break;
-
-
-    case "rewards":
-
-      await loadRewards();
-
-      break;
-
-
-    case "events":
-
-      await loadGeneric(
-        "live_events",
-        "eventsList"
-      );
-
-      break;
-
-
-    case "content":
-
-      await loadContent();
-
-      break;
-
-
-    case "community":
-
-      await loadCommunity();
-
-      break;
-
-
-    case "diagnostics":
-
-      await runDiagnostics();
-
-      break;
+    await loader();
 
   }
 
@@ -3900,22 +3828,208 @@ async function openSection(
 
 
 /* =========================================================
-   NAV EVENTS
+   NAVIGATION
 ========================================================= */
 
-document
-  .querySelectorAll(
-    ".nav button,.mobile-nav button"
-  )
-  .forEach(
-    button => {
+document.querySelectorAll(
+  ".nav button[data-section]"
+)
+.forEach(
+  button => {
 
-      button.addEventListener(
-        "click",
-        () =>
-          openSection(
-            button.dataset.section
+    button.addEventListener(
+      "click",
+      async () => {
+
+        const target =
+          button.dataset.section;
+
+
+        document
+          .querySelectorAll(
+            ".nav button"
           )
+          .forEach(
+            item =>
+              item.classList.remove(
+                "active"
+              )
+          );
+
+
+        button.classList.add(
+          "active"
+        );
+
+
+        document
+          .querySelectorAll(
+            ".section"
+          )
+          .forEach(
+            section =>
+              section.classList.remove(
+                "active"
+              )
+          );
+
+
+        const section =
+          $(target);
+
+
+        if(section){
+
+          section.classList.add(
+            "active"
+          );
+
+        }
+
+
+        $("pageTitle")
+          .textContent =
+          button.textContent.trim();
+
+
+        document.body
+          .classList
+          .remove(
+            "menu-open"
+          );
+
+
+        await refreshCurrentSection();
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+$("menuBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      document.body
+        .classList
+        .toggle(
+          "menu-open"
+        );
+
+    }
+  );
+
+
+/* =========================================================
+   GLOBAL REFRESH
+========================================================= */
+
+async function refreshAll(){
+
+  toast(
+    "Refreshing Admin Pro…"
+  );
+
+
+  const online =
+    await testConnection();
+
+
+  if(!online){
+
+    toast(
+      "Supabase connection failed.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  await refreshCurrentSection();
+
+  toast(
+    "Dashboard refreshed.",
+    "success"
+  );
+
+}
+
+
+/* =========================================================
+   REALTIME VIEWER REFRESH
+========================================================= */
+
+let viewerTimer =
+  null;
+
+
+async function refreshViewerStats(){
+
+  const viewers =
+    await getActiveViewers();
+
+
+  $("statViewers")
+    .textContent =
+    viewers.length
+    .toLocaleString();
+
+
+  $("analyticsActive")
+    .textContent =
+    viewers.length
+    .toLocaleString();
+
+
+  const active =
+    document.querySelector(
+      ".section.active"
+    );
+
+
+  if(
+    active &&
+    (
+      active.id === "channels" ||
+      active.id === "viewers" ||
+      active.id === "dashboard"
+    )
+  ){
+
+    await Promise.all([
+      loadDashboardChannels(),
+      loadChannels()
+    ]);
+
+  }
+
+}
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+supabaseClient.auth
+  .onAuthStateChange(
+    (
+      event,
+      session
+    ) => {
+
+      console.log(
+        "Auth:",
+        event,
+        Boolean(session)
       );
 
     }
@@ -3923,160 +4037,87 @@ document
 
 
 /* =========================================================
-   REFRESH BUTTONS
+   INITIALIZATION
 ========================================================= */
 
-$("refreshAnalytics")
-  .addEventListener(
-    "click",
-    loadAnalytics
-  );
+async function init(){
 
-
-$("refreshAnalytics2")
-  .addEventListener(
-    "click",
-    loadAnalytics
-  );
-
-
-$("refreshViewers")
-  .addEventListener(
-    "click",
-    loadViewers
-  );
-
-
-$("refreshChannels")
-  .addEventListener(
-    "click",
-    loadChannels
-  );
-
-
-$("refreshSchedule")
-  .addEventListener(
-    "click",
-    () =>
-      loadGeneric(
-        "schedule_items",
-        "scheduleList"
-      )
-  );
-
-
-/* =========================================================
-   REAL-TIME VIEWER REFRESH
-========================================================= */
-
-setInterval(
-  loadViewers,
-  CONFIG.VIEWER_REFRESH_MS
-);
-
-
-/* =========================================================
-   ANALYTICS REFRESH
-========================================================= */
-
-setInterval(
-  loadAnalytics,
-  CONFIG.ANALYTICS_REFRESH_MS
-);
-
-
-/* =========================================================
-   BOOT
-========================================================= */
-
-async function boot(){
-
-  if(!configIsReady()){
-
-    setConnection(
-      "warning",
-      "Add current Supabase key"
-    );
-
-
-    $("recentAnalytics")
-      .innerHTML = `
-
-        <div class="error">
-
-          <strong>
-            Supabase is not configured yet.
-          </strong>
-
-          <br><br>
-
-          Open this file and replace the
-          <code>SUPABASE_KEY</code> value with your
-          current Supabase Publishable key.
-
-          <br><br>
-
-          Do not put a service-role/secret key in this file.
-
-        </div>
-
-      `;
-
-    return;
-
-  }
-
-
-  const connected =
+  const online =
     await testConnection();
 
 
-  if(!connected){
+  if(!online){
 
-    $("recentAnalytics")
-      .innerHTML = `
+    $("healthList").innerHTML = `
 
-        <div class="error">
+      <div class="error">
 
-          <strong>
-            Supabase browser connection failed.
-          </strong>
+        <strong>
+          Supabase connection failed.
+        </strong>
 
-          <br><br>
+        <br><br>
 
-          Open
-          <strong>
-            Database Diagnostics
-          </strong>
-          to see the exact error returned by Supabase.
+        ${escapeHTML(
+          "Check the Supabase project URL, publishable key, Data API exposure and RLS policies."
+        )}
 
-        </div>
+      </div>
 
-      `;
+    `;
 
     return;
 
   }
 
 
-  await Promise.all([
+  await refreshCurrentSection();
 
-    loadAnalytics(),
 
-    loadViewers(),
+  /*
+    Live viewer counts refresh separately
+    so the entire dashboard doesn't reload
+    every 15 seconds.
+  */
 
-    loadChannels()
+  viewerTimer =
+    setInterval(
+      refreshViewerStats,
+      CONFIG.viewerRefreshMs
+    );
 
-  ]);
+
+  /*
+    General dashboard refresh.
+  */
+
+  setInterval(
+    async () => {
+
+      const active =
+        document.querySelector(
+          ".section.active"
+        );
+
+
+      if(
+        active &&
+        active.id === "dashboard"
+      ){
+
+        await loadDashboardStats();
+        await loadHealth();
+
+      }
+
+    },
+    CONFIG.refreshMs
+  );
 
 }
 
 
-/* =========================================================
-   START
-========================================================= */
-
-boot();
+init();
 
 </script>
 
