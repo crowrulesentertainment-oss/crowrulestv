@@ -18,7 +18,7 @@ function director(){const state=$("directorState"),clock=$("directorClock");if(!
  if(!u.data?.user)return $("studio").innerHTML='<div class="tvEmpty">Administrator sign-in required.</div>';
  const a=await sb.from("crplus_admins").select("is_active").eq("user_id",u.data.user.id).eq("is_active",true).maybeSingle();
  if(!a.data)return $("studio").innerHTML='<div class="tvEmpty">Administrator access required.</div>';
- const r=await sb.from("spectrum_ceremonies").select("id,title,award_id,starts_at,ends_at,stream_url,description").order("starts_at",{ascending:true});
+ const r=await sb.from("spectrum_ceremonies").select("id,title,award_id,starts_at,ends_at,stream_url,description,production_state").order("starts_at",{ascending:true});
  ceremonies=r.data||[];
  $("ceremony").innerHTML=ceremonies.map(c=>'<option value="'+c.id+'">'+esc(c.title)+'</option>').join("")||'<option value="">No ceremonies</option>';
  director(); if(ceremonies[0]){await load(ceremonies[0].id); commandCenter(ceremonies[0].id);}
@@ -29,7 +29,7 @@ function editor(type,rows,a,b,c){
  return '<div class="grid">'+rows.map(x=>'<article class="tvRowCard"><input data-field="a" value="'+esc(x[a])+'"><input data-field="b" value="'+esc(x[b]||"")+'"><input data-field="c" value="'+esc(x[c]||"")+'"><button data-del="'+x.id+'" data-type="'+type+'" class="btn">Delete</button></article>').join("")+'<button class="btn" data-add="'+type+'">+ Add</button></div>';
 }
 async function load(id){
- current=ceremonies.find(c=>c.id===id);
+ current=ceremonies.find(c=>c.id===id); if($("productionState")){ $("productionState").value=current.production_state||"planning"; const h=await sb.from("spectrum_ceremony_state_history").select("from_state,to_state,note,created_at").eq("ceremony_id",id).order("created_at",{ascending:false}).limit(8); $("stateHistory").innerHTML=(h.data?.length?h.data.map(x=>"<p><strong>"+esc(x.to_state)+"</strong> · "+new Date(x.created_at).toLocaleString()+" · "+esc(x.note||"")+"</p>").join(""):"No state history."); $("stateSave").onclick=async()=>{const r=await sb.rpc("spectrum_set_ceremony_state",{p_ceremony_id:id,p_to_state:$("productionState").value,p_note:$("stateNote").value||null}); if(r.error)alert(r.error.message); else load(id);}; }
  clearInterval(backstageTimer);
  const cueBox=async()=>{
   const r=await sb.from("spectrum_ceremony_cues").select("*").eq("ceremony_id",id).order("cue_at",{ascending:true,nullsFirst:false}).order("sort_order");
