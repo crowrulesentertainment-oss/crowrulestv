@@ -1,7 +1,7 @@
 const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let ceremonies=[],current=null,backstageTimer,directorHold=false,stateChannel,cueChannel;
+let ceremonies=[],current=null,backstageTimer,directorHold=false,stateChannel,cueChannel,autoDirectorTimer;
 async function commandCenter(id){
  const r=await sb.from("spectrum_ceremony_run_of_show").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true});
  const q=await sb.from("spectrum_ceremony_cues").select("*").eq("ceremony_id",id).order("cue_at",{ascending:true,nullsFirst:false}).order("sort_order");
@@ -13,6 +13,7 @@ async function commandCenter(id){
  const fmt=v=>{let s=Math.max(0,Math.floor(v/1000)),m=Math.floor(s/60);s%=60;return m+"m "+String(s).padStart(2,"0")+"s"};
  $("ccGrid").innerHTML='<article class="tvRowCard"><small>ON AIR</small><h2>'+(live?esc(live.title):"OFF AIR")+'</h2><p>'+(live?esc(live.segment_type.replaceAll("_"," ")): "No active segment")+'</p></article><article class="tvRowCard"><small>NEXT</small><h2>'+(next?esc(next.title):"—")+'</h2><p>'+(next?fmt(new Date(next.starts_at).getTime()-now):"—")+'</p></article><article class="tvRowCard"><small>NEXT CUE</small><h2>'+(nextCue?esc(nextCue.title):"—")+'</h2><p>'+(nextCue?esc(nextCue.cue_type.replaceAll("_"," ")): "No pending cue")+'</p></article><article class="tvRowCard"><small>NEXT WINNER REVEAL</small><h2>'+(reveal?esc(reveal.category_name||reveal.title):"—")+'</h2><p>'+(reveal?fmt(new Date(reveal.starts_at).getTime()-now):"—")+'</p></article>';
 }
+async function autoAdvance(){if(!current||directorHold||!$("autoDirector")?.checked)return; const r=await sb.rpc("spectrum_advance_run_of_show",{p_ceremony_id:current.id}); if(r.error)console.warn(r.error.message); else {commandCenter(current.id);}}
 function director(){const state=$("directorState"),clock=$("directorClock");if(!state)return;state.textContent=directorHold?"HOLD":"LIVE CONTROL";clock.textContent=directorHold?"Production paused — resume when ready":"Production director online";$("holdBtn").onclick=()=>{directorHold=true;director();};$("resumeBtn").onclick=()=>{directorHold=false;director();};} async function init(){
  const u=await sb.auth.getUser();
  if(!u.data?.user)return $("studio").innerHTML='<div class="tvEmpty">Administrator sign-in required.</div>';
@@ -21,7 +22,7 @@ function director(){const state=$("directorState"),clock=$("directorClock");if(!
  const r=await sb.from("spectrum_ceremonies").select("id,title,award_id,starts_at,ends_at,stream_url,description,production_state").order("starts_at",{ascending:true});
  ceremonies=r.data||[];
  $("ceremony").innerHTML=ceremonies.map(c=>'<option value="'+c.id+'">'+esc(c.title)+'</option>').join("")||'<option value="">No ceremonies</option>';
- director(); if(ceremonies[0]){await load(ceremonies[0].id); commandCenter(ceremonies[0].id);} cueChannel=sb.channel("spectrum-admin-cues").on("postgres_changes",{event:"*",schema:"public",table:"spectrum_ceremony_cues"},()=>{if(current)commandCenter(current.id);}).subscribe(); stateChannel=sb.channel("spectrum-admin-state").on("postgres_changes",{event:"UPDATE",schema:"public",table:"spectrum_ceremonies"},payload=>{const x=payload.new; const i=ceremonies.findIndex(c=>c.id===x.id); if(i<0)return; ceremonies[i]={...ceremonies[i],...x}; if(current?.id===x.id){current={...current,...x}; if($("productionState"))$("productionState").value=x.production_state||"planning"; if($("directorState")){$("directorState").textContent=(x.production_state||"planning").toUpperCase();$("directorClock").textContent="Realtime state synchronized";} load(x.id);}}).subscribe();
+ director(); if($("autoDirector")) $("autoDirector").onchange=()=>{clearInterval(autoDirectorTimer);if($("autoDirector").checked)autoDirectorTimer=setInterval(autoAdvance,1000);}; clearInterval(autoDirectorTimer); if($("autoDirector")?.checked)autoDirectorTimer=setInterval(autoAdvance,1000); if(ceremonies[0]){await load(ceremonies[0].id); commandCenter(ceremonies[0].id);} cueChannel=sb.channel("spectrum-admin-cues").on("postgres_changes",{event:"*",schema:"public",table:"spectrum_ceremony_cues"},()=>{if(current)commandCenter(current.id);}).subscribe(); stateChannel=sb.channel("spectrum-admin-state").on("postgres_changes",{event:"UPDATE",schema:"public",table:"spectrum_ceremonies"},payload=>{const x=payload.new; const i=ceremonies.findIndex(c=>c.id===x.id); if(i<0)return; ceremonies[i]={...ceremonies[i],...x}; if(current?.id===x.id){current={...current,...x}; if($("productionState"))$("productionState").value=x.production_state||"planning"; if($("directorState")){$("directorState").textContent=(x.production_state||"planning").toUpperCase();$("directorClock").textContent="Realtime state synchronized";} load(x.id);}}).subscribe();
 }
 $("ceremony").onchange=()=>{load($("ceremony").value);commandCenter($("ceremony").value)};
 function dt(v){return v?new Date(v).toISOString().slice(0,16):""}
