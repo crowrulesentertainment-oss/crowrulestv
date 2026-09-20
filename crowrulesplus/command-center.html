@@ -29,18 +29,34 @@
 </div></section>
 </div>
 <div id="operations" class="view">
-<section class="ccPanel"><div class="selectTitle"><div><h2>Show & Episode Manager</h2><p class="muted">Link published or draft content to a show, season and episode without changing playback sources.</p></div><button class="btn" id="clearEditor">Clear</button></div>
+<section class="ccPanel"><div class="selectTitle"><div><h2>Content Studio</h2><p class="muted">Create and manage shows, episodes, specials and films, then connect them to projects and playback.</p></div><button class="btn" id="newContent">New</button></div>
 <div class="ccTwo">
 <div><label for="contentSearch">Find content</label><input id="contentSearch" placeholder="Search titles, divisions or types…"><div id="contentList" class="ccList" style="margin-top:12px"></div></div>
 <div class="ccEditor">
 <div class="editorGrid">
+<label>Title<input id="editTitle" placeholder="Content title"></label>
+<label>Slug<input id="editSlug" placeholder="content-slug"></label>
+<label>Division<input id="editDivision" placeholder="dreamscapes"></label>
+<label>Workflow<select id="editWorkflow"><option>draft</option><option>review</option><option>approved</option><option>published</option><option>archived</option></select></label>
+<label>Membership level<input id="editMembership" type="number" min="0" value="0"></label>
+<label>Age rating<input id="editAge" placeholder="TV-14"></label>
+<label>Release at<input id="editRelease" type="datetime-local"></label>
+<label>Project<select id="projectId"><option value="">— No project —</option></select></label>
+</div>
+<label style="display:grid;gap:6px;margin-top:10px">Description<textarea id="editDescription" rows="4" placeholder="Description"></textarea></label>
+<label style="display:grid;gap:6px;margin-top:10px">Thumbnail URL<input id="editThumb" placeholder="https://…"></label>
+<label style="display:grid;gap:6px;margin-top:10px">Backdrop URL<input id="editBackdrop" placeholder="https://…"></label>
+<label style="display:grid;gap:6px;margin-top:10px">Video URL<input id="editVideo" placeholder="YouTube, HLS or direct video URL"></label>
+<label style="display:grid;gap:6px;margin-top:10px">Tags<input id="editTags" placeholder="tag1, tag2"></label>
+<div class="editorGrid">
+
 <label>Selected content<input id="selectedTitle" readonly placeholder="Choose a title"></label>
 <label>Content type<select id="contentType"><option value="episode">episode</option><option value="show">show</option><option value="movie">movie</option><option value="special">special</option></select></label>
 <label>Parent show<select id="showId"><option value="">— Not linked —</option></select></label>
 <label>Season number<input id="seasonNumber" type="number" min="1" step="1" placeholder="1"></label>
 <label>Episode number<input id="episodeNumber" type="number" min="1" step="1" placeholder="1"></label>
 </div>
-<div class="ccActions" style="margin-top:12px"><button class="btn primary" id="saveEpisode">Save Relationship</button></div>
+<div class="ccActions" style="margin-top:12px"><button class="btn primary" id="saveContent">Save Content</button><button class="btn" id="saveEpisode">Save Relationship</button><button class="btn" id="manageSource">Playback Source</button></div>
 <div id="editorStatus" class="ccMeta" style="margin-top:10px">Select a content item to edit its show relationship.</div>
 </div>
 </div></section>
@@ -59,7 +75,7 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&
 const fmt=v=>v?new Date(v).toLocaleString():"—";
 const tabButtons=[...document.querySelectorAll("[data-tab]")],views=[...document.querySelectorAll(".view")];
 tabButtons.forEach(b=>b.onclick=()=>{tabButtons.forEach(x=>x.classList.toggle("active",x===b));views.forEach(v=>v.classList.toggle("active",v.id===b.dataset.tab));});
-let allContent=[],shows=[];
+let allContent=[],shows=[],projects=[],selectedId=null;
 async function session(){const {data:{session}}=await sb.auth.getSession();if(!session)throw Error("Sign in required");return session}
 async function adminCall(action,body={}){const {data,error}=await sb.functions.invoke("crplus-admin",{body:{action,...body}});if(error)throw error;if(data?.error)throw Error(data.error);return data}
 function renderContent(){
@@ -69,26 +85,31 @@ function renderContent(){
  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>selectContent(b.dataset.edit));
 }
 function selectContent(id){
- const x=allContent.find(v=>v.id===id);if(!x)return;
+ const x=allContent.find(v=>v.id===id);if(!x)return;selectedId=x.id;
+ $("editTitle").value=x.title||"";$("editSlug").value=x.slug||"";$("editDivision").value=x.division_key||"";
+ $("editWorkflow").value=x.workflow_status||"draft";$("editMembership").value=x.membership_level??0;$("editAge").value=x.age_rating||"";
+ $("editRelease").value=x.release_at?new Date(x.release_at).toISOString().slice(0,16):"";
+ $("editDescription").value=x.description||"";$("editThumb").value=x.thumbnail_url||"";$("editBackdrop").value=x.backdrop_url||"";
+ $("editVideo").value=x.video_url||"";$("editTags").value=(x.tags||[]).join(", ");$("projectId").value=x.project_id||"";
  $("selectedTitle").value=x.title||"";$("contentType").value=x.content_type||"episode";$("showId").value=x.show_id||"";
  $("seasonNumber").value=x.season_number??"";$("episodeNumber").value=x.episode_number??"";
  $("editorStatus").textContent="Editing "+(x.title||"Untitled")+" · relationship changes are saved through the admin API.";
 }
-function clearEditor(){ $("selectedTitle").value="";$("contentType").value="episode";$("showId").value="";$("seasonNumber").value="";$("episodeNumber").value="";$("editorStatus").textContent="Select a content item to edit its show relationship."; }
+function clearEditor(){ selectedId=null; $("selectedTitle").value="";$("editTitle").value="";$("editSlug").value="";$("editDivision").value="";$("editWorkflow").value="draft";$("editMembership").value=0;$("editAge").value="";$("editRelease").value="";$("editDescription").value="";$("editThumb").value="";$("editBackdrop").value="";$("editVideo").value="";$("editTags").value="";$("projectId").value="";$("contentType").value="episode";$("showId").value="";$("seasonNumber").value="";$("episodeNumber").value="";$("editorStatus").textContent="Select a content item to edit its show relationship."; }
 async function load(){
  try{
   await session();
-  const [cc,alerts,hist,activity,notes,projects,integrity,checks,membershipHealth,platformHealth,list]=await Promise.all([
+  const [cc,alerts,hist,activity,notes,projectRows,integrity,checks,membershipHealth,platformHealth,list]=await Promise.all([
    sb.from("cr_platform_command_center").select("*").single(),sb.from("cr_platform_open_alerts").select("*").limit(50),
    sb.from("cr_platform_health_history").select("*").limit(20),sb.from("cr_platform_activity_feed").select("*").limit(50),
    sb.from("cr_platform_admin_notes").select("*").order("updated_at",{ascending:false}).limit(50),
-   sb.from("crplus_projects").select("id,title,status,division_key,project_type,target_release_at,updated_at").order("updated_at",{ascending:false}).limit(40),
+   sb.from("crplus_projects").select("id,title,status,division_key,project_type,target_release_at,updated_at").order("updated_at",{ascending:false}).limit(100),
    sb.from("crplus_integrity_issues").select("*").limit(100),sb.from("cr_platform_health_checks").select("*").order("checked_at",{ascending:false}).limit(20),
    sb.from("crplus_universal_membership_health").select("*").single(),sb.from("crplus_platform_health").select("*").single(),
    adminCall("list")
   ]);
   for(const r of [cc,alerts,hist,activity,notes,projects,integrity,checks,membershipHealth,platformHealth])if(r.error)throw r.error;
-  allContent=list.items||[];shows=allContent.filter(x=>x.content_type==="show");
+  allContent=list.items||[];shows=allContent.filter(x=>x.content_type==="show");projects=projectRows.data||[]; $("projectId").innerHTML="<option value=\"\">— No project —</option>"+projects.map(x=>"<option value=\""+x.id+"\">"+esc(x.title)+"</option>").join("");
   $("showId").innerHTML="<option value=''>— Not linked —</option>"+shows.map(x=>"<option value='"+x.id+"'>"+esc(x.title)+"</option>").join("");
   renderContent();
   const c=cc.data||{},h=(hist.data||[])[0];$("status").innerHTML="<h2>Command Center access granted</h2><p class='muted'>Administrator control plane connected. V9 show/episode management is active.</p>";$("app").hidden=false;
@@ -107,8 +128,15 @@ async function load(){
   document.querySelectorAll("[data-resolve]").forEach(b=>b.onclick=async()=>{try{await sb.rpc("cr_platform_resolve_alert",{p_alert_id:b.dataset.resolve}).throwOnError();load()}catch(e){alert(e.message)}});
  }catch(e){$("status").innerHTML="<h2>Access unavailable</h2><p>"+esc(e.message||e)+"</p><a class='btn primary' href='./#account'>Sign in</a>"}
 }
-$("contentSearch").oninput=renderContent;$("clearEditor").onclick=clearEditor;
-$("saveEpisode").onclick=async()=>{try{const title=$("selectedTitle").value;if(!title)return alert("Select a content item first.");const x=allContent.find(v=>v.title===title);if(!x)return alert("Select a content item first.");const patch={id:x.id,content_type:$("contentType").value,show_id:$("showId").value||null,season_number:$("seasonNumber").value?Number($("seasonNumber").value):null,episode_number:$("episodeNumber").value?Number($("episodeNumber").value):null};await adminCall("save_content",{item:patch});$("editorStatus").textContent="Saved relationship for "+title+".";await load()}catch(e){alert(e.message||e)}};
+$("contentSearch").oninput=renderContent;$("clearEditor").onclick=clearEditor;$("newContent").onclick=clearEditor;
+$("saveContent").onclick=async()=>{try{
+ const title=$("editTitle").value.trim();if(!title)return alert("Enter a title.");
+ const slug=($("editSlug").value.trim()||title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""));
+ const item={id:selectedId||undefined,content_type:$("contentType").value,title,slug,division_key:$("editDivision").value.trim()||null,description:$("editDescription").value.trim()||null,thumbnail_url:$("editThumb").value.trim()||null,backdrop_url:$("editBackdrop").value.trim()||null,video_url:$("editVideo").value.trim()||null,age_rating:$("editAge").value.trim()||null,membership_level:Number($("editMembership").value||0),release_at:$("editRelease").value?new Date($("editRelease").value).toISOString():null,tags:$("editTags").value.split(",").map(v=>v.trim()).filter(Boolean),project_id:$("projectId").value||null,show_id:$("showId").value||null,season_number:$("seasonNumber").value?Number($("seasonNumber").value):null,episode_number:$("episodeNumber").value?Number($("episodeNumber").value):null,workflow_status:$("editWorkflow").value};
+ const d=await adminCall("save_content",{item});selectedId=d.item.id;$("editorStatus").textContent="Saved "+title+".";await load();
+ }catch(e){alert(e.message||e)}};
+$("manageSource").onclick=async()=>{if(!selectedId)return alert("Select content first.");const url=prompt("Playback source URL (YouTube, HLS or direct video):",$("editVideo").value||"");if(url===null)return;try{await adminCall("save_source",{source:{content_id:selectedId,source_type:/youtube\.com|youtu\.be/i.test(url)?"youtube":/\.m3u8/i.test(url)?"hls":"external",source_url:url,is_primary:true,is_active:true,sort_order:0,metadata:{}}});$("editorStatus").textContent="Playback source saved.";await load()}catch(e){alert(e.message||e)}};
+$("saveEpisode").onclick=async()=>{try{const title=$("selectedTitle").value;if(!title)return alert("Select a content item first.");const x=allContent.find(v=>v.id===selectedId)||allContent.find(v=>v.title===title);if(!x)return alert("Select a content item first.");const patch={id:x.id,content_type:$("contentType").value,show_id:$("showId").value||null,season_number:$("seasonNumber").value?Number($("seasonNumber").value):null,episode_number:$("episodeNumber").value?Number($("episodeNumber").value):null};await adminCall("save_content",{item:patch});$("editorStatus").textContent="Saved relationship for "+title+".";await load()}catch(e){alert(e.message||e)}};
 $("healthCheck").onclick=async()=>{try{await sb.rpc("cr_platform_run_health_checks").throwOnError();load()}catch(e){alert(e.message)}};$("capture").onclick=async()=>{try{await sb.rpc("cr_platform_capture_health").throwOnError();load()}catch(e){alert(e.message)}};$("saveNote").onclick=async()=>{try{const t=$("noteTitle").value.trim();if(!t)return alert("Enter a note title.");await sb.rpc("cr_platform_upsert_note",{p_id:null,p_title:t,p_body:$("noteBody").value,p_status:$("noteStatus").value}).throwOnError();$("noteTitle").value="";$("noteBody").value="";load()}catch(e){alert(e.message)}};$("refresh").onclick=load;load();
 </script>
 </body></html>
