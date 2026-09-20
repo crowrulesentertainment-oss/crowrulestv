@@ -20,8 +20,8 @@ function editor(type,rows,a,b,c){
 async function load(id){
  current=ceremonies.find(c=>c.id===id);
  const [seg,pre,perf,media]=await Promise.all([
-  sb.from("spectrum_ceremony_segments").select("*").eq("ceremony_id",id).order("sort_order"),
-  sb.from("spectrum_presenters").select("*").eq("ceremony_id",id).order("sort_order"),
+  sb.from("spectrum_ceremony_segments").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true}),
+  sb.from("spectrum_presenters").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true}),
   sb.from("spectrum_performers").select("*").eq("ceremony_id",id).order("sort_order"),
   sb.from("spectrum_media").select("*").eq("ceremony_id",id).order("release_at")
  ]);
