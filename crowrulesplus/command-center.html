@@ -14,7 +14,7 @@
 <div id="status" class="accountPanel">Checking administrator access…</div>
 <div id="app" hidden>
 <div class="tabs" role="tablist">
-<button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="operations">Operations</button><button class="tab" data-tab="production">Production</button><button class="tab" data-tab="integrity">Integrity</button><button class="tab" data-tab="activity">Activity</button><button class="tab" data-tab="membership">Membership</button><button class="tab" data-tab="system">System</button>
+<button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="operations">Operations</button><button class="tab" data-tab="production">Production</button><button class="tab" data-tab="integrity">Integrity</button><button class="tab" data-tab="activity">Activity</button><button class="tab" data-tab="membership">Membership</button><button class="tab" data-tab="system">System</button><button class="tab" data-tab="creator">Creator Studio</button>
 </div>
 <div id="overview" class="view active">
 <div id="metrics" class="ccGrid"></div>
@@ -65,6 +65,16 @@
 <div id="production" class="view"><section class="ccPanel"><h2>Production Pipeline</h2><p class="muted">Projects are governed by the CrowRules+ workflow. Status changes are validated in the database.</p><div id="projects" class="ccList"></div></section></div>
 <div id="integrity" class="view"><section class="ccPanel"><h2>Integrity Monitor</h2><p class="muted">Items here need an operator decision rather than an automatic destructive fix.</p><div id="healthChecks" class="ccList"></div><div id="integrityList" class="ccList" style="margin-top:12px"></div></section></div>
 <div id="membership" class="view"><section class="ccPanel"><h2>Universal Membership Health</h2><p class="muted">One Account · One Universe — membership integrity across CrowRules.</p><div id="membershipHealth" class="ccGrid"></div></section></div>
+<div id="creator" class="view">
+<section class="ccPanel"><div class="selectTitle"><div><h2>Creator Studio</h2><p class="muted">Dreamscapes → Production → CrowRules+ publishing pipeline.</p></div><button class="btn" id="creatorRefresh">Refresh</button></div>
+<div class="ccTwo">
+<div><h3>Production Projects</h3><div id="creatorProjects" class="ccList"></div></div>
+<div><h3>Selected Project</h3><div id="creatorEditor" class="ccList"><div class="empty">Select a project.</div></div></div>
+</div></section>
+<section class="ccPanel"><h2>Credits</h2><div class="ccTwo"><div><div class="editorGrid">
+<label>Name<input id="creditName" placeholder="Creator / contributor"></label><label>Role<input id="creditRole" placeholder="Writer, Director, Host…"></label><label>User ID<input id="creditUser" placeholder="Optional UUID"></label><label>Creator ID<input id="creditCreator" placeholder="Optional UUID"></label><label>Sort<input id="creditSort" type="number" value="0"></label>
+</div><button class="btn primary" id="addCredit" style="margin-top:10px">Add Credit</button></div><div id="credits" class="ccList"><div class="empty">Select a project.</div></div></div></section>
+</div>
 <div id="system" class="view"><div class="ccTwo"><section class="ccPanel"><h2>Platform Health</h2><div id="platformHealth" class="ccList"></div></section><section class="ccPanel"><h2>Health Checks</h2><div id="systemChecks" class="ccList"></div></section></div></div>
 <div id="activity" class="view"><section class="ccPanel"><h2>Recent Activity</h2><div id="activityList" class="ccList"></div></section></div>
 </div></section></main>
@@ -75,9 +85,13 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&
 const fmt=v=>v?new Date(v).toLocaleString():"—";
 const tabButtons=[...document.querySelectorAll("[data-tab]")],views=[...document.querySelectorAll(".view")];
 tabButtons.forEach(b=>b.onclick=()=>{tabButtons.forEach(x=>x.classList.toggle("active",x===b));views.forEach(v=>v.classList.toggle("active",v.id===b.dataset.tab));});
-let allContent=[],shows=[],projects=[],selectedId=null;
+let allContent=[],shows=[],projects=[],selectedId=null,selectedProject=null;
 async function session(){const {data:{session}}=await sb.auth.getSession();if(!session)throw Error("Sign in required");return session}
 async function adminCall(action,body={}){const {data,error}=await sb.functions.invoke("crplus-admin",{body:{action,...body}});if(error)throw error;if(data?.error)throw Error(data.error);return data}
+function renderCreatorProjects(){ $("creatorProjects").innerHTML=projects.map(p=>"<div class='ccItem contentRow'><div><b>"+esc(p.title)+"</b><small>"+esc(p.status)+" · "+esc(p.project_type)+" · "+esc(p.division_key||"crplus")+"</small></div><button class='btn mini' data-project='"+p.id+"'>Open</button></div>").join("")||"<div class='empty'>No projects.</div>";document.querySelectorAll("[data-project]").forEach(b=>b.onclick=()=>selectProject(b.dataset.project));}
+async function selectProject(id){selectedProject=projects.find(p=>p.id===id);if(!selectedProject)return; $("creatorEditor").innerHTML="<div class='ccItem'><strong>"+esc(selectedProject.title)+"</strong><p>"+esc(selectedProject.status)+" · "+esc(selectedProject.project_type)+"</p><div class='ccActions'><button class='btn primary' id='createFromProject'>Create CrowRules+ Content</button><button class='btn' id='linkExisting'>Link Existing Content</button></div><div class='ccMeta'>Dreamscapes project: "+esc(selectedProject.dreamscapes_project_id||"—")+" · Content: "+esc(selectedProject.content_id||"—")+"</div></div>"; const r=await sb.from("crplus_project_credits").select("*").eq("project_id",id).order("sort_order"); if(r.error)return; $("credits").innerHTML=r.data.map(c=>"<div class='ccItem'><strong>"+esc(c.credit_name)+"</strong><span class='pill'>"+esc(c.credit_role)+"</span></div>").join("")||"<div class='empty'>No credits yet.</div>";$("createFromProject").onclick=()=>createContentForProject();$("linkExisting").onclick=()=>linkContentToProject();}
+async function createContentForProject(){if(!selectedProject)return;clearEditor();$("editTitle").value=selectedProject.title;$("editSlug").value=selectedProject.slug;$("editDivision").value=selectedProject.division_key||"dreamscapes";$("contentType").value=selectedProject.project_type==="series"?"show":"special";$("projectId").value=selectedProject.id;$("editDescription").value=selectedProject.description||selectedProject.logline||"";selectedId=null;$("editorStatus").textContent="Ready to create content for "+selectedProject.title+". Switch to Operations to save.";tabButtons.find(b=>b.dataset.tab==="operations").click();}
+async function linkContentToProject(){if(!selectedProject)return;const id=prompt("Enter existing CrowRules+ content UUID:",selectedProject.content_id||"");if(!id)return;try{await adminCall("save_content",{item:{id,project_id:selectedProject.id}});alert("Content linked.");await load();}catch(e){alert(e.message||e)}}
 function renderContent(){
  const q=($("contentSearch").value||"").toLowerCase().trim();
  const rows=allContent.filter(x=>!q||[x.title,x.division_key,x.content_type,x.workflow_status].some(v=>String(v||"").toLowerCase().includes(q))).slice(0,80);
@@ -109,7 +123,7 @@ async function load(){
    adminCall("list")
   ]);
   for(const r of [cc,alerts,hist,activity,notes,projects,integrity,checks,membershipHealth,platformHealth])if(r.error)throw r.error;
-  allContent=list.items||[];shows=allContent.filter(x=>x.content_type==="show");projects=projectRows.data||[]; $("projectId").innerHTML="<option value=\"\">— No project —</option>"+projects.map(x=>"<option value=\""+x.id+"\">"+esc(x.title)+"</option>").join("");
+  allContent=list.items||[];shows=allContent.filter(x=>x.content_type==="show");projects=projectRows.data||[]; $("projectId").innerHTML="<option value=\"\">— No project —</option>"+projects.map(x=>"<option value=\""+x.id+"\">"+esc(x.title)+"</option>").join(""); renderCreatorProjects();
   $("showId").innerHTML="<option value=''>— Not linked —</option>"+shows.map(x=>"<option value='"+x.id+"'>"+esc(x.title)+"</option>").join("");
   renderContent();
   const c=cc.data||{},h=(hist.data||[])[0];$("status").innerHTML="<h2>Command Center access granted</h2><p class='muted'>Administrator control plane connected. V9 show/episode management is active.</p>";$("app").hidden=false;
@@ -128,7 +142,8 @@ async function load(){
   document.querySelectorAll("[data-resolve]").forEach(b=>b.onclick=async()=>{try{await sb.rpc("cr_platform_resolve_alert",{p_alert_id:b.dataset.resolve}).throwOnError();load()}catch(e){alert(e.message)}});
  }catch(e){$("status").innerHTML="<h2>Access unavailable</h2><p>"+esc(e.message||e)+"</p><a class='btn primary' href='./#account'>Sign in</a>"}
 }
-$("contentSearch").oninput=renderContent;$("clearEditor").onclick=clearEditor;$("newContent").onclick=clearEditor;
+$("contentSearch").oninput=renderContent;$("creatorRefresh").onclick=load;$("clearEditor").onclick=clearEditor;$("newContent").onclick=clearEditor;
+$("addCredit").onclick=async()=>{if(!selectedProject)return alert("Select a project first.");const name=$("creditName").value.trim(),role=$("creditRole").value.trim();if(!name||!role)return alert("Name and role are required.");try{const r=await sb.from("crplus_project_credits").insert({project_id:selectedProject.id,user_id:$("creditUser").value.trim()||null,creator_id:$("creditCreator").value.trim()||null,credit_name:name,credit_role:role,sort_order:Number($("creditSort").value||0)});if(r.error)throw r.error;$("creditName").value="";$("creditRole").value="";selectProject(selectedProject.id);}catch(e){alert(e.message)}};
 $("saveContent").onclick=async()=>{try{
  const title=$("editTitle").value.trim();if(!title)return alert("Enter a title.");
  const slug=($("editSlug").value.trim()||title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""));
