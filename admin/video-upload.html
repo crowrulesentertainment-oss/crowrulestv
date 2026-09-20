@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js"></script>
   <style>
     :root{--black:#030303;--panel:#0b0b0d;--panel2:#111114;--red:#e50914;--red2:#ff2635;--white:#fff;--gray:#aaa;--muted:#68686d;--green:#35d07f;--border:rgba(255,255,255,.09);--display:"Orbitron",sans-serif;--body:"Montserrat",sans-serif}
     *{box-sizing:border-box}
@@ -57,7 +58,7 @@
 
   <main id="adminApp" class="hidden">
     <h1>Video Upload Admin</h1>
-    <p class="sub">Upload a video to Supabase Storage and publish its catalog record for CrowRules TV. Uploaded files are stored in the public CrowRules TV video bucket.</p>
+    <p class="sub">Upload a video to Supabase Storage and publish its catalog record for CrowRules TV. Large files use resumable TUS uploads so interrupted transfers can continue instead of restarting from zero.</p>
 
     <section class="card">
       <h2>Upload Video</h2>
@@ -67,7 +68,7 @@
             <label for="videoFile">Video File</label>
             <div class="filebox">
               <input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v" required>
-              <span class="hint">MP4, WebM, MOV or M4V · maximum 1 GB.</span>
+              <span class="hint">MP4, WebM, MOV or M4V · maximum 1 GB · resumable upload.</span>
             </div>
           </div>
           <div>
@@ -192,8 +193,37 @@ $("uploadForm").addEventListener("submit",async event=>{
   $("progress").classList.remove("hidden");
   $("progressFill").style.width="8%";
   try{
-    const {error:uploadError}=await supabaseClient.storage.from(BUCKET).upload(path,file,{contentType:file.type||"video/mp4",cacheControl:"3600",upsert:false});
-    if(uploadError)throw uploadError;
+    const {data:sessionData}=await supabaseClient.auth.getSession();
+    const accessToken=sessionData?.session?.access_token;
+    if(!accessToken)throw new Error("Your session has expired. Sign in again.");
+
+    const uploadEndpoint=SUPABASE_URL.replace(".supabase.co",".storage.supabase.co")+"/storage/v1/upload/resumable";
+    const upload=new tus.Upload(file,{
+      endpoint:uploadEndpoint,
+      retryDelays:[0,1000,3000,5000,10000,20000],
+      chunkSize:6*1024*1024,
+      headers:{
+        authorization:"Bearer "+accessToken,
+        apikey:SUPABASE_KEY,
+        "x-upsert":"false"
+      },
+      metadata:{
+        bucketName:BUCKET,
+        objectName:path,
+        contentType:file.type||"video/mp4",
+        cacheControl:"3600"
+      },
+      onError(error){throw error},
+      onProgress(bytesUploaded,bytesTotal){
+        const pct=Math.max(1,Math.min(99,Math.round(bytesUploaded/bytesTotal*70)));
+        $("progressFill").style.width=pct+"%";
+      }
+    });
+    await new Promise((resolve,reject)=>{
+      upload.options.onError=reject;
+      upload.options.onSuccess=resolve;
+      upload.start();
+    });
     $("progressFill").style.width="70%";
 
     const {data:publicUrlData}=supabaseClient.storage.from(BUCKET).getPublicUrl(path);
