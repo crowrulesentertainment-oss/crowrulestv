@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#030303">
+  <meta name="color-scheme" content="dark">
+  <title>CrowRules TV — Video Upload Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--black:#030303;--panel:#0b0b0d;--panel2:#111114;--red:#e50914;--red2:#ff2635;--white:#fff;--gray:#aaa;--muted:#68686d;--green:#35d07f;--border:rgba(255,255,255,.09);--display:"Orbitron",sans-serif;--body:"Montserrat",sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,rgba(229,9,20,.11),transparent 32%),linear-gradient(180deg,#060606,#010101);color:var(--white);font-family:var(--body)}
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:28px 0 70px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:10px 0 30px;border-bottom:1px solid var(--border)}
+    .brand{font-family:var(--display);font-size:1rem;letter-spacing:.12em;font-weight:900}.brand span{color:var(--red)}
+    .admin-badge{font-size:.62rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--green)}
+    h1,h2{font-family:var(--display);letter-spacing:.05em}h1{font-size:clamp(1.5rem,4vw,2.5rem);margin:34px 0 8px}h2{font-size:1rem;margin:0 0 18px}
+    .sub{color:var(--gray);font-size:.82rem;line-height:1.7;margin:0 0 28px}
+    .card{background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);margin-bottom:22px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.full{grid-column:1/-1}
+    label{display:block;color:#cfcfd3;font-size:.62rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;margin:0 0 8px}
+    input,textarea,select{width:100%;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#070709;color:#fff;padding:12px 13px;font:inherit;font-size:.78rem;outline:none}
+    textarea{min-height:100px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:rgba(229,9,20,.7);box-shadow:0 0 0 3px rgba(229,9,20,.08)}
+    .filebox{border:1px dashed rgba(229,9,20,.4);border-radius:9px;padding:18px;background:rgba(229,9,20,.025)}
+    .filebox input{border:0;padding:0;background:transparent}.hint{display:block;color:var(--muted);font-size:.65rem;margin-top:8px;line-height:1.5}
+    .checks{display:flex;gap:18px;flex-wrap:wrap;align-items:center}.checks label{display:flex;gap:8px;align-items:center;margin:0;text-transform:none;letter-spacing:0;font-size:.74rem;color:#ddd}.checks input{width:auto}
+    button,.button{border:0;border-radius:7px;padding:13px 18px;background:var(--red);color:#fff;font:800 .68rem var(--body);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+    button:hover,.button:hover{background:var(--red2)}button.secondary,.button.secondary{background:#151518;border:1px solid var(--border)}
+    button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .status{display:none;margin-top:18px;padding:13px;border-radius:7px;font-size:.73rem;line-height:1.55}.status.show{display:block}.status.error{border:1px solid rgba(229,9,20,.35);background:rgba(229,9,20,.07)}.status.ok{border:1px solid rgba(53,208,127,.3);background:rgba(53,208,127,.06)}
+    .progress{height:6px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:14px}.progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,#760008,#e50914,#ff2635);transition:width .2s}
+    .table-wrap{overflow:auto}.video-table{width:100%;border-collapse:collapse;min-width:720px}.video-table th,.video-table td{text-align:left;padding:12px;border-bottom:1px solid var(--border);font-size:.7rem}.video-table th{color:var(--muted);font-size:.58rem;text-transform:uppercase;letter-spacing:.12em}.video-table td strong{font-size:.75rem}.pill{display:inline-flex;padding:5px 8px;border-radius:99px;background:rgba(53,208,127,.08);color:var(--green);font-size:.58rem;font-weight:800;text-transform:uppercase}
+    .logout{font-size:.6rem;color:#aaa;background:transparent;border:1px solid var(--border)}.hidden{display:none!important}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}header{align-items:flex-start;flex-direction:column}.wrap{width:min(100% - 22px,1120px)}.card{padding:18px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../index.html">CROW<span>RULES</span> TV</a>
+    <div>
+      <span id="adminBadge" class="admin-badge">Checking administrator access…</span>
+      <button id="logoutBtn" class="logout hidden" type="button">Sign Out</button>
+    </div>
+  </header>
+
+  <section id="accessDenied" class="card hidden">
+    <h2>Administrator Access Required</h2>
+    <p class="sub">This page is restricted to authenticated CrowRules administrators.</p>
+    <a class="button" href="../../crowrulesentertainment/login.html">Sign In</a>
+  </section>
+
+  <main id="adminApp" class="hidden">
+    <h1>Video Upload Admin</h1>
+    <p class="sub">Upload a video to Supabase Storage and publish its catalog record for CrowRules TV. Uploaded files are stored in the public CrowRules TV video bucket.</p>
+
+    <section class="card">
+      <h2>Upload Video</h2>
+      <form id="uploadForm">
+        <div class="grid">
+          <div class="full">
+            <label for="videoFile">Video File</label>
+            <div class="filebox">
+              <input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v" required>
+              <span class="hint">MP4, WebM, MOV or M4V · maximum 1 GB.</span>
+            </div>
+          </div>
+          <div>
+            <label for="title">Title</label>
+            <input id="title" maxlength="180" required placeholder="Episode title">
+          </div>
+          <div>
+            <label for="slug">Slug</label>
+            <input id="slug" maxlength="180" placeholder="episode-title">
+          </div>
+          <div class="full">
+            <label for="description">Description</label>
+            <textarea id="description" maxlength="5000" placeholder="Describe this video…"></textarea>
+          </div>
+          <div>
+            <label for="category">Category</label>
+            <select id="category">
+              <option value="shows">Shows</option>
+              <option value="episodes">Episodes</option>
+              <option value="events">Events</option>
+              <option value="originals">Originals</option>
+              <option value="documentary">Documentary</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="genre">Genre</label>
+            <input id="genre" maxlength="100" placeholder="Documentary">
+          </div>
+          <div>
+            <label for="year">Year</label>
+            <input id="year" type="number" min="1900" max="2100" placeholder="2026">
+          </div>
+          <div>
+            <label for="rating">Rating</label>
+            <input id="rating" maxlength="20" placeholder="TV-PG">
+          </div>
+          <div>
+            <label for="runtime">Runtime (minutes)</label>
+            <input id="runtime" type="number" min="0" step="1" placeholder="30">
+          </div>
+          <div>
+            <label for="thumbnail">Thumbnail URL (optional)</label>
+            <input id="thumbnail" type="url" placeholder="https://…">
+          </div>
+          <div class="full checks">
+            <label><input id="featured" type="checkbox"> Featured</label>
+            <label><input id="published" type="checkbox" checked> Published</label>
+            <label><input id="active" type="checkbox" checked> Active</label>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="uploadBtn" type="submit">Upload &amp; Publish</button>
+          <button id="resetBtn" class="secondary" type="reset">Clear</button>
+        </div>
+        <div id="progress" class="progress hidden"><i id="progressFill"></i></div>
+        <div id="status" class="status"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Recent CrowRules TV Videos</h2>
+      <div class="table-wrap">
+        <table class="video-table">
+          <thead><tr><th>Title</th><th>Category</th><th>Published</th><th>Created</th><th>Video</th></tr></thead>
+          <tbody id="videoRows"><tr><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+"use strict";
+const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
+const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const {createClient}=window.supabase;
+const supabaseClient=createClient(SUPABASE_URL,SUPABASE_KEY);
+const BUCKET="crowrules-tv-videos";
+const $=id=>document.getElementById(id);
+const statusBox=$("status");
+
+function setStatus(message,type="ok"){statusBox.textContent=message;statusBox.className="status show "+type}
+function clearStatus(){statusBox.className="status";statusBox.textContent=""}
+function slugify(value){return value.toString().trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,180)}
+function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function formatDate(value){try{return new Date(value).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"})}catch{return "—"}}
+
+async function requireAdmin(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session){showDenied();return false}
+  const {data,isError,error}=await supabaseClient.rpc("crowrules_is_admin");
+  if(error||isError||data!==true){showDenied();return false}
+  $("adminBadge").textContent="Administrator verified";
+  $("logoutBtn").classList.remove("hidden");
+  $("adminApp").classList.remove("hidden");
+  await loadVideos();
+  return true;
+}
+function showDenied(){$("accessDenied").classList.remove("hidden");$("adminBadge").textContent="Access denied"}
+$("logoutBtn").addEventListener("click",async()=>{await supabaseClient.auth.signOut();location.href="../../crowrulesentertainment/login.html"});
+$("title").addEventListener("input",()=>{if(!$("slug").dataset.edited)$("slug").value=slugify($("title").value)});
+$("slug").addEventListener("input",()=>{$("slug").dataset.edited="1"});
+
+$("uploadForm").addEventListener("reset",()=>{delete $("slug").dataset.edited;clearStatus();$("progress").classList.add("hidden");$("progressFill").style.width="0%"});
+
+$("uploadForm").addEventListener("submit",async event=>{
+  event.preventDefault();clearStatus();
+  const file=$("videoFile").files[0];
+  if(!file)return setStatus("Choose a video file first.","error");
+  if(file.size>1073741824)return setStatus("The selected file is larger than the 1 GB limit.","error");
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session)return setStatus("Your session has expired. Sign in again.","error");
+
+  const title=$("title").value.trim();
+  const slug=slugify($("slug").value||title)||("video-"+Date.now());
+  const ext=(file.name.split(".").pop()||"mp4").toLowerCase();
+  const path="uploads/"+new Date().getUTCFullYear()+"/"+crypto.randomUUID()+"."+ext;
+  const metadata={original_filename:file.name,uploaded_by:session.user.id,mime_type:file.type,size_bytes:file.size};
+
+  $("uploadBtn").disabled=true;
+  $("progress").classList.remove("hidden");
+  $("progressFill").style.width="8%";
+  try{
+    const {error:uploadError}=await supabaseClient.storage.from(BUCKET).upload(path,file,{contentType:file.type||"video/mp4",cacheControl:"3600",upsert:false});
+    if(uploadError)throw uploadError;
+    $("progressFill").style.width="70%";
+
+    const {data:publicUrlData}=supabaseClient.storage.from(BUCKET).getPublicUrl(path);
+    const videoUrl=publicUrlData.publicUrl;
+
+    const runtimeMinutes=$("runtime").value?Number($("runtime").value):null;
+    const year=$("year").value?Number($("year").value):null;
+    const runtimeSeconds=runtimeMinutes!=null?runtimeMinutes*60:null;
+
+    const {error:dbError}=await supabaseClient.from("crowrules_tv_catalog").insert({
+      catalog_key:"upload_"+crypto.randomUUID(),
+      slug,title,
+      description:$("description").value.trim()||null,
+      year,genre:$("genre").value.trim()||null,runtime_minutes:runtimeMinutes,runtime_seconds:runtimeSeconds,
+      rating:$("rating").value.trim()||null,category:$("category").value,content_type:"video",
+      license:"CrowRules Entertainment",source:"supabase_storage",source_url:videoUrl,stream_url:videoUrl,video_url:videoUrl,
+      thumbnail_url:$("thumbnail").value.trim()||null,poster_url:$("thumbnail").value.trim()||null,
+      is_featured:$("featured").checked,is_active:$("active").checked,is_published:$("published").checked,
+      metadata
+    });
+    if(dbError){
+      await supabaseClient.storage.from(BUCKET).remove([path]);
+      throw dbError;
+    }
+    $("progressFill").style.width="100%";
+    setStatus("Video uploaded and added to the CrowRules TV catalog.","ok");
+    $("uploadForm").reset();
+    await loadVideos();
+  }catch(error){
+    console.error(error);
+    setStatus(error?.message||"Upload failed.","error");
+  }finally{$("uploadBtn").disabled=false}
+});
+
+async function loadVideos(){
+  const tbody=$("videoRows");
+  const {data,error}=await supabaseClient.from("crowrules_tv_catalog").select("id,title,slug,category,is_published,is_active,video_url,created_at").order("created_at",{ascending:false}).limit(25);
+  if(error){tbody.innerHTML='<tr><td colspan="5">Unable to load videos.</td></tr>';return}
+  if(!data?.length){tbody.innerHTML='<tr><td colspan="5">No videos uploaded yet.</td></tr>';return}
+  tbody.innerHTML=data.map(v=>{
+    const status=v.is_published&&v.is_active?'<span class="pill">Live</span>':'<span class="pill" style="color:#aaa">Draft</span>';
+    return '<tr><td><strong>'+escapeHtml(v.title)+'</strong><br><small>'+escapeHtml(v.slug||"")+'</small></td><td>'+escapeHtml(v.category||"—")+'</td><td>'+status+'</td><td>'+escapeHtml(formatDate(v.created_at))+'</td><td>'+(v.video_url?'<a class="button secondary" target="_blank" rel="noopener" href="'+escapeHtml(v.video_url)+'">Open</a>':'—')+'</td></tr>';
+  }).join("");
+}
+
+supabaseClient.auth.onAuthStateChange((_event,session)=>{if(!session)showDenied()});
+requireAdmin();
+</script>
+</body>
+</html>
