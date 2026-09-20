@@ -20,6 +20,15 @@ function editor(type,rows,a,b,c){
 async function load(id){
  current=ceremonies.find(c=>c.id===id);
  clearInterval(backstageTimer);
+ const cueBox=async()=>{
+  const r=await sb.from("spectrum_ceremony_cues").select("*").eq("ceremony_id",id).order("cue_at",{ascending:true,nullsFirst:false}).order("sort_order");
+  const rows=r.data||[];
+  const labels={standby:"STANDBY",ready:"READY",active:"ACTIVE",complete:"COMPLETE",cancelled:"CANCELLED"};
+  $("backstageBody").insertAdjacentHTML("beforeend",'<div class="tvRowTitle">Production Cues</div><div class="grid">'+(rows.length?rows.map(x=>'<article class="tvRowCard"><small>'+esc(x.cue_type.replaceAll("_"," "))+' · '+esc(labels[x.status]||x.status)+'</small><h2>'+esc(x.title)+'</h2><p>'+esc(x.instruction||"")+'</p><button class="btn" data-cue="'+x.id+'" data-status="'+(x.status==="active"?"complete":"active")+'">'+(x.status==="active"?"Complete Cue":"GO")+'</button></article>').join(""):'<div class="tvEmpty">No production cues configured.</div>')+'</div><button class="btn" id="addCue">+ Add Cue</button>';
+  document.querySelectorAll("[data-cue]").forEach(b=>b.onclick=async()=>{await sb.from("spectrum_ceremony_cues").update({status:b.dataset.status,updated_at:new Date().toISOString()}).eq("id",b.dataset.cue);cueBox()});
+  $("addCue").onclick=async()=>{await sb.from("spectrum_ceremony_cues").insert({ceremony_id:id,title:"New Production Cue",cue_type:"custom",status:"standby",sort_order:rows.length});cueBox()};
+ };
+ await cueBox();
  const refreshBackstage=async()=>{
   const r=await sb.from("spectrum_ceremony_run_of_show").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true});
   const rows=r.data||[], now=Date.now(), live=rows.find(x=>x.starts_at&&now>=new Date(x.starts_at).getTime()&&(!x.ends_at||now<=new Date(x.ends_at).getTime())), next=rows.find(x=>x.starts_at&&new Date(x.starts_at).getTime()>now);
