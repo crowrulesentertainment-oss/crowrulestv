@@ -1,8 +1,8 @@
 const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let ceremonies=[],current=null,backstageTimer;
-async function init(){
+let ceremonies=[],current=null,backstageTimer,directorHold=false;
+function director(){const state=$("directorState"),clock=$("directorClock");if(!state)return;state.textContent=directorHold?"HOLD":"LIVE CONTROL";clock.textContent=directorHold?"Production paused — resume when ready":"Production director online";$("holdBtn").onclick=()=>{directorHold=true;director();};$("resumeBtn").onclick=()=>{directorHold=false;director();};} async function init(){
  const u=await sb.auth.getUser();
  if(!u.data?.user)return $("studio").innerHTML='<div class="tvEmpty">Administrator sign-in required.</div>';
  const a=await sb.from("crplus_admins").select("is_active").eq("user_id",u.data.user.id).eq("is_active",true).maybeSingle();
@@ -10,7 +10,7 @@ async function init(){
  const r=await sb.from("spectrum_ceremonies").select("id,title,award_id,starts_at,ends_at,stream_url,description").order("starts_at",{ascending:true});
  ceremonies=r.data||[];
  $("ceremony").innerHTML=ceremonies.map(c=>'<option value="'+c.id+'">'+esc(c.title)+'</option>').join("")||'<option value="">No ceremonies</option>';
- if(ceremonies[0])await load(ceremonies[0].id);
+ director(); if(ceremonies[0])await load(ceremonies[0].id);
 }
 $("ceremony").onchange=()=>load($("ceremony").value);
 function dt(v){return v?new Date(v).toISOString().slice(0,16):""}
