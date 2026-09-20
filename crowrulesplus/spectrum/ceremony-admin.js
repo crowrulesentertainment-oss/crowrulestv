@@ -1,7 +1,7 @@
 const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let ceremonies=[],current=null,backstageTimer,directorHold=false,stateChannel;
+let ceremonies=[],current=null,backstageTimer,directorHold=false,stateChannel,cueChannel;
 async function commandCenter(id){
  const r=await sb.from("spectrum_ceremony_run_of_show").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true});
  const q=await sb.from("spectrum_ceremony_cues").select("*").eq("ceremony_id",id).order("cue_at",{ascending:true,nullsFirst:false}).order("sort_order");
@@ -21,7 +21,7 @@ function director(){const state=$("directorState"),clock=$("directorClock");if(!
  const r=await sb.from("spectrum_ceremonies").select("id,title,award_id,starts_at,ends_at,stream_url,description,production_state").order("starts_at",{ascending:true});
  ceremonies=r.data||[];
  $("ceremony").innerHTML=ceremonies.map(c=>'<option value="'+c.id+'">'+esc(c.title)+'</option>').join("")||'<option value="">No ceremonies</option>';
- director(); if(ceremonies[0]){await load(ceremonies[0].id); commandCenter(ceremonies[0].id);} stateChannel=sb.channel("spectrum-admin-state").on("postgres_changes",{event:"UPDATE",schema:"public",table:"spectrum_ceremonies"},payload=>{const x=payload.new; const i=ceremonies.findIndex(c=>c.id===x.id); if(i<0)return; ceremonies[i]={...ceremonies[i],...x}; if(current?.id===x.id){current={...current,...x}; if($("productionState"))$("productionState").value=x.production_state||"planning"; if($("directorState")){$("directorState").textContent=(x.production_state||"planning").toUpperCase();$("directorClock").textContent="Realtime state synchronized";} load(x.id);}}).subscribe();
+ director(); if(ceremonies[0]){await load(ceremonies[0].id); commandCenter(ceremonies[0].id);} cueChannel=sb.channel("spectrum-admin-cues").on("postgres_changes",{event:"*",schema:"public",table:"spectrum_ceremony_cues"},()=>{if(current)commandCenter(current.id);}).subscribe(); stateChannel=sb.channel("spectrum-admin-state").on("postgres_changes",{event:"UPDATE",schema:"public",table:"spectrum_ceremonies"},payload=>{const x=payload.new; const i=ceremonies.findIndex(c=>c.id===x.id); if(i<0)return; ceremonies[i]={...ceremonies[i],...x}; if(current?.id===x.id){current={...current,...x}; if($("productionState"))$("productionState").value=x.production_state||"planning"; if($("directorState")){$("directorState").textContent=(x.production_state||"planning").toUpperCase();$("directorClock").textContent="Realtime state synchronized";} load(x.id);}}).subscribe();
 }
 $("ceremony").onchange=()=>{load($("ceremony").value);commandCenter($("ceremony").value)};
 function dt(v){return v?new Date(v).toISOString().slice(0,16):""}
@@ -36,7 +36,7 @@ async function load(id){
   const rows=r.data||[];
   const labels={standby:"STANDBY",ready:"READY",active:"ACTIVE",complete:"COMPLETE",cancelled:"CANCELLED"};
   $("backstageBody").insertAdjacentHTML("beforeend",'<div class="tvRowTitle">Production Cues</div><div class="grid">'+(rows.length?rows.map(x=>'<article class="tvRowCard"><small>'+esc(x.cue_type.replaceAll("_"," "))+' · '+esc(labels[x.status]||x.status)+'</small><h2>'+esc(x.title)+'</h2><p>'+esc(x.instruction||"")+'</p><button class="btn" data-cue="'+x.id+'" data-status="'+(x.status==="active"?"complete":"active")+'">'+(x.status==="active"?"Complete Cue":"GO")+'</button></article>').join(""):'<div class="tvEmpty">No production cues configured.</div>')+'</div><button class="btn" id="addCue">+ Add Cue</button>';
-  document.querySelectorAll("[data-cue]").forEach(b=>b.onclick=async()=>{await sb.from("spectrum_ceremony_cues").update({status:b.dataset.status,updated_at:new Date().toISOString()}).eq("id",b.dataset.cue);cueBox()});
+  document.querySelectorAll("[data-cue]").forEach(b=>b.onclick=async()=>{await sb.rpc("spectrum_fire_cue",{p_cue_id:b.dataset.cue,p_status:b.dataset.status});cueBox()});
   $("addCue").onclick=async()=>{await sb.from("spectrum_ceremony_cues").insert({ceremony_id:id,title:"New Production Cue",cue_type:"custom",status:"standby",sort_order:rows.length});cueBox()};
  };
  await cueBox();
