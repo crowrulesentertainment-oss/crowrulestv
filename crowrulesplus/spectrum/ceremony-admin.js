@@ -1,7 +1,7 @@
 const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let ceremonies=[],current=null,backstageTimer,directorHold=false;
+let ceremonies=[],current=null,backstageTimer,directorHold=false,stateChannel;
 async function commandCenter(id){
  const r=await sb.from("spectrum_ceremony_run_of_show").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true});
  const q=await sb.from("spectrum_ceremony_cues").select("*").eq("ceremony_id",id).order("cue_at",{ascending:true,nullsFirst:false}).order("sort_order");
@@ -21,7 +21,7 @@ function director(){const state=$("directorState"),clock=$("directorClock");if(!
  const r=await sb.from("spectrum_ceremonies").select("id,title,award_id,starts_at,ends_at,stream_url,description,production_state").order("starts_at",{ascending:true});
  ceremonies=r.data||[];
  $("ceremony").innerHTML=ceremonies.map(c=>'<option value="'+c.id+'">'+esc(c.title)+'</option>').join("")||'<option value="">No ceremonies</option>';
- director(); if(ceremonies[0]){await load(ceremonies[0].id); commandCenter(ceremonies[0].id);}
+ director(); if(ceremonies[0]){await load(ceremonies[0].id); commandCenter(ceremonies[0].id);} stateChannel=sb.channel("spectrum-admin-state").on("postgres_changes",{event:"UPDATE",schema:"public",table:"spectrum_ceremonies"},payload=>{const x=payload.new; const i=ceremonies.findIndex(c=>c.id===x.id); if(i<0)return; ceremonies[i]={...ceremonies[i],...x}; if(current?.id===x.id){current={...current,...x}; if($("productionState"))$("productionState").value=x.production_state||"planning"; if($("directorState")){$("directorState").textContent=(x.production_state||"planning").toUpperCase();$("directorClock").textContent="Realtime state synchronized";} load(x.id);}}).subscribe();
 }
 $("ceremony").onchange=()=>{load($("ceremony").value);commandCenter($("ceremony").value)};
 function dt(v){return v?new Date(v).toISOString().slice(0,16):""}
