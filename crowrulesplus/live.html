@@ -1,23 +1,131 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowRules+ Live</title><link rel="stylesheet" href="./styles.css">
+<title>CrowRules+ Live — TV Mode</title><link rel="stylesheet" href="./styles.css">
 <style>
-.tvMode{background:#030305;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:12px;margin:16px 0 22px}.tvTop{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 4px 12px}.tvTitle{font-family:Orbitron;font-weight:900}.miniGuide{display:flex;gap:8px;overflow:auto;padding:4px 0 10px}.miniItem{min-width:190px;text-align:left;background:#0c0c13;color:#fff;border:1px solid #252538;border-radius:12px;padding:10px;cursor:pointer}.miniItem.now{border-color:#ff3658;background:#180b11}.miniItem small{display:block;color:#888;margin-top:4px}.channelJump{display:flex;gap:8px}.channelJump button{min-width:42px}.liveShell{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:18px}.player{background:#050507;border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;min-height:300px}.player iframe,.player video{width:100%;aspect-ratio:16/9;border:0;display:block}.placeholder{aspect-ratio:16/9;display:grid;place-items:center;background:radial-gradient(circle at 50% 20%,rgba(255,0,70,.22),transparent 45%),#050507}.liveBadge{display:inline-flex;align-items:center;gap:7px;color:#ff526f;font-weight:800;letter-spacing:.08em;font-size:.75rem}.dot{width:8px;height:8px;border-radius:50%;background:#ff3658;box-shadow:0 0 12px #ff3658}.channelRail{display:grid;gap:9px;max-height:70vh;overflow:auto}.channel{width:100%;text-align:left;background:rgba(255,255,255,.04);color:inherit;border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:12px;cursor:pointer}.channel.active{border-color:#ff3658;background:rgba(255,54,88,.1)}.channel b{display:block}.channel small{opacity:.65}.schedule{display:grid;gap:8px}.scheduleItem{padding:11px;border-left:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.025);border-radius:8px}.scheduleItem.now{border-left-color:#ff3658}.muted{opacity:.68}@media(max-width:900px){.liveShell{grid-template-columns:1fr}}
+.tvMode{background:#030305;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:12px;margin:16px 0 22px;position:sticky;top:8px;z-index:20;backdrop-filter:blur(16px)}
+.tvTop{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 4px 12px}.tvTitle{font-family:Orbitron;font-weight:900}.miniGuide{display:flex;gap:8px;overflow:auto;padding:4px 0 10px}.miniItem{min-width:210px;text-align:left;background:#0c0c13;color:#fff;border:1px solid #252538;border-radius:12px;padding:10px;cursor:pointer}.miniItem.now{border-color:#ff3658;background:#180b11}.miniItem.selected{box-shadow:0 0 0 1px #ff3658 inset}.miniItem small{display:block;color:#888;margin-top:4px}.miniItem .miniProgress{height:3px;background:#242431;border-radius:9px;margin-top:8px;overflow:hidden}.miniItem .miniProgress i{display:block;height:100%;background:#ff3658}.channelJump{display:flex;gap:8px}.channelJump button{min-width:42px}
+.liveShell{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:18px}.player{background:#050507;border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;min-height:300px}.player iframe,.player video{width:100%;aspect-ratio:16/9;border:0;display:block}.placeholder{aspect-ratio:16/9;display:grid;place-items:center;background:radial-gradient(circle at 50% 20%,rgba(255,0,70,.22),transparent 45%),#050507}.liveBadge{display:inline-flex;align-items:center;gap:7px;color:#ff526f;font-weight:800;letter-spacing:.08em;font-size:.75rem}.dot{width:8px;height:8px;border-radius:50%;background:#ff3658;box-shadow:0 0 12px #ff3658}.channelRail{display:grid;gap:9px;max-height:70vh;overflow:auto}.channel{width:100%;text-align:left;background:rgba(255,255,255,.04);color:inherit;border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:12px;cursor:pointer}.channel.active{border-color:#ff3658;background:rgba(255,54,88,.1)}.channel b{display:block}.channel small{opacity:.65}.schedule{display:grid;gap:8px}.scheduleItem{padding:11px;border-left:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.025);border-radius:8px}.scheduleItem.now{border-left-color:#ff3658}.scheduleItem.clickable{cursor:pointer}.scheduleItem:hover{background:rgba(255,54,88,.08)}.scheduleActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.muted{opacity:.68}.liveTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.liveTools .muted{margin-left:auto}.ccItem{padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)}.progressWrap{height:5px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin:12px 0 8px}.progressWrap div{height:100%;width:0;background:linear-gradient(90deg,#ff3658,#a855f7);transition:width 1s linear}.programActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.statusLine{font-size:.82rem}.keyboardHint{font-size:.72rem;opacity:.5}
+@media(max-width:900px){.liveShell{grid-template-columns:1fr}.tvMode{position:relative;top:auto}.channelRail{max-height:none}}
 </style></head>
 <body><header class="top"><a class="brand" href="./">CROW<span>RULES+</span></a><nav><a href="./">LIBRARY</a><a href="./guide.html">GUIDE</a><a href="./profile.html">MY CROW</a></nav></header>
-<main class="page"><div class="liveBadge"><span class="dot"></span> CROW RULES+ LIVE</div><h1>Live Television. One Universe.</h1><section class="tvMode"><div class="tvTop"><span class="tvTitle">TV MODE</span><div class="channelJump"><button class="btn" id="prevChannel">◀</button><button class="btn" id="nextChannel">▶</button><button class="btn" id="theater">⛶ Theater</button></div></div><div id="miniGuide" class="miniGuide"></div></section>
-<div class="liveShell"><section><div class="liveTools"><button class="btn" id="fullscreen">⛶ Fullscreen</button><button class="btn" id="mute">🔊 Mute</button><button class="btn" id="share">↗ Share</button><span id="clock" class="muted"></span></div><div id="player" class="player"><div class="placeholder"><b>Loading live network…</b></div></div><div id="info" class="panel" style="margin-top:14px"></div><section class="panel" style="margin-top:14px"><h2>Now Playing</h2><div id="nowPlaying" class="ccItem"><span class="muted">Select a channel.</span></div><div class="progressWrap"><div id="progressBar"></div></div><div id="nextProgram" class="muted"></div></section><section class="panel" style="margin-top:14px"><h2>Coming Up</h2><div id="schedule" class="schedule"></div></section></section>
+<main class="page"><div class="liveBadge"><span class="dot"></span> CROW RULES+ LIVE</div><h1>Live Television. One Universe.</h1>
+<section class="tvMode"><div class="tvTop"><span class="tvTitle">TV MODE</span><div class="channelJump"><button class="btn" id="prevChannel" title="Previous channel">◀</button><button class="btn" id="nextChannel" title="Next channel">▶</button><button class="btn" id="theater">⛶ Theater</button></div></div><div id="miniGuide" class="miniGuide"></div><div class="keyboardHint">Channel surfing: ↑ / ↓ &nbsp; • &nbsp; Enter: watch selected program &nbsp; • &nbsp; Space: theater mode</div></section>
+<div class="liveShell"><section><div class="liveTools"><button class="btn" id="fullscreen">⛶ Fullscreen</button><button class="btn" id="mute">🔊 Mute</button><button class="btn" id="share">↗ Share</button><span id="clock" class="muted"></span></div><div id="player" class="player"><div class="placeholder"><b>Loading live network…</b></div></div><div id="info" class="panel" style="margin-top:14px"></div>
+<section class="panel" style="margin-top:14px"><h2>Now Playing</h2><div id="nowPlaying" class="ccItem"><span class="muted">Select a channel.</span></div><div class="progressWrap"><div id="progressBar"></div></div><div id="nextProgram" class="muted"></div><div id="programActions" class="programActions"></div></section>
+<section class="panel" style="margin-top:14px"><h2>Coming Up</h2><div id="schedule" class="schedule"></div></section></section>
 <aside class="panel"><h2>Channels</h2><div id="channels" class="channelRail"></div></aside></div></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"),params=new URLSearchParams(location.search),requested=params.get("channel");let channels=[],current=null,currentSchedule=[];
-const $=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])),fmt=v=>v?new Date(v).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"";
-function renderMiniGuide(){const el=$("miniGuide");if(!el)return;const now=Date.now();el.innerHTML=channels.map(c=>{const item=currentSchedule.find(x=>new Date(x.starts_at).getTime()<=now&&new Date(x.ends_at).getTime()>now);return "<button class='miniItem "+(current?.id===c.id?"now":"")+"' data-mini='"+c.id+"'><b>"+esc(c.name)+"</b><small>"+(c.is_live?"● LIVE":"OFF AIR")+(current?.id===c.id&&item?" · "+esc(item.title):"")+"</small></button>"}).join("");document.querySelectorAll("[data-mini]").forEach(b=>b.onclick=()=>selectChannel(b.dataset.mini));}
-async function load(){const r=await sb.from("crplus_live_channels").select("*").order("sort_order");if(r.error){$("channels").innerHTML="<p>"+esc(r.error.message)+"</p>";return}channels=r.data||[];renderChannels();renderMiniGuide();let chosen=requested?channels.find(x=>x.id===requested||x.channel_key===requested):channels.find(x=>x.is_live);if(!chosen)chosen=channels[0];if(chosen)selectChannel(chosen.id);else $("info").innerHTML="<h2>Nothing is live right now.</h2><p class='muted'>Check the guide for upcoming programming.</p>";}
-function renderChannels(){$("channels").innerHTML=channels.map(x=>"<button class='channel "+(current?.id===x.id?"active":"")+"' data-channel='"+x.id+"'><b>"+esc(x.name)+"</b><small>"+(x.is_live?"● LIVE":"OFF AIR")+" · "+esc(x.channel_key||"")+"</small></button>").join("")||"<p class='muted'>No channels configured.</p>";document.querySelectorAll("[data-channel]").forEach(b=>b.onclick=()=>selectChannel(b.dataset.channel));}
-async function selectChannel(id){current=channels.find(x=>x.id===id);if(!current)return;renderChannels();renderMiniGuide();let media="";if(current.stream_url){if(/youtube\.com|youtu\.be/i.test(current.stream_url))media="<iframe src='"+esc(current.stream_url)+"' allow='autoplay; fullscreen; picture-in-picture' allowfullscreen></iframe>";else media="<video controls autoplay playsinline src='"+esc(current.stream_url)+"'></video>"}else media="<div class='placeholder'><div><div class='liveBadge'><span class='dot'></span>"+(current.is_live?"LIVE":"OFF AIR")+"</div><h2>"+esc(current.name)+"</h2><p class='muted'>Stream source not configured yet.</p></div></div>";$("player").innerHTML=media;$("info").innerHTML="<span class='liveBadge'>"+(current.is_live?"● LIVE NOW":"CHANNEL")+"</span><h2>"+esc(current.name)+"</h2><p class='muted'>"+esc(current.description||"")+" </p>";$("nowPlaying").innerHTML="<strong>"+esc(current.name)+"</strong><p class='muted'>"+(current.is_live?"Live now":"Off air")+" · Updated "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+"</p>";loadSchedule(current.id);}
-async function loadSchedule(id){const r=await sb.from("crplus_schedule").select("id,title,starts_at,ends_at,content_id").eq("channel_id",id).gte("ends_at",new Date().toISOString()).order("starts_at").limit(12);if(r.error)return;currentSchedule=r.data||[];renderNowPlaying();renderMiniGuide();$("schedule").innerHTML=currentSchedule.map(x=>"<div class='scheduleItem'><b>"+esc(x.title||"Untitled")+"</b><div class='muted'>"+fmt(x.starts_at)+" – "+fmt(x.ends_at)+"</div></div>").join("")||"<p class='muted'>No upcoming programming scheduled.</p>";}
-function renderNowPlaying(){const now=Date.now(),item=currentSchedule.find(x=>new Date(x.starts_at).getTime()<=now&&new Date(x.ends_at).getTime()>now),next=currentSchedule.find(x=>new Date(x.starts_at).getTime()>now);if(item){const a=new Date(item.starts_at).getTime(),b=new Date(item.ends_at).getTime(),pct=Math.max(0,Math.min(100,(now-a)/(b-a)*100));$("nowPlaying").innerHTML="<strong>"+esc(item.title||"Untitled")+"</strong><p class='muted'>"+fmt(item.starts_at)+" – "+fmt(item.ends_at)+" · "+Math.ceil((b-now)/60000)+" min remaining</p>";$("progressBar").style.width=pct+"%";$("nextProgram").textContent=next?"Next: "+(next.title||"Untitled")+" · "+fmt(next.starts_at):"No next program scheduled";}else{$("nowPlaying").innerHTML="<strong>"+esc(current?.name||"")+"</strong><p class='muted'>"+(current?.is_live?"Live now":"Off air")+" · No scheduled program at this moment</p>";$("progressBar").style.width="0%";$("nextProgram").textContent=next?"Next: "+(next.title||"Untitled")+" · "+fmt(next.starts_at):"No next program scheduled";}}
-function channelStep(dir){if(!channels.length)return;const i=channels.findIndex(x=>x.id===current?.id);const n=(i+dir+channels.length)%channels.length;selectChannel(channels[n].id)};$("prevChannel").onclick=()=>channelStep(-1);$("nextChannel").onclick=()=>channelStep(1);$("theater").onclick=()=>document.documentElement.requestFullscreen?.();
-const toolsCss=document.createElement("style");toolsCss.textContent=".liveTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.liveTools .muted{margin-left:auto}.ccItem{padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)}.progressWrap{height:5px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin:12px 0 8px}.progressWrap div{height:100%;width:0;background:linear-gradient(90deg,#ff3658,#a855f7);transition:width 1s linear}";document.head.appendChild(toolsCss);$("fullscreen").onclick=()=>{$("player").requestFullscreen?.()};$("mute").onclick=()=>{const v=$("player").querySelector("video");if(v){v.muted=!v.muted;$("mute").textContent=v.muted?"🔇 Unmute":"🔊 Mute"}};$("share").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);$("share").textContent="✓ Link Copied";setTimeout(()=>$("share").textContent="↗ Share",1800)}catch{prompt("Copy this link:",location.href)}};setInterval(()=>{$("clock").textContent=new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"});renderNowPlaying()},1000);load();setInterval(load,30000);
+const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
+const params=new URLSearchParams(location.search),requested=params.get("channel");
+let channels=[],current=null,currentSchedule=[],scheduleCache=new Map(),selectedProgram=null,autoAdvanceKey="";
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+const fmt=v=>v?new Date(v).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"";
+const nowMs=()=>Date.now();
+function scheduleNow(rows){const n=nowMs();return (rows||[]).find(x=>new Date(x.starts_at).getTime()<=n&&new Date(x.ends_at).getTime()>n)||null}
+function scheduleNext(rows){const n=nowMs();return (rows||[]).find(x=>new Date(x.starts_at).getTime()>n)||null}
+function programUrl(item){return item?.content_id?"./title.html?id="+encodeURIComponent(item.content_id):""}
+function renderMiniGuide(){
+ const el=$("miniGuide"); if(!el)return; const n=nowMs();
+ el.innerHTML=channels.map(c=>{
+   const rows=scheduleCache.get(c.id)||[],item=scheduleNow(rows);
+   const pct=item?Math.max(0,Math.min(100,(n-new Date(item.starts_at).getTime())/(new Date(item.ends_at).getTime()-new Date(item.starts_at).getTime())*100)):0;
+   return "<button class='miniItem "+(current?.id===c.id?"selected ":"")+(item?"now":"")+"' data-mini='"+c.id+"'><b>"+esc(c.name)+"</b><small>"+(c.is_live?"● LIVE":"OFF AIR")+(item?" · "+esc(item.title):" · No scheduled program")+"</small>"+(item?"<div class='miniProgress'><i style='width:"+pct+"%'></i></div>":"")+"</button>"
+ }).join("")||"<span class='muted'>No channels configured.</span>";
+ document.querySelectorAll("[data-mini]").forEach(b=>b.onclick=()=>selectChannel(b.dataset.mini));
+}
+function renderChannels(){
+ $("channels").innerHTML=channels.map(x=>"<button class='channel "+(current?.id===x.id?"active":"")+"' data-channel='"+x.id+"'><b>"+esc(x.name)+"</b><small>"+(x.is_live?"● LIVE":"OFF AIR")+" · "+esc(x.channel_key||"")+"</small></button>").join("")||"<p class='muted'>No channels configured.</p>";
+ document.querySelectorAll("[data-channel]").forEach(b=>b.onclick=()=>selectChannel(b.dataset.channel));
+}
+async function fetchSchedule(id,force=false){
+ if(!force&&scheduleCache.has(id))return scheduleCache.get(id);
+ const r=await sb.from("crplus_schedule").select("id,title,starts_at,ends_at,content_id").eq("channel_id",id).gte("ends_at",new Date().toISOString()).order("starts_at").limit(24);
+ if(r.error){console.warn(r.error);return scheduleCache.get(id)||[]}
+ const rows=r.data||[];scheduleCache.set(id,rows);return rows
+}
+async function preloadSchedules(){
+ await Promise.all(channels.map(c=>fetchSchedule(c.id,true)));
+ if(current){currentSchedule=scheduleCache.get(current.id)||[]}
+ renderMiniGuide();renderNowPlaying();renderSchedule();
+}
+function renderSchedule(){
+ const rows=currentSchedule,n=nowMs(),nowItem=scheduleNow(rows);
+ $("schedule").innerHTML=rows.map(x=>{
+   const isNow=nowItem?.id===x.id;
+   return "<div class='scheduleItem "+(isNow?"now ":"")+(x.content_id?"clickable":"")+"' data-program='"+x.id+"'><b>"+esc(x.title||"Untitled")+"</b><div class='muted'>"+fmt(x.starts_at)+" – "+fmt(x.ends_at)+(isNow?" · NOW":"")+"</div>"+(x.content_id?"<div class='muted'>Open title →</div>":"")+"</div>"
+ }).join("")||"<p class='muted'>No upcoming programming scheduled.</p>";
+ document.querySelectorAll("[data-program]").forEach(el=>el.onclick=()=>{
+   const item=currentSchedule.find(x=>x.id===el.dataset.program);if(!item)return;
+   selectedProgram=item;renderNowPlaying();
+   if(item.content_id)location.href=programUrl(item);
+ });
+}
+function renderNowPlaying(){
+ const n=nowMs(),item=scheduleNow(currentSchedule),next=scheduleNext(currentSchedule);
+ if(item){
+   const a=new Date(item.starts_at).getTime(),b=new Date(item.ends_at).getTime(),pct=Math.max(0,Math.min(100,(n-a)/(b-a)*100));
+   $("nowPlaying").innerHTML="<strong>"+esc(item.title||"Untitled")+"</strong><p class='muted'>"+fmt(item.starts_at)+" – "+fmt(item.ends_at)+" · "+Math.max(1,Math.ceil((b-n)/60000))+" min remaining</p>";
+   $("progressBar").style.width=pct+"%";
+   $("nextProgram").textContent=next?"Next: "+(next.title||"Untitled")+" · "+fmt(next.starts_at):"No next program scheduled";
+   $("programActions").innerHTML=item.content_id?"<a class='btn primary' href='"+programUrl(item)+"'>▶ Watch From Start</a><a class='btn' href='"+programUrl(item)+"'>View Title</a>":"<span class='statusLine muted'>This program is live-only; no on-demand title is linked yet.</span>";
+   if(autoAdvanceKey&&autoAdvanceKey!==item.id){} autoAdvanceKey=item.id;
+ }else{
+   $("nowPlaying").innerHTML="<strong>"+esc(current?.name||"")+"</strong><p class='muted'>"+(current?.is_live?"Live now":"Off air")+" · No scheduled program at this moment</p>";
+   $("progressBar").style.width="0%";$("nextProgram").textContent=next?"Next: "+(next.title||"Untitled")+" · "+fmt(next.starts_at):"No next program scheduled";
+   $("programActions").innerHTML=next?.content_id?"<a class='btn' href='"+programUrl(next)+"'>View Next Title</a>":"";
+ }
+}
+function renderInfo(){
+ const item=scheduleNow(currentSchedule),next=scheduleNext(currentSchedule);
+ $("info").innerHTML="<span class='liveBadge'>"+(current?.is_live?"● LIVE NOW":"CHANNEL")+"</span><h2>"+esc(current?.name||"")+"</h2><p class='muted'>"+esc(current?.description||"")+"</p><div class='statusLine muted'>"+(item?"Now: "+esc(item.title):next?"Next: "+esc(next.title):"No program scheduled")+"</div>";
+}
+async function selectChannel(id){
+ current=channels.find(x=>x.id===id);if(!current)return;
+ renderChannels();renderMiniGuide();
+ let media="";
+ if(current.stream_url){
+   if(/youtube\.com|youtu\.be/i.test(current.stream_url))media="<iframe src='"+esc(current.stream_url)+"' allow='autoplay; fullscreen; picture-in-picture' allowfullscreen></iframe>";
+   else media="<video controls autoplay playsinline src='"+esc(current.stream_url)+"'></video>";
+ }else media="<div class='placeholder'><div><div class='liveBadge'><span class='dot'></span>"+(current.is_live?"LIVE":"OFF AIR")+"</div><h2>"+esc(current.name)+"</h2><p class='muted'>Stream source not configured yet.</p></div></div>";
+ $("player").innerHTML=media;
+ currentSchedule=await fetchSchedule(current.id);
+ selectedProgram=scheduleNow(currentSchedule);
+ renderInfo();renderNowPlaying();renderSchedule();renderMiniGuide();
+ history.replaceState(null,"","?channel="+encodeURIComponent(current.channel_key||current.id));
+}
+function channelStep(dir){
+ if(!channels.length)return;const i=channels.findIndex(x=>x.id===current?.id),n=(i+dir+channels.length)%channels.length;selectChannel(channels[n].id);
+}
+async function refreshData(){
+ const r=await sb.from("crplus_live_channels").select("*").order("sort_order");
+ if(r.error){$("channels").innerHTML="<p>"+esc(r.error.message)+"</p>";return}
+ const old=current?.id;channels=r.data||[];renderChannels();
+ if(!channels.length){$("info").innerHTML="<h2>Nothing is live right now.</h2><p class='muted'>Check the guide for upcoming programming.</p>";return}
+ await preloadSchedules();
+ let chosen=old?channels.find(x=>x.id===old):null;
+ if(!chosen&&requested)chosen=channels.find(x=>x.id===requested||x.channel_key===requested);
+ if(!chosen)chosen=channels.find(x=>x.is_live)||channels[0];
+ if(!current||current.id!==chosen.id)await selectChannel(chosen.id);else{current=chosen;currentSchedule=scheduleCache.get(chosen.id)||[];renderChannels();renderMiniGuide();renderInfo();renderNowPlaying();renderSchedule()}
+}
+$("prevChannel").onclick=()=>channelStep(-1);$("nextChannel").onclick=()=>channelStep(1);
+$("theater").onclick=()=>document.documentElement.requestFullscreen?.();
+$("fullscreen").onclick=()=>$("player").requestFullscreen?.();
+$("mute").onclick=()=>{const v=$("player").querySelector("video");if(v){v.muted=!v.muted;$("mute").textContent=v.muted?"🔇 Unmute":"🔊 Mute"}};
+$("share").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);$("share").textContent="✓ Link Copied";setTimeout(()=>$("share").textContent="↗ Share",1800)}catch{prompt("Copy this link:",location.href)}};
+document.addEventListener("keydown",e=>{
+ if(["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName))return;
+ if(e.key==="ArrowUp"){e.preventDefault();channelStep(-1)}
+ if(e.key==="ArrowDown"){e.preventDefault();channelStep(1)}
+ if(e.key==="Enter"&&selectedProgram?.content_id)location.href=programUrl(selectedProgram);
+ if(e.code==="Space"){e.preventDefault();document.documentElement.requestFullscreen?.()}
+});
+setInterval(()=>{
+ $("clock").textContent=new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"});
+ const before=scheduleNow(currentSchedule)?.id;renderNowPlaying();renderMiniGuide();
+ const after=scheduleNow(currentSchedule)?.id;
+ if(before!==after){renderInfo();renderSchedule(); if(after&&after!==autoAdvanceKey){autoAdvanceKey=after;selectedProgram=scheduleNow(currentSchedule)}}
+},1000);
+refreshData();setInterval(refreshData,30000);
 </script></body></html>
