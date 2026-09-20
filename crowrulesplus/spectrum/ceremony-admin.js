@@ -2,6 +2,8 @@ const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_pu
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 let ceremonies=[],current=null,backstageTimer,directorHold=false,stateChannel,cueChannel,autoDirectorTimer;
+async function emergencyState(id){const r=await sb.from("spectrum_ceremony_emergency_state").select("*").eq("ceremony_id",id).maybeSingle(); const el=document.getElementById("emergencyStatus"); if(el) el.textContent=r.data?(r.data.override_type.toUpperCase()+" · "+(r.data.message||"Override active")):"Normal production."; return r.data;}
+async function setEmergency(type){if(!current)return; if(type==="clear"){await sb.from("spectrum_ceremony_overrides").update({active:false,cleared_at:new Date().toISOString()}).eq("ceremony_id",current.id).eq("active",true);}else{await sb.from("spectrum_ceremony_overrides").insert({ceremony_id:current.id,override_type:type,message:type==="blackout"?"Production blackout":type==="hold"?"Emergency hold":null,issued_by:(await sb.auth.getUser()).data.user.id});} await emergencyState(current.id); await emergencyState(current.id); await commandCenter(current.id);}
 async function commandCenter(id){
  const r=await sb.from("spectrum_ceremony_run_of_show").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true}); const ds=await sb.from("spectrum_ceremony_director_state").select("*").eq("ceremony_id",id).maybeSingle();
  const q=await sb.from("spectrum_ceremony_cues").select("*").eq("ceremony_id",id).order("cue_at",{ascending:true,nullsFirst:false}).order("sort_order");
