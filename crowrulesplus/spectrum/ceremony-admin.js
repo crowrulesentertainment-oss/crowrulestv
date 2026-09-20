@@ -92,7 +92,7 @@ async function wire(id){
  });
 }
 init();
-const broadcastOpsChannel=sb.channel("spectrum-broadcast-ops").on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_health"},()=>{if(current)operationsCenter(current.id);}).on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_failover_events"},()=>{if(current)operationsCenter(current.id);}).on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_switches"},()=>{if(current)operationsCenter(current.id);}).on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_incidents"},()=>{if(current)incidentCenter(current.id);}).subscribe();
+const broadcastOpsChannel=sb.channel("spectrum-broadcast-ops").on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_health"},()=>{if(current)operationsCenter(current.id);}).on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_failover_events"},()=>{if(current)operationsCenter(current.id);}).on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_switches"},()=>{if(current){operationsCenter(current.id);multicamCenter(current.id);}}).on("postgres_changes",{event:"*",schema:"public",table:"spectrum_broadcast_incidents"},()=>{if(current)incidentCenter(current.id);}).subscribe();
 
 let spectrumProbeTimer=null; function startSpectrumProbeLoop(){if(spectrumProbeTimer)clearInterval(spectrumProbeTimer);spectrumProbeTimer=setInterval(()=>{if(current)runWatcher(current.id).catch(console.warn)},5000);}
 startSpectrumProbeLoop();
