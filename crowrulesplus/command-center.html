@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowRules+ Command Center V2</title><link rel="stylesheet" href="./styles.css">
+<title>CrowRules+ Command Center V4</title><link rel="stylesheet" href="./styles.css">
 <style>
 .cc{display:grid;gap:18px}.ccHead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.ccGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.ccTwo{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}.ccPanel{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}.ccPanel h2{margin-top:0}.ccList{display:grid;gap:10px}.ccItem{padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(0,0,0,.15)}.critical{border-color:#ff4d6d}.warning{border-color:#ffb703}.info{border-color:#5ee7df}.ok{border-color:#55d187}.ccMeta{font-size:.82rem;opacity:.7}.ccActions{display:flex;gap:8px;flex-wrap:wrap}.ccNote{display:grid;gap:8px}.ccNote input,.ccNote textarea,.ccNote select{width:100%;box-sizing:border-box}.empty{opacity:.65;padding:12px 0}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:2px}.tab{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:inherit;border-radius:999px;padding:9px 14px;cursor:pointer;white-space:nowrap}.tab.active{border-color:#5ee7df;background:rgba(94,231,223,.12)}.view{display:none}.view.active{display:grid;gap:16px}.metric{min-height:78px}.metric strong{display:block;font-size:1.55rem}.metric span{opacity:.7;font-size:.82rem}.linkGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.linkCard{display:block;text-decoration:none;color:inherit;padding:14px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.035)}.linkCard b{display:block;margin-bottom:5px}.pill{display:inline-block;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:3px 8px;font-size:.72rem;margin:2px}.good{color:#55d187}.bad{color:#ff7b93}.warn{color:#ffcf5a}
 </style></head>
@@ -11,7 +11,7 @@
 <div id="status" class="accountPanel">Checking administrator access…</div>
 <div id="app" hidden>
 <div class="tabs" role="tablist">
-<button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="operations">Operations</button><button class="tab" data-tab="production">Production</button><button class="tab" data-tab="integrity">Integrity</button><button class="tab" data-tab="activity">Activity</button>
+<button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="operations">Operations</button><button class="tab" data-tab="production">Production</button><button class="tab" data-tab="integrity">Integrity</button><button class="tab" data-tab="activity">Activity</button><button class="tab" data-tab="membership">Membership</button><button class="tab" data-tab="system">System</button>
 </div>
 
 <div id="overview" class="view active">
@@ -54,16 +54,19 @@ async function session(){const {data:{session}}=await sb.auth.getSession();if(!s
 async function load(){
  try{
   await session();
-  const [cc,alerts,hist,activity,notes,projects,integrity]=await Promise.all([
+  const [cc,alerts,hist,activity,notes,projects,integrity,checks,membershipHealth,platformHealth]=await Promise.all([
    sb.from("cr_platform_command_center").select("*").single(),
    sb.from("cr_platform_open_alerts").select("*").limit(50),
    sb.from("cr_platform_health_history").select("*").limit(20),
    sb.from("cr_platform_activity_feed").select("*").limit(50),
    sb.from("cr_platform_admin_notes").select("*").order("updated_at",{ascending:false}).limit(50),
    sb.from("crplus_projects").select("id,title,status,division_key,project_type,target_release_at,updated_at").order("updated_at",{ascending:false}).limit(40),
-   sb.from("crplus_integrity_issues").select("*").limit(100)
+   sb.from("crplus_integrity_issues").select("*").limit(100),
+   sb.from("cr_platform_health_checks").select("*").order("checked_at",{ascending:false}).limit(20),
+   sb.from("crplus_universal_membership_health").select("*").single(),
+   sb.from("crplus_platform_health").select("*").single()
   ]);
-  for(const r of [cc,alerts,hist,activity,notes,projects,integrity]) if(r.error) throw r.error;
+  for(const r of [cc,alerts,hist,activity,notes,projects,integrity,checks,membershipHealth,platformHealth]) if(r.error) throw r.error;
   const c=cc.data||{}, h=(hist.data||[])[0];
   $("status").innerHTML="<h2>Command Center access granted</h2><p class='muted'>Administrator control plane connected.</p>";
   $("app").hidden=false;
@@ -78,7 +81,11 @@ async function load(){
   $("activityList").innerHTML=(activity.data||[]).map(x=>"<div class='ccItem'><strong>"+esc(x.division_key)+" · "+esc(x.event_type)+"</strong><p>"+esc(x.message||"Platform event")+"</p><div class='ccMeta'>"+esc(x.entity_type||"entity")+" · "+fmt(x.created_at)+"</div></div>").join("")||"<div class='empty'>No activity visible.</div>";
   $("notes").innerHTML=(notes.data||[]).map(n=>"<div class='ccItem'><strong>"+esc(n.title)+"</strong><p>"+esc(n.body||"")+"</p><div class='ccMeta'>"+esc(n.status)+" · "+fmt(n.updated_at)+"</div></div>").join("")||"<div class='empty'>No notes yet.</div>";
   $("projects").innerHTML=(projects.data||[]).map(p=>"<div class='ccItem'><strong>"+esc(p.title||"Untitled")+"</strong><span class='pill'>"+esc(p.status)+"</span><span class='pill'>"+esc(p.project_type)+"</span><span class='pill'>"+esc(p.division_key||"crplus")+"</span><p class='ccMeta'>Updated "+fmt(p.updated_at)+" · Target "+fmt(p.target_release_at)+"</p></div>").join("")||"<div class='empty'>No projects visible.</div>";
-  $("healthChecks").innerHTML="<div class=\"ccItem ok\"><strong>Health-check engine installed</strong><p>Run Health Checks to refresh platform integrity signals.</p></div>";\n  $("integrityList").innerHTML=(integrity.data||[]).map(i=>"<div class='ccItem "+(i.issue_type==="content_published_without_source"?"warning":"critical")+"'><strong>"+esc(i.issue_type)+"</strong><p>"+esc(i.detail||"Integrity issue detected.")+"</p><div class='ccMeta'>Entity: "+esc(i.record_id||"—")+"</div></div>").join("")||"<div class='ccItem ok'><strong>Integrity looks clean</strong><p>No issues are visible to this administrator.</p></div>";
+  $("healthChecks").innerHTML=(checks.data||[]).map(x=>"<div class='ccItem "+esc(x.status)+"><strong>"+esc(x.label||x.check_key)+"</strong><p>"+esc(x.detail||"—")+"</p><div class='ccMeta'>"+esc(x.status)+" · "+fmt(x.checked_at)+"</div></div>").join("")||"<div class='empty'>No checks recorded yet.</div>";
+  $("systemChecks").innerHTML=(checks.data||[]).map(x=>"<div class='ccItem "+esc(x.status)+"><strong>"+esc(x.check_key)+"</strong><span class='pill'>"+esc(x.status)+"</span><p>"+esc(x.detail||"")+"</p></div>").join("")||"<div class='empty'>No checks recorded yet.</div>";
+  const mh=membershipHealth.data||{}, ph=platformHealth.data||{};
+  $("membershipHealth").innerHTML=[["Member Rows",mh.member_rows],["Missing Auth User",mh.member_rows_without_auth_user],["Missing Plan",mh.members_without_plan],["CROW Members",mh.crow_members],["Active Members",mh.active_members],["Inactive Members",mh.inactive_members]].map(x=>"<div class='tile metric'><strong>"+esc(x[1])+"</strong><span>"+esc(x[0])+"</span></div>").join("");
+  $("platformHealth").innerHTML=Object.entries(ph).map(([k,v])=>"<div class='ccItem'><strong>"+esc(k.replaceAll("_"," "))+"</strong><span class='pill'>"+esc(v)+"</span></div>").join("")||"<div class='empty'>No platform health data visible.</div>";\n  $("integrityList").innerHTML=(integrity.data||[]).map(i=>"<div class='ccItem "+(i.issue_type==="content_published_without_source"?"warning":"critical")+"'><strong>"+esc(i.issue_type)+"</strong><p>"+esc(i.detail||"Integrity issue detected.")+"</p><div class='ccMeta'>Entity: "+esc(i.record_id||"—")+"</div></div>").join("")||"<div class='ccItem ok'><strong>Integrity looks clean</strong><p>No issues are visible to this administrator.</p></div>";
   document.querySelectorAll("[data-resolve]").forEach(b=>b.onclick=async()=>{try{await sb.rpc("cr_platform_resolve_alert",{p_alert_id:b.dataset.resolve}).throwOnError();load()}catch(e){alert(e.message)}});
  }catch(e){$("status").innerHTML="<h2>Access unavailable</h2><p>"+esc(e.message||e)+"</p><a class='btn primary' href='./#account'>Sign in</a>"}
 }
