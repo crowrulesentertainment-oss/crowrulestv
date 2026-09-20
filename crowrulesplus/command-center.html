@@ -7,7 +7,7 @@
 <body>
 <header><a class="logo" href="./">CROW<span>RULES+</span></a><nav><a class="btn" href="./admin.html">Operations</a><a class="btn" href="./">Public</a><a class="btn" href="./profile.html">Profile</a></nav></header>
 <main><section class="cc">
-<div class="ccHead"><div><h1>CrowRules+ Command Center</h1><p class="muted">Universal control plane for membership, Dreamscapes, production, content, live programming and platform health.</p></div><div class="ccActions"><button class="btn" id="capture">Capture Health</button><button class="btn primary" id="refresh">Refresh</button></div></div>
+<div class="ccHead"><div><h1>CrowRules+ Command Center</h1><p class="muted">Universal control plane for membership, Dreamscapes, production, content, live programming and platform health.</p></div><div class="ccActions"><button class="btn" id="healthCheck">Run Health Checks</button><button class="btn" id="capture">Capture Health</button><button class="btn primary" id="refresh">Refresh</button></div></div>
 <div id="status" class="accountPanel">Checking administrator access…</div>
 <div id="app" hidden>
 <div class="tabs" role="tablist">
@@ -36,7 +36,7 @@
 </div>
 
 <div id="integrity" class="view">
-<section class="ccPanel"><h2>Integrity Monitor</h2><p class="muted">Items here need an operator decision rather than an automatic destructive fix.</p><div id="integrityList" class="ccList"></div></section>
+<section class="ccPanel"><h2>Integrity Monitor</h2><p class="muted">Items here need an operator decision rather than an automatic destructive fix.</p><div id="healthChecks" class="ccList"></div><div id="integrityList" class="ccList" style="margin-top:12px"></div></section>
 </div>
 
 <div id="activity" class="view">
@@ -78,11 +78,11 @@ async function load(){
   $("activityList").innerHTML=(activity.data||[]).map(x=>"<div class='ccItem'><strong>"+esc(x.division_key)+" · "+esc(x.event_type)+"</strong><p>"+esc(x.message||"Platform event")+"</p><div class='ccMeta'>"+esc(x.entity_type||"entity")+" · "+fmt(x.created_at)+"</div></div>").join("")||"<div class='empty'>No activity visible.</div>";
   $("notes").innerHTML=(notes.data||[]).map(n=>"<div class='ccItem'><strong>"+esc(n.title)+"</strong><p>"+esc(n.body||"")+"</p><div class='ccMeta'>"+esc(n.status)+" · "+fmt(n.updated_at)+"</div></div>").join("")||"<div class='empty'>No notes yet.</div>";
   $("projects").innerHTML=(projects.data||[]).map(p=>"<div class='ccItem'><strong>"+esc(p.title||"Untitled")+"</strong><span class='pill'>"+esc(p.status)+"</span><span class='pill'>"+esc(p.project_type)+"</span><span class='pill'>"+esc(p.division_key||"crplus")+"</span><p class='ccMeta'>Updated "+fmt(p.updated_at)+" · Target "+fmt(p.target_release_at)+"</p></div>").join("")||"<div class='empty'>No projects visible.</div>";
-  $("integrityList").innerHTML=(integrity.data||[]).map(i=>"<div class='ccItem "+(i.issue_type==="content_published_without_source"?"warning":"critical")+"'><strong>"+esc(i.issue_type)+"</strong><p>"+esc(i.detail||"Integrity issue detected.")+"</p><div class='ccMeta'>Entity: "+esc(i.record_id||"—")+"</div></div>").join("")||"<div class='ccItem ok'><strong>Integrity looks clean</strong><p>No issues are visible to this administrator.</p></div>";
+  $("healthChecks").innerHTML="<div class=\"ccItem ok\"><strong>Health-check engine installed</strong><p>Run Health Checks to refresh platform integrity signals.</p></div>";\n  $("integrityList").innerHTML=(integrity.data||[]).map(i=>"<div class='ccItem "+(i.issue_type==="content_published_without_source"?"warning":"critical")+"'><strong>"+esc(i.issue_type)+"</strong><p>"+esc(i.detail||"Integrity issue detected.")+"</p><div class='ccMeta'>Entity: "+esc(i.record_id||"—")+"</div></div>").join("")||"<div class='ccItem ok'><strong>Integrity looks clean</strong><p>No issues are visible to this administrator.</p></div>";
   document.querySelectorAll("[data-resolve]").forEach(b=>b.onclick=async()=>{try{await sb.rpc("cr_platform_resolve_alert",{p_alert_id:b.dataset.resolve}).throwOnError();load()}catch(e){alert(e.message)}});
  }catch(e){$("status").innerHTML="<h2>Access unavailable</h2><p>"+esc(e.message||e)+"</p><a class='btn primary' href='./#account'>Sign in</a>"}
 }
-$("capture").onclick=async()=>{try{await sb.rpc("cr_platform_capture_health").throwOnError();load()}catch(e){alert(e.message)}};
+$("healthCheck").onclick=async()=>{try{await sb.rpc("cr_platform_run_health_checks").throwOnError();load()}catch(e){alert(e.message)}};\n$("capture").onclick=async()=>{try{await sb.rpc("cr_platform_capture_health").throwOnError();load()}catch(e){alert(e.message)}};
 $("saveNote").onclick=async()=>{try{const t=$("noteTitle").value.trim();if(!t)return alert("Enter a note title.");await sb.rpc("cr_platform_upsert_note",{p_id:null,p_title:t,p_body:$("noteBody").value,p_status:$("noteStatus").value}).throwOnError();$("noteTitle").value="";$("noteBody").value="";load()}catch(e){alert(e.message)}};
 $("refresh").onclick=load;load();
 </script></body></html>
