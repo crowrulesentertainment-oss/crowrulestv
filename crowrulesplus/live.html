@@ -83,6 +83,8 @@ function renderInfo(){
 }
 async function selectChannel(id){
  current=channels.find(x=>x.id===id);if(!current)return;
+ localStorage.setItem("crplus_last_channel",String(id));localStorage.setItem("crplus_last_channel_at",new Date().toISOString());
+ let recent=JSON.parse(localStorage.getItem("crplus_recent_channels")||"[]").filter(x=>String(x)!==String(id));recent=[String(id),...recent].slice(0,5);localStorage.setItem("crplus_recent_channels",JSON.stringify(recent));
  renderChannels();renderMiniGuide();
  let media="";
  if(current.stream_url){
@@ -104,9 +106,10 @@ async function refreshData(){
  const old=current?.id;channels=r.data||[];renderChannels();
  if(!channels.length){$("info").innerHTML="<h2>Nothing is live right now.</h2><p class='muted'>Check the guide for upcoming programming.</p>";return}
  await preloadSchedules();
+ let saved=localStorage.getItem("crplus_last_channel");
  let chosen=old?channels.find(x=>x.id===old):null;
  if(!chosen&&requested)chosen=channels.find(x=>x.id===requested||x.channel_key===requested);
- if(!chosen)chosen=channels.find(x=>x.is_live)||channels[0];
+ if(!chosen&&saved)chosen=channels.find(x=>String(x.id)===String(saved)||x.channel_key===saved);if(!chosen)chosen=channels.find(x=>x.is_live)||channels[0];
  if(!current||current.id!==chosen.id)await selectChannel(chosen.id);else{current=chosen;currentSchedule=scheduleCache.get(chosen.id)||[];renderChannels();renderMiniGuide();renderInfo();renderNowPlaying();renderSchedule()}
 }
 $("prevChannel").onclick=()=>channelStep(-1);$("nextChannel").onclick=()=>channelStep(1);
