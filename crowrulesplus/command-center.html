@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CrowRules+ Command Center</title><link rel="stylesheet" href="./styles.css">
+<style>
+.cc{display:grid;gap:18px}.ccHead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.ccGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.ccPanel{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}.ccPanel h2{margin-top:0}.ccList{display:grid;gap:10px}.ccItem{padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(0,0,0,.15)}.critical{border-color:#ff4d6d}.warning{border-color:#ffb703}.info{border-color:#5ee7df}.ok{border-color:#55d187}.ccMeta{font-size:.82rem;opacity:.7}.ccActions{display:flex;gap:8px;flex-wrap:wrap}.ccNote{display:grid;gap:8px}.ccNote input,.ccNote textarea,.ccNote select{width:100%;box-sizing:border-box}.empty{opacity:.65;padding:12px 0}
+</style></head>
+<body>
+<header><a class="logo" href="./">CROW<span>RULES+</span></a><nav><a class="btn" href="./admin.html">Operations</a><a class="btn" href="./">Public</a><a class="btn" href="./profile.html">Profile</a></nav></header>
+<main><section class="cc">
+<div class="ccHead"><div><h1>CrowRules+ Command Center</h1><p class="muted">One control plane for membership, Dreamscapes, production, content, live programming and platform health.</p></div><div class="ccActions"><button class="btn" id="capture">Capture Health</button><button class="btn primary" id="refresh">Refresh</button></div></div>
+<div id="status" class="accountPanel">Checking administrator access…</div>
+<div id="app" hidden>
+<div id="metrics" class="ccGrid"></div>
+<div class="ccGrid">
+<section class="ccPanel"><h2>Open Alerts</h2><div id="alerts" class="ccList"></div></section>
+<section class="ccPanel"><h2>Latest Health</h2><div id="health" class="ccList"></div></section>
+</div>
+<div class="ccGrid">
+<section class="ccPanel"><h2>Health History</h2><div id="history" class="ccList"></div></section>
+<section class="ccPanel"><h2>Recent Activity</h2><div id="activity" class="ccList"></div></section>
+</div>
+<section class="ccPanel"><h2>Admin Notes</h2><div class="ccNote"><input id="noteTitle" placeholder="Note title"><textarea id="noteBody" rows="3" placeholder="What needs attention?"></textarea><select id="noteStatus"><option value="open">Open</option><option value="done">Done</option><option value="archived">Archived</option></select><button class="btn primary" id="saveNote">Save Note</button></div><div id="notes" class="ccList" style="margin-top:14px"></div></section>
+</div></section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"),$=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+async function session(){const {data:{session}}=await sb.auth.getSession();if(!session)throw Error("Sign in required");return session}
+async function load(){
+ try{
+  await session();
+  const [cc,alerts,hist,activity,notes]=await Promise.all([
+   sb.from("cr_platform_command_center").select("*").single(),
+   sb.from("cr_platform_open_alerts").select("*").limit(50),
+   sb.from("cr_platform_health_history").select("*").limit(20),
+   sb.from("cr_platform_activity_feed").select("*").limit(50),
+   sb.from("cr_platform_admin_notes").select("*").order("updated_at",{ascending:false}).limit(50)
+  ]);
+  for(const r of [cc,alerts,hist,activity,notes]) if(r.error) throw r.error;
+  const c=cc.data||{}, h=(hist.data||[])[0];
+  $("status").innerHTML="<h2>Command Center access granted</h2><p class='muted'>Administrator control plane connected.</p>";
+  $("app").hidden=false;
+  $("metrics").innerHTML=[
+   ["Members",c.members],["Active Members",c.active_members],["Active Projects",c.active_projects],
+   ["Published Titles",c.published_content],["Live Channels",c.live_channels],["Pending Dreams",c.pending_dreamscapes],
+   ["Published Podcasts",c.published_podcasts],["Sports Follows",c.sports_follows],["Open Alerts",c.open_alerts],
+   ["Critical",c.critical_alerts],["Events / 24h",c.events_24h],["Health Snapshots / 24h",c.health_snapshots_24h]
+  ].map(x=>"<div class='tile'><strong>"+esc(x[1])+"</strong><span>"+esc(x[0])+"</span></div>").join("");
+  $("alerts").innerHTML=(alerts.data||[]).map(a=>"<div class='ccItem "+esc(a.severity)+"'><strong>"+esc(a.title)+"</strong><p>"+esc(a.message)+"</p><div class='ccMeta'>"+esc(a.source)+" · "+new Date(a.created_at).toLocaleString()+"</div><button class='btn mini' data-resolve='"+a.id+"'>Resolve</button></div>").join("")||"<div class='empty'>No open alerts.</div>";
+  $("health").innerHTML=h?"<div class='ccItem ok'><strong>Latest snapshot</strong><p>"+new Date(h.snapshot_at).toLocaleString()+"</p><div class='ccMeta'>Members "+h.members+" · Active "+h.active_members+" · Projects "+h.active_projects+" · Published "+h.published_content+" · Live "+h.live_channels+" · Pending Dreams "+h.pending_dreamscapes+" · Podcasts "+h.published_podcasts+" · Alerts "+h.open_alerts+"</div></div>":"<div class='empty'>No health snapshot yet.</div>";
+  $("history").innerHTML=(hist.data||[]).map(x=>"<div class='ccItem'><strong>"+new Date(x.snapshot_at).toLocaleString()+"</strong><div class='ccMeta'>Members "+x.members+" · Active "+x.active_members+" · Projects "+x.active_projects+" · Published "+x.published_content+" · Live "+x.live_channels+" · Dreams "+x.pending_dreamscapes+" · Podcasts "+x.published_podcasts+" · Alerts "+x.open_alerts+"</div></div>").join("")||"<div class='empty'>No history.</div>";
+  $("activity").innerHTML=(activity.data||[]).map(x=>"<div class='ccItem'><strong>"+esc(x.division_key)+" · "+esc(x.event_type)+"</strong><p>"+esc(x.message||"Platform event")+"</p><div class='ccMeta'>"+esc(x.entity_type||"entity")+" · "+new Date(x.created_at).toLocaleString()+"</div></div>").join("")||"<div class='empty'>No activity visible for this account.</div>";
+  $("notes").innerHTML=(notes.data||[]).map(n=>"<div class='ccItem'><strong>"+esc(n.title)+"</strong><p>"+esc(n.body||"")+"</p><div class='ccMeta'>"+esc(n.status)+" · "+new Date(n.updated_at).toLocaleString()+"</div></div>").join("")||"<div class='empty'>No notes yet.</div>";
+  document.querySelectorAll("[data-resolve]").forEach(b=>b.onclick=async()=>{try{await sb.rpc("cr_platform_resolve_alert",{p_alert_id:b.dataset.resolve}).throwOnError();load()}catch(e){alert(e.message)}});
+ }catch(e){$("status").innerHTML="<h2>Access unavailable</h2><p>"+esc(e.message||e)+"</p><a class='btn primary' href='./#account'>Sign in</a>"}
+}
+$("capture").onclick=async()=>{try{await sb.rpc("cr_platform_capture_health").throwOnError();load()}catch(e){alert(e.message)}};
+$("saveNote").onclick=async()=>{try{const t=$("noteTitle").value.trim();if(!t)return alert("Enter a note title.");await sb.rpc("cr_platform_upsert_note",{p_id:null,p_title:t,p_body:$("noteBody").value,p_status:$("noteStatus").value}).throwOnError();$("noteTitle").value="";$("noteBody").value="";load()}catch(e){alert(e.message)}};
+$("refresh").onclick=load;load();
+</script></body></html>
