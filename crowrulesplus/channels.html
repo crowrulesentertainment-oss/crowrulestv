@@ -33,7 +33,7 @@
 .channelCard.open .epg{display:block}
 .epgHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
 .epgHead strong{font-family:Orbitron}
-.timeline{display:grid;gap:7px}
+.timeline{display:grid;gap:7px}.timelineItem{cursor:pointer}.timelineItem:hover{border-color:#5ee7df77;transform:translateX(2px)}.epgLink{display:inline-flex;margin-top:10px;font-size:.78rem;color:var(--cyan)}
 .timelineItem{position:relative;padding:10px 11px;border:1px solid #242438;border-radius:10px;background:#0b0b12}
 .timelineItem.now{border-color:#ff3658;background:#160c12}
 .timelineItem.next{border-color:#5ee7df55}
@@ -95,7 +95,7 @@ const fmt=v=>v?new Date(v).toLocaleTimeString([], {hour:"numeric",minute:"2-digi
 const dateKey=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
 const now=()=>Date.now();
 
-let channels=[], schedules=[], filter="all", openId=null, loading=false;
+let channels=[], schedules=[], filter="all", openId=null, loading=false; const requestedChannel=new URLSearchParams(location.search).get("channel");
 
 function currentProgram(list){
  const n=now();
@@ -147,7 +147,7 @@ function channelSchedules(id){
  return schedules.filter(x=>x.channel_id===id);
 }
 
-function render(){
+function programUrl(p){return p.content_id?"./title.html?id="+encodeURIComponent(p.content_id):""}\nfunction render(){
  const q=$("search").value.trim().toLowerCase();
  const list=channels.filter(x=>{
   const status=filter==="all"||(filter==="live"&&x.is_live)||(filter==="off"&&!x.is_live);
@@ -155,7 +155,7 @@ function render(){
   return status&&(!q||text.includes(q));
  });
  $("grid").innerHTML=list.map(cardHtml).join("")||"<div class='empty'>No channels match your filters.</div>";
- document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>toggleEPG(b.dataset.open));
+ document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>toggleEPG(b.dataset.open)); document.querySelectorAll("[data-program]").forEach(el=>el.onclick=e=>{if(e.target.closest("a"))return; const p=schedules.find(x=>x.id===el.dataset.program); if(p?.content_id) location.href=programUrl(p)});
 }
 
 function cardHtml(x){
@@ -180,7 +180,7 @@ function cardHtml(x){
    "<div class='epg'><div class='epgHead'><strong>Programming</strong><span class='muted'>Next 12 slots</span></div><div class='timeline'>"+
    (day.length?day.map(p=>{
     const isNow=current&&current.id===p.id, isNext=next&&next.id===p.id;
-    return "<div class='timelineItem "+(isNow?"now ":"")+(isNext?"next":"")+"'><div class='timelineTime'>"+fmt(p.starts_at)+" – "+fmt(p.ends_at)+"</div><div class='timelineTitle'>"+esc(p.title||"Untitled")+"</div>"+(isNow?"<div class='progress'><span style='width:"+progressPct(p)+"%'></span></div>":"")+"</div>";
+    return "<div class='timelineItem "+(isNow?"now ":"")+(isNext?"next":"")+" data-program='"+esc(p.id)+"'><div class='timelineTime'>"+fmt(p.starts_at)+" – "+fmt(p.ends_at)+"</div><div class='timelineTitle'>"+esc(p.title||"Untitled")+"</div>"+(isNow?"<div class='progress'><span style='width:"+progressPct(p)+"%'></span></div>":"")+(p.content_id?"<a class='epgLink' href='"+programUrl(p)+"'>Open title →</a>":"")+"</div>";
    }).join(""):"<div class='empty'>No programming scheduled in the next 24 hours.</div>")+
    "</div></div>"+
   "</div></article>";
@@ -202,8 +202,7 @@ document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{
 $("search").oninput=render;
 $("refresh").onclick=load;
 
-load();
-setInterval(load,30000);
+load().then(()=>{if(requestedChannel){openId=requestedChannel;render();}});\nsetInterval(load,30000);
 setInterval(()=>{render()},1000);
 </script>
 </body>
