@@ -1,7 +1,7 @@
 const sb=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let ceremonies=[],current=null;
+let ceremonies=[],current=null,backstageTimer;
 async function init(){
  const u=await sb.auth.getUser();
  if(!u.data?.user)return $("studio").innerHTML='<div class="tvEmpty">Administrator sign-in required.</div>';
@@ -18,7 +18,16 @@ function editor(type,rows,a,b,c){
  return '<div class="grid">'+rows.map(x=>'<article class="tvRowCard"><input data-field="a" value="'+esc(x[a])+'"><input data-field="b" value="'+esc(x[b]||"")+'"><input data-field="c" value="'+esc(x[c]||"")+'"><button data-del="'+x.id+'" data-type="'+type+'" class="btn">Delete</button></article>').join("")+'<button class="btn" data-add="'+type+'">+ Add</button></div>';
 }
 async function load(id){
- current=ceremonies.find(c=>c.id===id); const board=(await sb.from("spectrum_ceremony_production_board").select("*").eq("ceremony_id",id).maybeSingle()).data||{};
+ current=ceremonies.find(c=>c.id===id);
+ clearInterval(backstageTimer);
+ const refreshBackstage=async()=>{
+  const r=await sb.from("spectrum_ceremony_run_of_show").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true});
+  const rows=r.data||[], now=Date.now(), live=rows.find(x=>x.starts_at&&now>=new Date(x.starts_at).getTime()&&(!x.ends_at||now<=new Date(x.ends_at).getTime())), next=rows.find(x=>x.starts_at&&new Date(x.starts_at).getTime()>now);
+  const winner=rows.find(x=>x.segment_type==="winner_reveal"&&x.starts_at&&new Date(x.starts_at).getTime()>now);
+  const fmtMs=v=>{let s=Math.max(0,Math.floor(v/1000)),m=Math.floor(s/60);s%=60;return m+"m "+String(s).padStart(2,"0")+"s"};
+  $("backstageBody").innerHTML='<div class="grid"><article class="tvRowCard"><small>ON AIR</small><h2>'+(live?esc(live.title):"OFF AIR")+'</h2><p>'+(live?esc(live.segment_type.replaceAll("_"," ")): "No segment is active")+'</p></article><article class="tvRowCard"><small>NEXT</small><h2>'+(next?esc(next.title):"—")+'</h2><p>'+(next?fmtMs(new Date(next.starts_at).getTime()-now):"No upcoming segment")+'</p></article><article class="tvRowCard"><small>NEXT WINNER REVEAL</small><h2>'+(winner?esc(winner.category_name||winner.title):"—")+'</h2><p>'+(winner?fmtMs(new Date(winner.starts_at).getTime()-now):"No reveal scheduled")+'</p></article></div>';
+ };
+ refreshBackstage(); backstageTimer=setInterval(refreshBackstage,1000); const board=(await sb.from("spectrum_ceremony_production_board").select("*").eq("ceremony_id",id).maybeSingle()).data||{};
  const [seg,pre,perf,media]=await Promise.all([
   sb.from("spectrum_ceremony_segments").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true}),
   sb.from("spectrum_presenters").select("*").eq("ceremony_id",id).order("sort_order",{ascending:true}),
