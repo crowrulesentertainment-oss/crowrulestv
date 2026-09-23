@@ -1,0 +1,5 @@
+-- CrowRules+ Schedule Guardian v9
+-- Uses existing schedule/channel/incident tables.
+-- Guardian performs authenticated admin-side integrity scans.
+-- Existing incident RLS remains the authorization boundary.
+-- No additional schema required.
