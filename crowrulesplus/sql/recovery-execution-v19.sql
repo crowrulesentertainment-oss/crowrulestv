@@ -1,0 +1,6 @@
+-- CrowRules+ v19 — Recovery Execution & Verification Foundation
+-- Approval and execution RPCs are admin-gated and transaction-locked.
+-- Failover requires an explicitly supplied published content UUID.
+-- Rollback requires an explicitly selected recovery snapshot.
+-- Execution records result and status='executed'; incident closure is intentionally
+-- deferred until a separate verification step confirms recovery.
