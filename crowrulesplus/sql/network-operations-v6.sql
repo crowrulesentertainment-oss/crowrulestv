@@ -1,0 +1,5 @@
+-- CrowRules+ Network Operations Center v6
+-- Monitoring-only layer. Uses existing crplus_live_channels and crplus_schedule.
+-- No schema changes required.
+-- Existing RLS policies remain in force; authenticated admin access is required by the UI.
+-- The control room refreshes channel/program state every 15 seconds.
