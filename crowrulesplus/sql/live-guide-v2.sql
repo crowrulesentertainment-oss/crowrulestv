@@ -1,0 +1,8 @@
+-- CrowRules+ Live TV & Guide Engine v2
+-- Current verified schema: crplus_live_channels + crplus_schedule.
+-- No new tables/RLS changes required.
+-- Runtime calculates NOW PLAYING, NEXT, remaining time and progress client-side.
+-- Existing optimized indexes are retained:
+-- crplus_live_channels_live_idx (is_live, sort_order)
+-- crplus_schedule_channel_time_idx (channel_id, starts_at)
+-- idx_crplus_schedule_channel_time (channel_id, starts_at, ends_at)
