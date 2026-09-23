@@ -1,0 +1,5 @@
+-- CrowRules+ Programming Director v11
+-- Decision-support layer over existing scheduling tables.
+-- Recommendations are logged; schedule publication remains operator-controlled.
+-- Content selection currently prioritizes recently released published content while avoiding the current item.
+-- Future policy layers can add duration, repeat, division, rating, and live-event constraints.
