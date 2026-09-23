@@ -1,0 +1,4 @@
+-- CrowRules+ Rollback & Recovery v15
+-- Persistent schedule snapshots plus administrator-only transactional rollback.
+-- Rollback uses the same advisory deployment lock as controlled deployment.
+-- Snapshots must be created by the deployment workflow in the next hardening pass.
