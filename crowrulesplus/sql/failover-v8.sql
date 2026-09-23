@@ -1,0 +1,4 @@
+-- CrowRules+ Failover Engine v8
+-- Uses existing crplus_live_channels, crplus_content and crplus_network_incidents.
+-- RLS and existing admin authorization remain the security boundary.
+-- v8 provides operator-controlled fallback activation; it does not silently replace scheduled programming.
