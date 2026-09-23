@@ -1,0 +1,6 @@
+-- CrowRules+ Controlled Schedule Deployment v14
+-- Deploys an approved/published schedule version inside one database transaction.
+-- Uses an advisory transaction lock to serialize deployments.
+-- Validates non-empty version and channel-local overlaps before replacing the
+-- selected time window in crplus_schedule.
+-- Function is SECURITY INVOKER and execution is restricted to authenticated admins.
