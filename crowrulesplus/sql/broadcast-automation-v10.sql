@@ -1,0 +1,5 @@
+-- CrowRules+ Broadcast Automation v10
+-- Automation audit table is created in Supabase.
+-- The v10 UI performs operator-authorized automation cycles.
+-- Coverage failures create incidents but do NOT silently hijack a channel.
+-- This keeps emergency programming explicitly operator-controlled until a later hardened failover policy is approved.
