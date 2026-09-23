@@ -1,0 +1,5 @@
+-- CrowRules+ Smart Programming Scheduler v5
+-- No additional schema required.
+-- v5 uses crplus_program_templates as reusable rules and crplus_schedule as the published timeline.
+-- Existing admin RLS on crplus_schedule remains the authorization boundary.
+-- The frontend performs conflict checks before publishing generated slots.
