@@ -1,0 +1,7 @@
+-- CrowRules+ v20 — Recovery Verification & Incident Lifecycle
+-- Installed in Supabase via execute_sql.
+-- Verification is deliberately separate from execution.
+-- A passing verification marks the recovery action verified and resolves its linked
+-- open incident. A failed verification marks the action failed and leaves the incident open.
+-- Failover verification requires a post-execution healthy stream-health observation.
+-- NOTE: current stream health is a browser reachability signal, not definitive HLS playback validation.
