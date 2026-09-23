@@ -1,0 +1,3 @@
+-- CrowRules+ Discovery Hub v3
+-- Uses existing crplus_content, crplus_watch_history, crplus_my_list and crplus_profiles.
+-- No additional exposed tables are required.
