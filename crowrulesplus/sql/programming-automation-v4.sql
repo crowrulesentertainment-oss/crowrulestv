@@ -1,0 +1,4 @@
+-- CrowRules+ Programming Automation v4
+-- Creates reusable schedule templates with admin-only writes and public reads.
+-- Generated schedule rows continue to use crplus_schedule and its existing admin RLS policy.
+-- Timezone is stored per template; v4 frontend currently generates using the configured template clock.
