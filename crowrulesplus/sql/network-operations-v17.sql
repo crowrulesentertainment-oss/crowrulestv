@@ -1,0 +1,9 @@
+-- CrowRules+ v17 — Network Operations Engine
+-- Adds persistent operations-cycle state and extends stream-health observations.
+-- Modes:
+--   observe   = detect/report only
+--   assist    = reserved for future operator-preparation actions
+--   automatic = reserved for explicitly configured recovery actions
+-- v17 deliberately performs NO silent failover or schedule rollback.
+-- Recovery actions remain explicit until their authorization and safety gates
+-- are implemented in a later release.
