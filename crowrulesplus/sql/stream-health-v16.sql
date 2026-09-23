@@ -1,0 +1,5 @@
+-- CrowRules+ v16
+-- Automatic pre-deployment snapshots are now created by crplus_deploy_schedule_version().
+-- Stream health stores persistent browser/provider reachability observations.
+-- A browser HEAD/no-cors check is only a reachability signal, not definitive media
+-- playback validation; server-side HLS probing can be added with an Edge Function later.
