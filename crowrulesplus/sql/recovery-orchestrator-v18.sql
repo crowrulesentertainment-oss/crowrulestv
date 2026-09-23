@@ -1,0 +1,5 @@
+-- CrowRules+ v18 — Recovery Orchestrator
+-- Recovery plans map diagnosed incident types to explicit, approval-gated actions.
+-- The orchestrator creates recommendations only. It does not execute failover,
+-- rollback, or other destructive recovery actions in v18.
+-- This preserves the operator approval boundary established by v8/v14/v15/v17.
