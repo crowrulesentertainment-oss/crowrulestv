@@ -1,4 +1,0 @@
--- CrowRules+ Programming Manager v3
--- No schema changes required. Uses existing admin RLS policies.
--- crplus_schedule INSERT/UPDATE/DELETE is restricted by crplus_is_admin().
--- Public SELECT remains available for the viewer-facing guide.

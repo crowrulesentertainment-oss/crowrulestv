@@ -1,8 +1,0 @@
--- CrowRules+ Live TV & Guide Engine v1
--- Current schema verified.
--- Existing equivalent indexes are already present; no additional DDL is required.
--- Existing indexes:
---   crplus_live_channels_live_idx (is_live, sort_order)
---   crplus_schedule_channel_time_idx (channel_id, starts_at)
---   idx_crplus_schedule_channel_time (channel_id, starts_at, ends_at)
--- RLS is enabled on both exposed tables; retain policies appropriate to the publishing model.

@@ -1,4 +1,0 @@
--- CrowRules+ Schedule Studio v13
--- Persistent schedule-version foundation.
--- Drafts are isolated from crplus_schedule until a future controlled publish transaction.
--- RLS intentionally restricts versions/items to administrators.

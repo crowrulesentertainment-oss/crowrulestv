@@ -1,4 +1,0 @@
--- CrowRules+ v21 — Network Command Center
--- Escalation table, admin-only RLS, indexes, and escalation RPC are installed directly
--- in Supabase. The command center is an operator dashboard over existing network,
--- incident, recovery, and operations data.
