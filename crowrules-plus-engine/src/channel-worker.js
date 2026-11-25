@@ -146,7 +146,7 @@ export class ChannelWorker {
         }
         const dbChannel = await this.getChannelConfig();
         this.enabled = dbChannel?.enabled ?? true;
-        this.standbyUrl = dbChannel?.standby_media_url || this.standbyUrl || "";
+        this.standbyUrl = dbChannel?.standby_media_url || "";
         this.nextProgram = await this.getNextScheduleItem();
         if (this.directorStopped) {
           await this.stopChild(); this.state = "director_stopped";
