@@ -90,6 +90,7 @@ async function save(e){
    if(!channel){$("crEditError").textContent="Enter the CrowRules+ channel key.";return;}
    const slug=String(payload.description||"youtube-playlist").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,36)||"youtube-playlist";
    payload.setting_key="tv_playlist:"+channel+":"+slug+"-"+match[1].slice(-6);
+   delete payload.autoplay; // Autoplay is stored inside setting_value JSON, not a table column.
    payload.setting_value={channel_key:channel,youtube_url:raw,youtube_playlist_id:match[1],playback_order:Number(payload.playback_order||0),repeat:payload.repeat!==false,shuffle:payload.shuffle===true,autoplay:payload.autoplay!==false,fallback_mode:payload.fallback_mode||"standby"};
    payload.is_public=payload.is_public!==false;
  }
