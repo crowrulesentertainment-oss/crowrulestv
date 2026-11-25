@@ -88,7 +88,8 @@ async function save(e){
    if(!match){$("crEditError").textContent="Enter a valid YouTube playlist URL containing a list= playlist ID.";return;}
    const channel=String(payload.channel_key||"").trim();
    if(!channel){$("crEditError").textContent="Enter the CrowRules+ channel key.";return;}
-   payload.setting_key="tv_playlist:"+channel+":"+String(payload.setting_key||"playlist").replace(/^tv_playlist:[^:]+:/,"").replace(/[^a-z0-9_-]+/gi,"-").toLowerCase();
+   const slug=String(payload.description||"youtube-playlist").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,36)||"youtube-playlist";
+   payload.setting_key="tv_playlist:"+channel+":"+slug+"-"+match[1].slice(-6);
    payload.setting_value={channel_key:channel,youtube_url:raw,youtube_playlist_id:match[1],playback_order:Number(payload.playback_order||0),repeat:payload.repeat!==false,shuffle:payload.shuffle===true,autoplay:payload.autoplay!==false,fallback_mode:payload.fallback_mode||"standby"};
    payload.is_public=payload.is_public!==false;
  }
