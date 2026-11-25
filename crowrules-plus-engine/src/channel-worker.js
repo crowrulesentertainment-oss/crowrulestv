@@ -116,6 +116,12 @@ export class ChannelWorker {
       destination_type: "youtube_live", destination_label: `YouTube — ${this.config.name}`,
       worker_id: `crowrules-plus-${this.config.slug}`,
       enabled: this.enabled, status: this.state,
+      current_program: this.directorOverride?.title || this.currentItem?.title || (this.state === "standby" ? "Standby slate" : null),
+      next_program: this.nextProgram?.title || null,
+      encoder_connected: Boolean(this.child && this.child.exitCode === null),
+      encoder_pid: this.child?.pid || null, director_override: Boolean(this.directorOverride),
+      standby_media_url: this.standbyUrl || null, last_error: this.lastError,
+      restart_count: this.restartCount,
       last_heartbeat_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
