@@ -128,6 +128,10 @@ export class ChannelWorker {
   async runLoop(gen) {
     while (this.running && gen === this.generation) {
       try {
+        if (Date.now() - this.lastCommandPoll >= this.pollMs) {
+          this.lastCommandPoll = Date.now();
+          await this.processCommands();
+        }
         if (!this.streamKey) {
           this.state = "waiting_for_stream_key";
           if (Date.now() - this.lastHeartbeatWrite >= this.heartbeatMs) { this.lastHeartbeatWrite = Date.now(); await this.writeHeartbeat(); }
@@ -136,28 +140,30 @@ export class ChannelWorker {
         }
         const dbChannel = await this.getChannelConfig();
         this.enabled = dbChannel?.enabled ?? true;
-        if (!this.enabled) {
-          await this.stopChild(); this.currentItem = null; this.currentItemId = null;
-          this.state = "disabled";
+        this.standbyUrl = dbChannel?.standby_media_url || this.standbyUrl || "";
+        this.nextProgram = await this.getNextScheduleItem();
+        if (this.directorStopped) {
+          await this.stopChild(); this.state = "director_stopped";
+        } else if (!this.enabled) {
+          await this.stopChild(); this.currentItem = null; this.currentItemId = null; this.state = "disabled";
         } else {
-          const item = await this.getCurrentScheduleItem();
-          const id = item?.id || (this.standbyFile ? "__standby__" : null);
+          const scheduledItem = await this.getCurrentScheduleItem();
+          const item = this.directorOverride || scheduledItem;
+          const id = item?.id || ((this.standbyUrl || this.standbyFile) ? "__standby__" : null);
           if (id !== this.currentItemId) {
             await this.stopChild();
-            this.currentItem = item || null; this.currentItemId = id; this.playlistItemId = null; this.playlistEntries = []; this.playlistIndex = 0;
+            this.currentItem = item || null; this.currentItemId = id;
+            this.playlistItemId = null; this.playlistEntries = []; this.playlistIndex = 0;
             if (item) await this.launch(item, gen);
-            else if (this.standbyFile) await this.launchStandby(gen);
+            else if (this.standbyUrl || this.standbyFile) await this.launchStandby(gen);
             else this.state = "idle_no_program";
           } else if (id && !this.child) {
             if (item) await this.launch(item, gen);
-            else if (this.standbyFile) await this.launchStandby(gen);
-          } else if (!id) {
-            this.state = "idle_no_program";
-          }
+            else if (this.standbyUrl || this.standbyFile) await this.launchStandby(gen);
+          } else if (!id) this.state = "idle_no_program";
         }
         if (Date.now() - this.lastHeartbeatWrite >= this.heartbeatMs) {
-          this.lastHeartbeatWrite = Date.now();
-          await this.writeHeartbeat();
+          this.lastHeartbeatWrite = Date.now(); await this.writeHeartbeat();
         }
         await sleep(this.pollMs);
       } catch (error) {
@@ -233,9 +239,13 @@ export class ChannelWorker {
     }
   }
   async launchStandby(gen) {
-    if (!this.standbyFile) return;
+    const input = this.standbyUrl || this.standbyFile;
+    if (!input) return;
     this.state = "standby";
-    this.spawnFfmpeg(this.ffmpegArgs(this.standbyFile, true), gen, "Standby slate");
+    try {
+      const resolved = this.standbyUrl ? await this.resolveInput({media_url:this.standbyUrl}) : input;
+      if (this.running && gen === this.generation) this.spawnFfmpeg(this.ffmpegArgs(resolved, true), gen, "Standby slate");
+    } catch (error) { this.lastError = error.message; this.state = "standby_error"; }
   }
   spawnFfmpeg(args, gen, title) {
     const child = spawn(this.env.FFMPEG_PATH || "ffmpeg", args, { stdio: ["ignore", "ignore", "pipe"] });
