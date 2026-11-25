@@ -15,7 +15,11 @@ let syncState="local";
 function setSyncState(status,message=""){syncState=status;const el=$("sync-status");if(el){el.dataset.state=status;el.textContent=message||({local:"LOCAL CACHE",syncing:"SYNCING…",saved:"ALL CHANGES SAVED",offline:"OFFLINE · LOCAL COPY",error:"SYNC ERROR"}[status]||status.toUpperCase())}}
 function persistLocal(){localStorage.setItem(KEY,JSON.stringify(state));renderAll()}
 async function save(){persistLocal();if(supabase&&user){setSyncState("syncing");try{await syncAllData();setSyncState("saved")}catch(e){setSyncState("error");$("config-message").textContent="Changes are safe in this browser, but database sync failed: "+e.message}}else setSyncState("local")}
-async function syncAllData(){if(!supabase||!user)return;for(const c of state.channels)await syncChannelPlaylist(c)}
+async function syncAllData(){if(!supabase||!user)return;
+ const channelRows=state.channels.map(c=>({id:c.id,owner_id:user.id,slug:c.slug,name:c.name,description:c.description||"",kind:c.kind||"other",enabled:Boolean(c.enabled),standby_media_url:c.standby_media_url||null}));
+ const{error:channelError}=await supabase.from("cr_channels").upsert(channelRows,{onConflict:"id"});if(channelError)throw channelError;
+ for(const c of state.channels)await syncChannelPlaylist(c)
+}
 async function syncChannelPlaylist(c){
  if(!c.playlistId)c.playlistId=crypto.randomUUID();
  const pl={id:c.playlistId,owner_id:user.id,channel_id:c.id,name:c.name+" Playlist",is_default:true};
