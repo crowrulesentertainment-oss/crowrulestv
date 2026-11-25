@@ -22,6 +22,40 @@
   const renderers = {home,live,ondemand,guide,mylist,player,creators,admin};
   const content = (renderers[page] || home)();
   $("#app").innerHTML = nav() + content + footer();
+  // Public CrowRules+ channel playlist playout. Reads only settings explicitly published by an admin.
+  async function loadCrowRulesPlaylist(){
+    if(page!=="player")return;
+    const params=new URLSearchParams(location.search),channelId=params.get("channel");
+    if(!channelId)return;
+    const stage=$(".player-stage");if(!stage)return;
+    const status=$(".player-status");
+    try{
+      if(!window.supabase?.createClient)return;
+      const db=window.supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
+      const {data,error}=await db.from("tv_network_settings").select("setting_value,description").eq("is_public",true).eq("is_active",true).like("setting_key","tv_playlist:%");
+      if(error)throw error;
+      const items=(data||[]).map(x=>({...(x.setting_value||{}),description:x.description||""})).filter(x=>x.channel_key===channelId&&x.youtube_playlist_id);
+      items.sort((x,y)=>(Number(x.playback_order)||0)-(Number(y.playback_order)||0));
+      if(!items.length)return;
+      const selected=items[0],list=String(selected.youtube_playlist_id).replace(/[^A-Za-z0-9_-]/g,"");
+      if(!list)return;
+      const iframe=document.createElement("iframe");
+      iframe.title="CrowRules+ "+(selected.description||"YouTube playlist");
+      iframe.src="https://www.youtube-nocookie.com/embed/videoseries?list="+encodeURIComponent(list)+"&autoplay="+(selected.autoplay===false?"0":"1")+"&loop="+(selected.repeat===false?"0":"1")+"&playlist="+encodeURIComponent(list)+"&rel=0";
+      iframe.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";
+      iframe.allowFullscreen=true;
+      iframe.referrerPolicy="strict-origin-when-cross-origin";
+      iframe.style.cssText="position:absolute;inset:0;width:100%;height:100%;border:0;background:#05070b";
+      stage.querySelector(".player-backdrop")?.remove();
+      stage.querySelector(".player-watermark")?.remove();
+      stage.querySelector(".player-center")?.remove();
+      stage.querySelector(".player-controls")?.remove();
+      stage.appendChild(iframe);
+      const notice=$(".notice");if(notice){notice.querySelector("b").textContent="CrowRules+ playlist";notice.querySelector("span").textContent="Now playing the published YouTube playlist: "+(selected.description||"Channel playlist")+". Playback is provided by YouTube.";}
+      if(status)status.textContent="YOUTUBE PLAYLIST · CROWRULES+";
+    }catch(err){console.warn("CrowRules+ playlist could not load:",err);}
+  }
+  loadCrowRulesPlaylist();
   const toggleSearch = () => {$("#search-panel").classList.toggle("hidden"); if(!$("#search-panel").classList.contains("hidden")) $("#site-search").focus();};
   $("#search-toggle")?.addEventListener("click",toggleSearch);
   $("#menu-toggle")?.addEventListener("click",()=>$(".main-nav").classList.toggle("nav-open"));
