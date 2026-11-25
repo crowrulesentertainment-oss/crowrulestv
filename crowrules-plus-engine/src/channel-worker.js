@@ -10,6 +10,8 @@ export class ChannelWorker {
     this.state = "starting"; this.lastError = null; this.lastHeartbeat = null;
     this.lastSchedulePoll = 0; this.lastHeartbeatWrite = 0; this.loopPromise = null;
     this.generation = 0; this.playlistItemId = null; this.playlistEntries = []; this.playlistIndex = 0;
+    this.directorOverride = null; this.directorStopped = false; this.standbyUrl = "";
+    this.restartCount = 0; this.nextProgram = null; this.lastCommandPoll = 0;
   }
   get streamKey() { return this.env[this.config.keyEnv] || ""; }
   get standbyFile() { return this.env[this.config.standbyEnv] || ""; }
@@ -50,7 +52,7 @@ export class ChannelWorker {
   }
   async getChannelConfig() {
     const rows = await this.supabase(
-      `cr_channels?select=id,enabled&id=eq.${encodeURIComponent(this.config.id)}`
+      `cr_channels?select=id,enabled,standby_media_url&id=eq.${encodeURIComponent(this.config.id)}`
     );
     return rows?.[0] || null;
   }
@@ -66,6 +68,46 @@ export class ChannelWorker {
     });
     const rows = await this.supabase(`cr_schedule_items?${params.toString()}`);
     return rows?.[0] || null;
+  }
+  async getNextScheduleItem() {
+    const now = new Date().toISOString();
+    const params = new URLSearchParams({select:"id,title,starts_at",channel_id:`eq.${this.config.id}`,starts_at:`gt.${now}`,order:"starts_at.asc",limit:"1"});
+    const rows = await this.supabase(`cr_schedule_items?${params.toString()}`);
+    return rows?.[0] || null;
+  }
+  async processCommands() {
+    const params = new URLSearchParams({select:"id,command,payload",channel_id:`eq.${this.config.id}`,status:"eq.pending",order:"created_at.asc",limit:"10"});
+    const commands = await this.supabase(`cr_playout_commands?${params.toString()}`);
+    for (const command of commands || []) {
+      const claim = await this.supabase(`cr_playout_commands?id=eq.${command.id}&status=eq.pending`, {
+        method:"PATCH", headers:{Prefer:"return=representation"}, body:JSON.stringify({status:"processing"})
+      });
+      if (!claim?.length) continue;
+      try {
+        const payload = command.payload || {};
+        if (command.command === "stop") {
+          this.directorStopped = true; await this.stopChild(); this.state = "director_stopped";
+        } else if (command.command === "start") {
+          this.directorStopped = false; this.currentItemId = null; this.state = "starting";
+        } else if (command.command === "restart") {
+          this.directorStopped = false; await this.stopChild(); this.currentItemId = null; this.state = "director_restarting";
+        } else if (command.command === "director_override") {
+          if (!payload.media_url) throw new Error("Director override requires a media_url");
+          this.directorOverride = {id:"__director_override__",title:String(payload.title || "Director override"),media_url:String(payload.media_url),media_type:"video"};
+          await this.stopChild(); this.currentItemId = null;
+        } else if (command.command === "clear_override") {
+          this.directorOverride = null; await this.stopChild(); this.currentItemId = null;
+        } else if (command.command === "set_standby") {
+          this.standbyUrl = String(payload.media_url || "");
+          await this.supabase(`cr_channels?id=eq.${this.config.id}`, {method:"PATCH",body:JSON.stringify({standby_media_url:this.standbyUrl || null})});
+          await this.stopChild(); this.currentItemId = null;
+        }
+        await this.supabase(`cr_playout_commands?id=eq.${command.id}`,{method:"PATCH",body:JSON.stringify({status:"completed",processed_at:new Date().toISOString(),error:null})});
+      } catch (error) {
+        await this.supabase(`cr_playout_commands?id=eq.${command.id}`,{method:"PATCH",body:JSON.stringify({status:"failed",processed_at:new Date().toISOString(),error:error.message})});
+        this.lastError = error.message;
+      }
+    }
   }
   async writeHeartbeat() {
     if (!this.ownerId) return;
