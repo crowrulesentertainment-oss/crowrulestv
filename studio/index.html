@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b10">
+<meta name="description" content="CrowRules+ independent multi-channel network control studio.">
+<title>CrowRules+ Studio — Network Master Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="studio.css?v=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js" defer></script>
+<script src="studio.js?v=1" defer></script>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+ <a class="brand" href="./"><span class="brand-icon">♜</span><span><b>CROWRULES<span>+</span></b><small>NETWORK CONTROL</small></span></a>
+ <div class="side-caption">NETWORK</div>
+ <button class="nav-item active" data-view="overview"><i>◈</i> Master Control</button>
+ <button class="nav-item" data-view="channels"><i>▦</i> Channel Manager <em>4</em></button>
+ <button class="nav-item" data-view="playlists"><i>▤</i> Playlist Control</button>
+ <button class="nav-item" data-view="schedule"><i>◷</i> Automatic Programming</button>
+ <button class="nav-item" data-view="library"><i>▣</i> Media Library</button>
+ <div class="side-caption">OPERATIONS</div>
+ <button class="nav-item" data-view="outputs"><i>⌁</i> Broadcast Outputs</button>
+ <button class="nav-item" data-view="monitoring"><i>◉</i> Monitoring & Recovery</button>
+ <button class="nav-item" data-view="settings"><i>⚙</i> Network Settings</button>
+ <div class="sidebar-bottom"><span class="raven-mark">RAVEN / 01</span><p>ONE COMPANY.<br>ONE UNIVERSE.</p><small>Independent channel architecture</small></div>
+</aside>
+<main class="main">
+<header class="topbar"><div><div class="crumb">CROWRULES+ <span>/</span> <b id="crumb-current">MASTER CONTROL</b></div><h1 id="page-title">Network overview</h1></div><div class="top-actions"><span class="mode-pill"><i></i> DIRECTOR CONSOLE</span><button class="outline-btn" id="refresh">↻ Refresh</button><button class="user-pill" id="auth-button">Sign in</button></div></header>
+<div class="notice" id="system-notice"><b>STUDIO PREVIEW</b><span>Channel, playlist and schedule management is available here. Independent live broadcasts require the CrowRules+ Node playout service and one encoder/output per channel.</span><button id="dismiss-notice" aria-label="Dismiss">×</button></div>
+<section class="view active" id="view-overview">
+ <div class="hero"><div class="hero-image"></div><div class="hero-copy"><span class="eyebrow">MASTER CONTROL / NETWORK OPERATIONS</span><h2>Four channels.<br><i>One universe.</i></h2><p>Direct the CrowRules+ network from one control room. Every channel owns its own playlist, schedule and broadcast output.</p><div class="hero-actions"><button class="red-btn" data-go="channels">Manage channels <b>↗</b></button><button class="glass-btn" data-go="schedule">Build programming schedule</button></div></div><div class="hero-raven">C+</div></div>
+ <div class="section-heading"><div><span class="eyebrow">LIVE NETWORK / CHANNEL INDEPENDENCE</span><h2>Channel status</h2></div><button class="text-btn" data-go="channels">All channels →</button></div>
+ <div class="channel-grid" id="overview-channels"></div>
+ <div class="two-col"><article class="panel"><div class="panel-head"><div><span class="eyebrow">PROGRAMMING ENGINE</span><h3>Schedule overview</h3></div><span class="tag">PACIFIC TIME</span></div><div id="schedule-summary" class="empty">No programming schedule generated yet.</div><button class="outline-btn" data-go="schedule">Open programming desk →</button></article>
+ <article class="panel"><div class="panel-head"><div><span class="eyebrow">NETWORK INFRASTRUCTURE</span><h3>Broadcast readiness</h3></div><span class="tag amber">SETUP REQUIRED</span></div><div class="readiness"><div><span>Channel configurations</span><b id="ready-channels">4 / 4</b></div><div><span>Playout service</span><b class="warn">NOT CONNECTED</b></div><div><span>Independent outputs</span><b class="warn">NOT VERIFIED</b></div><div><span>Supabase persistence</span><b id="db-status">LOCAL MODE</b></div></div><button class="outline-btn" data-go="outputs">Configure broadcast outputs →</button></article></div>
+</section>
+<section class="view" id="view-channels">
+ <div class="view-intro"><div><span class="eyebrow">NETWORK DIRECTORY / 01</span><h2>Channel manager</h2><p>Configure each channel independently. Channel changes here do not alter Tacoma Nights Studio.</p></div><button class="red-btn" id="add-channel">＋ Add channel</button></div>
+ <div class="channel-grid manager-grid" id="channel-manager"></div>
+</section>
+<section class="view" id="view-playlists">
+ <div class="view-intro"><div><span class="eyebrow">PLAYOUT / 02</span><h2>Playlist control</h2><p>Each channel has its own ordered playlist and playback queue. Add playlist entries without affecting other channels.</p></div></div>
+ <div class="toolbar"><label>Active channel<select id="playlist-channel"></select></label><button class="red-btn" id="new-playlist">＋ New playlist</button></div>
+ <div class="panel"><div class="panel-head"><div><span class="eyebrow">CHANNEL PLAYLISTS</span><h3 id="playlist-title">Select a channel</h3></div><span class="tag" id="playlist-count">0 ITEMS</span></div><div id="playlist-list" class="playlist-list"></div></div>
+ <div class="panel"><div class="panel-head"><div><span class="eyebrow">ADD MEDIA</span><h3>Add a playlist item</h3></div><span class="tag">YOUTUBE / VIDEO URL</span></div><form id="media-form" class="form-grid"><label>Program title<input id="media-title" required placeholder="Episode or program title"></label><label>Video / playlist URL<input id="media-url" type="url" required placeholder="https://www.youtube.com/watch?v=…"></label><label>Duration (minutes)<input id="media-duration" type="number" min="1" max="1440" value="30" required></label><label>Content type<select id="media-type"><option>Episode</option><option>Live replay</option><option>Promo</option><option>Station ID</option><option>Movie</option><option>Other</option></select></label><div class="form-actions"><button class="red-btn" type="submit">Add to selected channel</button><span id="media-message" class="helper"></span></div></form></div>
+</section>
+<section class="view" id="view-schedule">
+ <div class="view-intro"><div><span class="eyebrow">AUTOMATION / 03</span><h2>Automatic programming</h2><p>Generate a channel-specific rundown from its playlist. Preview the schedule before saving it.</p></div></div>
+ <div class="panel"><div class="form-grid schedule-form"><label>Channel<select id="schedule-channel"></select></label><label>Schedule length<select id="schedule-days"><option value="1">24 hours</option><option value="7">7 days</option><option value="30">30 days</option></select></label><label>Start date<input id="schedule-date" type="date"></label><label>Daily start time<input id="schedule-time" type="time" value="00:00"></label><label>Repeat mode<select id="schedule-repeat"><option value="cycle">Cycle playlist continuously</option><option value="once">Play each item once per day</option></select></label><label>Gap handling<select id="schedule-gap"><option value="fill">Fill gaps by cycling playlist</option><option value="standby">Insert standby slate</option></select></label></div><div class="form-actions"><button class="red-btn" id="generate-schedule">Generate schedule preview</button><button class="outline-btn" id="save-schedule">Save schedule</button><span id="schedule-message" class="helper"></span></div></div>
+ <div class="panel"><div class="panel-head"><div><span class="eyebrow">PROGRAM GRID</span><h3>Schedule preview</h3></div><span class="tag" id="schedule-meta">NOT GENERATED</span></div><div id="schedule-preview" class="schedule-preview empty">Choose a channel and generate a schedule to preview its rundown.</div></div>
+</section>
+<section class="view" id="view-library">
+ <div class="view-intro"><div><span class="eyebrow">ASSET MANAGEMENT / 04</span><h2>Media library</h2><p>All media entries across the four channels, grouped by channel. Playlist items remain independently assigned.</p></div></div><div id="library-list" class="panel"></div>
+</section>
+<section class="view" id="view-outputs">
+ <div class="view-intro"><div><span class="eyebrow">TRANSMISSION / 05</span><h2>Broadcast outputs</h2><p>Assign a distinct playout process and destination to each channel. Never share stream keys in this browser dashboard.</p></div></div>
+ <div class="warning"><b>SECURITY NOTE</b> Stream keys and OAuth refresh tokens must stay on the Node.js host in environment variables or a secrets manager. This interface stores only destination labels and connection status.</div>
+ <div id="outputs-list" class="output-grid"></div>
+ <div class="panel"><span class="eyebrow">INDEPENDENT BROADCAST REQUIREMENTS</span><h3>One process per channel</h3><p class="muted">For four simultaneous streams, the playout service must run four isolated channel workers. Each worker needs its own playlist cursor, schedule runner, encoder process, destination credentials, heartbeat and restart policy. A single OBS instance or one shared stream output cannot broadcast four independent channels by itself.</p></div>
+</section>
+<section class="view" id="view-monitoring">
+ <div class="view-intro"><div><span class="eyebrow">NETWORK HEALTH / 06</span><h2>Monitoring & recovery</h2><p>Operational status for each channel. The dashboard does not report a channel live until a connected playout service confirms it.</p></div><button class="outline-btn" id="refresh-health">Check status</button></div>
+ <div id="monitor-grid" class="monitor-grid"></div><div class="panel"><span class="eyebrow">RECOVERY POLICY</span><h3>Recommended safeguards</h3><div class="readiness"><div><span>Worker heartbeat timeout</span><b>30 seconds</b></div><div><span>Automatic restart attempts</span><b>3 attempts</b></div><div><span>Fallback content</span><b>Channel standby slate</b></div><div><span>Director override</span><b>Manual takeover</b></div></div></div>
+</section>
+<section class="view" id="view-settings">
+ <div class="view-intro"><div><span class="eyebrow">CONFIGURATION / 07</span><h2>Network settings</h2><p>Connection details, data persistence and operating guidance.</p></div></div>
+ <div class="panel"><span class="eyebrow">DATA CONNECTION</span><h3>Supabase network database</h3><p class="muted">The studio can run in local browser mode immediately. To share channels and schedules between devices, apply the included SQL migration and configure the public Supabase browser key below.</p><form id="config-form" class="form-grid"><label>Supabase project URL<input id="supabase-url" type="url" placeholder="https://your-project.supabase.co"></label><label>Supabase publishable / anon key<input id="supabase-key" type="password" autocomplete="off" placeholder="sb_publishable_…"></label><div class="form-actions"><button class="red-btn" type="submit">Connect database</button><span id="config-message" class="helper"></span></div></form></div>
+ <div class="panel"><span class="eyebrow">DEPLOYMENT NOTES</span><h3>What is required for 24/7 broadcasts?</h3><ol class="steps"><li>Apply <code>crowrules-plus-schema.sql</code> in the Supabase SQL Editor.</li><li>Sign in with a Supabase Auth account and initialize the four network channels.</li><li>Deploy the CrowRules+ Node.js playout bridge on an always-on host.</li><li>Run one isolated worker and encoder output per enabled channel.</li><li>Store YouTube stream keys on the server, never in GitHub Pages or browser storage.</li><li>Test each channel independently before enabling unattended 24/7 automation.</li></ol></div>
+ <div class="panel"><span class="eyebrow">TACOMA NIGHTS PROTECTION</span><h3>Separate system, preserved production</h3><p class="muted">This studio uses its own <code>cr_</code> database tables and a new studio path in the CrowRules TV repository. It does not edit or replace the Tacoma Nights Studio files, existing queue, bridge routes or production tables.</p></div>
+</section>
+<footer>© CROWRULES ENTERTAINMENT <span>ONE COMPANY. ONE UNIVERSE.</span><span>NETWORK CONTROL / PACIFIC TIME</span></footer>
+</main></div>
+<dialog id="channel-dialog"><form method="dialog" id="channel-form"><div class="dialog-head"><div><span class="eyebrow">CHANNEL CONFIGURATION</span><h2 id="dialog-title">Add channel</h2></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div><input type="hidden" id="edit-channel-id"><label>Channel name<input id="channel-name" required maxlength="60"></label><label>Channel slug<input id="channel-slug" required maxlength="60"></label><label>Description<textarea id="channel-description" rows="3"></textarea></label><label>Channel identity<select id="channel-kind"><option value="flagship">Flagship</option><option value="community">Community</option><option value="production">Productions</option><option value="live">Live & events</option><option value="other">Other</option></select></label><label class="check-row"><input id="channel-enabled" type="checkbox" checked> Channel enabled</label><div class="form-actions"><button class="red-btn" type="submit">Save channel</button><button class="outline-btn" type="button" id="cancel-channel">Cancel</button></div></form></dialog>
+<dialog id="output-dialog"><form method="dialog" id="output-form"><div class="dialog-head"><div><span class="eyebrow">OUTPUT ASSIGNMENT</span><h2>Configure channel output</h2></div><button class="close-btn" value="cancel">×</button></div><input type="hidden" id="output-channel-id"><label>Output destination label<input id="output-label" placeholder="YouTube — CrowRules TV"></label><label>Destination type<select id="output-type"><option>YouTube Live</option><option>RTMP destination</option><option>Test / local output</option></select></label><label>Worker ID<input id="output-worker" placeholder="cr-main-worker-01"></label><label>Public channel / stream URL<input id="output-public-url" type="url" placeholder="https://www.youtube.com/@…"></label><p class="helper">Do not enter a stream key here. Credentials belong in the server environment.</p><div class="form-actions"><button class="red-btn" type="submit">Save output assignment</button></div></form></dialog>
+</body></html>
