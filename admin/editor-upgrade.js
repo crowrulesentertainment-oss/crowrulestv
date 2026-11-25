@@ -60,7 +60,11 @@ function renderList(){
 function form(row){
  editing=row;const d=playlistOnly?D.settings:D[active];$("crEditList").hidden=true;$("crEditFields").hidden=false;$("crEditSave").hidden=false;$("crEditNew").hidden=true;$("crEditTitle").textContent=(row?"Edit ":"Create ")+(playlistOnly?"playlist definition":d.title);
  let fields=d.fields;
- if(playlistOnly)fields=[["setting_key","Playlist key (tv_playlist:channel:slug)","text",1],["description","Description"],["setting_value","Playlist JSON","json",1],["is_active","Enabled","bool"]];
+ if(playlistOnly){
+   const sv=row?.setting_value||{};
+   fields=[["setting_key","Playlist key (tv_playlist:channel:slug)","text",1],["description","Playlist name / description","text",1],["channel_key","CrowRules+ channel key","text",1],["youtube_url","YouTube playlist URL","url",1],["playback_order","Playback order","number"],["repeat","Repeat playlist","bool"],["shuffle","Shuffle playlist","bool"],["autoplay","Autoplay when channel opens","bool"],["fallback_mode","When unavailable","select",0,["standby","skip"]],["is_public","Publish to CrowRules+ player","bool"],["is_active","Enabled","bool"]];
+   row={...(row||{}),channel_key:sv.channel_key||"cr-talk",youtube_url:sv.youtube_url||"",playback_order:sv.playback_order??0,repeat:sv.repeat!==false,shuffle:sv.shuffle===true,autoplay:sv.autoplay!==false,fallback_mode:sv.fallback_mode||"standby",is_public:row?.is_public!==false,is_active:row?.is_active!==false};
+ }
  $("crEditFields").innerHTML=fields.map(([name,label,type="text",required=false,opts])=>{
  let v=row?.[name];if(v===undefined)v=type==="bool"?false:type==="json"?"{}":"";
  if(type==="datetime"&&v){const dt=new Date(v);v=new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16);}
@@ -71,13 +75,22 @@ function form(row){
 }
 async function save(e){
  e.preventDefault();const d=playlistOnly?D.settings:D[active],payload={};
- for(const [name,label,type="text"] of (playlistOnly?[["setting_key","Key"],["description","Description"],["setting_value","JSON","json"],["is_active","Active","bool"]]:d.fields)){
+ for(const [name,label,type="text"] of (playlistOnly?[["setting_key","Key"],["description","Description"],["channel_key","Channel"],["youtube_url","YouTube playlist URL"],["playback_order","Playback order","number"],["repeat","Repeat","bool"],["shuffle","Shuffle","bool"],["autoplay","Autoplay","bool"],["fallback_mode","Fallback"],["is_public","Public","bool"],["is_active","Active","bool"]]:d.fields)){
  const el=e.target.elements[name];if(!el)continue;let v=type==="bool"?el.checked:el.value;
  if(type==="json"){try{v=v.trim()?JSON.parse(v):{};}catch(_){$("crEditError").textContent=label+" must be valid JSON.";return;}}
- if(type==="number")v=v===""?null:Number(v);
+ if(type==="number")v=v===""?0:Number(v);
  if(type==="datetime")v=v?new Date(v).toISOString():null;
  if(v==="")v=null;
  payload[name]=v;
+ }
+ if(playlistOnly){
+   const raw=String(payload.youtube_url||"").trim(),match=raw.match(/[?&]list=([A-Za-z0-9_-]+)/)||raw.match(/^([A-Za-z0-9_-]{10,})$/);
+   if(!match){$("crEditError").textContent="Enter a valid YouTube playlist URL containing a list= playlist ID.";return;}
+   const channel=String(payload.channel_key||"").trim();
+   if(!channel){$("crEditError").textContent="Enter the CrowRules+ channel key.";return;}
+   payload.setting_key="tv_playlist:"+channel+":"+String(payload.setting_key||"playlist").replace(/^tv_playlist:[^:]+:/,"").replace(/[^a-z0-9_-]+/gi,"-").toLowerCase();
+   payload.setting_value={channel_key:channel,youtube_url:raw,youtube_playlist_id:match[1],playback_order:Number(payload.playback_order||0),repeat:payload.repeat!==false,shuffle:payload.shuffle===true,autoplay:payload.autoplay!==false,fallback_mode:payload.fallback_mode||"standby"};
+   payload.is_public=payload.is_public!==false;
  }
  const table=playlistOnly?"tv_network_settings":d.table;
  const result=editing?await db.from(table).update(payload).eq(d.pk,editing[d.pk]):await db.from(table).insert(payload);
@@ -94,8 +107,8 @@ async function remove(row){
 function createPlaylist(){
  active="playlists";playlistOnly=true;ensureModal();$("crEditModal").classList.add("open");$("crEditList").hidden=true;$("crEditFields").hidden=false;$("crEditSave").hidden=false;$("crEditNew").hidden=true;$("crEditTitle").textContent="Create playlist definition";
  editing=null;
- const seed={channel_key:"crowrules-tv",items:[],repeat:true,shuffle:false,description:""};
- form({setting_key:"tv_playlist:crowrules-tv:new-playlist",description:"New playlist",setting_value:seed,is_active:true});
+ const seed={channel_key:"cr-talk",youtube_url:"",youtube_playlist_id:"",playback_order:0,repeat:true,shuffle:false,autoplay:true,fallback_mode:"standby"};
+ form({setting_key:"tv_playlist:cr-talk:new-playlist",description:"New YouTube playlist",setting_value:seed,is_public:true,is_active:true});
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install);else install();
 new MutationObserver(install).observe(document.body,{childList:true,subtree:true});
