@@ -57,7 +57,7 @@ The engine reads the currently active row from `public.cr_schedule_items` for ea
 
 A row is active when `starts_at <= now < ends_at`. The service writes worker health to `public.cr_broadcast_outputs`. It does not write or modify Tacoma Nights tables.
 
-The first CrowRules+ Studio release currently stores playlist items and generated schedules in browser local storage. Therefore, before this engine can receive actual programming, the next integration step is to synchronize Studio playlists/schedule entries into `cr_playlists`, `cr_playlist_items`, `cr_program_schedules` and `cr_schedule_items`. No schedule data is invented by the engine.
+The CrowRules+ Studio now synchronizes playlist entries into `cr_playlists` and `cr_playlist_items`, and saved generated schedules into `cr_program_schedules` and `cr_schedule_items` after an authenticated Supabase sign-in. The worker reads the currently active schedule rows in `cr_schedule_items`. Keep the Studio connected to the same Supabase project and user that owns the channel records.
 
 ## Media and playout
 
@@ -67,7 +67,7 @@ The first CrowRules+ Studio release currently stores playlist items and generate
 - Configure optional per-channel standby MP4 paths to keep the RTMP output active when no schedule item is on air.
 - Schedule transitions are detected by each channel worker independently.
 
-The first engine release is a scheduled-file playout engine. It does not automatically start a YouTube broadcast event, manage YouTube Live Control Room, or operate OBS/Streamlabs scenes. YouTube livestreams must be created and stream keys configured in YouTube Studio. The engine sends the encoded RTMP signal to the configured ingest endpoint. Confirm each channel independently in YouTube Live Control Room.
+The first engine release is a scheduled-file playout engine. It supports direct media URLs, YouTube video URLs and sequential YouTube playlist entry playback via yt-dlp. It does not automatically create a YouTube broadcast event, manage YouTube Live Control Room, or operate OBS/Streamlabs scenes. YouTube livestreams must be created in YouTube Studio and each unique stream key configured in the server environment. The engine sends each channel's encoded RTMP signal to the configured ingest endpoint. Its health state is intentionally labeled unverified until the operator checks each channel in YouTube Live Control Room.
 
 ## Render deployment
 
