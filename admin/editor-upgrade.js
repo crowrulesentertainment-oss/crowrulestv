@@ -109,6 +109,7 @@ function createPlaylist(){
  editing=null;
  const seed={channel_key:"cr-talk",youtube_url:"",youtube_playlist_id:"",playback_order:0,repeat:true,shuffle:false,autoplay:true,fallback_mode:"standby"};
  form({setting_key:"tv_playlist:cr-talk:new-playlist",description:"New YouTube playlist",setting_value:seed,is_public:true,is_active:true});
+ editing=null;
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install);else install();
 new MutationObserver(install).observe(document.body,{childList:true,subtree:true});
