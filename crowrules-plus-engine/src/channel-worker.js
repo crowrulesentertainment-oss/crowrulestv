@@ -174,7 +174,7 @@ export class ChannelWorker {
         if (this.playlistItemId !== item.id) {
           const raw = await this.runCapture(this.env.YTDLP_PATH || "yt-dlp", ["--no-warnings", "--flat-playlist", "--dump-single-json", item.media_url], 45000);
           const data = JSON.parse(raw);
-          this.playlistEntries = (data.entries || []).filter(Boolean).map(entry => entry.webpage_url || entry.original_url || (entry.url && /^https?:\\/\\//i.test(entry.url) ? entry.url : null) || (entry.id ? "https://www.youtube.com/watch?v=" + entry.id : null)).filter(Boolean);
+          this.playlistEntries = (data.entries || []).filter(Boolean).map(entry => entry.webpage_url || entry.original_url || (entry.url && /^https?:\/\//i.test(entry.url) ? entry.url : null) || (entry.id ? "https://www.youtube.com/watch?v=" + entry.id : null)).filter(Boolean);
           if (!this.playlistEntries.length) throw new Error("YouTube playlist contains no playable entries");
           this.playlistItemId = item.id; this.playlistIndex = 0;
         }
