@@ -4,7 +4,7 @@ This service is a separate Node.js/FFmpeg playout engine for the CrowRules+ netw
 
 ## Architecture
 
-The local development mode can run all four channel workers in one Node.js process. For production, deploy **four separate background worker services**, one per channel, using `CR_CHANNEL_ID`. This isolates CPU, memory, FFmpeg restarts and failure domains. Each channel service has its own:
+The local development mode can run all four channel workers in one Node.js process. For production, deploy **four separate background worker services**, one per channel, using `CR_CHANNEL_ID`. This isolates CPU, memory, FFmpeg restarts and failure domains. Render background workers do not accept inbound HTTP traffic, so their local status API is not remotely reachable after deployment. Each channel service has its own:
 - channel ID and schedule polling loop
 - current program state and FFmpeg child process
 - RTMP destination and unique stream key
@@ -41,7 +41,7 @@ Each channel's stream key is read from its own server-side environment variable.
    npm start
    ```
 6. Health: `GET http://127.0.0.1:8788/health`.
-7. Authenticated controls: `GET http://127.0.0.1:8788/api/channels` and `POST /api/channels/:channelId/start|stop|restart`, with `Authorization: Bearer <CR_CONTROL_TOKEN>`.
+7. Authenticated controls for local mode: `GET http://127.0.0.1:8788/api/channels` and `POST /api/channels/:channelId/start|stop|restart`, with `Authorization: Bearer <CR_CONTROL_TOKEN>`. The Render background-worker deployment does not expose an inbound HTTP URL; use its logs and the `cr_broadcast_outputs` heartbeat rows for remote monitoring. The local HTTP control API is for trusted local development only.
 
 The service binds to localhost by default. Do not expose this control API directly to the public internet. Put it behind a private network or authenticated reverse proxy if remote control is required.
 
