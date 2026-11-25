@@ -56,3 +56,6 @@ A sync indicator reports local-only, syncing, saved, and error states. Failed sy
 Schedule publishing is staged: a new schedule and its items are written as a draft first, then activated, and only then are previous active schedules archived. If writing the new schedule fails, the draft is removed and the prior active schedule remains available. Schedules are generated using Tacoma / Pacific Time, with cycle and once-per-day modes and a standby-gap option. The public scheduler preview is not proof of a live broadcast; the independent playout workers still need deployment and testing.
 
 No changes were made to the Tacoma Nights Node bridge or its existing studio.
+
+
+Additional persistence note: channel metadata is upserted before its playlist so newly created channels satisfy the playlist foreign key. This is part of the same per-user Supabase sync path.
