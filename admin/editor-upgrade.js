@@ -88,11 +88,13 @@ async function save(e){
    if(!match){$("crEditError").textContent="Enter a valid YouTube playlist URL containing a list= playlist ID.";return;}
    const channel=String(payload.channel_key||"").trim();
    if(!channel){$("crEditError").textContent="Enter the CrowRules+ channel key.";return;}
-   const slug=String(payload.description||"youtube-playlist").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,36)||"youtube-playlist";
-   payload.setting_key="tv_playlist:"+channel+":"+slug+"-"+match[1].slice(-6);
-   delete payload.autoplay; // Autoplay is stored inside setting_value JSON, not a table column.
-   payload.setting_value={channel_key:channel,youtube_url:raw,youtube_playlist_id:match[1],playback_order:Number(payload.playback_order||0),repeat:payload.repeat!==false,shuffle:payload.shuffle===true,autoplay:payload.autoplay!==false,fallback_mode:payload.fallback_mode||"standby"};
-   payload.is_public=payload.is_public!==false;
+   const description=String(payload.description||"YouTube playlist").trim();
+   const slug=description.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,36)||"youtube-playlist";
+   const settingsValue={channel_key:channel,youtube_url:raw,youtube_playlist_id:match[1],playback_order:Number(payload.playback_order||0),repeat:payload.repeat!==false,shuffle:payload.shuffle===true,autoplay:payload.autoplay!==false,fallback_mode:payload.fallback_mode||"standby"};
+   // Persist only real tv_network_settings columns. Playlist controls live in setting_value JSONB.
+   const playlistRow={setting_key:"tv_playlist:"+channel+":"+slug+"-"+match[1].slice(-6),setting_value:settingsValue,description,is_public:payload.is_public!==false,is_active:payload.is_active!==false};
+   for(const key of Object.keys(payload))delete payload[key];
+   Object.assign(payload,playlistRow);
  }
  const table=playlistOnly?"tv_network_settings":d.table;
  const result=editing?await db.from(table).update(payload).eq(d.pk,editing[d.pk]):await db.from(table).insert(payload);
