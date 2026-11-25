@@ -66,3 +66,8 @@ Additional persistence note: channel metadata is upserted before its playlist so
 The Automatic Programming view includes a Pacific-time day rundown and rolling seven-day overview. Program titles, start times and durations can be edited inline. Entries can be dragged to reorder within the same calendar day; the grid recalculates the day's sequence while preserving each item's duration.
 
 Overlapping program intervals are highlighted and publishing is blocked until the overlaps are resolved. The grid is a schedule editor and planning view, not a live preview of the encoder output. Saving publishes the edited schedule through the existing staged schedule workflow. The four channel schedules remain independent.
+
+
+## Network Program Guide
+
+The Network Program Guide view displays the four seeded network channels as independent rows on a 24-hour Pacific-time grid. Select a date to see each channel's saved schedule; the guide refreshes from the Studio's current local/Supabase-loaded channel state. Program blocks show titles and start/end times. An empty row/date is labeled rather than implying that a channel is broadcasting. The guide is a schedule reference, not proof of live encoder or YouTube output status.
