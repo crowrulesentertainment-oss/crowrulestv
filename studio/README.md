@@ -30,3 +30,13 @@ This is the network control-plane foundation, not a running 24/7 playout service
 Independent simultaneous broadcasting requires a CrowRules+ Node.js service with one isolated worker per channel. Each worker needs its own schedule cursor, media resolver, encoder process, destination credentials, heartbeat and restart policy. Credentials must be held on the server (environment variables or a secrets manager), never in GitHub Pages, browser storage, SQL rows or public source code.
 
 The existing Tacoma Nights Studio and its current bridge are not modified by this addition. A separate CrowRules+ playout service and adapter should be implemented and tested before routing any production streams.
+
+
+## Independent Node.js playout engine
+
+The separate `../crowrules-plus-engine/` service provides four channel-specific FFmpeg workers. It reads the active programming rows published by this Studio in `cr_schedule_items` and writes status to `cr_broadcast_outputs`.
+
+- [Engine setup and local runbook](../crowrules-plus-engine/README.md)
+- [Four-service Render Blueprint](../render-crowrules-plus.yaml)
+
+The engine is committed but not deployed or connected to live YouTube destinations yet. Configure one unique stream key per channel in server-side environment settings; never enter stream keys into this browser Studio.
