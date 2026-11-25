@@ -59,3 +59,10 @@ No changes were made to the Tacoma Nights Node bridge or its existing studio.
 
 
 Additional persistence note: channel metadata is upserted before its playlist so newly created channels satisfy the playlist foreign key. This is part of the same per-user Supabase sync path.
+
+
+## Visual programming grid
+
+The Automatic Programming view includes a Pacific-time day rundown and rolling seven-day overview. Program titles, start times and durations can be edited inline. Entries can be dragged to reorder within the same calendar day; the grid recalculates the day's sequence while preserving each item's duration.
+
+Overlapping program intervals are highlighted and publishing is blocked until the overlaps are resolved. The grid is a schedule editor and planning view, not a live preview of the encoder output. Saving publishes the edited schedule through the existing staged schedule workflow. The four channel schedules remain independent.
