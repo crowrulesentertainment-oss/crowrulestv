@@ -4,7 +4,7 @@ This service is a separate Node.js/FFmpeg playout engine for the CrowRules+ netw
 
 ## Architecture
 
-Four independent workers run inside one Node.js service process. Each worker has its own:
+The local development mode can run all four channel workers in one Node.js process. For production, deploy **four separate background worker services**, one per channel, using `CR_CHANNEL_ID`. This isolates CPU, memory, FFmpeg restarts and failure domains. Each channel service has its own:
 - channel ID and schedule polling loop
 - current program state and FFmpeg child process
 - RTMP destination and unique stream key
@@ -32,8 +32,8 @@ Each channel's stream key is read from its own server-side environment variable.
 
 1. Copy `.env.example` to `.env` and fill in the required values.
 2. Set `CR_OWNER_USER_ID` to the Supabase Auth user UUID that owns the `cr_*` rows.
-3. Configure four unique channel stream keys. Keep stream keys and the Supabase service-role key out of Git.
-4. Install FFmpeg and yt-dlp on the machine, or use Docker.
+3. Configure unique channel stream keys. Keep stream keys and the Supabase service-role key out of Git.
+4. Install FFmpeg and yt-dlp on the machine, or use Docker. To run only one channel process, set `CR_CHANNEL_ID=cr-main` (or another listed ID). Leave it unset only when intentionally running all four locally.
 5. Run:
    ```sh
    npm install
@@ -71,15 +71,15 @@ The first engine release is a scheduled-file playout engine. It supports direct 
 
 ## Render deployment
 
-A starter Blueprint is provided at the repository root as `render-crowrules-plus.yaml`. It creates a background worker from the Dockerfile. Before deployment, add these secret environment values in Render:
+A starter Blueprint is provided at the repository root as `render-crowrules-plus.yaml`. It defines four separate background worker services, each running one channel process from the same Dockerfile. Before deployment, add these secret environment values to the matching Render services:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `CR_OWNER_USER_ID`
-- `CR_MAIN_STREAM_KEY`
-- `CR_TACOMA_STREAM_KEY`
-- `CR_PRODUCTIONS_STREAM_KEY`
-- `CR_BACKDECK_STREAM_KEY`
+- `CR_MAIN_STREAM_KEY` on `crowrules-plus-main`
+- `CR_TACOMA_STREAM_KEY` on `crowrules-plus-tacoma-nights`
+- `CR_PRODUCTIONS_STREAM_KEY` on `crowrules-plus-productions`
+- `CR_BACKDECK_STREAM_KEY` on `crowrules-plus-back-deck-live`
 
-The service is configured with `autoDeploy: false` to avoid starting a broadcast engine before credentials, schedules and output destinations have been reviewed. Do not deploy until all stream keys are intentionally configured. For local testing, use unique unlisted/test YouTube broadcasts first.
+Each service is configured with `autoDeploy: false` to avoid starting a broadcast engine before credentials, schedules and output destinations have been reviewed. Add the service-role key and owner UUID to all four services, then add only that service's corresponding stream key. Do not deploy until the stream keys and YouTube destinations are intentionally configured. For local testing, use unique unlisted/test YouTube broadcasts first.
 
 ## Safety and isolation
 
