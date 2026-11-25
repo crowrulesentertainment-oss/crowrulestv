@@ -45,3 +45,14 @@ The engine and remote command/telemetry integration are committed, but the four 
 ## Playout Control Center operations
 
 The Monitoring / Playout Control Center view polls `cr_broadcast_outputs` while signed in. Commands are inserted into `cr_playout_commands` and consumed by the matching channel worker. Supported commands: `start`, `stop`, `restart`, `director_override`, `clear_override` and `set_standby`. Director override accepts a media URL and title; clear override returns to the active schedule. Standby accepts a direct media URL or supported YouTube video URL. Automatic recovery relaunches a failed FFmpeg process on the worker's next polling cycle. Heartbeats are written every 15 seconds by default; the Studio considers a heartbeat stale after 40 seconds.
+
+
+## Phase 1–2 upgrade: safer persistence and scheduling
+
+The Studio now loads existing channel and playlist data from Supabase before syncing local state, so a fresh browser session does not blindly overwrite the database with empty local playlists. Playlist synchronization upserts stable item IDs and only deletes entries explicitly removed from that playlist; it no longer clears and recreates every item on each save.
+
+A sync indicator reports local-only, syncing, saved, and error states. Failed synchronization leaves the browser's local copy intact and surfaces the database error.
+
+Schedule publishing is staged: a new schedule and its items are written as a draft first, then activated, and only then are previous active schedules archived. If writing the new schedule fails, the draft is removed and the prior active schedule remains available. Schedules are generated using Tacoma / Pacific Time, with cycle and once-per-day modes and a standby-gap option. The public scheduler preview is not proof of a live broadcast; the independent playout workers still need deployment and testing.
+
+No changes were made to the Tacoma Nights Node bridge or its existing studio.
