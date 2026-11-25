@@ -50,7 +50,7 @@ export class ChannelWorker {
   }
   async getChannelConfig() {
     const rows = await this.supabase(
-      `cr_channels?select=id,enabled& id=eq.${encodeURIComponent(this.config.id)}`.replace("& ", "&")
+      `cr_channels?select=id,enabled&id=eq.${encodeURIComponent(this.config.id)}`
     );
     return rows?.[0] || null;
   }
@@ -74,7 +74,7 @@ export class ChannelWorker {
       destination_type: "youtube_live", destination_label: `YouTube — ${this.config.name}`,
       worker_id: `crowrules-plus-${this.config.slug}`,
       enabled: this.enabled, status: this.state,
-      public_url: null, last_heartbeat_at: new Date().toISOString(),
+      last_heartbeat_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
     await this.supabase("cr_broadcast_outputs?on_conflict=channel_id", {
@@ -174,7 +174,7 @@ export class ChannelWorker {
         if (this.playlistItemId !== item.id) {
           const raw = await this.runCapture(this.env.YTDLP_PATH || "yt-dlp", ["--no-warnings", "--flat-playlist", "--dump-single-json", item.media_url], 45000);
           const data = JSON.parse(raw);
-          this.playlistEntries = (data.entries || []).filter(Boolean).map(entry => entry.webpage_url || entry.url || (entry.id ? "https://www.youtube.com/watch?v=" + entry.id : null)).filter(Boolean);
+          this.playlistEntries = (data.entries || []).filter(Boolean).map(entry => entry.webpage_url || entry.original_url || (entry.url && /^https?:\\/\\//i.test(entry.url) ? entry.url : null) || (entry.id ? "https://www.youtube.com/watch?v=" + entry.id : null)).filter(Boolean);
           if (!this.playlistEntries.length) throw new Error("YouTube playlist contains no playable entries");
           this.playlistItemId = item.id; this.playlistIndex = 0;
         }
@@ -198,6 +198,7 @@ export class ChannelWorker {
   spawnFfmpeg(args, gen, title) {
     const child = spawn(this.env.FFMPEG_PATH || "ffmpeg", args, { stdio: ["ignore", "ignore", "pipe"] });
     this.child = child;
+    child.once("spawn", () => { if (this.child === child && this.running && gen === this.generation) this.state = "encoder_running_unverified"; });
     child.stderr.on("data", data => {
       const line = data.toString().trim();
       if (line && /error|failed|invalid/i.test(line)) this.lastError = line.slice(-350);
