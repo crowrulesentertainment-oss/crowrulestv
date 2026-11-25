@@ -9,7 +9,7 @@ export class ChannelWorker {
     this.running = false; this.enabled = true; this.manualStop = false;
     this.state = "starting"; this.lastError = null; this.lastHeartbeat = null;
     this.lastSchedulePoll = 0; this.lastHeartbeatWrite = 0; this.loopPromise = null;
-    this.generation = 0;
+    this.generation = 0; this.playlistItemId = null; this.playlistEntries = []; this.playlistIndex = 0;
   }
   get streamKey() { return this.env[this.config.keyEnv] || ""; }
   get standbyFile() { return this.env[this.config.standbyEnv] || ""; }
@@ -88,7 +88,7 @@ export class ChannelWorker {
       try {
         if (!this.streamKey) {
           this.state = "waiting_for_stream_key";
-          await this.writeHeartbeat();
+          if (Date.now() - this.lastHeartbeatWrite >= this.heartbeatMs) { this.lastHeartbeatWrite = Date.now(); await this.writeHeartbeat(); }
           await sleep(this.pollMs);
           continue;
         }
@@ -102,7 +102,7 @@ export class ChannelWorker {
           const id = item?.id || (this.standbyFile ? "__standby__" : null);
           if (id !== this.currentItemId) {
             await this.stopChild();
-            this.currentItem = item || null; this.currentItemId = id;
+            this.currentItem = item || null; this.currentItemId = id; this.playlistItemId = null; this.playlistEntries = []; this.playlistIndex = 0;
             if (item) await this.launch(item, gen);
             else if (this.standbyFile) await this.launchStandby(gen);
             else this.state = "idle_no_program";
@@ -168,10 +168,24 @@ export class ChannelWorker {
   async launch(item, gen) {
     try {
       this.state = "resolving_media";
-      const input = await this.resolveInput(item);
+      let input, title = item.title;
+      const isPlaylist = item.media_type === "youtube_playlist" || /[?&]list=/.test(item.media_url || "");
+      if (isPlaylist) {
+        if (this.playlistItemId !== item.id) {
+          const raw = await this.runCapture(this.env.YTDLP_PATH || "yt-dlp", ["--no-warnings", "--flat-playlist", "--dump-single-json", item.media_url], 45000);
+          const data = JSON.parse(raw);
+          this.playlistEntries = (data.entries || []).filter(Boolean).map(entry => entry.webpage_url || entry.url || (entry.id ? "https://www.youtube.com/watch?v=" + entry.id : null)).filter(Boolean);
+          if (!this.playlistEntries.length) throw new Error("YouTube playlist contains no playable entries");
+          this.playlistItemId = item.id; this.playlistIndex = 0;
+        }
+        const entryUrl = this.playlistEntries[this.playlistIndex % this.playlistEntries.length];
+        this.playlistIndex = (this.playlistIndex + 1) % this.playlistEntries.length;
+        input = await this.resolveInput({ media_url: entryUrl });
+        title = item.title + " · playlist item " + this.playlistIndex + "/" + this.playlistEntries.length;
+      } else input = await this.resolveInput(item);
       if (!this.running || gen !== this.generation) return;
-      this.state = "on_air";
-      this.spawnFfmpeg(this.ffmpegArgs(input), gen, item.title);
+      this.state = "encoder_starting_unverified";
+      this.spawnFfmpeg(this.ffmpegArgs(input), gen, title);
     } catch (error) {
       this.lastError = error.message; this.state = "media_error";
     }
