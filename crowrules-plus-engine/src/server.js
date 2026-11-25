@@ -13,12 +13,20 @@ const OWNER_ID = env.CR_OWNER_USER_ID || "";
 const POLL_MS = Math.max(2000, Number(env.POLL_INTERVAL_MS || 5000));
 const HEARTBEAT_MS = Math.max(5000, Number(env.HEARTBEAT_INTERVAL_MS || 15000));
 
-const CHANNELS = [
+const ALL_CHANNELS = [
   { id: "cr-main", slug: "main", name: "CrowRules+ Main", keyEnv: "CR_MAIN_STREAM_KEY", standbyEnv: "CR_MAIN_STANDBY_FILE" },
   { id: "cr-tacoma", slug: "tacoma-nights", name: "Tacoma Nights", keyEnv: "CR_TACOMA_STREAM_KEY", standbyEnv: "CR_TACOMA_STANDBY_FILE" },
   { id: "cr-productions", slug: "productions", name: "CrowRules Productions", keyEnv: "CR_PRODUCTIONS_STREAM_KEY", standbyEnv: "CR_PRODUCTIONS_STANDBY_FILE" },
   { id: "cr-backdeck", slug: "back-deck-live", name: "Back Deck Live", keyEnv: "CR_BACKDECK_STREAM_KEY", standbyEnv: "CR_BACKDECK_STANDBY_FILE" }
 ];
+const selectedChannel = env.CR_CHANNEL_ID || "";
+const CHANNELS = selectedChannel
+  ? ALL_CHANNELS.filter(channel => channel.id === selectedChannel)
+  : ALL_CHANNELS;
+if (selectedChannel && CHANNELS.length !== 1) {
+  console.error("CR_CHANNEL_ID must be one of: " + ALL_CHANNELS.map(c => c.id).join(", "));
+  process.exit(1);
+}
 
 if (CONTROL_TOKEN.length < 40) {
   console.error("CR_CONTROL_TOKEN must be at least 40 characters.");
