@@ -34,8 +34,8 @@ async function syncScheduleToSupabase(c,meta){
  const{error:se}=await supabase.from("cr_program_schedules").insert(schedule);if(se)throw se;
  try{const rows=meta.items.map((item,i)=>({id:item.scheduleItemId||crypto.randomUUID(),owner_id:user.id,schedule_id:scheduleId,channel_id:c.id,playlist_item_id:item.playlistItemId||null,title:item.title,media_url:item.url,media_type:item.type||"episode",starts_at:item.start,ends_at:item.end,position:i,item_type:"program"}));
  for(let i=0;i<rows.length;i+=500){const{error}=await supabase.from("cr_schedule_items").insert(rows.slice(i,i+500));if(error)throw error}
- const{error:ae}=await supabase.from("cr_program_schedules").update({status:"archived"}).eq("owner_id",user.id).eq("channel_id",c.id).eq("status","active");if(ae)throw ae;
  const{error:ue}=await supabase.from("cr_program_schedules").update({status:"active"}).eq("id",scheduleId).eq("owner_id",user.id);if(ue)throw ue;
+ const{error:ae}=await supabase.from("cr_program_schedules").update({status:"archived"}).eq("owner_id",user.id).eq("channel_id",c.id).eq("status","active").neq("id",scheduleId);if(ae)throw ae;
  }catch(e){await supabase.from("cr_program_schedules").delete().eq("id",scheduleId).eq("owner_id",user.id);throw e}
 }
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
